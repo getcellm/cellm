@@ -1,9 +1,6 @@
-﻿using System.ComponentModel;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Cellm.Exceptions;
-using Cellm.RenderMarkdownTable;
 using ExcelDna.Integration;
 
 namespace Cellm;
@@ -12,41 +9,16 @@ public class Cellm
 {
     private static readonly string ApiKey = new Secrets().ApiKey;
     private static readonly string ApiUrl = "https://api.anthropic.com/v1/messages";
-    private static readonly string SystemMessage = @"
-The user has called you via the ""Prompt"" Excel function in a cell formula. The argument to the formula is the range of cells the user selected, e.g. ""=Prompt(A1:D10)"" 
-The selected range of cells are rendered as a markdown table. The first column and the header row will contain cell coordinates. 
-You will find instructions before the table or somewhere in the table. Follow these instructions.
-If you cannot find any instructions, or you cannot complete the user's request, reply with ""#INSTRUCTION_ERROR?"" and nothing else.
-You are limited to returning data to a cell in a spreadsheet. You cannot solve a task whose output is not fit for cell.
-Be concise. Cells are small. 
-Return the result of following the user's instructions and ONLY the result. 
-The result must be one word or number, a comma-seperated list of or numbers, or one brief sentence.
-Do not explain how to do something. Do not chat with the user.
-";
 
-    [ExcelFunction(Description = "Call a model with a prompt")]
+    [ExcelFunction(Name = "PROMPT", Description = "Call a model with a prompt")]
     public static string Prompt(
-        [ExcelArgument(Name = "Cells", Description = "String or range of cells to render")] object input,
-        [ExcelArgument(Name = "Instructions", Description = "Model instructions")] string instructions = "")
+        [ExcelArgument(AllowReference = true, Name = "Cells", Description = "A cell or range of cells")] object arg1,
+        [ExcelArgument(Name = "Instructions", Description = "Model instructions or temperature")] object arg2,
+        [ExcelArgument(Name = "Temperature", Description = "Temperature")] object arg3)
     {
         try
         {
-            string cells;
-
-            if (input is string userMessage)
-            {
-                cells = userMessage;
-            }
-            else if (input is object[,] range)
-            {
-                cells = MarkdownTable.Render(range);
-            }
-            else
-            {
-                return "Error: Invalid input type. Please provide a string or a range of cells.";
-            }
-
-            return CallModelSync(cells, "");
+            return CallModelSync(new Arguments(arg1, arg2, arg3));
         }
         catch (CellmException ex)
         {
@@ -54,8 +26,7 @@ Do not explain how to do something. Do not chat with the user.
         }
     }
 
-
-    private static string CallModelSync(string cells, string instructions)
+    private static string CallModelSync(Arguments arguments)
     {
         using (var httpClient = new HttpClient())
         {
@@ -77,23 +48,20 @@ Do not explain how to do something. Do not chat with the user.
                 throw new CellmException("Invalid format for request header value", ex);
             }
 
-            var content = new StringBuilder();
-            content.AppendLine(instructions);
-            content.AppendLine(cells);
-
             var requestBody = new RequestBody
             {
-                System = SystemMessage,
+                System = arguments.Instructions,
                 Messages = new List<Message>
                 {
                     new Message
                     {
                         Role = "user",
-                        Content = content.ToString()
+                        Content = arguments.Cells
                     }
                 },
                 Model = "claude-3-5-sonnet-20240620",
-                MaxTokens = 128
+                MaxTokens = 256,
+                Temperature = arguments.Temperature
             };
 
             try
@@ -182,6 +150,9 @@ Do not explain how to do something. Do not chat with the user.
 
         [JsonPropertyName("max_tokens")]
         public int MaxTokens { get; set; }
+
+        [JsonPropertyName("temperature")]
+        public double Temperature { get; set; }
     }
 
     public class Message
