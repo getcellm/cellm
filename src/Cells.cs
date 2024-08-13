@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Cellm;
 
-public class Table
+public class Cells
 {
     public static string Render(ExcelReference reference)
     {
@@ -32,7 +32,7 @@ public class Table
                     stringBuilder.Append(value);
                 }
 
-                stringBuilder.AppendLine(" |");
+                stringBuilder.AppendLine(" | ");
             }
 
             return stringBuilder.ToString();

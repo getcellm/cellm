@@ -1,24 +1,70 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Cellm.Arguments;
 using ExcelDna.Integration;
 
 namespace Cellm;
 
 public class Cellm
 {
-    private static readonly string ApiKey = new Secrets().ApiKey;
-    private static readonly string ApiUrl = "https://api.anthropic.com/v1/messages";
+    private static readonly string ApiKey = new Config().ApiKey;
+    private static readonly string ApiUrl = new Config().ApiUrl;
+
+    private static readonly string SystemMessage = @"
+<input>
+The user has called you via the ""Prompt"" Excel function in a cell formula. The argument to the formula is the range of cells the user selected, e.g. ""=Prompt(A1)"" or ""=Prompt(A1:D10)"" 
+Multiple cells are rendered as a table where each cell is prepended with the its coordinates.
+<input>
+
+<constraints>
+You can only solve tasks that return data suitable for a single cell in a spreadsheet and in a format that is plain text or a numeric value.
+If you cannot find any instructions, or you cannot follow user's instructions in a cell-appropriate format, reply with ""#INSTRUCTION_ERROR?"" and nothing else.
+</constraints>
+
+<output>
+Return ONLY the result of following the user's instructions.
+The result must be one of the following:
+
+- A single word or number
+- A comma-separated list of words or numbers
+- A brief sentence
+
+Be concise. Remember that cells have limited visible space.
+Do not provide explanations, steps, or engage in conversation.
+Ensure the output is directly usable in a spreadsheet cell.
+</output>
+";
 
     [ExcelFunction(Name = "PROMPT", Description = "Call a model with a prompt")]
-    public static string Prompt(
-        [ExcelArgument(AllowReference = true, Name = "Cells", Description = "A cell or range of cells")] object arg1,
-        [ExcelArgument(Name = "Instructions", Description = "Model instructions or temperature")] object arg2,
-        [ExcelArgument(Name = "Temperature", Description = "Temperature")] object arg3)
+    public static string Call(
+        [ExcelArgument(AllowReference = true, Name = "Cells", Description = "A cell or range of cells")] object cells,
+        [ExcelArgument(Name = "InstructionsOrTemperature", Description = "Model instructions or temperature")] object instructionsOrTemperature,
+        [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
     {
         try
         {
-            return CallModelSync(new Arguments(arg1, arg2, arg3));
+            var arguments = new ArgumentParser()
+                .AddCells(cells)
+                .AddInstructionsOrTemperature(instructionsOrTemperature)
+                .AddTemperature(temperature)
+                .Parse();
+
+            var userMessage = new StringBuilder()
+                .AppendLine(arguments.Cells)
+                .AppendLine(arguments.Instructions)
+                .ToString();
+
+            var prompt = new PromptBuilder()
+                .SetSystemMessage(SystemMessage)
+                .SetTemperature(arguments.Temperature)
+                .AddUserMessage(userMessage)
+                .Build();
+
+            return CallModelSync(prompt);
+
         }
         catch (CellmException ex)
         {
@@ -26,7 +72,7 @@ public class Cellm
         }
     }
 
-    private static string CallModelSync(Arguments arguments)
+    private static string CallModelSync(Prompt prompt)
     {
         using (var httpClient = new HttpClient())
         {
@@ -50,23 +96,22 @@ public class Cellm
 
             var requestBody = new RequestBody
             {
-                System = arguments.Instructions,
-                Messages = new List<Message>
-                {
-                    new Message
-                    {
-                        Role = "user",
-                        Content = arguments.Cells
-                    }
-                },
+                System = prompt.SystemMessage,
+                Messages = prompt.messages.Select(x => new Message { Content = x.Content, Role = x.Role.ToString().ToLower()}).ToList(),
                 Model = "claude-3-5-sonnet-20240620",
                 MaxTokens = 256,
-                Temperature = arguments.Temperature
+                Temperature = prompt.Temperature
             };
 
             try
             {
-                var json = JsonSerializer.Serialize(requestBody);
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                };
+
+                var json = JsonSerializer.Serialize(requestBody, options);
                 var jsonAsString = new StringContent(json, Encoding.UTF8, "application/json");
 
                 var response = httpClient.PostAsync(ApiUrl, jsonAsString).Result;
@@ -77,7 +122,7 @@ public class Cellm
                     throw new HttpRequestException(responseBodyAsString, null, response.StatusCode);
                 }
 
-                var responseBody = JsonSerializer.Deserialize<ResponseBody>(responseBodyAsString);
+                var responseBody = JsonSerializer.Deserialize<ResponseBody>(responseBodyAsString, options);
                 var assistantMessage = responseBody?.Content?.Last()?.Text ?? "No content received from API";
 
                 if (assistantMessage.StartsWith("#INSTRUCTION_ERROR?"))
@@ -112,16 +157,12 @@ public class Cellm
 
     public class ResponseBody
     {
-        [JsonPropertyName("content")]
         public List<Content> Content { get; set; }
 
-        [JsonPropertyName("id")]
         public string Id { get; set; }
 
-        [JsonPropertyName("model")]
         public string Model { get; set; }
 
-        [JsonPropertyName("role")]
         public string Role { get; set; }
 
         [JsonPropertyName("stop_reason")]
@@ -130,55 +171,43 @@ public class Cellm
         [JsonPropertyName("stop_sequence")]
         public string? StopSequence { get; set; }
 
-        [JsonPropertyName("type")]
         public string Type { get; set; }
 
-        [JsonPropertyName("usage")]
         public Usage Usage { get; set; }
     }
 
     public class RequestBody
     {
-        [JsonPropertyName("messages")]
         public List<Message> Messages { get; set; }
 
-        [JsonPropertyName("system")]
         public string System { get; set; }
 
-        [JsonPropertyName("model")]
         public string Model { get; set; }
 
         [JsonPropertyName("max_tokens")]
         public int MaxTokens { get; set; }
 
-        [JsonPropertyName("temperature")]
         public double Temperature { get; set; }
     }
 
     public class Message
     {
-        [JsonPropertyName("role")]
         public string Role { get; set; }
 
-        [JsonPropertyName("content")]
         public string Content { get; set; }
     }
 
     public class Content
     {
-        [JsonPropertyName("text")]
         public string Text { get; set; }
 
-        [JsonPropertyName("type")]
         public string Type { get; set; }
     }
 
     public class Usage
     {
-        [JsonPropertyName("input_tokens")]
         public int InputTokens { get; set; }
 
-        [JsonPropertyName("output_tokens")]
         public int OutputTokens { get; set; }
     }
 }
