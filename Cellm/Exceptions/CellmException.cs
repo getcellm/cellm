@@ -1,4 +1,4 @@
-﻿namespace Cellm;
+﻿namespace Cellm.Exceptions;
 
 public class CellmException : Exception
 {

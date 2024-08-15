@@ -1,17 +1,18 @@
-﻿using System.Diagnostics;
-using System.Text;
+﻿using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Cellm.Arguments;
+using Cellm.AddIn;
+using Cellm.Exceptions;
+using Cellm.Prompts;
 using ExcelDna.Integration;
 
 namespace Cellm;
 
 public class Cellm
 {
-    private static readonly string ApiKey = new Config().ApiKey;
-    private static readonly string ApiUrl = new Config().ApiUrl;
+    private static readonly string ApiKey = new AddIn.AddIn().ApiKey;
+    private static readonly string ApiUrl = new AddIn.AddIn().ApiUrl;
 
     private static readonly string SystemMessage = @"
 <input>
@@ -97,7 +98,7 @@ Ensure the output is directly usable in a spreadsheet cell.
             var requestBody = new RequestBody
             {
                 System = prompt.SystemMessage,
-                Messages = prompt.messages.Select(x => new Message { Content = x.Content, Role = x.Role.ToString().ToLower()}).ToList(),
+                Messages = prompt.messages.Select(x => new Message { Content = x.Content, Role = x.Role.ToString().ToLower() }).ToList(),
                 Model = "claude-3-5-sonnet-20240620",
                 MaxTokens = 256,
                 Temperature = prompt.Temperature

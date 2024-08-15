@@ -1,19 +1,19 @@
-﻿using ExcelDna.Integration;
-using Microsoft.Office.Interop.Excel;
-using System.Text;
+﻿using System.Text;
+using Cellm.Exceptions;
+using ExcelDna.Integration;
 
-namespace Cellm;
+namespace Cellm.Prompts;
 
-public class Cells
+public class Format
 {
-    public static string Render(ExcelReference reference)
+    public static string Cells(ExcelReference reference)
     {
         try
         {
-            Application app = (Application)ExcelDnaUtil.Application;
+            var app = ExcelDnaUtil.Application;
             var sheetName = (string)XlCall.Excel(XlCall.xlSheetNm, reference);
             sheetName = sheetName.Substring(sheetName.LastIndexOf("]") + 1);
-            Worksheet worksheet = (Worksheet)app.Sheets[sheetName];
+            var worksheet = app.Sheets[sheetName];
 
             var stringBuilder = new StringBuilder();
 
@@ -48,8 +48,8 @@ public class Cells
         string columnName = "";
         while (columnNumber >= 0)
         {
-            columnName = (char)('A' + (columnNumber % 26)) + columnName;
-            columnNumber = (columnNumber / 26) - 1;
+            columnName = (char)('A' + columnNumber % 26) + columnName;
+            columnNumber = columnNumber / 26 - 1;
         }
         return columnName;
     }

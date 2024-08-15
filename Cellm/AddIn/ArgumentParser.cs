@@ -1,7 +1,8 @@
 ﻿using System.Text;
+using Cellm.Prompts;
 using ExcelDna.Integration;
 
-namespace Cellm.Arguments;
+namespace Cellm.AddIn;
 
 public record Arguments(string Cells, string Instructions, double Temperature);
 
@@ -85,7 +86,7 @@ public class ArgumentParser
         // Parse cells
         var cellsBuilder = new StringBuilder();
         cellsBuilder.AppendLine("<cells>");
-        cellsBuilder.Append(Cells.Render(cells));
+        cellsBuilder.Append(Format.Cells(cells));
         cellsBuilder.AppendLine("<cells>");
 
         // Parse instructions

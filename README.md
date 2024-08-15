@@ -2,18 +2,22 @@
 Cellm is an Excel extension that lets you use Large Language Models (LLMs) like ChatGPT in cell formulas.
 
 ## What is Cellm?
-Cellm adds a new function `=PROMPT()` that can send a range of cells to an LLM and output the result in a cell.
+Similar to the `=SUM()` function that outputs the sum of a cell range of numbers, Cellm outputs the LLM response to a cell range of text. This is useful when you want to use LLMs for repetitive tasks that would normally require you to copy-paste data in and out of a chat window many times. 
+
+For example, imagine you want to compare many scientific papers against inclusion and exclusion criteria for a systematic review. Cellm adds the `=PROMPT()` function that you can use to automate this task:
 
 [GIF WITH EXAMPLE]
 
-Similar to the `=SUM()` function that calculates the sum of a cell range of numbers, Cellm calculates a response to a cell range of text. This is useful for text analysis and for repetitive tasks that would normally require copying and pasting in and out of a chat window.
+Here, we write the prompt once and take advantage of the fact that we  can create one prompt and then drag the cell to automatically adjust the cell range. Simple and powerful.
+
+Some papers are misclassified because inclusion/exclusion criteria were simplified for the purposes if this demo. I like this example, however, because it shows that these models do make mistakes. 
 
 ## Key features
 This extension does one thing and one thing well.
 
-- Calls LLMs in formulas.
-- Accepts strings, a single cell, or a range of cells.
+- Calls LLMs in formulas. 
 - Returns short answers suitable for cells.
+- Supports models from Anthropic, OpenAI, and Google, and other providers that adheres to one of these APIs, e.g. local llama.cpp or Ollama servers. 
 
 ## Function
 
@@ -37,25 +41,25 @@ Example usage:
 - `=Prompt(A1:D10, 0.7)` uses the selected range of cells as context, follows any instruction within the cells, and sets the temperature to 0. 
 
 ## Why?
-My girlfriend was writing a systematic review paper. She had to compare 7.500 papers against inclusion and exclusion criterias. She did this manually because obviously she cares about scientific integrity, but it inspired me to make an AI tool to automate repetitive tasks for people who would rather avoid programming. The name is a combination of "Cell" and "LLM" and is pronounced _Sell 'em!_.
+My girlfriend was writing a systematic review paper. She had to compare 7.500 papers against inclusion and exclusion criterias. She obviously did this manually because she cares about scientific integrity, but it inspired me to make an AI tool to automate repetitive tasks for people who would rather avoid programming. 
 
 ## Use-cases
-- **Qualitative interview analysis**
+Copy your data into Excel and take advantage of the fact that you can create one prompt and then drag the cell to automatically adjust cell range.
+
+- **Free-form survery responses**
     ```excel
-    =Prompt(B2:B100, "Analyze the sentiment of each interview answer. Categorize as POSITIVE, NEGATIVE, NEUTRAL, or MIXED."
+    =Prompt(B2, "Analyse the survery response. Categorize as 'Product', 'Service', or 'Pricing' related or 'Other'."
     ```
 
 - **Prompt engineering and RAG tuning**
     ```excel
-    =Prompt(A1:F1), "Summarize this product review in one sentence.")
-    =Prompt(B1:F1), "Summarize this product review in one sentence.")
-    =Prompt(C1:F1), "Summarize this product review in one sentence.")
+    =Prompt(A1:F1, "Score relevancy to the user's question on a scale from 1-10 where 10 is most relevant.")
     ```
-    where the cell range contains different RAG results.
+    where rows will contain contains RAG results from different search parameters.
 
-- **Catogorize text**
+- **Internal Tooling**
     ```excel
-    =Prompt(A2:A100, "Categorize each customer comment as 'Product', 'Service', or 'Pricing' related.")
+    =Prompt(A1, "Categorize each customer email as 'Positive', 'Negative', or 'Other'")
     ```
 
 ## Dos and dont's 
