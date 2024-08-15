@@ -11,8 +11,8 @@ namespace Cellm;
 
 public class Cellm
 {
-    private static readonly string ApiKey = new AddIn.AddIn().ApiKey;
-    private static readonly string ApiUrl = new AddIn.AddIn().ApiUrl;
+    private static readonly string ApiKey = new CellmAddin().ApiKey;
+    private static readonly string ApiUrl = new CellmAddin().ApiUrl;
 
     private static readonly string SystemMessage = @"
 <input>
@@ -65,7 +65,6 @@ Ensure the output is directly usable in a spreadsheet cell.
                 .Build();
 
             return CallModelSync(prompt);
-
         }
         catch (CellmException ex)
         {
