@@ -2,46 +2,50 @@
 Cellm is an Excel extension that lets you use Large Language Models (LLMs) like ChatGPT in cell formulas.
 
 ## What is Cellm?
-Similar to the `=SUM()` function that outputs the sum of a cell range of numbers, Cellm outputs the LLM response to a cell range of text. This is useful when you want to use LLMs for repetitive tasks that would normally require you to copy-paste data in and out of a chat window many times. 
 
-For example, imagine you want to compare many scientific papers against inclusion and exclusion criteria for a systematic review. Cellm adds the `=PROMPT()` function that you can use to automate this task:
+Cellm adds the `=PROMPT()` function. Similar to Excel's `=SUM()` function that outputs the sum of a range of numbers, Cellm's `=PROMPT()` function outputs the AI response to a range of text. 
 
-[GIF WITH EXAMPLE]
-
-Here, we write the prompt once and take advantage of the fact that we  can create one prompt and then drag the cell to automatically adjust the cell range. Simple and powerful.
-
-Some papers are misclassified because inclusion/exclusion criteria were simplified for the purposes if this demo. I like this example, however, because it shows that these models do make mistakes. 
+It works like Excel's built-in functions but uses AI to calculate cell values. For example, you can write `=PROMPT(A1:B10, "Extract keywords")` in a cell to extract keywords from a range of other cells. This is useful when you want to use AI for repetitive tasks that would normally require copy-pasting data in and out of a chat window many times
 
 ## Key features
 This extension does one thing and one thing well.
 
-- Calls LLMs in formulas. 
+- Calls LLMs in formulas.
 - Returns short answers suitable for cells.
-- Supports models from Anthropic, OpenAI, and Google, and other providers that adheres to one of these APIs, e.g. local llama.cpp or Ollama servers. 
+- Supports models from Anthropic, OpenAI, and Google as well as other providers that mirrors one of these APIs, e.g. local llama.cpp or Ollama servers.
+
+## Example
+Imagine you want to compare many scientific papers against inclusion and exclusion criteria for a systematic review. Here's how you could use Cellm to help with this task:
+
+[GIF WITH EXAMPLE]
+
+In this example, we write the prompt once and use AutoFill to apply the prompt to many papers. Simple and powerful.
+
+Some papers are misclassified because the inclusion and exclusion criteria were shortened to one sentence. This is a good example, however, because it shows that these models rely entirely on your input and can make mistakes.
+
+## Why?
+My girlfriend was writing a systematic review paper. She had to compare 7.500 papers against inclusion and exclusion criterias. She obviously did this manually because she cares about scientific integrity, but it sparked the idea to make an AI tool to automate repetitive tasks for people like her who would rather avoid programming. Cellm makes AI automation of repetitive tasks available toall Excel users, not just programmers
+
 
 ## Function
-
 Cellm provides the following function:
 
 ```excel
 PROMPT(cells: range, [instruction: string | temperature: double], [temperature: double]): string
 ```
 
-- cells: A cell or a range of cells to send to the AI model
-- instructions: string: (Optional) Instructions for the AI model. 
-  - Default: Empty. The model will follow instructions as long as they present _somewhere_ in the cells.
-- temperature: double: (Optional) A value between 0 and 1 that controls the balance between deterministic outputs and creative exploration.
+- **cells:** A cell or a range of cells to send to the AI model
+- **instructions:** string: (Optional) Instructions for the AI model.
+  - Default: Empty. The model will follow instructions in cells as long as they present _somewhere_.
+- **temperature:** double: (Optional) A value between 0 and 1 that controls the balance between deterministic outputs and creative exploration.
   - Default: 0. The model will almost always give you the same result.
-- Returns: string: The AI-generated response
+- **Returns:** string: The AI model's response
 
 Example usage:
-- `=Prompt(A1:D10, "Extract keywords")` uses the selected range of cells as context and will follow the instruction to extract keywords.
-- `=Prompt(A1:D10, "Extract keywords", 0.7)` uses the selected range of cells as context, follows the instruction to extract keywords, and uses a temperature of 0.7.
-- `=Prompt(A1:D10)` uses the range of cells as context and will follow instructions as long as they present _somewhere_ in the cells.
-- `=Prompt(A1:D10, 0.7)` uses the selected range of cells as context, follows any instruction within the cells, and sets the temperature to 0. 
-
-## Why?
-My girlfriend was writing a systematic review paper. She had to compare 7.500 papers against inclusion and exclusion criterias. She obviously did this manually because she cares about scientific integrity, but it inspired me to make an AI tool to automate repetitive tasks for people who would rather avoid programming. 
+- `=Prompt(A1:D10, "Extract keywords")` will use the selected range of cells as context and follow the instruction to extract keywords.
+- `=Prompt(A1:D10, "Extract keywords", 0.7)` will use the selected range of cells as context, follow the instruction to extract keywords, and use a temperature of 0.7.
+- `=Prompt(A1:D10)` will use the range of cells as context and follow instructions as long as they present _somewhere_ in the cells.
+- `=Prompt(A1:D10, 0.7)` will use the selected range of cells as context, follow any instruction within the cells, and use a temperature of 0.7.ompt(A1:D10, 0.7)` uses the selected range of cells as context, follows any instruction within the cells, and sets the temperature to 0. 
 
 ## Use-cases
 Copy your data into Excel and take advantage of the fact that you can create one prompt and then drag the cell to automatically adjust cell range.
