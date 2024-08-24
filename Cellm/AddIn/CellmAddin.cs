@@ -9,7 +9,6 @@ public class CellmAddin : IExcelAddIn
 
     public void AutoOpen()
     {
-
     }
 
     public void AutoClose() 
