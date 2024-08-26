@@ -17,7 +17,7 @@ public class ClientFactory : IClientFactory
 
         return modelProvider switch
         {
-            nameof(AnthropicClient) => ServiceLocator.ServiceProvider.GetRequiredService<AnthropicClient>(),
+            nameof(AnthropicClient) => ServiceLocator.Get<AnthropicClient>(),
             _ => throw new ArgumentException($"Unsupported client type: {modelProvider}")
         };
     }

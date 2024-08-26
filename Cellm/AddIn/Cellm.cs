@@ -44,7 +44,7 @@ Ensure the output is directly usable in a spreadsheet cell.
     {
         try
         {
-            var arguments = new ArgumentParser()
+            var arguments = ServiceLocator.Get<ArgumentParser>()
                 .AddCells(cells)
                 .AddInstructionsOrTemperature(instructionsOrTemperature)
                 .AddTemperature(temperature)
@@ -73,8 +73,8 @@ Ensure the output is directly usable in a spreadsheet cell.
     {
         try
         {
-            var cellmConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptions<CellmConfiguration>>().Value;
-            var clientFactory = ServiceLocator.ServiceProvider.GetRequiredService<IClientFactory>();
+            var cellmConfiguration = ServiceLocator.Get<IOptions<CellmConfiguration>>().Value;
+            var clientFactory = ServiceLocator.Get<IClientFactory>();
             var client = clientFactory.GetClient(cellmConfiguration.DefaultModelProvider);
 
             return client.Send(prompt);

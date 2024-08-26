@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Cellm.AddIn;
 
-namespace Cellm.AddIn;
-
-internal class CellmConfiguration
+public class CellmConfiguration
 {
     public string DefaultModelProvider { get; init; }
 

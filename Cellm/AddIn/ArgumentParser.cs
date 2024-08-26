@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using Cellm.Prompts;
 using ExcelDna.Integration;
+using Microsoft.Extensions.Options;
 
 namespace Cellm.AddIn;
 
@@ -11,6 +12,12 @@ public class ArgumentParser
     private ExcelReference? cells;
     private string? instructions;
     private double? temperature;
+    private readonly CellmConfiguration _cellmConfiguration;
+
+    public ArgumentParser(IOptions<CellmConfiguration> cellmConfiguration)
+    {
+        _cellmConfiguration = cellmConfiguration.Value;
+    }
 
     public ArgumentParser AddCells(object cellsArg)
     {
