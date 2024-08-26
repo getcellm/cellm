@@ -12,23 +12,12 @@ public interface IClientFactory
 
 public class ClientFactory : IClientFactory
 {
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IConfiguration _configuration;
-
-    public ClientFactory(IHttpClientFactory httpClientFactory, IConfiguration configuration)
-    {
-        _httpClientFactory = httpClientFactory;
-        _configuration = configuration;
-    }
-
     public IClient GetClient(string modelProvider)
     { 
 
         return modelProvider switch
         {
-            "Anthropic" => ServiceLocator.ServiceProvider.GetRequiredService<AnthropicClient>(),
-            // "OpenAI" => new OpenAIClient(httpClient),
-            // Add more cases as needed
+            nameof(AnthropicClient) => ServiceLocator.ServiceProvider.GetRequiredService<AnthropicClient>(),
             _ => throw new ArgumentException($"Unsupported client type: {modelProvider}")
         };
     }

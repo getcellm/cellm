@@ -2,18 +2,14 @@
 
 internal class AnthropicConfiguration
 {
-    public Uri BaseAddress { get; set; }
-    public string Model { get; set; }
-    public Dictionary<string, string> Headers { get; set; }
+    public Uri BaseAddress { get; init; }
+    public string Model { get; init; }
+    public Dictionary<string, string> Headers { get; init; } = new();
 
     public AnthropicConfiguration()
     {
-    }
-
-    public AnthropicConfiguration(Uri baseAddress, string model, Dictionary<string, string> headers)
-    {
-        BaseAddress = baseAddress;
-        Model = model;
-        Headers = headers ?? new Dictionary<string, string>();
+        BaseAddress = default!;
+        Model = default!;
+        Headers = new Dictionary<string, string>();
     }
 }

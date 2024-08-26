@@ -17,20 +17,14 @@ internal class AnthropicClient : IClient
 
     public AnthropicClient(
         IOptions<AnthropicConfiguration> anthropicConfiguration,
-        IHttpClientFactory httpClientFactory)
+        HttpClient httpClient)
     {
         _anthropicConfiguration = anthropicConfiguration.Value;
-        _httpClient = httpClientFactory.CreateClient();
+        _httpClient = httpClient;
     }
 
     public string Send(Prompt prompt)
     {
-        // TODO: Find more elegant way of doing this
-        foreach (var header in  _anthropicConfiguration.Headers)
-        {
-            _httpClient.DefaultRequestHeaders.Add(header.Key, header.Value);
-        }
-
         var requestBody = new RequestBody
         {
             System = prompt.SystemMessage,
@@ -70,32 +64,32 @@ internal class AnthropicClient : IClient
 
     private class ResponseBody
     {
-        public List<Content> Content { get; set; }
+        public List<Content>? Content { get; set; }
 
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
-        public string Model { get; set; }
+        public string? Model { get; set; }
 
-        public string Role { get; set; }
+        public string? Role { get; set; }
 
         [JsonPropertyName("stop_reason")]
-        public string StopReason { get; set; }
+        public string? StopReason { get; set; }
 
         [JsonPropertyName("stop_sequence")]
         public string? StopSequence { get; set; }
 
-        public string Type { get; set; }
+        public string? Type { get; set; }
 
-        public Usage Usage { get; set; }
+        public Usage? Usage { get; set; }
     }
 
     private class RequestBody
     {
-        public List<Message> Messages { get; set; }
+        public List<Message>? Messages { get; set; }
 
-        public string System { get; set; }
+        public string? System { get; set; }
 
-        public string Model { get; set; }
+        public string? Model { get; set; }
 
         [JsonPropertyName("max_tokens")]
         public int MaxTokens { get; set; }
@@ -105,16 +99,16 @@ internal class AnthropicClient : IClient
 
     private class Message
     {
-        public string Role { get; set; }
+        public string? Role { get; set; }
 
-        public string Content { get; set; }
+        public string? Content { get; set; }
     }
 
     private class Content
     {
-        public string Text { get; set; }
+        public string? Text { get; set; }
 
-        public string Type { get; set; }
+        public string? Type { get; set; }
     }
 
     private class Usage

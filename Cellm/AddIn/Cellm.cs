@@ -5,14 +5,12 @@ using Cellm.ModelProviders;
 using Cellm.Prompts;
 using ExcelDna.Integration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Cellm.AddIn;
 
 public class Cellm
 {
-    private static readonly string ApiKey = new CellmAddin().ApiKey;
-    private static readonly string ApiUrl = new CellmAddin().ApiUrl;
-
     private static readonly string SystemMessage = @"
 <input>
 The user has called you via the ""Prompt"" Excel function in a cell formula. The argument to the formula is the range of cells the user selected, e.g. ""=Prompt(A1)"" or ""=Prompt(A1:D10)"" 
@@ -75,8 +73,9 @@ Ensure the output is directly usable in a spreadsheet cell.
     {
         try
         {
+            var cellmConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptions<CellmConfiguration>>().Value;
             var clientFactory = ServiceLocator.ServiceProvider.GetRequiredService<IClientFactory>();
-            var client = clientFactory.GetClient("Anthropic");
+            var client = clientFactory.GetClient(cellmConfiguration.DefaultModelProvider);
 
             return client.Send(prompt);
         }
@@ -90,7 +89,7 @@ Ensure the output is directly usable in a spreadsheet cell.
         }
         catch (NotSupportedException ex)
         {
-            throw new CellmException("Serialization or deserialization of request body is not supported", ex);
+            throw new CellmException("Serialization or deserialization of request failed", ex);
         }
         catch (NullReferenceException ex)
         {
