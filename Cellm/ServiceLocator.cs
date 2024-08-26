@@ -2,6 +2,7 @@
 using Cellm.Exceptions;
 using Cellm.ModelProviders;
 using Cellm.Models;
+using Cellm.Prompts;
 using ExcelDna.Integration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +14,7 @@ internal static class ServiceLocator
     private static readonly Lazy<IServiceProvider> _serviceProvider = new(() => ConfigureServices(new ServiceCollection()).BuildServiceProvider());
     public static IServiceProvider ServiceProvider => _serviceProvider.Value;
 
-    internal static IServiceCollection ConfigureServices(IServiceCollection services)
+    private static IServiceCollection ConfigureServices(IServiceCollection services)
     {
         // Configurations
         var basePath = ExcelDnaUtil.XllPathInfo?.Directory?.FullName ??
@@ -34,7 +35,8 @@ internal static class ServiceLocator
         // Internals
         services
             .AddTransient<ArgumentParser>()
-            .AddSingleton<IClientFactory, ClientFactory>();
+            .AddSingleton<IClientFactory, ClientFactory>()
+            .AddTransient<PromptBuilder>();
 
         // Model Providers
         var anthropicConfiguration = configuration.GetRequiredSection(nameof(AnthropicConfiguration)).Get<AnthropicConfiguration>()

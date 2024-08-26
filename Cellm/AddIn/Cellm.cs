@@ -55,7 +55,7 @@ Ensure the output is directly usable in a spreadsheet cell.
                 .AppendLine(arguments.Cells)
                 .ToString();
 
-            var prompt = new PromptBuilder()
+            var prompt = ServiceLocator.Get<PromptBuilder>()
                 .SetSystemMessage(SystemMessage)
                 .SetTemperature(arguments.Temperature)
                 .AddUserMessage(userMessage)

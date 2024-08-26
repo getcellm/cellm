@@ -12,7 +12,7 @@ public class Format
         {
             var app = ExcelDnaUtil.Application;
             var sheetName = (string)XlCall.Excel(XlCall.xlSheetNm, reference);
-            sheetName = sheetName.Substring(sheetName.LastIndexOf("]") + 1);
+            sheetName = sheetName[(sheetName.LastIndexOf("]") + 1)..];
             var worksheet = app.Sheets[sheetName];
 
             var stringBuilder = new StringBuilder();
