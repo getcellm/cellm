@@ -9,21 +9,20 @@ public record Arguments(string Cells, string Instructions, double Temperature);
 
 public class ArgumentParser
 {
-    private ExcelReference? cells;
+    private ExcelReference? context;
     private string? instructions;
-    private double? temperature;
-    private readonly CellmConfiguration _cellmConfiguration;
+    private double temperature;
 
     public ArgumentParser(IOptions<CellmConfiguration> cellmConfiguration)
     {
-        _cellmConfiguration = cellmConfiguration.Value;
+        temperature = cellmConfiguration.Value.DefaultTemperature;
     }
 
-    public ArgumentParser AddCells(object cellsArg)
+    public ArgumentParser AddContext(object cellsArg)
     {
         if (cellsArg is ExcelReference excelRef)
         {
-            cells = excelRef;
+            context = excelRef;
         }
         else
         {
@@ -61,11 +60,6 @@ public class ArgumentParser
             return this;
         }
 
-        if (temperature.HasValue)
-        {
-            throw new ArgumentException("Temperature already set.", nameof(temperatureArg));
-        }
-
         if (temperatureArg is double tempArg)
         {
             if (tempArg < 0 || tempArg > 1)
@@ -85,7 +79,7 @@ public class ArgumentParser
 
     public Arguments Parse()
     {
-        if (cells == null)
+        if (context == null)
         {
             throw new InvalidOperationException("Cells are required to build a prompt.");
         }
@@ -93,7 +87,7 @@ public class ArgumentParser
         // Parse cells
         var cellsBuilder = new StringBuilder();
         cellsBuilder.AppendLine("<cells>");
-        cellsBuilder.Append(Format.Cells(cells));
+        cellsBuilder.Append(Format.Cells(context));
         cellsBuilder.AppendLine("<cells>");
 
         // Parse instructions
@@ -111,6 +105,6 @@ public class ArgumentParser
 
         instructionsBuilder.AppendLine("</instructions>");
 
-        return new Arguments(cellsBuilder.ToString(), instructionsBuilder.ToString(), temperature ?? 0);
+        return new Arguments(cellsBuilder.ToString(), instructionsBuilder.ToString(), temperature);
     }
 }

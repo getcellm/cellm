@@ -29,18 +29,17 @@ internal static class ServiceLocator
             .Build();
 
         services
-            .Configure<CellmConfiguration>(configuration.GetSection(nameof(CellmConfiguration)))
-            .Configure<AnthropicConfiguration>(configuration.GetSection(nameof(AnthropicConfiguration)));
+            .Configure<CellmConfiguration>(configuration.GetRequiredSection(nameof(CellmConfiguration)))
+            .Configure<AnthropicConfiguration>(configuration.GetRequiredSection(nameof(AnthropicConfiguration)));
 
         // Internals
         services
             .AddTransient<ArgumentParser>()
-            .AddSingleton<IClientFactory, ClientFactory>()
-            .AddTransient<PromptBuilder>();
+            .AddSingleton<IClientFactory, ClientFactory>();
 
         // Model Providers
         var anthropicConfiguration = configuration.GetRequiredSection(nameof(AnthropicConfiguration)).Get<AnthropicConfiguration>()
-            ?? throw new CellmException($"Missing {nameof(AnthropicConfiguration)}");
+            ?? throw new NullReferenceException(nameof(AnthropicConfiguration));
 
         services.AddHttpClient<AnthropicClient>(anthropicHttpClient =>
         {

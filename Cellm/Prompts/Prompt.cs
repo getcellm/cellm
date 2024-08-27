@@ -9,4 +9,4 @@ public enum Role
 
 public record Message(string Content, Role Role);
 
-public record Prompt(string SystemMessage, List<Message> messages, double Temperature);
+public record Prompt(string SystemMessage, List<Message> Messages, double Temperature);

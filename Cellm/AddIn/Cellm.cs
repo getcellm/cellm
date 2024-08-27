@@ -4,7 +4,6 @@ using Cellm.Exceptions;
 using Cellm.ModelProviders;
 using Cellm.Prompts;
 using ExcelDna.Integration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace Cellm.AddIn;
@@ -45,7 +44,7 @@ Ensure the output is directly usable in a spreadsheet cell.
         try
         {
             var arguments = ServiceLocator.Get<ArgumentParser>()
-                .AddCells(cells)
+                .AddContext(cells)
                 .AddInstructionsOrTemperature(instructionsOrTemperature)
                 .AddTemperature(temperature)
                 .Parse();
@@ -55,7 +54,7 @@ Ensure the output is directly usable in a spreadsheet cell.
                 .AppendLine(arguments.Cells)
                 .ToString();
 
-            var prompt = ServiceLocator.Get<PromptBuilder>()
+            var prompt = new PromptBuilder()
                 .SetSystemMessage(SystemMessage)
                 .SetTemperature(arguments.Temperature)
                 .AddUserMessage(userMessage)

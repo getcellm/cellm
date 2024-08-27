@@ -28,7 +28,7 @@ internal class AnthropicClient : IClient
         var requestBody = new RequestBody
         {
             System = prompt.SystemMessage,
-            Messages = prompt.messages.Select(x => new Message { Content = x.Content, Role = x.Role.ToString().ToLower() }).ToList(),
+            Messages = prompt.Messages.Select(x => new Message { Content = x.Content, Role = x.Role.ToString().ToLower() }).ToList(),
             Model = _anthropicConfiguration.Model,
             MaxTokens = _anthropicConfiguration.MaxTokens,
             Temperature = prompt.Temperature

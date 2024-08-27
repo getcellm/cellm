@@ -1,18 +1,10 @@
-﻿using Cellm.AddIn;
-using Microsoft.Extensions.Options;
-
-namespace Cellm.Prompts;
+﻿namespace Cellm.Prompts;
 
 public class PromptBuilder
 {
-    private string _systemMessage = string.Empty;
-    private List<Message> _messages = new();
-    private double _temperature = 0;
-
-    public PromptBuilder(IOptions<CellmConfiguration> cellmConfiguration)
-    {
-        _temperature = cellmConfiguration.Value.DefaultTemperature;
-    }
+    private string? _systemMessage;
+    private readonly List<Message> _messages = new();
+    private double? _temperature;
 
     public PromptBuilder SetSystemMessage(string systemMessage)
     {
@@ -46,6 +38,10 @@ public class PromptBuilder
 
     public Prompt Build()
     {
-        return new Prompt(_systemMessage, _messages, _temperature);
+        return new Prompt(
+            _systemMessage ?? throw new ArgumentNullException(nameof(_systemMessage)),
+            _messages, 
+            _temperature ?? throw new ArgumentNullException(nameof(_temperature))
+        );
     }
 }
