@@ -114,4 +114,4 @@ internal class Secrets
 
 ## License
 
-Apache 2.0 License
+Fair Core License, Version 1.0, Apache 2.0 Future License
