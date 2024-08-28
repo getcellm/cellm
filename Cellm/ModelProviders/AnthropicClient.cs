@@ -2,6 +2,7 @@
 using System.Text.Json;
 using System.Text;
 using System.Text.Json.Serialization;
+using Cellm.AddIn;
 using Cellm.Exceptions;
 using Cellm.Prompts;
 using Microsoft.Extensions.Options;
@@ -11,13 +12,16 @@ namespace Cellm.ModelProviders;
 internal class AnthropicClient : IClient
 {
     private readonly AnthropicConfiguration _anthropicConfiguration;
+    private readonly CellmConfiguration _cellmConfiguration;
     private readonly HttpClient _httpClient;
 
     public AnthropicClient(
         IOptions<AnthropicConfiguration> anthropicConfiguration,
+        IOptions<CellmConfiguration> cellmConfiguration,
         HttpClient httpClient)
     {
         _anthropicConfiguration = anthropicConfiguration.Value;
+        _cellmConfiguration = cellmConfiguration.Value;
         _httpClient = httpClient;
     }
 
@@ -28,7 +32,7 @@ internal class AnthropicClient : IClient
             System = prompt.SystemMessage,
             Messages = prompt.Messages.Select(x => new Message { Content = x.Content, Role = x.Role.ToString().ToLower() }).ToList(),
             Model = _anthropicConfiguration.DefaultModel,
-            MaxTokens = _anthropicConfiguration.MaxTokens,
+            MaxTokens = _cellmConfiguration.MaxTokens,
             Temperature = prompt.Temperature
         };
 
