@@ -1,8 +1,4 @@
-﻿using Cellm.Models;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-
-namespace Cellm.ModelProviders;
+﻿namespace Cellm.ModelProviders;
 
 public interface IClientFactory
 {

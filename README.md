@@ -24,8 +24,7 @@ In this example, we write the prompt once and use AutoFill to apply the prompt t
 Some papers are misclassified because the inclusion and exclusion criteria were shortened to one sentence. This is a good example, however, because it shows that these models rely entirely on your input and can make mistakes.
 
 ## Why?
-My girlfriend was writing a systematic review paper. She had to compare 7.500 papers against inclusion and exclusion criterias. She obviously did this manually because she cares about scientific integrity, but it sparked the idea to make an AI tool to automate repetitive tasks for people like her who would rather avoid programming. Cellm makes AI automation of repetitive tasks available toall Excel users, not just programmers
-
+My girlfriend was writing a systematic review paper. She had to compare 7.500 papers against inclusion and exclusion criterias. She obviously did this manually because she cares about scientific integrity but it sparked the idea to make an AI tool to automate repetitive tasks for people like her who would rather avoid programming.
 
 ## Function
 Cellm provides the following function:
@@ -36,7 +35,7 @@ PROMPT(cells: range, [instruction: string | temperature: double], [temperature: 
 
 - **cells:** A cell or a range of cells to send to the AI model
 - **instructions:** string: (Optional) Instructions for the AI model.
-  - Default: Empty. The model will follow instructions in cells as long as they present _somewhere_.
+  - Default: Empty. The model will follow instructions in cells as long as they present _somewhere_ and the model can identify them.
 - **temperature:** double: (Optional) A value between 0 and 1 that controls the balance between deterministic outputs and creative exploration.
   - Default: 0. The model will almost always give you the same result.
 - **Returns:** string: The AI model's response

@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace Cellm.AddIn;
 
-public record Arguments(string Cells, string Instructions, double Temperature);
+public record Arguments(string Context, string Instructions, double Temperature);
 
 public class ArgumentParser
 {

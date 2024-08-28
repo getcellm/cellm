@@ -1,14 +1,12 @@
-﻿using System.Net.Http;
-using System.Text.Encodings.Web;
+﻿using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text;
 using System.Text.Json.Serialization;
 using Cellm.Exceptions;
 using Cellm.Prompts;
 using Microsoft.Extensions.Options;
-using Cellm.ModelProviders;
 
-namespace Cellm.Models;
+namespace Cellm.ModelProviders;
 
 internal class AnthropicClient : IClient
 {
@@ -29,7 +27,7 @@ internal class AnthropicClient : IClient
         {
             System = prompt.SystemMessage,
             Messages = prompt.Messages.Select(x => new Message { Content = x.Content, Role = x.Role.ToString().ToLower() }).ToList(),
-            Model = _anthropicConfiguration.Model,
+            Model = _anthropicConfiguration.DefaultModel,
             MaxTokens = _anthropicConfiguration.MaxTokens,
             Temperature = prompt.Temperature
         };

@@ -29,7 +29,7 @@ The result must be one of the following:
 - A comma-separated list of words or numbers
 - A brief sentence
 
-Be concise. Remember that cells have limited visible space.
+Be concise. Cells have limited visible space.
 Do not provide explanations, steps, or engage in conversation.
 Ensure the output is directly usable in a spreadsheet cell.
 </output>
@@ -51,7 +51,7 @@ Ensure the output is directly usable in a spreadsheet cell.
 
             var userMessage = new StringBuilder()
                 .AppendLine(arguments.Instructions)
-                .AppendLine(arguments.Cells)
+                .AppendLine(arguments.Context)
                 .ToString();
 
             var prompt = new PromptBuilder()

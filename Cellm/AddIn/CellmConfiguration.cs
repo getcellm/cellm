@@ -1,4 +1,4 @@
-﻿using Cellm.Models;
+﻿using Cellm.ModelProviders;
 
 namespace Cellm.AddIn;
 

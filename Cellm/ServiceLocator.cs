@@ -1,8 +1,6 @@
 ﻿using Cellm.AddIn;
 using Cellm.Exceptions;
 using Cellm.ModelProviders;
-using Cellm.Models;
-using Cellm.Prompts;
 using ExcelDna.Integration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
