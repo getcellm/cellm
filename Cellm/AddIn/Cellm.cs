@@ -36,7 +36,7 @@ Ensure the output is directly usable in a spreadsheet cell.
 ";
 
     [ExcelFunction(Name = "PROMPT", Description = "Call a model with a prompt")]
-    public static string Call(
+    public static object Call(
         [ExcelArgument(AllowReference = true, Name = "Cells", Description = "A cell or range of cells")] object cells,
         [ExcelArgument(Name = "InstructionsOrTemperature", Description = "Model instructions or temperature")] object instructionsOrTemperature,
         [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
@@ -60,7 +60,10 @@ Ensure the output is directly usable in a spreadsheet cell.
                 .AddUserMessage(userMessage)
                 .Build();
 
-            return CallModelSync(prompt);
+            return ExcelAsyncUtil.Run(nameof(Call), new object[] { cells, instructionsOrTemperature, temperature }, () =>
+            {
+                return CallModelSync(prompt);
+            });
         }
         catch (CellmException ex)
         {

@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using Cellm.Exceptions;
 using ExcelDna.Integration;
+using Microsoft.Office.Interop.Excel;
 
 namespace Cellm.Prompts;
 
@@ -10,7 +11,7 @@ public class Format
     {
         try
         {
-            var app = ExcelDnaUtil.Application;
+            var app = (Application)ExcelDnaUtil.Application;
             var sheetName = (string)XlCall.Excel(XlCall.xlSheetNm, reference);
             sheetName = sheetName[(sheetName.LastIndexOf("]") + 1)..];
             var worksheet = app.Sheets[sheetName];

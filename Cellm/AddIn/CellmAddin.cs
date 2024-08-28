@@ -6,9 +6,10 @@ public class CellmAddin : IExcelAddIn
 {
     public void AutoOpen()
     {
+        ExcelIntegration.RegisterUnhandledExceptionHandler(ex => ex.ToString());
     }
 
-    public void AutoClose() 
+    public void AutoClose()
     {
     }
 }
