@@ -45,7 +45,7 @@ internal class AnthropicClient : IClient
         var json = JsonSerializer.Serialize(requestBody, options);
         var jsonAsString = new StringContent(json, Encoding.UTF8, "application/json");
 
-        var response = _httpClient.PostAsync(new Uri(_anthropicConfiguration.BaseAddress, "/v1/messages"), jsonAsString).Result;
+        var response = _httpClient.PostAsync("/v1/messages", jsonAsString).Result;
         var responseBodyAsString = response.Content.ReadAsStringAsync().Result;
 
         if (!response.IsSuccessStatusCode)
@@ -54,7 +54,7 @@ internal class AnthropicClient : IClient
         }
 
         var responseBody = JsonSerializer.Deserialize<ResponseBody>(responseBodyAsString, options);
-        var assistantMessage = responseBody?.Content?.Last()?.Text ?? "No content received from API";
+        var assistantMessage = responseBody?.Content?.Last()?.Text ?? throw new CellmException("#EMPTY_RESPONSE?");
 
         if (assistantMessage.StartsWith("#INSTRUCTION_ERROR?"))
         {

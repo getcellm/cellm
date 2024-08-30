@@ -43,12 +43,15 @@ internal static class ServiceLocator
         services.AddHttpClient<AnthropicClient>(anthropicHttpClient =>
         {
             anthropicHttpClient.BaseAddress = anthropicConfiguration.BaseAddress;
+            anthropicHttpClient.DefaultRequestHeaders.Add("x-api-key", anthropicConfiguration.ApiKey);
+            anthropicHttpClient.DefaultRequestHeaders.Add("anthropic-version", anthropicConfiguration.Version);
+        });
 
         var openAiConfiguration = configuration.GetRequiredSection(nameof(OpenAiConfiguration)).Get<OpenAiConfiguration>()
             ?? throw new NullReferenceException(nameof(OpenAiConfiguration));
 
         services.AddHttpClient<OpenAiClient>(openAiHttpClient =>
-            {
+        {
             openAiHttpClient.BaseAddress = openAiConfiguration.BaseAddress;
             openAiHttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {openAiConfiguration.ApiKey}");
         });
