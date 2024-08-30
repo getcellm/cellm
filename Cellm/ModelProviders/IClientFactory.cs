@@ -14,6 +14,7 @@ public class ClientFactory : IClientFactory
         return modelProvider switch
         {
             nameof(AnthropicClient) => ServiceLocator.Get<AnthropicClient>(),
+            nameof(OpenAiClient) => ServiceLocator.Get<OpenAiClient>(),
             _ => throw new ArgumentException($"Unsupported client type: {modelProvider}")
         };
     }

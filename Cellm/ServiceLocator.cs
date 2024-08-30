@@ -28,7 +28,8 @@ internal static class ServiceLocator
 
         services
             .Configure<CellmConfiguration>(configuration.GetRequiredSection(nameof(CellmConfiguration)))
-            .Configure<AnthropicConfiguration>(configuration.GetRequiredSection(nameof(AnthropicConfiguration)));
+            .Configure<AnthropicConfiguration>(configuration.GetRequiredSection(nameof(AnthropicConfiguration)))
+            .Configure<OpenAiConfiguration>(configuration.GetRequiredSection(nameof(OpenAiConfiguration)));
 
         // Internals
         services
@@ -43,10 +44,13 @@ internal static class ServiceLocator
         {
             anthropicHttpClient.BaseAddress = anthropicConfiguration.BaseAddress;
 
-            foreach (var header in anthropicConfiguration.Headers)
+        var openAiConfiguration = configuration.GetRequiredSection(nameof(OpenAiConfiguration)).Get<OpenAiConfiguration>()
+            ?? throw new NullReferenceException(nameof(OpenAiConfiguration));
+
+        services.AddHttpClient<OpenAiClient>(openAiHttpClient =>
             {
-                anthropicHttpClient.DefaultRequestHeaders.Add(header.Key, header.Value);
-            }
+            openAiHttpClient.BaseAddress = openAiConfiguration.BaseAddress;
+            openAiHttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {openAiConfiguration.ApiKey}");
         });
 
         return services;
