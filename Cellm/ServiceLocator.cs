@@ -29,6 +29,7 @@ internal static class ServiceLocator
         services
             .Configure<CellmConfiguration>(configuration.GetRequiredSection(nameof(CellmConfiguration)))
             .Configure<AnthropicConfiguration>(configuration.GetRequiredSection(nameof(AnthropicConfiguration)))
+            .Configure<GoogleGeminiConfiguration>(configuration.GetRequiredSection(nameof(GoogleGeminiConfiguration)))
             .Configure<OpenAiConfiguration>(configuration.GetRequiredSection(nameof(OpenAiConfiguration)));
 
         // Internals
@@ -45,6 +46,14 @@ internal static class ServiceLocator
             anthropicHttpClient.BaseAddress = anthropicConfiguration.BaseAddress;
             anthropicHttpClient.DefaultRequestHeaders.Add("x-api-key", anthropicConfiguration.ApiKey);
             anthropicHttpClient.DefaultRequestHeaders.Add("anthropic-version", anthropicConfiguration.Version);
+        });
+
+        var googleGeminiConfiguration = configuration.GetRequiredSection(nameof(GoogleGeminiConfiguration)).Get<GoogleGeminiConfiguration>()
+            ?? throw new NullReferenceException(nameof(GoogleGeminiConfiguration));
+
+        services.AddHttpClient<GoogleGeminiClient>(googleGeminiHttpClient =>
+        {
+            googleGeminiHttpClient.BaseAddress = googleGeminiConfiguration.BaseAddress;
         });
 
         var openAiConfiguration = configuration.GetRequiredSection(nameof(OpenAiConfiguration)).Get<OpenAiConfiguration>()

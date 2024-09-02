@@ -11,7 +11,7 @@ public class CellmConfiguration
 
     public CellmConfiguration()
     {
-        DefaultModelProvider = nameof(AnthropicClient);
+        DefaultModelProvider = string.Empty;
         DefaultTemperature = default;
         MaxTokens = default;
     }
