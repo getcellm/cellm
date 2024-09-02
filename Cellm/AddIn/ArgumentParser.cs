@@ -9,7 +9,7 @@ public record Arguments(string Context, string Instructions, double Temperature)
 
 public class ArgumentParser
 {
-    private ExcelReference? context;
+    private string? context;
     private string? instructions;
     private double temperature;
 
@@ -22,7 +22,7 @@ public class ArgumentParser
     {
         if (cellsArg is ExcelReference excelRef)
         {
-            context = excelRef;
+            context = Format.Cells(excelRef);
         }
         else
         {
@@ -42,6 +42,9 @@ public class ArgumentParser
         {
             case string instructionsArg:
                 instructions = instructionsArg;
+                break;
+            case ExcelReference excelRef:
+                instructions = Format.Cells(excelRef);
                 break;
             case double tempArg:
                 AddTemperature(tempArg);
@@ -87,7 +90,7 @@ public class ArgumentParser
         // Parse cells
         var cellsBuilder = new StringBuilder();
         cellsBuilder.AppendLine("<cells>");
-        cellsBuilder.Append(Format.Cells(context));
+        cellsBuilder.Append(context);
         cellsBuilder.AppendLine("<cells>");
 
         // Parse instructions
