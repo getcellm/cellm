@@ -6,6 +6,7 @@ using Cellm.AddIn;
 using Cellm.Exceptions;
 using Cellm.Prompts;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Cellm.ModelProviders;
 
@@ -14,15 +15,18 @@ internal class AnthropicClient : IClient
     private readonly AnthropicConfiguration _anthropicConfiguration;
     private readonly CellmConfiguration _cellmConfiguration;
     private readonly HttpClient _httpClient;
+    private readonly ICache _cache;
 
     public AnthropicClient(
         IOptions<AnthropicConfiguration> anthropicConfiguration,
         IOptions<CellmConfiguration> cellmConfiguration,
-        HttpClient httpClient)
+        HttpClient httpClient,
+        ICache cache)
     {
         _anthropicConfiguration = anthropicConfiguration.Value;
         _cellmConfiguration = cellmConfiguration.Value;
         _httpClient = httpClient;
+        _cache = cache;
     }
 
     public string Send(Prompt prompt)
@@ -35,6 +39,11 @@ internal class AnthropicClient : IClient
             MaxTokens = _cellmConfiguration.MaxTokens,
             Temperature = prompt.Temperature
         };
+
+        if (_cache.TryGetValue(requestBody, out object? value) && value is string assistantMessage)
+        {
+            return assistantMessage;
+        }
 
         var options = new JsonSerializerOptions
         {
@@ -54,12 +63,14 @@ internal class AnthropicClient : IClient
         }
 
         var responseBody = JsonSerializer.Deserialize<ResponseBody>(responseBodyAsString, options);
-        var assistantMessage = responseBody?.Content?.Last()?.Text ?? throw new CellmException("#EMPTY_RESPONSE?");
+        assistantMessage = responseBody?.Content?.Last()?.Text ?? throw new CellmException("#EMPTY_RESPONSE?");
 
         if (assistantMessage.StartsWith("#INSTRUCTION_ERROR?"))
         {
             throw new CellmException(assistantMessage);
         }
+
+        _cache.Set(requestBody, assistantMessage);
 
         return assistantMessage;
     }

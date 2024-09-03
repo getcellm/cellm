@@ -14,15 +14,18 @@ internal class GoogleGeminiClient : IClient
     private readonly GoogleGeminiConfiguration _googleGeminiConfiguration;
     private readonly CellmConfiguration _cellmConfiguration;
     private readonly HttpClient _httpClient;
+    private readonly ICache _cache;
 
     public GoogleGeminiClient(
         IOptions<GoogleGeminiConfiguration> googleGeminiConfiguration,
         IOptions<CellmConfiguration> cellmConfiguration,
-        HttpClient httpClient)
+        HttpClient httpClient,
+        ICache cache)
     {
         _googleGeminiConfiguration = googleGeminiConfiguration.Value;
         _cellmConfiguration = cellmConfiguration.Value;
         _httpClient = httpClient;
+        _cache = cache;
     }
 
     public string Send(Prompt prompt)
@@ -42,6 +45,11 @@ internal class GoogleGeminiClient : IClient
             }
         };
 
+        if (_cache.TryGetValue(requestBody, out object? value) && value is string assistantMessage)
+        {
+            return assistantMessage;
+        }
+
         var options = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -60,12 +68,14 @@ internal class GoogleGeminiClient : IClient
         }
 
         var responseBody = JsonSerializer.Deserialize<ResponseBody>(responseBodyAsString, options);
-        var assistantMessage = responseBody?.Candidates?.SingleOrDefault()?.Content?.Parts?.SingleOrDefault()?.Text ?? throw new CellmException("#EMPTY_RESPONSE?");
+        assistantMessage = responseBody?.Candidates?.SingleOrDefault()?.Content?.Parts?.SingleOrDefault()?.Text ?? throw new CellmException("#EMPTY_RESPONSE?");
 
         if (assistantMessage.StartsWith("#INSTRUCTION_ERROR?"))
         {
             throw new CellmException(assistantMessage);
         }
+
+        _cache.Set(requestBody, assistantMessage);
 
         return assistantMessage;
     }

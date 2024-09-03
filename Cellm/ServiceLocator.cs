@@ -2,6 +2,7 @@
 using Cellm.Exceptions;
 using Cellm.ModelProviders;
 using ExcelDna.Integration;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -21,9 +22,7 @@ internal static class ServiceLocator
         IConfiguration configuration = new ConfigurationBuilder()
             .SetBasePath(basePath)
             .AddJsonFile("appsettings.json")
-#if DEBUG
             .AddJsonFile("appsettings.Local.json", true)
-#endif
             .Build();
 
         services
@@ -36,7 +35,9 @@ internal static class ServiceLocator
         services
             .AddTransient<ArgumentParser>()
             .AddSingleton<IClientFactory, ClientFactory>()
-            .AddSingleton<IClient, Client>();
+            .AddSingleton<IClient, Client>()
+            .AddSingleton<ICache, Cache>()
+            .AddMemoryCache();
 
         // Model Providers
         var anthropicConfiguration = configuration.GetRequiredSection(nameof(AnthropicConfiguration)).Get<AnthropicConfiguration>()
