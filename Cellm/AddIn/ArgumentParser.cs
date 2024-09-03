@@ -28,6 +28,7 @@ public class ArgumentParser
         {
             throw new ArgumentException("First argument must be a cell (A1) or a range of cells (A1:B2).", nameof(cellsArg));
         }
+
         return this;
     }
 
@@ -88,10 +89,10 @@ public class ArgumentParser
         }
 
         // Parse cells
-        var cellsBuilder = new StringBuilder();
-        cellsBuilder.AppendLine("<cells>");
-        cellsBuilder.Append(context);
-        cellsBuilder.AppendLine("<cells>");
+        var contextBuilder = new StringBuilder();
+        contextBuilder.AppendLine("<context>");
+        contextBuilder.Append(context);
+        contextBuilder.AppendLine("<context>");
 
         // Parse instructions
         var instructionsBuilder = new StringBuilder();
@@ -99,7 +100,7 @@ public class ArgumentParser
 
         if (string.IsNullOrEmpty(instructions))
         {
-            instructionsBuilder.AppendLine("Analyze the cells carefully and follow any instructions within the table.");
+            instructionsBuilder.AppendLine("Analyze the context carefully and follow any instructions within the table.");
         }
         else
         {
@@ -108,6 +109,6 @@ public class ArgumentParser
 
         instructionsBuilder.AppendLine("</instructions>");
 
-        return new Arguments(cellsBuilder.ToString(), instructionsBuilder.ToString(), temperature);
+        return new Arguments(contextBuilder.ToString(), instructionsBuilder.ToString(), temperature);
     }
 }

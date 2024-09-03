@@ -12,8 +12,10 @@ public class Cellm
 {
     private static readonly string SystemMessage = @"
 <input>
-The user has called you via the ""Prompt"" Excel function in a cell formula. The argument to the formula is the range of cells the user selected, e.g. ""=Prompt(A1)"" or ""=Prompt(A1:D10)"" 
-Multiple cells are rendered as a table where each cell is prepended with the its coordinates.
+The user has called you via the ""Prompt"" Excel function in a cell formula. 
+The argument to the formula is the range of cells the user selected, e.g. ""=Prompt(A1)"" or ""=Prompt(A1:D10)"".
+The cells are rendered as a table where each cell coordinate is prepended to its contents.
+The cells are your context that you should use when following the user's instructions.
 <input>
 
 <constraints>
@@ -37,8 +39,8 @@ Ensure the output is directly usable in a spreadsheet cell.
 
     [ExcelFunction(Name = "PROMPT", Description = "Call a model with a prompt")]
     public static object Call(
-        [ExcelArgument(AllowReference = true, Name = "Cells", Description = "A cell or range of cells")] object cells,
-        [ExcelArgument(Name = "InstructionsOrTemperature", Description = "Model instructions or temperature")] object instructionsOrTemperature,
+        [ExcelArgument(AllowReference = true, Name = "Context", Description = "A cell or range of cells")] object cells,
+        [ExcelArgument(Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
         [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
     {
         try
