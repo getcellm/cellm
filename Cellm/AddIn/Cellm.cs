@@ -1,10 +1,8 @@
 ﻿using System.Text;
-using System.Text.Json;
 using Cellm.Exceptions;
 using Cellm.ModelProviders;
 using Cellm.Prompts;
 using ExcelDna.Integration;
-using Microsoft.Extensions.Options;
 
 namespace Cellm.AddIn;
 
