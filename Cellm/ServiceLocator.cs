@@ -35,7 +35,8 @@ internal static class ServiceLocator
         // Internals
         services
             .AddTransient<ArgumentParser>()
-            .AddSingleton<IClientFactory, ClientFactory>();
+            .AddSingleton<IClientFactory, ClientFactory>()
+            .AddSingleton<IClient, Client>();
 
         // Model Providers
         var anthropicConfiguration = configuration.GetRequiredSection(nameof(AnthropicConfiguration)).Get<AnthropicConfiguration>()

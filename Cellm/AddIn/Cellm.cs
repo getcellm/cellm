@@ -77,27 +77,12 @@ Ensure the output is directly usable in a spreadsheet cell.
     {
         try
         {
-            var cellmConfiguration = ServiceLocator.Get<IOptions<CellmConfiguration>>().Value;
-            var clientFactory = ServiceLocator.Get<IClientFactory>();
-            var client = clientFactory.GetClient(cellmConfiguration.DefaultModelProvider);
-
+            var client = ServiceLocator.Get<IClient>();
             return client.Send(prompt);
         }
-        catch (HttpRequestException ex)
+        catch (CellmException)
         {
-            throw new CellmException("API request failed", ex);
-        }
-        catch (JsonException ex)
-        {
-            throw new CellmException("Failed to deserialize API response", ex);
-        }
-        catch (NotSupportedException ex)
-        {
-            throw new CellmException("Serialization or deserialization of request failed", ex);
-        }
-        catch (NullReferenceException ex)
-        {
-            throw new CellmException("Null reference encountered while processing the response", ex);
+            throw;
         }
         catch (Exception ex)
         {
