@@ -32,50 +32,50 @@ public class ArgumentParser
         return this;
     }
 
-    public ArgumentParser AddInstructionsOrTemperature(object arg)
+    public ArgumentParser AddInstructionsOrTemperature(object instructionsOrTemperature)
     {
-        if (arg is ExcelMissing)
+        if (instructionsOrTemperature is ExcelMissing)
         {
             return this;
         }
 
-        switch (arg)
+        switch (instructionsOrTemperature)
         {
-            case string instructionsArg:
-                instructions = instructionsArg;
+            case string i:
+                instructions = i;
                 break;
             case ExcelReference excelRef:
                 instructions = Format.Cells(excelRef);
                 break;
-            case double tempArg:
-                AddTemperature(tempArg);
+            case double t:
+                AddTemperature(t);
                 break;
             default:
-                throw new ArgumentException("Second argument must be either a string (instructions) or a double (temperature).");
+                throw new ArgumentException("Second argument must be a cell, a range of cells, or a string (instructions) or a double (temperature).");
         }
 
         return this;
     }
 
-    public ArgumentParser AddTemperature(object temperatureArg)
+    public ArgumentParser AddTemperature(object Temperature)
     {
-        if (temperatureArg is ExcelMissing)
+        if (Temperature is ExcelMissing)
         {
             return this;
         }
 
-        if (temperatureArg is double tempArg)
+        if (Temperature is double t)
         {
-            if (tempArg < 0 || tempArg > 1)
+            if (t < 0 || t > 1)
             {
-                throw new ArgumentOutOfRangeException(nameof(tempArg), "Temperature must be between 0 and 1");
+                throw new ArgumentOutOfRangeException(nameof(Temperature), "Temperature must be between 0 and 1");
             }
 
-            temperature = tempArg;
+            temperature = t;
         }
         else
         {
-            throw new ArgumentException("Third argument must be a double (temperature).", nameof(temperatureArg));
+            throw new ArgumentException("Third argument must be a double (temperature).", nameof(Temperature));
         }
 
         return this;
