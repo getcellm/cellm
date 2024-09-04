@@ -3,6 +3,7 @@ using Cellm.Exceptions;
 using Cellm.Prompts;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
+using Polly.Timeout;
 
 namespace Cellm.ModelProviders;
 
@@ -26,11 +27,11 @@ internal class Client : IClient
         }
         catch (HttpRequestException ex)
         {
-            throw new CellmException("API request failed", ex);
+            throw new CellmException($"HTTP request failed: {ex.Message}", ex);
         }
         catch (JsonException ex)
         {
-            throw new CellmException("Failed to deserialize API response", ex);
+            throw new CellmException($"JSON processing error: {ex.Message}", ex);
         }
         catch (NotSupportedException ex)
         {
@@ -40,6 +41,14 @@ internal class Client : IClient
         {
             throw new CellmException("Null reference encountered while processing the response", ex);
         }
-        
+        catch (TimeoutRejectedException ex)
+        {
+            throw new CellmException($"Request timed out: {ex.Message}", ex);
+        }
+        catch (Exception ex) when (ex is not CellmException)
+        {
+            // Handle any other unexpected exceptions
+            throw new CellmException($"An unexpected error occurred: {ex.Message}", ex);
+        }
     }
 }

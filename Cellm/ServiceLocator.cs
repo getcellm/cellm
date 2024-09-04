@@ -5,6 +5,10 @@ using ExcelDna.Integration;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Polly;
+using Polly.Retry;
+using Polly.Timeout;
+using System.Net;
 
 namespace Cellm;
 
@@ -26,7 +30,7 @@ internal static class ServiceLocator
             .Build();
 
         services
-            .Configure<CellmConfiguration>(configuration.GetRequiredSection(nameof(CellmConfiguration)))
+            .Configure<CellmAddInConfiguration>(configuration.GetRequiredSection(nameof(CellmAddInConfiguration)))
             .Configure<AnthropicConfiguration>(configuration.GetRequiredSection(nameof(AnthropicConfiguration)))
             .Configure<GoogleGeminiConfiguration>(configuration.GetRequiredSection(nameof(GoogleGeminiConfiguration)))
             .Configure<OpenAiConfiguration>(configuration.GetRequiredSection(nameof(OpenAiConfiguration)));
@@ -48,7 +52,7 @@ internal static class ServiceLocator
             anthropicHttpClient.BaseAddress = anthropicConfiguration.BaseAddress;
             anthropicHttpClient.DefaultRequestHeaders.Add("x-api-key", anthropicConfiguration.ApiKey);
             anthropicHttpClient.DefaultRequestHeaders.Add("anthropic-version", anthropicConfiguration.Version);
-        });
+        }).AddResilienceHandler("AnthropicResiliencePipeline", ConfigureResiliencePipeline);
 
         var googleGeminiConfiguration = configuration.GetRequiredSection(nameof(GoogleGeminiConfiguration)).Get<GoogleGeminiConfiguration>()
             ?? throw new NullReferenceException(nameof(GoogleGeminiConfiguration));
@@ -56,7 +60,7 @@ internal static class ServiceLocator
         services.AddHttpClient<GoogleGeminiClient>(googleGeminiHttpClient =>
         {
             googleGeminiHttpClient.BaseAddress = googleGeminiConfiguration.BaseAddress;
-        });
+        }).AddResilienceHandler("GoogleGeminiResiliencePipeline", ConfigureResiliencePipeline);
 
         var openAiConfiguration = configuration.GetRequiredSection(nameof(OpenAiConfiguration)).Get<OpenAiConfiguration>()
             ?? throw new NullReferenceException(nameof(OpenAiConfiguration));
@@ -65,10 +69,41 @@ internal static class ServiceLocator
         {
             openAiHttpClient.BaseAddress = openAiConfiguration.BaseAddress;
             openAiHttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {openAiConfiguration.ApiKey}");
-        });
+        }).AddResilienceHandler("OpenAiResiliencePipeline", ConfigureResiliencePipeline);
 
         return services;
     }
+
+    static void ConfigureResiliencePipeline(ResiliencePipelineBuilder<HttpResponseMessage> builder)
+    {
+        _ = builder
+            .AddRetry(new RetryStrategyOptions<HttpResponseMessage>
+            {
+                ShouldHandle = args => ValueTask.FromResult(ShouldRetry(args.Outcome)),
+                BackoffType = DelayBackoffType.Exponential,
+                UseJitter = true,
+                MaxRetryAttempts = 7,
+                Delay = TimeSpan.FromSeconds(2),
+            })
+            // Timeout for a single request
+            .AddTimeout(TimeSpan.FromSeconds(10));
+    }
+
+
+    private static bool ShouldRetry(Outcome<HttpResponseMessage> outcome) => outcome switch
+    {
+        { Result: HttpResponseMessage response } => IsServerError(response),
+        { Exception: Exception exception } => IsTransientException(exception),
+        _ => false
+    };
+
+    private static bool IsServerError(HttpResponseMessage response) =>
+        response.StatusCode >= HttpStatusCode.InternalServerError ||
+        response.StatusCode == HttpStatusCode.RequestTimeout ||
+        response.StatusCode == HttpStatusCode.TooManyRequests;
+
+    private static bool IsTransientException(Exception exception) =>
+        exception is HttpRequestException or TimeoutRejectedException;
 
     public static T Get<T>() where T : notnull
     {
