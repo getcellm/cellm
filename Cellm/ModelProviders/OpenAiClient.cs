@@ -12,13 +12,13 @@ namespace Cellm.ModelProviders;
 internal class OpenAiClient : IClient
 {
     private readonly OpenAiConfiguration _openAiConfiguration;
-    private readonly CellmConfiguration _cellmConfiguration;
+    private readonly CellmAddInConfiguration _cellmConfiguration;
     private readonly HttpClient _httpClient;
     private readonly ICache _cache;
 
     internal OpenAiClient(
         IOptions<OpenAiConfiguration> openAiConfiguration,
-        IOptions<CellmConfiguration> cellmConfiguration,
+        IOptions<CellmAddInConfiguration> cellmConfiguration,
         HttpClient httpClient,
         ICache cache)
     {

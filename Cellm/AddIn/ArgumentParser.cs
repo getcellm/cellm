@@ -13,7 +13,7 @@ public class ArgumentParser
     private string? instructions;
     private double temperature;
 
-    public ArgumentParser(IOptions<CellmConfiguration> cellmConfiguration)
+    public ArgumentParser(IOptions<CellmAddInConfiguration> cellmConfiguration)
     {
         temperature = cellmConfiguration.Value.DefaultTemperature;
     }
@@ -100,7 +100,7 @@ public class ArgumentParser
 
         if (string.IsNullOrEmpty(instructions))
         {
-            instructionsBuilder.AppendLine("Analyze the context carefully and follow any instructions within the table.");
+            instructionsBuilder.AppendLine(Messages.InlineInstructions);
         }
         else
         {

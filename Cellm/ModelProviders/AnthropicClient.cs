@@ -13,13 +13,13 @@ namespace Cellm.ModelProviders;
 internal class AnthropicClient : IClient
 {
     private readonly AnthropicConfiguration _anthropicConfiguration;
-    private readonly CellmConfiguration _cellmConfiguration;
+    private readonly CellmAddInConfiguration _cellmConfiguration;
     private readonly HttpClient _httpClient;
     private readonly ICache _cache;
 
     public AnthropicClient(
         IOptions<AnthropicConfiguration> anthropicConfiguration,
-        IOptions<CellmConfiguration> cellmConfiguration,
+        IOptions<CellmAddInConfiguration> cellmConfiguration,
         HttpClient httpClient,
         ICache cache)
     {

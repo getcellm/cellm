@@ -12,13 +12,13 @@ namespace Cellm.ModelProviders;
 internal class GoogleGeminiClient : IClient
 {
     private readonly GoogleGeminiConfiguration _googleGeminiConfiguration;
-    private readonly CellmConfiguration _cellmConfiguration;
+    private readonly CellmAddInConfiguration _cellmConfiguration;
     private readonly HttpClient _httpClient;
     private readonly ICache _cache;
 
     public GoogleGeminiClient(
         IOptions<GoogleGeminiConfiguration> googleGeminiConfiguration,
-        IOptions<CellmConfiguration> cellmConfiguration,
+        IOptions<CellmAddInConfiguration> cellmConfiguration,
         HttpClient httpClient,
         ICache cache)
     {
