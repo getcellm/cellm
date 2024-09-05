@@ -2,17 +2,16 @@
 Cellm is an Excel extension that lets you use Large Language Models (LLMs) like ChatGPT in cell formulas.
 
 ## What is Cellm?
+Similar to Excel's `=SUM()` that outputs the sum of a range of numbers, Cellm's `=PROMPT()` outputs the AI response to a range of text. 
 
-Cellm adds the `=PROMPT()` function. Similar to Excel's `=SUM()` function that outputs the sum of a range of numbers, Cellm's `=PROMPT()` function outputs the AI response to a range of text. 
-
-It works like Excel's built-in functions but uses AI to calculate cell values. For example, you can write `=PROMPT(A1:B10, "Extract keywords")` in a cell to extract keywords from a range of other cells. This is useful when you want to use AI for repetitive tasks that would normally require copy-pasting data in and out of a chat window many times
+For example, you can write `=PROMPT(A1:A10, "Extract keywords")` in a cell's formula to extract keywords from the range of cells `A1:B1`. You can then drag the cell to apply the prompt to many other rows like `A2:B2` and `A3:B3`. This is useful when you want to use AI for repetitive tasks that would normally require copy-pasting data in and out of a chat window many times.
 
 ## Key features
 This extension does one thing and one thing well.
 
 - Calls LLMs in formulas.
 - Returns short answers suitable for cells.
-- Supports models from Anthropic, OpenAI, and Google as well as other providers that mirrors one of these APIs, e.g. local llama.cpp or Ollama servers.
+- Supports models from Anthropic, OpenAI, and Google as well as other providers that mirrors one of these APIs, e.g. local Ollama, llama.cpp or vLLM servers.
 
 ## Example
 Imagine you want to compare many scientific papers against inclusion and exclusion criteria for a systematic review. Here's how you could use Cellm to help with this task:
