@@ -8,7 +8,7 @@ public class ClientFactory : IClientFactory
         return modelProvider switch
         {
             nameof(AnthropicClient) => ServiceLocator.Get<AnthropicClient>(),
-            nameof(GoogleGeminiClient) => ServiceLocator.Get<GoogleGeminiClient>(),
+            nameof(GoogleClient) => ServiceLocator.Get<GoogleClient>(),
             nameof(OpenAiClient) => ServiceLocator.Get<OpenAiClient>(),
             _ => throw new ArgumentException($"Unsupported client type: {modelProvider}")
         };

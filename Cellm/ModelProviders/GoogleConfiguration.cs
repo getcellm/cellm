@@ -1,6 +1,6 @@
 ﻿namespace Cellm.ModelProviders;
 
-internal class GoogleGeminiConfiguration
+internal class GoogleConfiguration
 {
     public Uri BaseAddress { get; init; }
 
@@ -8,7 +8,7 @@ internal class GoogleGeminiConfiguration
 
     public string ApiKey { get; init; }
 
-    public GoogleGeminiConfiguration()
+    public GoogleConfiguration()
     {
         BaseAddress = default!;
         DefaultModel = default!;

@@ -32,7 +32,7 @@ internal static class ServiceLocator
         services
             .Configure<CellmAddInConfiguration>(configuration.GetRequiredSection(nameof(CellmAddInConfiguration)))
             .Configure<AnthropicConfiguration>(configuration.GetRequiredSection(nameof(AnthropicConfiguration)))
-            .Configure<GoogleGeminiConfiguration>(configuration.GetRequiredSection(nameof(GoogleGeminiConfiguration)))
+            .Configure<GoogleConfiguration>(configuration.GetRequiredSection(nameof(GoogleConfiguration)))
             .Configure<OpenAiConfiguration>(configuration.GetRequiredSection(nameof(OpenAiConfiguration)));
 
         // Internals
@@ -57,7 +57,7 @@ internal static class ServiceLocator
         var googleGeminiConfiguration = configuration.GetRequiredSection(nameof(GoogleGeminiConfiguration)).Get<GoogleGeminiConfiguration>()
             ?? throw new NullReferenceException(nameof(GoogleGeminiConfiguration));
 
-        services.AddHttpClient<GoogleGeminiClient>(googleGeminiHttpClient =>
+        services.AddHttpClient<GoogleClient>(googleGeminiHttpClient =>
         {
             googleGeminiHttpClient.BaseAddress = googleGeminiConfiguration.BaseAddress;
         }).AddResilienceHandler("GoogleGeminiResiliencePipeline", ConfigureResiliencePipeline);

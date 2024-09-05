@@ -4,5 +4,5 @@ namespace Cellm.ModelProviders;
 
 public interface IClient
 {
-    string Send(Prompt prompt);
+    public Task<string> Send(Prompt prompt);
 }

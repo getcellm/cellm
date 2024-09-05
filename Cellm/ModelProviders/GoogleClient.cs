@@ -9,15 +9,15 @@ using Microsoft.Extensions.Options;
 
 namespace Cellm.ModelProviders;
 
-internal class GoogleGeminiClient : IClient
+internal class GoogleClient : IClient
 {
-    private readonly GoogleGeminiConfiguration _googleGeminiConfiguration;
+    private readonly GoogleConfiguration _googleGeminiConfiguration;
     private readonly CellmAddInConfiguration _cellmConfiguration;
     private readonly HttpClient _httpClient;
     private readonly ICache _cache;
 
-    public GoogleGeminiClient(
-        IOptions<GoogleGeminiConfiguration> googleGeminiConfiguration,
+    public GoogleClient(
+        IOptions<GoogleConfiguration> googleGeminiConfiguration,
         IOptions<CellmAddInConfiguration> cellmConfiguration,
         HttpClient httpClient,
         ICache cache)
@@ -28,7 +28,7 @@ internal class GoogleGeminiClient : IClient
         _cache = cache;
     }
 
-    public string Send(Prompt prompt)
+    public async Task<string> Send(Prompt prompt)
     {
         var requestBody = new RequestBody
         {
@@ -59,8 +59,8 @@ internal class GoogleGeminiClient : IClient
         var json = JsonSerializer.Serialize(requestBody, options);
         var jsonAsString = new StringContent(json, Encoding.UTF8, "application/json");
 
-        var response = _httpClient.PostAsync($"/v1beta/models/{_googleGeminiConfiguration.DefaultModel}:generateContent?key={_googleGeminiConfiguration.ApiKey}", jsonAsString).Result;
-        var responseBodyAsString = response.Content.ReadAsStringAsync().Result;
+        var response = await _httpClient.PostAsync($"/v1beta/models/{_googleGeminiConfiguration.DefaultModel}:generateContent?key={_googleGeminiConfiguration.ApiKey}", jsonAsString);
+        var responseBodyAsString = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)
         {

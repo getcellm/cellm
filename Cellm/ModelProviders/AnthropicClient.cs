@@ -29,7 +29,7 @@ internal class AnthropicClient : IClient
         _cache = cache;
     }
 
-    public string Send(Prompt prompt)
+    public async Task<string> Send(Prompt prompt)
     {
         var requestBody = new RequestBody
         {
@@ -54,8 +54,8 @@ internal class AnthropicClient : IClient
         var json = JsonSerializer.Serialize(requestBody, options);
         var jsonAsString = new StringContent(json, Encoding.UTF8, "application/json");
 
-        var response = _httpClient.PostAsync("/v1/messages", jsonAsString).Result;
-        var responseBodyAsString = response.Content.ReadAsStringAsync().Result;
+        var response = await _httpClient.PostAsync("/v1/messages", jsonAsString);
+        var responseBodyAsString = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)
         {
