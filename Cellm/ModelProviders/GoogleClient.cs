@@ -2,10 +2,10 @@
 using System.Text.Json;
 using System.Text;
 using System.Text.Json.Serialization;
-using Cellm.AddIn;
 using Cellm.Exceptions;
 using Cellm.Prompts;
 using Microsoft.Extensions.Options;
+using Cellm.Services.Configuration;
 
 namespace Cellm.ModelProviders;
 

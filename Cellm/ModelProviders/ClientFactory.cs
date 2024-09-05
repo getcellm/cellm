@@ -1,4 +1,6 @@
-﻿namespace Cellm.ModelProviders;
+﻿using Cellm.Services;
+
+namespace Cellm.ModelProviders;
 
 public class ClientFactory : IClientFactory
 {

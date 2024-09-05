@@ -1,6 +1,7 @@
 ﻿using Cellm.Exceptions;
 using Cellm.ModelProviders;
 using Cellm.Prompts;
+using Cellm.Services;
 using ExcelDna.Integration;
 using System.Text;
 

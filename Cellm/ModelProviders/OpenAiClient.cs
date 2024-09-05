@@ -2,10 +2,10 @@
 using System.Text.Encodings.Web;
 using System.Text.Json.Serialization;
 using System.Text.Json;
-using Cellm.AddIn;
 using Cellm.Exceptions;
 using Cellm.Prompts;
 using Microsoft.Extensions.Options;
+using Cellm.Services.Configuration;
 
 namespace Cellm.ModelProviders;
 
@@ -16,7 +16,7 @@ internal class OpenAiClient : IClient
     private readonly HttpClient _httpClient;
     private readonly ICache _cache;
 
-    internal OpenAiClient(
+    public OpenAiClient(
         IOptions<OpenAiConfiguration> openAiConfiguration,
         IOptions<CellmAddInConfiguration> cellmConfiguration,
         HttpClient httpClient,

@@ -2,7 +2,6 @@
 
 public class CellmException : Exception
 {
-
     public CellmException(string message = "#CELLM_ERROR?")
         : base(message) { }
 

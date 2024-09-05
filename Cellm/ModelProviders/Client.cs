@@ -1,9 +1,9 @@
-﻿using Cellm.AddIn;
-using Cellm.Exceptions;
+﻿using Cellm.Exceptions;
 using Cellm.Prompts;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 using Polly.Timeout;
+using Cellm.Services.Configuration;
 
 namespace Cellm.ModelProviders;
 
@@ -31,15 +31,15 @@ internal class Client : IClient
         }
         catch (JsonException ex)
         {
-            throw new CellmException($"JSON processing error: {ex.Message}", ex);
+            throw new CellmException($"JSON processing failed: {ex.Message}", ex);
         }
         catch (NotSupportedException ex)
         {
-            throw new CellmException("Serialization or deserialization of request failed", ex);
+            throw new CellmException($"Method not supported: {ex.Message}", ex);
         }
         catch (NullReferenceException ex)
         {
-            throw new CellmException("Null reference encountered while processing the response", ex);
+            throw new CellmException($"Null reference error: {ex.Message}", ex);
         }
         catch (TimeoutRejectedException ex)
         {
