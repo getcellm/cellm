@@ -1,8 +1,8 @@
 ﻿namespace Cellm.Prompts;
 
-internal static class Messages
+internal static class CellmPrompts
 {
-    public const string System = @"
+    public const string SystemMessage = @"
 <input>
 The user has called you via the ""Prompt"" Excel function in a cell formula. 
 The argument to the formula is the range of cells the user selected, e.g. ""=Prompt(A1)"" or ""=Prompt(A1:D10)"".

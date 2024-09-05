@@ -28,7 +28,7 @@ public static class CellmFunctions
                 .ToString();
 
             var prompt = new PromptBuilder()
-                .SetSystemMessage(Messages.System)
+                .SetSystemMessage(CellmPrompts.SystemMessage)
                 .SetTemperature(arguments.Temperature)
                 .AddUserMessage(userMessage)
                 .Build();

@@ -100,7 +100,7 @@ public class ArgumentParser
 
         if (string.IsNullOrEmpty(instructions))
         {
-            instructionsBuilder.AppendLine(Messages.InlineInstructions);
+            instructionsBuilder.AppendLine(CellmPrompts.InlineInstructions);
         }
         else
         {
