@@ -93,7 +93,7 @@ public class ArgumentParser
         var contextBuilder = new StringBuilder();
         contextBuilder.AppendLine("<context>");
         contextBuilder.Append(context);
-        contextBuilder.AppendLine("<context>");
+        contextBuilder.AppendLine("</context>");
 
         // Parse instructions
         var instructionsBuilder = new StringBuilder();
