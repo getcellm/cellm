@@ -53,7 +53,8 @@ public class ResiliencePipelineConfigurator
                 MaxRetryAttempts = retryConfiguration.MaxRetryAttempts,
                 Delay = TimeSpan.FromSeconds(retryConfiguration.DelayInSeconds),
             })
-            .AddTimeout(TimeSpan.FromSeconds(retryConfiguration.RequestTimeoutInSeconds));
+            .AddTimeout(TimeSpan.FromSeconds(retryConfiguration.RequestTimeoutInSeconds))
+            .Build();
     }
 
     private static bool ShouldBreakCircuit(Outcome<HttpResponseMessage> outcome) => outcome switch
