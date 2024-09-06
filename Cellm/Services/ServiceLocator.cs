@@ -6,12 +6,14 @@ using ExcelDna.Integration;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Cellm.Services;
 
 internal static class ServiceLocator
 {
     private static readonly Lazy<IServiceProvider> _serviceProvider = new(() => ConfigureServices(new ServiceCollection()).BuildServiceProvider());
+
     public static IServiceProvider ServiceProvider => _serviceProvider.Value;
 
     public static T Get<T>() where T : notnull
@@ -43,6 +45,11 @@ internal static class ServiceLocator
 
         // Internals
         services
+            .AddLogging(loggingBuilder =>
+            {
+                loggingBuilder.AddConsole();
+                loggingBuilder.AddDebug();
+            })
             .AddTransient<ArgumentParser>()
             .AddSingleton<IClientFactory, ClientFactory>()
             .AddSingleton<IClient, Client>()
