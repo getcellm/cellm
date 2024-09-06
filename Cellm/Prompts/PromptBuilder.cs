@@ -40,7 +40,7 @@ public class PromptBuilder
     {
         return new Prompt(
             _systemMessage ?? throw new ArgumentNullException(nameof(_systemMessage)),
-            _messages, 
+            _messages,
             _temperature ?? throw new ArgumentNullException(nameof(_temperature))
         );
     }
