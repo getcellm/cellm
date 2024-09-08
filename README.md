@@ -75,6 +75,13 @@ Cellm must be built from source and installed via Excel. Follow the steps below.
    dotnet build --configuration Release
    ```
 
+### Install
+
+1. In Excel, go to `File > Options > Add-Ins`.
+2. Manage `Excel Add-ins` and click `Go...`.
+3. Click `Browse...` and select the `.xll` file in the bin/Release/net6.0-windows folder.
+4. Check the box next to Cellm and click `OK`.
+
 ### Requirements
 
 - Windows.
