@@ -17,7 +17,7 @@ Imagine you want to compare many scientific papers against inclusion and exclusi
 
 https://github.com/user-attachments/assets/94671655-09c5-42fa-9197-d8dffc439c27
 
-In this example, we copy the papers title and abstract into excel and write the prompt once. We then use AutoFill to apply the prompt to many papers. Simple and powerful.
+In this example, we copy the papers title and abstract into Excel and write the prompt once. We then use AutoFill to apply the prompt to many papers. Simple and powerful.
 
 A single paper is misclassified because the original inclusion and exclusion criteria were summarized in one sentence. This is a good example, however, because it shows that these models rely entirely on your input and can make mistakes.
 
@@ -26,67 +26,6 @@ My girlfriend was writing a systematic review paper. She had to compare 7.500 pa
 
 She still did her analysis manually, of couse, because she cares about scientific integrity.
 
-## Getting Started
-
-Cellm must be built from source and installed via Excel. Follow the steps below.
-
-### Build
-
-1. Clone this repository:
-   ```cmd
-   git clone https://github.com/kaspermarstal/cellm.git
-   ```
-2. Rename `Cellm/appsettings.Local.Example.json` to `Cellm/appsettings.Local.json` and configure your model provider:
-
-    - For Anthropic, Google, or OpenAI APIs, add your API key to `Cellm/appsettings.Local.json`. Example:
-      ```json
-      {
-        "AnthropicConfiguration": {
-            "ApiKey": "YOUR_ANTHROPIC_APIKEY"
-        },
-        "CellmConfiguration": {
-            "DefaultModelProvider":  "AnthropicClient"
-        }
-      }
-      ```
-      For Google or OpenAI, replace `AnthropicConfiguration` and `AnthropicClient` with `GoogleConfiguration` and `GoogleClient` or `OpenAiConfiguration` and `OpenAiClient`.
-    - For local inference with Llama.cpp, Ollama, vLLM, or other OpenAI compatible inference servers, use the OpenAI provider and set the base address to localhost:
-      ```json
-      {
-        "OpenAiConfiguration": {
-            "BaseAddress": "https://localhost:8000"
-        },
-        "CellmConfiguration": {
-            "DefaultModelProvider":  "OpenAiClient"
-        }
-      }
-      ``` 
-      Llama.cpp and vLLM use port `8000` by default while Ollama uses `11434`. 
-3. In your terminal, go into the project directory:
-   ```cmd
-   cd cellm
-   ```
-4. Install dependencies:
-   ```cmd
-   dotnet restore
-   ```cmd
-5. Build the project:
-   ```cmd
-   dotnet build --configuration Release
-   ```
-
-### Install
-
-1. In Excel, go to `File > Options > Add-Ins`.
-2. Manage `Excel Add-ins` and click `Go...`.
-3. Click `Browse...` and select the `.xll` file in the bin/Release/net6.0-windows folder.
-4. Check the box next to Cellm and click `OK`.
-
-### Requirements
-
-- Windows.
-- .NET 6.0 SDK.
-- Excel desktop app.
 
 ## Usage
 Cellm provides the following function:
@@ -97,7 +36,7 @@ PROMPT(cells: range, [instruction: range | instruction: string | temperature: do
 
 - **cells (Required):** A cell or a range of cells.
   - Context and (optionally) instructions. The model will follow instructions as long as they present _somewhere_ in the cells and the model can identify them.
-- **instructions (Optional):** A cell, a range of cells or a string.
+- **instructions (Optional):** A cell, a range of cells, or a string.
   - Overrides any instructions in the cells of the first argument.
   - Default: Empty. 
 - **temperature (Optional):** double. 
@@ -110,6 +49,7 @@ Example usage:
 - `=Prompt(A1:D10, "Extract keywords", 0.7)` will use the selected range of cells as context, follow the instruction to extract keywords, and use a temperature of 0.7.
 - `=Prompt(A1:D10)` will use the range of cells as context and follow instructions as long as they present _somewhere_ in the cells.
 - `=Prompt(A1:D10, 0.7)` will use the selected range of cells as context, follow any instruction within the cells, and use a temperature of 0.7.
+
 
 ## Use Cases
 Cellm is useful for repetitive tasks on structured data. Here are some practical applications:
@@ -162,30 +102,90 @@ Cellm is useful for repetitive tasks on structured data. Here are some practical
    ```
    Useful for analyzing unstructured text data in fields like journalism, research, or customer relationship management.
 
-These use cases are starting points. Experiment with different instructions to find what works best for your data.
+These use cases are starting points. Experiment with different instructions to find what works best for your data. It works best when combined with human judgment and expertise in your specific domain.
+
+## Getting Started
+
+Cellm must be built from source and installed via Excel. Follow the steps below.
+
+### Build
+
+1. Clone this repository:
+   ```cmd
+   git clone https://github.com/kaspermarstal/cellm.git
+   ```
+2. Rename `Cellm/appsettings.Local.Example.json` to `Cellm/appsettings.Local.json` and configure your model provider:
+
+    - For Anthropic, Google, or OpenAI APIs, add your API key to `Cellm/appsettings.Local.json`. Example:
+      ```json
+      {
+        "AnthropicConfiguration": {
+            "ApiKey": "YOUR_ANTHROPIC_APIKEY"
+        },
+        "CellmConfiguration": {
+            "DefaultModelProvider":  "AnthropicClient"
+        }
+      }
+      ```
+      For Google or OpenAI, replace `AnthropicConfiguration` and `AnthropicClient` with `GoogleConfiguration` and `GoogleClient` or `OpenAiConfiguration` and `OpenAiClient`.
+    - For local inference with Llama.cpp, Ollama, vLLM, or other OpenAI compatible inference servers, use the OpenAI provider and set the base address to localhost:
+      ```json
+      {
+        "OpenAiConfiguration": {
+            "BaseAddress": "https://localhost:8000"
+        },
+        "CellmConfiguration": {
+            "DefaultModelProvider":  "OpenAiClient"
+        }
+      }
+      ``` 
+      Llama.cpp and vLLM use port `8000` by default while Ollama uses `11434`. 
+3. In your terminal, go into the root of the project directory:
+   ```cmd
+   cd cellm
+   ```
+4. Install dependencies:
+   ```cmd
+   dotnet restore
+   ```
+5. Build the project:
+   ```cmd
+   dotnet build --configuration Release
+   ```
+
+### Install
+
+1. In Excel, go to File > Options > Add-Ins.
+2. In the `Manage` drop-down menu, select `Excel Add-ins` and click `Go...`.
+3. Click `Browse...` and select the `Cellm-AddIn64.xll` file in the bin/Release/net6.0-windows folder.
+4. Check the box next to Cellm and click `OK`.
+
+### Requirements
+
+- Windows.
+- .NET 6.0 SDK.
+- Excel desktop app.
 
 ## Dos and Don'ts
 
 Do:
 
 - Use Cellm for tasks that require natural language processing, such as text classification, synthetic data generation, or sentiment analysis.
+- Be aware that you WILL spend API credits at incredible pace.
 - Combine Cellm with Excel's built-in functions when appropriate.
 - Experiment with different prompts to find the most effective instructions for your data.
 - Use cell references to dynamically change your prompts based on other data in your spreadsheet.
+- In your instructions (second argument), refer to the context (first argument) as "context"
 - Use Cellm for batch processing of text data, leveraging Excel's ability to apply formulas across multiple rows.
 - Always verify the AI's outputs, especially for critical decisions or analyses. AI can make mistakes or have biases.
 - Always consider the privacy implications of the data you're processing with Cellm when using cloud-based LLM providers.
-- Be aware that you WILL spend API credits at incredible pace.
 
 Don't:
-
-- Don't use extremely long prompts or give Cellm complex tasks. A normal chat UI lets you have a back and forth conversation which is better for exploring complex topics. 
+ 
 - Don't use Cellm to compute sums, averages, and other numerical calculations. The current generation of LLMs are not designed for mathematical operations. Use Excel's existing functions instead.
-- Don't rely on Cellm for time-sensitive or mission-critical tasks without human verification.
 - Don't use Cellm to process sensitive or confidential information unless you've carefully reviewed the privacy policies of the LLM provider you're using.
-- Don't use Cellm for tasks that require up-to-date information beyond the AI model's knowledge cutoff date.
-
-Cellm is a tool to streamline repetitive tasks. It works best when combined with human judgment and expertise in your specific domain.
+- Don't use extremely long prompts or give Cellm complex tasks. A normal chat UI lets you have a back and forth conversation which is better for exploring complex topics.
+- Don't use Cellm for tasks that require up-to-date information beyond the AI model's knowledge cutoff date _unless_ you provide the information as context.
 
 ## License
 
