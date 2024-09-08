@@ -21,12 +21,12 @@ internal class Cache : ICache
         };
     }
 
-    public void Set<TKey, TValue>(TKey key, TValue value)
+    public void Set<T, U>(T key, U value)
     {
-        _memoryCache.Set(GetHash(key), value);
+        _memoryCache.Set(GetHash(key), value, _memoryCacheEntryOptions);
     }
 
-    public bool TryGetValue<TKey>(TKey key, out object? value)
+    public bool TryGetValue<T>(T key, out object? value)
     {
         return _memoryCache.TryGetValue(GetHash(key), out value);
     }
