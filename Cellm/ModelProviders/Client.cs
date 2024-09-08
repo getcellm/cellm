@@ -10,9 +10,9 @@ namespace Cellm.ModelProviders;
 internal class Client : IClient
 {
     private readonly IClientFactory _clientFactory;
-    private readonly CellmAddInConfiguration _cellmConfiguration;
+    private readonly CellmConfiguration _cellmConfiguration;
 
-    public Client(IClientFactory clientFactory, IOptions<CellmAddInConfiguration> cellmConfiguration)
+    public Client(IClientFactory clientFactory, IOptions<CellmConfiguration> cellmConfiguration)
     {
         _clientFactory = clientFactory;
         _cellmConfiguration = cellmConfiguration.Value;

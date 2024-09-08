@@ -1,6 +1,6 @@
 ﻿namespace Cellm.Services.Configuration;
 
-public class CellmAddInConfiguration
+public class CellmConfiguration
 {
     public string DefaultModelProvider { get; init; } = string.Empty;
 

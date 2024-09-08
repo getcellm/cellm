@@ -12,7 +12,7 @@ internal class Cache : ICache
     private readonly IMemoryCache _memoryCache;
     private readonly MemoryCacheEntryOptions _memoryCacheEntryOptions;
 
-    public Cache(IMemoryCache memoryCache, IOptions<CellmAddInConfiguration> _cellmConfiguration)
+    public Cache(IMemoryCache memoryCache, IOptions<CellmConfiguration> _cellmConfiguration)
     {
         _memoryCache = memoryCache;
         _memoryCacheEntryOptions = new()

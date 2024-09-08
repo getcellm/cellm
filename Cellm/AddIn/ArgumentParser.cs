@@ -14,7 +14,7 @@ public class ArgumentParser
     private string? instructions;
     private double temperature;
 
-    public ArgumentParser(IOptions<CellmAddInConfiguration> cellmConfiguration)
+    public ArgumentParser(IOptions<CellmConfiguration> cellmConfiguration)
     {
         temperature = cellmConfiguration.Value.DefaultTemperature;
     }
