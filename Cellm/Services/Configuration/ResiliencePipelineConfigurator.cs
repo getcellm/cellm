@@ -1,10 +1,10 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Net;
+using System.Threading.RateLimiting;
+using Microsoft.Extensions.Configuration;
+using Polly;
 using Polly.CircuitBreaker;
 using Polly.Retry;
 using Polly.Timeout;
-using Polly;
-using System.Net;
-using System.Threading.RateLimiting;
 
 namespace Cellm.Services.Configuration;
 

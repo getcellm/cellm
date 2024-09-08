@@ -1,11 +1,11 @@
 ﻿using System.Text;
 using System.Text.Encodings.Web;
-using System.Text.Json.Serialization;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Cellm.Exceptions;
 using Cellm.Prompts;
-using Microsoft.Extensions.Options;
 using Cellm.Services.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Cellm.ModelProviders;
 

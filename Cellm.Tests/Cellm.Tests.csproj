@@ -7,4 +7,13 @@
     <RollForward>LatestMajor</RollForward>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ExcelDna.Testing" Version="1.8.0" />
+    <PackageReference Include="xunit" Version="2.9.0" />
+  </ItemGroup>
+
 </Project>

@@ -72,13 +72,13 @@ Copy your data into Excel and take advantage of the fact that you can create one
 
 To use Cellm:
 
-1. Download the Cellm Excel add-in (`.xll` file) from the Releases page.
+1. Build the project and configure appsettings.Local.json using the guides below.
 2. In Excel, go to `File > Options > Add-Ins`.
 3. Manage `Excel Add-ins` and click `Go...`.
-4. Click `Browse...` and select the downloaded `.xll` file.
+4. Click `Browse...` and select the `.xll` file in the bin/Release/net6.0-windows folder.
 5. Check the box next to Cellm and click `OK`.
 
-## Development
+## Building
 
 1. Install the .NET SDK.
 2. Clone this repository:
@@ -100,7 +100,10 @@ To use Cellm:
 
 ## Configuration
 
-Edit the `Cellm/appsettings.Local.json` file and add you API key to the model provider of your choice or set the base address of the OpenAI client to the url of your local Llama.cpp, Ollama, or vLLM server. Remember to update the "DefaultModelProvider" parameter if you switch away from Anthropic which is the default model provider.
+Rename `Cellm/appsettings.Local.Example.json` to `Cellm/appsettings.Local.json and setup your model provider.
+
+- If you use Anthropic, Google, or OpenAI APIs, add your API key to the model provider of your choice. The default model provider is Anthropic. If you use Google or OpenAI, add `"CellmConfiguration": { "DefaultModelProvider": "GoogleClient" }` or `"CellmConfiguration": { "DefaultModelProvider": "OpenAiClient" }`. See `Cellm/appsetings.json` for a detailed example.
+- If you run models locally with Llama.cpp, Ollama, vLLM, or other OpenAI compatible servers, add `"CellmConfiguration": { "DefaultModelProvider": "OpenAiClient" }` and `"OpenAiConfiguration": { "BaseAddress": "http://localhost:{port}" }`. Replace `{port}` with with the port of your local server. 
 
 ## License
 

@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  Build:
+    runs-on: windows-latest
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}\.nuget\packages
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore --locked-mode
+    - name: Add appsettings.Local.json
+      run: mv Cellm/appsettings.Local.Example.json Cellm/appsettings.Local.json
+    - name: Build
+      run: dotnet build --no-restore
+    - name: Test
+      run: dotnet test --filter ClassName=Cellm.Tests.UnitTests	--no-build --verbosity normal
+  Lint:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 6.0.x
+    - name: Lint solution
+      run: dotnet format --no-restore --verify-no-changes

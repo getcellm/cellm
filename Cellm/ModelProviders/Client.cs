@@ -1,9 +1,9 @@
-﻿using Cellm.Exceptions;
+﻿using System.Text.Json;
+using Cellm.Exceptions;
 using Cellm.Prompts;
-using Microsoft.Extensions.Options;
-using System.Text.Json;
-using Polly.Timeout;
 using Cellm.Services.Configuration;
+using Microsoft.Extensions.Options;
+using Polly.Timeout;
 
 namespace Cellm.ModelProviders;
 
