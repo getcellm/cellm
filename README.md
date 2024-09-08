@@ -13,7 +13,7 @@ This extension does one thing and one thing well.
 - Supports models from Anthropic, OpenAI, and Google as well as other providers that mirrors one of these APIs, e.g. local Ollama, llama.cpp or vLLM servers.
 
 ## Example
-Imagine you want to compare many scientific papers against inclusion and exclusion criteria for a systematic review. Here's how you could use Cellm to help with this task:
+Imagine you want to compare many scientific papers against inclusion and exclusion criteria for a systematic review. Here's how you could use Cellm for this task:
 
 https://github.com/user-attachments/assets/94671655-09c5-42fa-9197-d8dffc439c27
 
@@ -26,7 +26,49 @@ My girlfriend was writing a systematic review paper. She had to compare 7.500 pa
 
 She still did her analysis manually, of couse, because she cares about scientific integrity.
 
-## Function
+## Getting Started
+
+To use Cellm:
+
+1. Build the project and configure appsettings.Local.json using the guides below.
+2. In Excel, go to `File > Options > Add-Ins`.
+3. Manage `Excel Add-ins` and click `Go...`.
+4. Click `Browse...` and select the `.xll` file in the bin/Release/net6.0-windows folder.
+5. Check the box next to Cellm and click `OK`.
+
+### Building
+
+1. Install the .NET 6.0 SDK.
+2. Clone this repository:
+   ```
+   git clone https://github.com/yourusername/cellm.git
+   ```
+3. Go to the project directory:
+   ```
+   cd cellm
+   ```
+4. Install dependencies:
+   ```
+   dotnet restore
+   ```
+5. Build the project:
+   ```
+   dotnet build
+   ```
+
+### Configuration
+
+Rename `Cellm/appsettings.Local.Example.json` to `Cellm/appsettings.Local.json and setup your model provider.
+
+- If you use Anthropic, Google, or OpenAI APIs, add your API key to the model provider of your choice. The default model provider is Anthropic. If you use Google or OpenAI, add `"CellmConfiguration": { "DefaultModelProvider": "GoogleClient" }` or `"CellmConfiguration": { "DefaultModelProvider": "OpenAiClient" }`. See `Cellm/appsetings.json` for a detailed example.
+- If you run models locally with Llama.cpp, Ollama, vLLM, or other OpenAI compatible servers, add `"CellmConfiguration": { "DefaultModelProvider": "OpenAiClient" }` and `"OpenAiConfiguration": { "BaseAddress": "http://localhost:{port}" }`. Replace `{port}` with with the port of your local server. 
+
+### Requirements
+
+- Requires Windows.
+- Requires the Excel desktop app.
+
+## Usage
 Cellm provides the following function:
 
 ```excel
@@ -67,43 +109,6 @@ Copy your data into Excel and take advantage of the fact that you can create one
 
 ## Dos and dont's 
 - Don't use Cellm to compute sums, averages, and other calculations. LLMs are not good at that. Use existing tools instead.
-
-## Getting Started
-
-To use Cellm:
-
-1. Build the project and configure appsettings.Local.json using the guides below.
-2. In Excel, go to `File > Options > Add-Ins`.
-3. Manage `Excel Add-ins` and click `Go...`.
-4. Click `Browse...` and select the `.xll` file in the bin/Release/net6.0-windows folder.
-5. Check the box next to Cellm and click `OK`.
-
-## Building
-
-1. Install the .NET SDK.
-2. Clone this repository:
-   ```
-   git clone https://github.com/yourusername/cellm.git
-   ```
-3. Go to the project directory:
-   ```
-   cd cellm
-   ```
-4. Install dependencies:
-   ```
-   dotnet restore
-   ```
-5. Build the project:
-   ```
-   dotnet build
-   ```
-
-## Configuration
-
-Rename `Cellm/appsettings.Local.Example.json` to `Cellm/appsettings.Local.json and setup your model provider.
-
-- If you use Anthropic, Google, or OpenAI APIs, add your API key to the model provider of your choice. The default model provider is Anthropic. If you use Google or OpenAI, add `"CellmConfiguration": { "DefaultModelProvider": "GoogleClient" }` or `"CellmConfiguration": { "DefaultModelProvider": "OpenAiClient" }`. See `Cellm/appsetings.json` for a detailed example.
-- If you run models locally with Llama.cpp, Ollama, vLLM, or other OpenAI compatible servers, add `"CellmConfiguration": { "DefaultModelProvider": "OpenAiClient" }` and `"OpenAiConfiguration": { "BaseAddress": "http://localhost:{port}" }`. Replace `{port}` with with the port of your local server. 
 
 ## License
 
