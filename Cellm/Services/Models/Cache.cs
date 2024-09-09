@@ -1,11 +1,11 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using Cellm.Services.Configuration;
+using Cellm.AddIn;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 
-namespace Cellm.ModelProviders;
+namespace Cellm.Services.ModelProviders;
 
 internal class Cache : ICache
 {

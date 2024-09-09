@@ -1,4 +1,4 @@
-﻿namespace Cellm.ModelProviders;
+﻿namespace Cellm.Services.ModelProviders;
 
 internal interface ICache
 {

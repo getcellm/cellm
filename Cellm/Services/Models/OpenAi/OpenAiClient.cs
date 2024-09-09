@@ -2,12 +2,12 @@
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Cellm.Exceptions;
-using Cellm.Prompts;
-using Cellm.Services.Configuration;
+using Cellm.AddIn.Prompts;
+using Cellm.AddIn.Exceptions;
 using Microsoft.Extensions.Options;
+using Cellm.AddIn;
 
-namespace Cellm.ModelProviders;
+namespace Cellm.Services.ModelProviders.OpenAi;
 
 internal class OpenAiClient : IClient
 {
@@ -28,7 +28,7 @@ internal class OpenAiClient : IClient
         _cache = cache;
     }
 
-    public async Task<string> Send(Prompt prompt)
+    public async Task<Prompt> Send(Prompt prompt)
     {
         var requestBody = new RequestBody
         {
@@ -38,9 +38,9 @@ internal class OpenAiClient : IClient
             Temperature = prompt.Temperature
         };
 
-        if (_cache.TryGetValue(requestBody, out object? value) && value is string assistantMessage)
+        if (_cache.TryGetValue(requestBody, out object? value) && value is Prompt assistantPrompt)
         {
-            return assistantMessage;
+            return assistantPrompt;
         }
 
         var options = new JsonSerializerOptions
@@ -61,16 +61,21 @@ internal class OpenAiClient : IClient
         }
 
         var responseBody = JsonSerializer.Deserialize<ResponseBody>(responseBodyAsString, options);
-        assistantMessage = responseBody?.Choices?.FirstOrDefault()?.Message?.Content ?? throw new CellmException("#EMPTY_RESPONSE?");
+        var assistantMessage = responseBody?.Choices?.FirstOrDefault()?.Message?.Content ?? throw new CellmException("#EMPTY_RESPONSE?");
 
         if (assistantMessage.StartsWith("#INSTRUCTION_ERROR?"))
         {
             throw new CellmException(assistantMessage);
         }
 
-        _cache.Set(requestBody, assistantMessage);
+        var promptBuilder = new PromptBuilder();
+        promptBuilder.SetPrompt(prompt);
+        promptBuilder.AddAssistantMessage(assistantMessage);
+        assistantPrompt = promptBuilder.Build();
 
-        return assistantMessage;
+        _cache.Set(requestBody, assistantPrompt);
+
+        return assistantPrompt;
     }
 
     private class RequestBody

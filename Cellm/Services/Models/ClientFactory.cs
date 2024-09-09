@@ -1,8 +1,11 @@
 ﻿using Cellm.Services;
+using Cellm.Services.ModelProviders.Anthropic;
+using Cellm.Services.ModelProviders.Google;
+using Cellm.Services.ModelProviders.OpenAi;
 
-namespace Cellm.ModelProviders;
+namespace Cellm.Services.ModelProviders;
 
-public class ClientFactory : IClientFactory
+internal class ClientFactory : IClientFactory
 {
     public IClient GetClient(string modelProvider)
     {

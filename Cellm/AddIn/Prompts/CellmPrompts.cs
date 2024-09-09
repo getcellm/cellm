@@ -1,4 +1,4 @@
-﻿namespace Cellm.Prompts;
+﻿namespace Cellm.AddIn.Prompts;
 
 internal static class CellmPrompts
 {

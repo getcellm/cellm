@@ -1,4 +1,4 @@
-﻿namespace Cellm.Services.Configuration;
+﻿namespace Cellm.AddIn;
 
 public class CellmConfiguration
 {

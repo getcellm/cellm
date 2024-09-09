@@ -1,7 +1,12 @@
 ﻿using Cellm.AddIn;
-using Cellm.Exceptions;
-using Cellm.ModelProviders;
+using Cellm.AddIn.Exceptions;
 using Cellm.Services.Configuration;
+using Cellm.Services.ModelProviders;
+using Cellm.Services.ModelProviders.Anthropic;
+using Cellm.Services.ModelProviders.Google;
+using Cellm.Services.ModelProviders.OpenAi;
+using Cellm.Services.Telemetry.Sentry;
+using Cellm.Services.Telemetry;
 using ExcelDna.Integration;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
@@ -41,23 +46,49 @@ internal static class ServiceLocator
             .Configure<RateLimiterConfiguration>(configuration.GetRequiredSection(nameof(RateLimiterConfiguration)))
             .Configure<CircuitBreakerConfiguration>(configuration.GetRequiredSection(nameof(CircuitBreakerConfiguration)))
             .Configure<RetryConfiguration>(configuration.GetRequiredSection(nameof(RetryConfiguration)))
-            .AddSingleton<ResiliencePipelineConfigurator>();
+            .Configure<SentryClientConfiguration>(configuration.GetRequiredSection(nameof(SentryClientConfiguration)));
 
-        // Internals
+        // Logging
+        var sentryTelemetryConfiguration = configuration.GetRequiredSection(nameof(SentryClientConfiguration)).Get<SentryClientConfiguration>()
+            ?? throw new NullReferenceException(nameof(SentryClientConfiguration));
+
         services
-            .AddLogging(loggingBuilder =>
+          .AddLogging(loggingBuilder =>
             {
                 loggingBuilder.AddConsole();
                 loggingBuilder.AddDebug();
-            })
+                loggingBuilder.AddSentry(sentryLoggingOptions =>
+                {
+                    sentryLoggingOptions.InitializeSdk = sentryTelemetryConfiguration.IsEnabled;
+                    sentryLoggingOptions.Dsn = sentryTelemetryConfiguration.Dsn;
+                    sentryLoggingOptions.Debug = sentryTelemetryConfiguration.Debug;
+                    sentryLoggingOptions.TracesSampleRate = sentryTelemetryConfiguration.TracesSampleRate;
+                    sentryLoggingOptions.ProfilesSampleRate = sentryTelemetryConfiguration.ProfilesSampleRate;
+                    sentryLoggingOptions.AutoSessionTracking = false;
+                });
+            });
+
+        // Internals
+        services
+            .AddMemoryCache()
             .AddTransient<ArgumentParser>()
             .AddSingleton<IClientFactory, ClientFactory>()
             .AddSingleton<IClient, Client>()
             .AddSingleton<ICache, Cache>()
-            .AddMemoryCache();
+            .AddSingleton<ITelemetry, Telemetry.Sentry.SentryClient>();
 
         // Model Providers
-        var resiliencePipelineConfigurator = new ResiliencePipelineConfigurator(configuration);
+        var rateLimiterConfiguration = configuration.GetRequiredSection(nameof(RateLimiterConfiguration)).Get<RateLimiterConfiguration>()
+    ?? throw new NullReferenceException(nameof(RateLimiterConfiguration));
+
+        var circuitBreakerConfiguration = configuration.GetRequiredSection(nameof(CircuitBreakerConfiguration)).Get<CircuitBreakerConfiguration>()
+            ?? throw new NullReferenceException(nameof(CircuitBreakerConfiguration));
+
+        var retryConfiguration = configuration.GetRequiredSection(nameof(RetryConfiguration)).Get<RetryConfiguration>()
+            ?? throw new NullReferenceException(nameof(RetryConfiguration));
+
+        var resiliencePipelineConfigurator = new ResiliencePipelineConfigurator(
+            rateLimiterConfiguration, circuitBreakerConfiguration, retryConfiguration);
 
         var anthropicConfiguration = configuration.GetRequiredSection(nameof(AnthropicConfiguration)).Get<AnthropicConfiguration>()
             ?? throw new NullReferenceException(nameof(AnthropicConfiguration));

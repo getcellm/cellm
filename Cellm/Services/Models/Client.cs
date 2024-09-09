@@ -1,11 +1,11 @@
 ﻿using System.Text.Json;
-using Cellm.Exceptions;
-using Cellm.Prompts;
-using Cellm.Services.Configuration;
+using Cellm.AddIn;
+using Cellm.AddIn.Exceptions;
+using Cellm.AddIn.Prompts;
 using Microsoft.Extensions.Options;
 using Polly.Timeout;
 
-namespace Cellm.ModelProviders;
+namespace Cellm.Services.ModelProviders;
 
 internal class Client : IClient
 {
@@ -18,7 +18,7 @@ internal class Client : IClient
         _cellmConfiguration = cellmConfiguration.Value;
     }
 
-    public async Task<string> Send(Prompt prompt)
+    public async Task<Prompt> Send(Prompt prompt)
     {
         try
         {

@@ -4,7 +4,7 @@ Cellm is an Excel extension that lets you use Large Language Models (LLMs) like 
 ## What is Cellm?
 Similar to Excel's `=SUM()` function that outputs the sum of a range of numbers, Cellm's `=PROMPT()` function outputs the AI response to a range of text. 
 
-For example, you can write `=PROMPT(A1:A10, "Extract keywords")` in a cell's formula to extract keywords from the range of cells. You can then drag the cell to apply the prompt to many other rows like `A2:B2` and `A3:B3`. This is useful when you want to use AI for repetitive tasks that would normally require copy-pasting data in and out of a chat window many times.
+For example, you can write `=PROMPT(A1:A10, "Extract all person names mentioned in the text.")` in a cell's formula to extract keywords from the range of cells. You can then drag the cell to apply the prompt to many other rows like `A2:B2` and `A3:B3`. This is useful when you want to use AI for repetitive tasks that would normally require copy-pasting data in and out of a chat window many times.
 
 ## Key features
 This extension does one thing and one thing well.
@@ -66,11 +66,12 @@ Cellm is useful for repetitive tasks on structured data. Here are some practical
    ```
    Useful for analyzing customer feedback, social media comments, or product reviews at scale.
 
-3. **Keyword Extraction**
+3. **Test LLM apps**
+   Implement `Cellm/ModelProviders/IClient.cs` for your own app and quickly test performance on large datasets. Manually score responses or use an LLM to evaluate performance. For example, imagine you have a test set of user queries in column A. You can use column B to send queries to your app and column C to get an automated score.
    ```excel
-   =PROMPT(C2, "Extract the top 3 keywords from the product description.")
+   =PROMPT(A1) [Column B]
+   =PROMPT(A1:B1, "Score the relevance of the answer in column B to the query in column A on a scale from 1 to 5 where 5 is most relevant.") [Column C]
    ```
-   Helpful for SEO optimization, content tagging, or quickly summarizing lengthy texts.
 
 4. **Language Translation**
    ```excel
@@ -92,7 +93,7 @@ Cellm is useful for repetitive tasks on structured data. Here are some practical
 
 7. **Prompt Engineering and RAG Tuning**
    ```excel
-   =PROMPT(A1:F1, "Score the relevancy of the retrieved documents to the user's question on a scale from 1-10, where 10 is most relevant.")
+   =PROMPT(A1:F1, "Score the relevancy of the retrieved documents to the user's question on a scale from 1 to 5 where 5 is most relevant.")
    ```
    Helpful for fine-tuning prompts and evaluating Retrieval-Augmented Generation (RAG) systems.
 
@@ -101,6 +102,12 @@ Cellm is useful for repetitive tasks on structured data. Here are some practical
    =PROMPT(G2, "Extract all person names mentioned in the text.")
    ```
    Useful for analyzing unstructured text data in fields like journalism, research, or customer relationship management.
+
+9. **Keyword Extraction**
+   ```excel
+   =PROMPT(C2, "Extract the top 3 keywords from the product description.")
+   ```
+   Helpful for SEO optimization, content tagging, or quickly summarizing lengthy texts.
 
 These use cases are starting points. Experiment with different instructions to find what works best for your data. It works best when combined with human judgment and expertise in your specific domain.
 

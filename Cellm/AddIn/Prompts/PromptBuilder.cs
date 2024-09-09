@@ -1,4 +1,6 @@
-﻿namespace Cellm.Prompts;
+﻿using System.Text;
+
+namespace Cellm.AddIn.Prompts;
 
 public class PromptBuilder
 {
@@ -15,6 +17,15 @@ public class PromptBuilder
     public PromptBuilder SetTemperature(double temperature)
     {
         _temperature = temperature;
+        return this;
+    }
+
+    public PromptBuilder SetPrompt(Prompt prompt)
+    {
+        _systemMessage = prompt.SystemMessage;
+        _messages.AddRange(prompt.Messages);
+        _temperature = prompt.Temperature;
+
         return this;
     }
 

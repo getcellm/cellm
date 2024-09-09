@@ -1,9 +1,9 @@
 ﻿using System.Text;
-using Cellm.Exceptions;
+using Cellm.AddIn.Exceptions;
 using ExcelDna.Integration;
 using Microsoft.Office.Interop.Excel;
 
-namespace Cellm.Prompts;
+namespace Cellm.AddIn.Prompts;
 
 public class Format
 {

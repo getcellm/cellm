@@ -1,8 +1,8 @@
 ﻿using System.Text;
-using Cellm.Exceptions;
-using Cellm.ModelProviders;
-using Cellm.Prompts;
+using Cellm.AddIn.Exceptions;
+using Cellm.AddIn.Prompts;
 using Cellm.Services;
+using Cellm.Services.ModelProviders;
 using ExcelDna.Integration;
 
 namespace Cellm.AddIn;
@@ -51,7 +51,8 @@ public static class CellmFunctions
         try
         {
             var client = ServiceLocator.Get<IClient>();
-            return await client.Send(prompt);
+            var response = await client.Send(prompt);
+            return response.Messages.Last().Content;
         }
         catch (CellmException)
         {

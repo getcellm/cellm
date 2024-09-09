@@ -8,52 +8,49 @@ using Polly.Timeout;
 
 namespace Cellm.Services.Configuration;
 
-
 public class ResiliencePipelineConfigurator
 {
-    private readonly IConfiguration _configuration;
+    private readonly RateLimiterConfiguration _rateLimiterConfiguration;
+    private readonly CircuitBreakerConfiguration _circuitBreakerConfiguration;
+    private readonly RetryConfiguration _retryConfiguration;
 
-    public ResiliencePipelineConfigurator(IConfiguration configuration)
+    public ResiliencePipelineConfigurator(
+        RateLimiterConfiguration rateLimiterConfiguration,
+        CircuitBreakerConfiguration circuitBreakerConfiguration,
+        RetryConfiguration retryConfiguration)
     {
-        _configuration = configuration;
+        _rateLimiterConfiguration = rateLimiterConfiguration;
+        _circuitBreakerConfiguration = circuitBreakerConfiguration;
+        _retryConfiguration = retryConfiguration;
     }
 
     public void ConfigureResiliencePipeline(ResiliencePipelineBuilder<HttpResponseMessage> builder)
     {
-        var rateLimiterConfiguration = _configuration.GetRequiredSection(nameof(RateLimiterConfiguration)).Get<RateLimiterConfiguration>()
-            ?? throw new NullReferenceException(nameof(RateLimiterConfiguration));
-
-        var circuitBreakerConfiguration = _configuration.GetRequiredSection(nameof(CircuitBreakerConfiguration)).Get<CircuitBreakerConfiguration>()
-            ?? throw new NullReferenceException(nameof(CircuitBreakerConfiguration));
-
-        var retryConfiguration = _configuration.GetRequiredSection(nameof(RetryConfiguration)).Get<RetryConfiguration>()
-            ?? throw new NullReferenceException(nameof(RetryConfiguration));
-
         _ = builder
             .AddRateLimiter(new TokenBucketRateLimiter(new TokenBucketRateLimiterOptions
             {
-                TokenLimit = rateLimiterConfiguration.TokenLimit,
-                QueueLimit = rateLimiterConfiguration.QueueLimit,
-                ReplenishmentPeriod = TimeSpan.FromSeconds(rateLimiterConfiguration.ReplenishmentPeriodInSeconds),
-                TokensPerPeriod = rateLimiterConfiguration.TokensPerPeriod,
+                TokenLimit = _rateLimiterConfiguration.TokenLimit,
+                QueueLimit = _rateLimiterConfiguration.QueueLimit,
+                ReplenishmentPeriod = TimeSpan.FromSeconds(_rateLimiterConfiguration.ReplenishmentPeriodInSeconds),
+                TokensPerPeriod = _rateLimiterConfiguration.TokensPerPeriod,
             }))
             .AddCircuitBreaker(new CircuitBreakerStrategyOptions<HttpResponseMessage>
             {
                 ShouldHandle = args => ValueTask.FromResult(ShouldBreakCircuit(args.Outcome)),
-                FailureRatio = circuitBreakerConfiguration.FailureRatio,
-                SamplingDuration = TimeSpan.FromSeconds(circuitBreakerConfiguration.SamplingDurationInSeconds),
-                MinimumThroughput = circuitBreakerConfiguration.MinimumThroughput,
-                BreakDuration = TimeSpan.FromSeconds(circuitBreakerConfiguration.BreakDurationInSeconds),
+                FailureRatio = _circuitBreakerConfiguration.FailureRatio,
+                SamplingDuration = TimeSpan.FromSeconds(_circuitBreakerConfiguration.SamplingDurationInSeconds),
+                MinimumThroughput = _circuitBreakerConfiguration.MinimumThroughput,
+                BreakDuration = TimeSpan.FromSeconds(_circuitBreakerConfiguration.BreakDurationInSeconds),
             })
             .AddRetry(new RetryStrategyOptions<HttpResponseMessage>
             {
                 ShouldHandle = args => ValueTask.FromResult(ShouldRetry(args.Outcome)),
                 BackoffType = DelayBackoffType.Exponential,
                 UseJitter = true,
-                MaxRetryAttempts = retryConfiguration.MaxRetryAttempts,
-                Delay = TimeSpan.FromSeconds(retryConfiguration.DelayInSeconds),
+                MaxRetryAttempts = _retryConfiguration.MaxRetryAttempts,
+                Delay = TimeSpan.FromSeconds(_retryConfiguration.DelayInSeconds),
             })
-            .AddTimeout(TimeSpan.FromSeconds(retryConfiguration.RequestTimeoutInSeconds))
+            .AddTimeout(TimeSpan.FromSeconds(_retryConfiguration.RequestTimeoutInSeconds))
             .Build();
     }
 

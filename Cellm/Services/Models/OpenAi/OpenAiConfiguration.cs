@@ -1,6 +1,6 @@
-﻿namespace Cellm.Services.Configuration;
+﻿namespace Cellm.Services.ModelProviders.OpenAi;
 
-internal class GoogleConfiguration
+internal class OpenAiConfiguration
 {
     public Uri BaseAddress { get; init; }
 
@@ -8,7 +8,7 @@ internal class GoogleConfiguration
 
     public string ApiKey { get; init; }
 
-    public GoogleConfiguration()
+    public OpenAiConfiguration()
     {
         BaseAddress = default!;
         DefaultModel = default!;
