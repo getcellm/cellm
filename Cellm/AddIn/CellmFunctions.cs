@@ -4,20 +4,39 @@ using Cellm.AddIn.Prompts;
 using Cellm.Models;
 using Cellm.Services;
 using ExcelDna.Integration;
+using Microsoft.Extensions.Options;
 
 namespace Cellm.AddIn;
 
 public static class CellmFunctions
 {
-    [ExcelFunction(Name = "PROMPT", Description = "Call a model with a prompt")]
+    [ExcelFunction(Name = "PROMPT", Description = "Send a prompt to the default model")]
     public static object Prompt(
     [ExcelArgument(AllowReference = true, Name = "Context", Description = "A cell or range of cells")] object context,
     [ExcelArgument(Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
     [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
     {
+        var cellmConfiguration = ServiceLocator.Get<IOptions<CellmConfiguration>>().Value;
+
+        return PromptModel(
+            $"{cellmConfiguration.DefaultModelProvider}/{cellmConfiguration.DefaultModel}",
+            context, 
+            instructionsOrTemperature, 
+            temperature);
+    }
+
+    [ExcelFunction(Name = "PROMPTMODEL", Description = "Send a prompt to a specific model")]
+    public static object PromptModel(
+        [ExcelArgument(AllowReference = true, Name = "Provider/Model")] object providerAndModel,
+        [ExcelArgument(AllowReference = true, Name = "Context", Description = "A cell or range of cells")] object context,
+        [ExcelArgument(Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
+        [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
+    {
         try
         {
             var arguments = ServiceLocator.Get<ArgumentParser>()
+                .AddProvider(providerAndModel)
+                .AddModel(providerAndModel)
                 .AddContext(context)
                 .AddInstructionsOrTemperature(instructionsOrTemperature)
                 .AddTemperature(temperature)

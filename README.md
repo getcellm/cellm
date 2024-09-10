@@ -4,7 +4,7 @@ Cellm is an Excel extension that lets you use Large Language Models (LLMs) like 
 ## What is Cellm?
 Similar to Excel's `=SUM()` function that outputs the sum of a range of numbers, Cellm's `=PROMPT()` function outputs the AI response to a range of text. 
 
-For example, you can write `=PROMPT(A1:A10, "Extract all person names mentioned in the text.")` in a cell's formula to extract keywords from the range of cells. You can then drag the cell to apply the prompt to many other rows like `A2:B2` and `A3:B3`. This is useful when you want to use AI for repetitive tasks that would normally require copy-pasting data in and out of a chat window many times.
+For example, you can write `=PROMPT(A1:A10, "Extract all person names mentioned in the text.")` in a cell's formula and drag the cell to apply the prompt to many other rows. Cellm is useful when you want to use AI for repetitive tasks that would normally require copy-pasting data in and out of a chat window many times.
 
 ## Key features
 This extension does one thing and one thing well.
@@ -68,10 +68,10 @@ Cellm is useful for repetitive tasks on structured data. Here are some practical
 
 3. **Test LLM apps**
 
-   Implement `Cellm/ModelProviders/IClient.cs` for your own app and quickly test performance on large datasets. Manually score responses or use an LLM to evaluate performance. For example, imagine you have a test set of user queries in column A. You can use column B to send queries to your app and column C to get an automated score.
+   Implement `Cellm/Models/IClient.cs` for your own app and quickly test performance on large datasets. Manually score responses or use an LLM to evaluate performance. For example, imagine you have a test set of user queries in column A. You can use column B to send queries to your app and column C to get an automated score.
    ```excel
-   =PROMPT(A1) [Column B]
-   =PROMPTWITH("openai/gpt-4o-mini", A1:B1, "Score the relevance of the answer in column B to the query in column A on a scale from 1 to 5 where 5 is most relevant.") [Column C]
+   =PROMPTMODEL("CLIENTNAME", "MODELNAME", A1) [Column B]
+   =PROMPT("Score the relevance of the answer in column B to the query in column A on a scale from 1 to 5 where 5 is most relevant.") [Column C]
    ```
 
 4. **Language Translation**
