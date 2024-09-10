@@ -30,7 +30,7 @@ internal class GoogleClient : IClient
         _cache = cache;
     }
 
-    public async Task<Prompt> Send(Prompt prompt)
+    public async Task<Prompt> Send(Prompt prompt, string? provider, string? model)
     {
         var transaction = SentrySdk.StartTransaction(typeof(GoogleClient).Name, nameof(Send));
         SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
@@ -64,7 +64,7 @@ internal class GoogleClient : IClient
         var json = JsonSerializer.Serialize(requestBody, options);
         var jsonAsString = new StringContent(json, Encoding.UTF8, "application/json");
 
-        var response = await _httpClient.PostAsync($"/v1beta/models/{_googleGeminiConfiguration.DefaultModel}:generateContent?key={_googleGeminiConfiguration.ApiKey}", jsonAsString);
+        var response = await _httpClient.PostAsync($"/v1beta/models/{model ?? _googleGeminiConfiguration.DefaultModel}:generateContent?key={_googleGeminiConfiguration.ApiKey}", jsonAsString);
         var responseBodyAsString = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)

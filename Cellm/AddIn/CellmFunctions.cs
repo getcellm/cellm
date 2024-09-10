@@ -37,7 +37,7 @@ public static class CellmFunctions
             // ExcelAsyncUtil yields Excel's main thread, Task.Run enables async/await in inner code
             return ExcelAsyncUtil.Run(nameof(Prompt), new object[] { context, instructionsOrTemperature, temperature }, () =>
             {
-                return Task.Run(async () => await PromptAsync(prompt)).GetAwaiter().GetResult();
+                return Task.Run(async () => await CallModelAsync(prompt)).GetAwaiter().GetResult();
             });
         }
         catch (CellmException ex)
@@ -47,12 +47,12 @@ public static class CellmFunctions
         }
     }
 
-    private static async Task<string> PromptAsync(Prompt prompt)
+    private static async Task<string> CallModelAsync(Prompt prompt, string? provider = null, string? model = null)
     {
         try
         {
             var client = ServiceLocator.Get<IClient>();
-            var response = await client.Send(prompt);
+            var response = await client.Send(prompt, provider, model);
             return response.Messages.Last().Content;
         }
         catch (CellmException)

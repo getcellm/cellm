@@ -5,7 +5,6 @@ using System.Text.Json.Serialization;
 using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.AddIn.Prompts;
-using Cellm.Models.OpenAi;
 using Microsoft.Extensions.Options;
 
 namespace Cellm.Models.Anthropic;
@@ -29,7 +28,7 @@ internal class AnthropicClient : IClient
         _cache = cache;
     }
 
-    public async Task<Prompt> Send(Prompt prompt)
+    public async Task<Prompt> Send(Prompt prompt, string? provider, string? model)
     {
         var transaction = SentrySdk.StartTransaction(typeof(AnthropicClient).Name, nameof(Send));
         SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
@@ -38,7 +37,7 @@ internal class AnthropicClient : IClient
         {
             System = prompt.SystemMessage,
             Messages = prompt.Messages.Select(x => new Message { Content = x.Content, Role = x.Role.ToString().ToLower() }).ToList(),
-            Model = _anthropicConfiguration.DefaultModel,
+            Model = model ?? _anthropicConfiguration.DefaultModel,
             MaxTokens = _cellmConfiguration.MaxTokens,
             Temperature = prompt.Temperature
         };

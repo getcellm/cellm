@@ -18,12 +18,12 @@ internal class Client : IClient
         _cellmConfiguration = cellmConfiguration.Value;
     }
 
-    public async Task<Prompt> Send(Prompt prompt)
+    public async Task<Prompt> Send(Prompt prompt, string? provider, string? model)
     {
         try
         {
-            var client = _clientFactory.GetClient(_cellmConfiguration.DefaultModelProvider);
-            return await client.Send(prompt);
+            var client = _clientFactory.GetClient(provider ?? _cellmConfiguration.DefaultModelProvider);
+            return await client.Send(prompt, provider, model);
         }
         catch (HttpRequestException ex)
         {

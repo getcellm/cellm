@@ -28,14 +28,14 @@ internal class OpenAiClient : IClient
         _cache = cache;
     }
 
-    public async Task<Prompt> Send(Prompt prompt)
+    public async Task<Prompt> Send(Prompt prompt, string? provider, string? model)
     {
         var transaction = SentrySdk.StartTransaction(typeof(OpenAiClient).Name, nameof(Send));
         SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
 
         var requestBody = new RequestBody
         {
-            Model = _openAiConfiguration.DefaultModel,
+            Model = model ?? _openAiConfiguration.DefaultModel,
             Messages = prompt.Messages.Select(x => new Message { Content = x.Content, Role = x.Role.ToString().ToLower() }).ToList(),
             MaxTokens = _cellmConfiguration.MaxTokens,
             Temperature = prompt.Temperature
