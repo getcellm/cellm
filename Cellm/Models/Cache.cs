@@ -5,7 +5,7 @@ using Cellm.AddIn;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 
-namespace Cellm.Services.ModelProviders;
+namespace Cellm.Models;
 
 internal class Cache : ICache
 {

@@ -2,38 +2,44 @@
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Cellm.AddIn.Prompts;
-using Cellm.AddIn.Exceptions;
-using Microsoft.Extensions.Options;
 using Cellm.AddIn;
+using Cellm.AddIn.Exceptions;
+using Cellm.AddIn.Prompts;
+using Cellm.Models;
+using Cellm.Telemetry;
+using Microsoft.Extensions.Options;
 
-namespace Cellm.Services.ModelProviders.OpenAi;
+namespace Cellm.Models.Anthropic;
 
-internal class OpenAiClient : IClient
+internal class AnthropicClient : IClient
 {
-    private readonly OpenAiConfiguration _openAiConfiguration;
+    private readonly AnthropicConfiguration _anthropicConfiguration;
     private readonly CellmConfiguration _cellmConfiguration;
     private readonly HttpClient _httpClient;
     private readonly ICache _cache;
+    private readonly ITelemetry _telemetry;
 
-    public OpenAiClient(
-        IOptions<OpenAiConfiguration> openAiConfiguration,
+    public AnthropicClient(
+        IOptions<AnthropicConfiguration> anthropicConfiguration,
         IOptions<CellmConfiguration> cellmConfiguration,
         HttpClient httpClient,
-        ICache cache)
+        ICache cache,
+        ITelemetry telemetry)
     {
-        _openAiConfiguration = openAiConfiguration.Value;
+        _anthropicConfiguration = anthropicConfiguration.Value;
         _cellmConfiguration = cellmConfiguration.Value;
         _httpClient = httpClient;
         _cache = cache;
+        _telemetry = telemetry;
     }
 
     public async Task<Prompt> Send(Prompt prompt)
     {
         var requestBody = new RequestBody
         {
-            Model = _openAiConfiguration.DefaultModel,
+            System = prompt.SystemMessage,
             Messages = prompt.Messages.Select(x => new Message { Content = x.Content, Role = x.Role.ToString().ToLower() }).ToList(),
+            Model = _anthropicConfiguration.DefaultModel,
             MaxTokens = _cellmConfiguration.MaxTokens,
             Temperature = prompt.Temperature
         };
@@ -52,7 +58,7 @@ internal class OpenAiClient : IClient
         var json = JsonSerializer.Serialize(requestBody, options);
         var jsonAsString = new StringContent(json, Encoding.UTF8, "application/json");
 
-        var response = await _httpClient.PostAsync("/v1/chat/completions", jsonAsString);
+        var response = await _httpClient.PostAsync("/v1/messages", jsonAsString);
         var responseBodyAsString = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)
@@ -61,7 +67,9 @@ internal class OpenAiClient : IClient
         }
 
         var responseBody = JsonSerializer.Deserialize<ResponseBody>(responseBodyAsString, options);
-        var assistantMessage = responseBody?.Choices?.FirstOrDefault()?.Message?.Content ?? throw new CellmException("#EMPTY_RESPONSE?");
+        var assistantMessage = responseBody?.Content?.Last()?.Text ?? throw new CellmException("#EMPTY_RESPONSE?");
+
+        _telemetry.AddUsage(responseBody?.Usage?.InputTokens, responseBody?.Usage?.OutputTokens);
 
         if (assistantMessage.StartsWith("#INSTRUCTION_ERROR?"))
         {
@@ -78,32 +86,39 @@ internal class OpenAiClient : IClient
         return assistantPrompt;
     }
 
-    private class RequestBody
+    private class ResponseBody
     {
+        public List<Content>? Content { get; set; }
+
+        public string? Id { get; set; }
+
         public string? Model { get; set; }
 
+        public string? Role { get; set; }
+
+        [JsonPropertyName("stop_reason")]
+        public string? StopReason { get; set; }
+
+        [JsonPropertyName("stop_sequence")]
+        public string? StopSequence { get; set; }
+
+        public string? Type { get; set; }
+
+        public Usage? Usage { get; set; }
+    }
+
+    private class RequestBody
+    {
         public List<Message>? Messages { get; set; }
+
+        public string? System { get; set; }
+
+        public string? Model { get; set; }
 
         [JsonPropertyName("max_tokens")]
         public int MaxTokens { get; set; }
 
         public double Temperature { get; set; }
-    }
-
-    private class ResponseBody
-    {
-        public string? Id { get; set; }
-
-        public string? Object { get; set; }
-        public long Created { get; set; }
-        public string? Model { get; set; }
-
-        [JsonPropertyName("system_fingerprint")]
-        public string? SystemFingerprint { get; set; }
-
-        public List<Choice>? Choices { get; set; }
-
-        public Usage? Usage { get; set; }
     }
 
     private class Message
@@ -113,25 +128,17 @@ internal class OpenAiClient : IClient
         public string? Content { get; set; }
     }
 
-    private class Choice
+    private class Content
     {
-        public int Index { get; set; }
+        public string? Text { get; set; }
 
-        public Message? Message { get; set; }
-
-        public object? Logprobs { get; set; }
-
-        [JsonPropertyName("finish_reason")]
-        public string? FinishReason { get; set; }
+        public string? Type { get; set; }
     }
 
     private class Usage
     {
-        [JsonPropertyName("prompt_tokens")]
-        public int PromptTokens { get; set; }
-        [JsonPropertyName("completion_tokens")]
-        public int CompletionTokens { get; set; }
-        [JsonPropertyName("total_tokens")]
-        public int TotalTokens { get; set; }
+        public int InputTokens { get; set; }
+
+        public int OutputTokens { get; set; }
     }
 }

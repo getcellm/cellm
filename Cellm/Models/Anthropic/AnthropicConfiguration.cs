@@ -1,4 +1,4 @@
-﻿namespace Cellm.Services.ModelProviders.Anthropic;
+﻿namespace Cellm.Models.Anthropic;
 
 internal class AnthropicConfiguration
 {

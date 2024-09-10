@@ -1,6 +1,6 @@
-﻿namespace Cellm.Services.Telemetry.Sentry;
+﻿namespace Cellm.Services.Configuration;
 
-internal class SentryTelemetryConfiguration
+internal class SentryConfiguration
 {
     public bool IsEnabled { get; init; }
 

@@ -1,4 +1,4 @@
-﻿namespace Cellm.Services.ModelProviders;
+﻿namespace Cellm.Models;
 
 internal interface IClientFactory
 {

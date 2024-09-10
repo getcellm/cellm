@@ -1,9 +1,9 @@
-﻿using Cellm.Services;
-using Cellm.Services.ModelProviders.Anthropic;
-using Cellm.Services.ModelProviders.Google;
-using Cellm.Services.ModelProviders.OpenAi;
+﻿using Cellm.Models.Anthropic;
+using Cellm.Models.Google;
+using Cellm.Models.OpenAi;
+using Cellm.Services;
 
-namespace Cellm.Services.ModelProviders;
+namespace Cellm.Models;
 
 internal class ClientFactory : IClientFactory
 {

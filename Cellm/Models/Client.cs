@@ -5,7 +5,7 @@ using Cellm.AddIn.Prompts;
 using Microsoft.Extensions.Options;
 using Polly.Timeout;
 
-namespace Cellm.Services.ModelProviders;
+namespace Cellm.Models;
 
 internal class Client : IClient
 {

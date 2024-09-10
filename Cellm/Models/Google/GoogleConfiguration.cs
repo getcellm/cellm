@@ -1,4 +1,4 @@
-﻿namespace Cellm.Services.ModelProviders.Google;
+﻿namespace Cellm.Models.Google;
 
 internal class GoogleConfiguration
 {

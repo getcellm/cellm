@@ -5,9 +5,10 @@ using System.Text.Json.Serialization;
 using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.AddIn.Prompts;
+using Cellm.Models;
 using Microsoft.Extensions.Options;
 
-namespace Cellm.Services.ModelProviders.Google;
+namespace Cellm.Models.Google;
 
 internal class GoogleClient : IClient
 {

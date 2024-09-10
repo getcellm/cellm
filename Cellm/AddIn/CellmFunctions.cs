@@ -1,10 +1,9 @@
 ﻿using System.Text;
 using Cellm.AddIn.Exceptions;
 using Cellm.AddIn.Prompts;
+using Cellm.Models;
 using Cellm.Services;
-using Cellm.Services.ModelProviders;
 using ExcelDna.Integration;
-using Microsoft.Extensions.Logging;
 
 namespace Cellm.AddIn;
 

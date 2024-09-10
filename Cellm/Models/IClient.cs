@@ -1,6 +1,6 @@
 ﻿using Cellm.AddIn.Prompts;
 
-namespace Cellm.Services.ModelProviders;
+namespace Cellm.Models;
 
 internal interface IClient
 {

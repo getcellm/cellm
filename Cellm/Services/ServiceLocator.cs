@@ -1,18 +1,16 @@
 ﻿using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.Services.Configuration;
-using Cellm.Services.ModelProviders;
-using Cellm.Services.ModelProviders.Anthropic;
-using Cellm.Services.ModelProviders.Google;
-using Cellm.Services.ModelProviders.OpenAi;
-using Cellm.Services.Telemetry.Sentry;
-using Cellm.Services.Telemetry;
 using ExcelDna.Integration;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sentry.Profiling;
+using Cellm.Models;
+using Cellm.Models.Anthropic;
+using Cellm.Models.Google;
+using Cellm.Models.OpenAi;
 
 namespace Cellm.Services;
 
@@ -47,11 +45,11 @@ internal static class ServiceLocator
             .Configure<RateLimiterConfiguration>(configuration.GetRequiredSection(nameof(RateLimiterConfiguration)))
             .Configure<CircuitBreakerConfiguration>(configuration.GetRequiredSection(nameof(CircuitBreakerConfiguration)))
             .Configure<RetryConfiguration>(configuration.GetRequiredSection(nameof(RetryConfiguration)))
-            .Configure<SentryTelemetryConfiguration>(configuration.GetRequiredSection(nameof(SentryTelemetryConfiguration)));
+            .Configure<SentryConfiguration>(configuration.GetRequiredSection(nameof(SentryConfiguration)));
 
         // Logging
-        var sentryTelemetryConfiguration = configuration.GetRequiredSection(nameof(SentryTelemetryConfiguration)).Get<SentryTelemetryConfiguration>()
-            ?? throw new NullReferenceException(nameof(SentryTelemetryConfiguration));
+        var sentryConfiguration = configuration.GetRequiredSection(nameof(SentryConfiguration)).Get<SentryConfiguration>()
+            ?? throw new NullReferenceException(nameof(SentryConfiguration));
 
         services
           .AddLogging(loggingBuilder =>
@@ -61,13 +59,13 @@ internal static class ServiceLocator
                   .AddDebug()
                   .AddSentry(sentryLoggingOptions =>
                   {
-                      sentryLoggingOptions.InitializeSdk = sentryTelemetryConfiguration.IsEnabled;
-                      sentryLoggingOptions.Dsn = sentryTelemetryConfiguration.Dsn;
-                      sentryLoggingOptions.Debug = sentryTelemetryConfiguration.Debug;
+                      sentryLoggingOptions.InitializeSdk = sentryConfiguration.IsEnabled;
+                      sentryLoggingOptions.Dsn = sentryConfiguration.Dsn;
+                      sentryLoggingOptions.Debug = sentryConfiguration.Debug;
                       sentryLoggingOptions.DiagnosticLevel = SentryLevel.Debug;
-                      sentryLoggingOptions.TracesSampleRate = sentryTelemetryConfiguration.TracesSampleRate;
-                      sentryLoggingOptions.ProfilesSampleRate = sentryTelemetryConfiguration.ProfilesSampleRate;
-                      sentryLoggingOptions.Environment = sentryTelemetryConfiguration.Environment;
+                      sentryLoggingOptions.TracesSampleRate = sentryConfiguration.TracesSampleRate;
+                      sentryLoggingOptions.ProfilesSampleRate = sentryConfiguration.ProfilesSampleRate;
+                      sentryLoggingOptions.Environment = sentryConfiguration.Environment;
                       sentryLoggingOptions.AutoSessionTracking = true;
                       sentryLoggingOptions.IsGlobalModeEnabled = true;
                       sentryLoggingOptions.AddIntegration(new ProfilingIntegration());
@@ -80,8 +78,7 @@ internal static class ServiceLocator
             .AddTransient<ArgumentParser>()
             .AddSingleton<IClientFactory, ClientFactory>()
             .AddSingleton<IClient, Client>()
-            .AddSingleton<ICache, Cache>()
-            .AddSingleton<ITelemetry, SentryTelemetry>();
+            .AddSingleton<ICache, Cache>();
 
         // Model Providers
         var rateLimiterConfiguration = configuration.GetRequiredSection(nameof(RateLimiterConfiguration)).Get<RateLimiterConfiguration>()
