@@ -3,8 +3,8 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Cellm.AddIn;
-using Cellm.AddIn.Prompts;
 using Cellm.AddIn.Exceptions;
+using Cellm.AddIn.Prompts;
 using Microsoft.Extensions.Options;
 
 namespace Cellm.Models.OpenAi;
@@ -98,7 +98,8 @@ internal class OpenAiClient : IClient
             SentrySdk.Metrics.Distribution("OutputTokens",
                 outputTokens,
                 unit: MeasurementUnit.Custom("token"),
-                tags: new Dictionary<string, string> { 
+                tags: new Dictionary<string, string>
+                {
                     { nameof(Client), typeof(OpenAiClient).Name },
                     { nameof(_openAiConfiguration.DefaultModel), _openAiConfiguration.DefaultModel },
                     { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }

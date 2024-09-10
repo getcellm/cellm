@@ -1,5 +1,9 @@
 ﻿using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
+using Cellm.Models;
+using Cellm.Models.Anthropic;
+using Cellm.Models.Google;
+using Cellm.Models.OpenAi;
 using Cellm.Services.Configuration;
 using ExcelDna.Integration;
 using Microsoft.Extensions.Caching.Memory;
@@ -7,10 +11,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sentry.Profiling;
-using Cellm.Models;
-using Cellm.Models.Anthropic;
-using Cellm.Models.Google;
-using Cellm.Models.OpenAi;
 
 namespace Cellm.Services;
 
@@ -71,7 +71,7 @@ internal static class ServiceLocator
                       sentryLoggingOptions.ExperimentalMetrics = new ExperimentalMetricsOptions { EnableCodeLocations = true };
                       sentryLoggingOptions.AddIntegration(new ProfilingIntegration());
                   });
-            });
+          });
 
         // Internals
         services
