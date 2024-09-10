@@ -4,13 +4,14 @@ using Cellm.AddIn.Prompts;
 using Cellm.Services;
 using Cellm.Services.ModelProviders;
 using ExcelDna.Integration;
+using Microsoft.Extensions.Logging;
 
 namespace Cellm.AddIn;
 
 public static class CellmFunctions
 {
     [ExcelFunction(Name = "PROMPT", Description = "Call a model with a prompt")]
-    public static object CallModel(
+    public static object Prompt(
     [ExcelArgument(AllowReference = true, Name = "Context", Description = "A cell or range of cells")] object context,
     [ExcelArgument(Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
     [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
@@ -35,18 +36,19 @@ public static class CellmFunctions
                 .Build();
 
             // ExcelAsyncUtil yields Excel's main thread, Task.Run enables async/await in inner code
-            return ExcelAsyncUtil.Run(nameof(CallModel), new object[] { context, instructionsOrTemperature, temperature }, () =>
+            return ExcelAsyncUtil.Run(nameof(Prompt), new object[] { context, instructionsOrTemperature, temperature }, () =>
             {
-                return Task.Run(async () => await CallModelAsync(prompt)).GetAwaiter().GetResult();
+                return Task.Run(async () => await PromptAsync(prompt)).GetAwaiter().GetResult();
             });
         }
         catch (CellmException ex)
         {
-            return ex.ToString();
+            SentrySdk.CaptureException(ex);
+            return ex.Message;
         }
     }
 
-    private static async Task<string> CallModelAsync(Prompt prompt)
+    private static async Task<string> PromptAsync(Prompt prompt)
     {
         try
         {

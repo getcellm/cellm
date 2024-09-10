@@ -12,6 +12,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Sentry.Profiling;
 
 namespace Cellm.Services;
 
@@ -29,11 +30,11 @@ internal static class ServiceLocator
     private static IServiceCollection ConfigureServices(IServiceCollection services)
     {
         // Configurations
-        var basePath = ExcelDnaUtil.XllPathInfo?.Directory?.FullName ??
+        var XllPath = ExcelDnaUtil.XllPathInfo?.Directory?.FullName ??
             throw new CellmException($"Unable to configure app, invalid value for ExcelDnaUtil.XllPathInfo='{ExcelDnaUtil.XllPathInfo}'");
 
         IConfiguration configuration = new ConfigurationBuilder()
-            .SetBasePath(basePath)
+            .SetBasePath(XllPath)
             .AddJsonFile("appsettings.json")
             .AddJsonFile("appsettings.Local.json", true)
             .Build();
@@ -46,26 +47,31 @@ internal static class ServiceLocator
             .Configure<RateLimiterConfiguration>(configuration.GetRequiredSection(nameof(RateLimiterConfiguration)))
             .Configure<CircuitBreakerConfiguration>(configuration.GetRequiredSection(nameof(CircuitBreakerConfiguration)))
             .Configure<RetryConfiguration>(configuration.GetRequiredSection(nameof(RetryConfiguration)))
-            .Configure<SentryClientConfiguration>(configuration.GetRequiredSection(nameof(SentryClientConfiguration)));
+            .Configure<SentryTelemetryConfiguration>(configuration.GetRequiredSection(nameof(SentryTelemetryConfiguration)));
 
         // Logging
-        var sentryTelemetryConfiguration = configuration.GetRequiredSection(nameof(SentryClientConfiguration)).Get<SentryClientConfiguration>()
-            ?? throw new NullReferenceException(nameof(SentryClientConfiguration));
+        var sentryTelemetryConfiguration = configuration.GetRequiredSection(nameof(SentryTelemetryConfiguration)).Get<SentryTelemetryConfiguration>()
+            ?? throw new NullReferenceException(nameof(SentryTelemetryConfiguration));
 
         services
           .AddLogging(loggingBuilder =>
-            {
-                loggingBuilder.AddConsole();
-                loggingBuilder.AddDebug();
-                loggingBuilder.AddSentry(sentryLoggingOptions =>
-                {
-                    sentryLoggingOptions.InitializeSdk = sentryTelemetryConfiguration.IsEnabled;
-                    sentryLoggingOptions.Dsn = sentryTelemetryConfiguration.Dsn;
-                    sentryLoggingOptions.Debug = sentryTelemetryConfiguration.Debug;
-                    sentryLoggingOptions.TracesSampleRate = sentryTelemetryConfiguration.TracesSampleRate;
-                    sentryLoggingOptions.ProfilesSampleRate = sentryTelemetryConfiguration.ProfilesSampleRate;
-                    sentryLoggingOptions.AutoSessionTracking = false;
-                });
+          {
+              loggingBuilder
+                  .AddConsole()
+                  .AddDebug()
+                  .AddSentry(sentryLoggingOptions =>
+                  {
+                      sentryLoggingOptions.InitializeSdk = sentryTelemetryConfiguration.IsEnabled;
+                      sentryLoggingOptions.Dsn = sentryTelemetryConfiguration.Dsn;
+                      sentryLoggingOptions.Debug = sentryTelemetryConfiguration.Debug;
+                      sentryLoggingOptions.DiagnosticLevel = SentryLevel.Debug;
+                      sentryLoggingOptions.TracesSampleRate = sentryTelemetryConfiguration.TracesSampleRate;
+                      sentryLoggingOptions.ProfilesSampleRate = sentryTelemetryConfiguration.ProfilesSampleRate;
+                      sentryLoggingOptions.Environment = sentryTelemetryConfiguration.Environment;
+                      sentryLoggingOptions.AutoSessionTracking = true;
+                      sentryLoggingOptions.IsGlobalModeEnabled = true;
+                      sentryLoggingOptions.AddIntegration(new ProfilingIntegration());
+                  });
             });
 
         // Internals
@@ -75,11 +81,11 @@ internal static class ServiceLocator
             .AddSingleton<IClientFactory, ClientFactory>()
             .AddSingleton<IClient, Client>()
             .AddSingleton<ICache, Cache>()
-            .AddSingleton<ITelemetry, Telemetry.Sentry.SentryClient>();
+            .AddSingleton<ITelemetry, SentryTelemetry>();
 
         // Model Providers
         var rateLimiterConfiguration = configuration.GetRequiredSection(nameof(RateLimiterConfiguration)).Get<RateLimiterConfiguration>()
-    ?? throw new NullReferenceException(nameof(RateLimiterConfiguration));
+            ?? throw new NullReferenceException(nameof(RateLimiterConfiguration));
 
         var circuitBreakerConfiguration = configuration.GetRequiredSection(nameof(CircuitBreakerConfiguration)).Get<CircuitBreakerConfiguration>()
             ?? throw new NullReferenceException(nameof(CircuitBreakerConfiguration));

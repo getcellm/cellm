@@ -58,30 +58,31 @@ Cellm is useful for repetitive tasks on structured data. Here are some practical
    ```excel
    =PROMPT(B2, "Analyze the survey response. Categorize as 'Product', 'Service', 'Pricing', or 'Other'.")
    ```
-   Use classificatin prompts to quickly categorize large volumes of open-ended survey responses or customer feedback.
+   Use classification prompts to quickly categorize large volumes of e.g. open-ended survey responses.
 
 2. **Sentiment Analysis**
    ```excel
-   =PROMPT(A1, "Categorize the customer email sentiment as 'Positive', 'Negative', or 'Neutral'.")
+   =PROMPT(A1, "Score the customer email sentiment on a scale from 1 to 5 where 5 is very positive.")
    ```
    Useful for analyzing customer feedback, social media comments, or product reviews at scale.
 
 3. **Test LLM apps**
+
    Implement `Cellm/ModelProviders/IClient.cs` for your own app and quickly test performance on large datasets. Manually score responses or use an LLM to evaluate performance. For example, imagine you have a test set of user queries in column A. You can use column B to send queries to your app and column C to get an automated score.
    ```excel
    =PROMPT(A1) [Column B]
-   =PROMPT(A1:B1, "Score the relevance of the answer in column B to the query in column A on a scale from 1 to 5 where 5 is most relevant.") [Column C]
+   =PROMPTWITH("openai/gpt-4o-mini", A1:B1, "Score the relevance of the answer in column B to the query in column A on a scale from 1 to 5 where 5 is most relevant.") [Column C]
    ```
 
 4. **Language Translation**
    ```excel
-   =PROMPT(D2, "Translate the text in the context from English to Spanish:")
+   =PROMPT(D2, "Translate the text in the context from English to Spanish.")
    ```
    Enables quick translation of product names, short descriptions, or customer communications.
 
 5. **Data Cleaning**
    ```excel
-   =PROMPT(E2, "Standardize the company name by removing any legal entity identifiers (e.g., Inc., LLC) and correcting common misspellings:")
+   =PROMPT(E2, "Standardize the company name by removing any legal entity identifiers (e.g., Inc., LLC) and correcting common misspellings.")
    ```
    Useful for cleaning and standardizing messy datasets, especially with company names or addresses.
 
@@ -169,8 +170,7 @@ Cellm must be built from source and installed via Excel. Follow the steps below.
 
 ### Requirements
 
-- Windows.
-- .NET 6.0 SDK.
+- Windows with .NET 6.0 SDK.
 - Excel desktop app.
 
 ## Dos and Don'ts

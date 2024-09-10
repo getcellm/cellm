@@ -3,34 +3,14 @@ using Microsoft.Extensions.Options;
 
 namespace Cellm.Services.Telemetry.Sentry;
 
-internal class SentryClient : ITelemetry
+internal class SentryTelemetry : ITelemetry
 {
-    private readonly SentryClientConfiguration _sentryTelemtryConfiguration;
+    private readonly SentryTelemetryConfiguration _sentryTelemtryConfiguration;
     private readonly List<Usage> _usage = new();
 
-    public SentryClient(IOptions<SentryClientConfiguration> sentryTelemtryConfiguration)
+    public SentryTelemetry(IOptions<SentryTelemetryConfiguration> sentryTelemtryConfiguration)
     {
         _sentryTelemtryConfiguration = sentryTelemtryConfiguration.Value;
-    }
-
-    public void Start()
-    {
-        if (!_sentryTelemtryConfiguration.IsEnabled)
-        {
-            return;
-        }
-
-        SentrySdk.StartSession();
-    }
-
-    public void Stop()
-    {
-        if (!_sentryTelemtryConfiguration.IsEnabled)
-        {
-            return;
-        }
-
-        SentrySdk.EndSession();
     }
 
     public void AddUsage(int? inputTokens, int? outputTokens)

@@ -1,6 +1,4 @@
-﻿using Cellm.Services;
-using Cellm.Services.Telemetry;
-using ExcelDna.Integration;
+﻿using ExcelDna.Integration;
 
 namespace Cellm.AddIn;
 
@@ -8,13 +6,16 @@ public class Cellm : IExcelAddIn
 {
     public void AutoOpen()
     {
-        ExcelIntegration.RegisterUnhandledExceptionHandler(ex => ex.ToString());
-
-        ServiceLocator.Get<ITelemetry>().Start();
+        ExcelIntegration.RegisterUnhandledExceptionHandler(obj =>
+        {
+            var ex = (Exception)obj;
+            SentrySdk.CaptureException(ex);
+            return ex.Message;
+        });
     }
 
     public void AutoClose()
     {
-        ServiceLocator.Get<ITelemetry>().Stop();
+        SentrySdk.Flush();
     }
 }

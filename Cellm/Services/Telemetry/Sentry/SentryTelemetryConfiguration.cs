@@ -1,6 +1,6 @@
 ﻿namespace Cellm.Services.Telemetry.Sentry;
 
-internal class SentryClientConfiguration
+internal class SentryTelemetryConfiguration
 {
     public bool IsEnabled { get; init; }
 
@@ -11,4 +11,6 @@ internal class SentryClientConfiguration
     public float TracesSampleRate { get; init; }
 
     public float ProfilesSampleRate { get; init; }
+
+    public string Environment { get; init; } = string.Empty;
 }

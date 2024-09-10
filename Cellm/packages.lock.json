@@ -147,6 +147,16 @@
           "Sentry": "4.10.2"
         }
       },
+      "Sentry.Profiling": {
+        "type": "Direct",
+        "requested": "[4.10.2, )",
+        "resolved": "4.10.2",
+        "contentHash": "OgFfG7nnF6iENkq9AqDPn5T1H1/aPbo4zj990YdSddfrE/A5PCpU8cDKZ/JT2oWokb6igtQgpJHjFxAeZM9NBQ==",
+        "dependencies": {
+          "Microsoft.Diagnostics.NETCore.Client": "0.2.510501",
+          "Sentry": "4.10.2"
+        }
+      },
       "ExcelDna.Integration": {
         "type": "Transitive",
         "resolved": "1.8.0",
@@ -163,6 +173,14 @@
         "contentHash": "C7kWHJnMRY7EvJev2S8+yJHZ1y7A4ZlLbA4NE+O23BDIAN5mHeqND1m+SKv1ChRS5YlCDW7yAMUe7lttRsJaAA==",
         "dependencies": {
           "Microsoft.Bcl.AsyncInterfaces": "8.0.0"
+        }
+      },
+      "Microsoft.Diagnostics.NETCore.Client": {
+        "type": "Transitive",
+        "resolved": "0.2.510501",
+        "contentHash": "juoqJYMDs+lRrrZyOkXXMImJHneCF23cuvO4waFRd2Ds7j+ZuGIPbJm0Y/zz34BdeaGiiwGWraMUlln05W1PCQ==",
+        "dependencies": {
+          "Microsoft.Extensions.Logging": "6.0.0"
         }
       },
       "Microsoft.Extensions.AmbientMetadata.Application": {
