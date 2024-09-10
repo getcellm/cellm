@@ -5,8 +5,7 @@ using System.Text.Json.Serialization;
 using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.AddIn.Prompts;
-using Cellm.Models;
-using Cellm.Telemetry;
+using Cellm.Models.OpenAi;
 using Microsoft.Extensions.Options;
 
 namespace Cellm.Models.Anthropic;
@@ -17,24 +16,24 @@ internal class AnthropicClient : IClient
     private readonly CellmConfiguration _cellmConfiguration;
     private readonly HttpClient _httpClient;
     private readonly ICache _cache;
-    private readonly ITelemetry _telemetry;
 
     public AnthropicClient(
         IOptions<AnthropicConfiguration> anthropicConfiguration,
         IOptions<CellmConfiguration> cellmConfiguration,
         HttpClient httpClient,
-        ICache cache,
-        ITelemetry telemetry)
+        ICache cache)
     {
         _anthropicConfiguration = anthropicConfiguration.Value;
         _cellmConfiguration = cellmConfiguration.Value;
         _httpClient = httpClient;
         _cache = cache;
-        _telemetry = telemetry;
     }
 
     public async Task<Prompt> Send(Prompt prompt)
     {
+        var transaction = SentrySdk.StartTransaction(typeof(AnthropicClient).Name, nameof(Send));
+        SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
+
         var requestBody = new RequestBody
         {
             System = prompt.SystemMessage,
@@ -69,8 +68,6 @@ internal class AnthropicClient : IClient
         var responseBody = JsonSerializer.Deserialize<ResponseBody>(responseBodyAsString, options);
         var assistantMessage = responseBody?.Content?.Last()?.Text ?? throw new CellmException("#EMPTY_RESPONSE?");
 
-        _telemetry.AddUsage(responseBody?.Usage?.InputTokens, responseBody?.Usage?.OutputTokens);
-
         if (assistantMessage.StartsWith("#INSTRUCTION_ERROR?"))
         {
             throw new CellmException(assistantMessage);
@@ -82,6 +79,36 @@ internal class AnthropicClient : IClient
         assistantPrompt = promptBuilder.Build();
 
         _cache.Set(requestBody, assistantPrompt);
+
+        var inputTokens = responseBody?.Usage?.InputTokens ?? -1;
+        if (inputTokens > 0)
+        {
+            SentrySdk.Metrics.Distribution("InputTokens",
+                inputTokens,
+                unit: MeasurementUnit.Custom("token"),
+                tags: new Dictionary<string, string> {
+                    { nameof(Client), typeof(AnthropicClient).Name },
+                    { nameof(_anthropicConfiguration.DefaultModel), _anthropicConfiguration.DefaultModel },
+                    { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
+                }
+            );
+        }
+
+        var outputTokens = responseBody?.Usage?.InputTokens ?? -1;
+        if (outputTokens > 0)
+        {
+            SentrySdk.Metrics.Distribution("OutputTokens",
+                outputTokens,
+                unit: MeasurementUnit.Custom("token"),
+                tags: new Dictionary<string, string> {
+                    { nameof(Client), typeof(AnthropicClient).Name },
+                    { nameof(_anthropicConfiguration.DefaultModel), _anthropicConfiguration.DefaultModel },
+                    { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
+                }
+            );
+        }
+
+        transaction.Finish();
 
         return assistantPrompt;
     }

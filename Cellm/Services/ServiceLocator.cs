@@ -68,6 +68,7 @@ internal static class ServiceLocator
                       sentryLoggingOptions.Environment = sentryConfiguration.Environment;
                       sentryLoggingOptions.AutoSessionTracking = true;
                       sentryLoggingOptions.IsGlobalModeEnabled = true;
+                      sentryLoggingOptions.ExperimentalMetrics = new ExperimentalMetricsOptions { EnableCodeLocations = true };
                       sentryLoggingOptions.AddIntegration(new ProfilingIntegration());
                   });
             });

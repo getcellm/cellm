@@ -20,8 +20,6 @@ internal class Client : IClient
 
     public async Task<Prompt> Send(Prompt prompt)
     {
-        var transaction = SentrySdk.StartTransaction(nameof(Client), nameof(Send));
-
         try
         {
             var client = _clientFactory.GetClient(_cellmConfiguration.DefaultModelProvider);
@@ -51,10 +49,6 @@ internal class Client : IClient
         {
             // Handle any other unexpected exceptions
             throw new CellmException($"An unexpected error occurred: {ex.Message}", ex);
-        }
-        finally
-        {
-            transaction.Finish();
         }
     }
 }

@@ -5,7 +5,8 @@ using System.Text.Json.Serialization;
 using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.AddIn.Prompts;
-using Cellm.Models;
+using Cellm.Models.Anthropic;
+using Cellm.Models.OpenAi;
 using Microsoft.Extensions.Options;
 
 namespace Cellm.Models.Google;
@@ -31,6 +32,9 @@ internal class GoogleClient : IClient
 
     public async Task<Prompt> Send(Prompt prompt)
     {
+        var transaction = SentrySdk.StartTransaction(typeof(GoogleClient).Name, nameof(Send));
+        SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
+
         var requestBody = new RequestBody
         {
             SystemInstruction = new Content
@@ -82,6 +86,36 @@ internal class GoogleClient : IClient
         assistantPrompt = promptBuilder.Build();
 
         _cache.Set(requestBody, assistantPrompt);
+
+        var inputTokens = responseBody?.UsageMetadata?.PromptTokenCount ?? -1;
+        if (inputTokens > 0)
+        {
+            SentrySdk.Metrics.Distribution("InputTokens",
+                inputTokens,
+                unit: MeasurementUnit.Custom("token"),
+                tags: new Dictionary<string, string> {
+                    { nameof(Client), typeof(OpenAiClient).Name },
+                    { nameof(_googleGeminiConfiguration.DefaultModel), _googleGeminiConfiguration.DefaultModel },
+                    { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
+                }
+            );
+        }
+
+        var outputTokens = responseBody?.UsageMetadata?.CandidatesTokenCount ?? -1;
+        if (outputTokens > 0)
+        {
+            SentrySdk.Metrics.Distribution("OutputTokens",
+                outputTokens,
+                unit: MeasurementUnit.Custom("token"),
+                tags: new Dictionary<string, string> {
+                    { nameof(Client), typeof(OpenAiClient).Name },
+                    { nameof(_googleGeminiConfiguration.DefaultModel), _googleGeminiConfiguration.DefaultModel },
+                    { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
+                }
+            );
+        }
+
+        transaction.Finish();
 
         return assistantPrompt;
     }
