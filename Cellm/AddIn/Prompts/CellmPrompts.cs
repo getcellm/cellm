@@ -6,8 +6,8 @@ internal static class CellmPrompts
 <input>
 The user has called you via the ""Prompt"" Excel function in a cell formula. 
 The argument to the formula is the range of cells the user selected, e.g. ""=Prompt(A1)"" or ""=Prompt(A1:D10)"".
-The cells are rendered as a table where each cell coordinate is prepended to its contents.
-The cells are your context that you should use when following the user's instructions.
+The cells are rendered as a table where each cell conist of its coordinate and value.
+The table is your context and you must use it when following the user's instructions.
 <input>
 
 <constraints>
