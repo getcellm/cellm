@@ -85,8 +85,8 @@ internal class OpenAiClient : IClient
                 inputTokens,
                 unit: MeasurementUnit.Custom("token"),
                 tags: new Dictionary<string, string> {
-                    { nameof(Client), typeof(OpenAiClient).Name },
-                    { nameof(_openAiConfiguration.DefaultModel), _openAiConfiguration.DefaultModel },
+                    { nameof(provider), provider?.ToLower() ?? _cellmConfiguration.DefaultModelProvider },
+                    { nameof(model), model?.ToLower() ?? _cellmConfiguration.DefaultModelProvider },
                     { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
                 }
             );
@@ -100,8 +100,8 @@ internal class OpenAiClient : IClient
                 unit: MeasurementUnit.Custom("token"),
                 tags: new Dictionary<string, string>
                 {
-                    { nameof(Client), typeof(OpenAiClient).Name },
-                    { nameof(_openAiConfiguration.DefaultModel), _openAiConfiguration.DefaultModel },
+                    { nameof(provider), provider?.ToLower() ?? _cellmConfiguration.DefaultModelProvider },
+                    { nameof(model), model?.ToLower() ?? _cellmConfiguration.DefaultModelProvider },
                     { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
                 }
             );

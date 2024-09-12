@@ -13,18 +13,18 @@ namespace Cellm.Models.Google;
 
 internal class GoogleClient : IClient
 {
-    private readonly GoogleConfiguration _googleGeminiConfiguration;
+    private readonly GoogleConfiguration _googleConfiguration;
     private readonly CellmConfiguration _cellmConfiguration;
     private readonly HttpClient _httpClient;
     private readonly ICache _cache;
 
     public GoogleClient(
-        IOptions<GoogleConfiguration> googleGeminiConfiguration,
+        IOptions<GoogleConfiguration> googleConfiguration,
         IOptions<CellmConfiguration> cellmConfiguration,
         HttpClient httpClient,
         ICache cache)
     {
-        _googleGeminiConfiguration = googleGeminiConfiguration.Value;
+        _googleConfiguration = googleConfiguration.Value;
         _cellmConfiguration = cellmConfiguration.Value;
         _httpClient = httpClient;
         _cache = cache;
@@ -64,7 +64,7 @@ internal class GoogleClient : IClient
         var json = JsonSerializer.Serialize(requestBody, options);
         var jsonAsString = new StringContent(json, Encoding.UTF8, "application/json");
 
-        var response = await _httpClient.PostAsync($"/v1beta/models/{model ?? _googleGeminiConfiguration.DefaultModel}:generateContent?key={_googleGeminiConfiguration.ApiKey}", jsonAsString);
+        var response = await _httpClient.PostAsync($"/v1beta/models/{model ?? _googleConfiguration.DefaultModel}:generateContent?key={_googleConfiguration.ApiKey}", jsonAsString);
         var responseBodyAsString = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)
@@ -94,8 +94,8 @@ internal class GoogleClient : IClient
                 inputTokens,
                 unit: MeasurementUnit.Custom("token"),
                 tags: new Dictionary<string, string> {
-                    { nameof(Client), typeof(OpenAiClient).Name },
-                    { nameof(_googleGeminiConfiguration.DefaultModel), _googleGeminiConfiguration.DefaultModel },
+                    { nameof(provider), provider?.ToLower() ?? _cellmConfiguration.DefaultModelProvider },
+                    { nameof(model), model?.ToLower() ?? _cellmConfiguration.DefaultModelProvider },
                     { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
                 }
             );
@@ -108,8 +108,8 @@ internal class GoogleClient : IClient
                 outputTokens,
                 unit: MeasurementUnit.Custom("token"),
                 tags: new Dictionary<string, string> {
-                    { nameof(Client), typeof(OpenAiClient).Name },
-                    { nameof(_googleGeminiConfiguration.DefaultModel), _googleGeminiConfiguration.DefaultModel },
+                    { nameof(provider), provider?.ToLower() ?? _cellmConfiguration.DefaultModelProvider },
+                    { nameof(model), model?.ToLower() ?? _cellmConfiguration.DefaultModelProvider },
                     { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
                 }
             );
