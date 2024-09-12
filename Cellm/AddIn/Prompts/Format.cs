@@ -31,9 +31,10 @@ public class Format
                     stringBuilder.Append(GetColumnName(reference.ColumnFirst + column) + GetRowName(reference.RowFirst + row));
                     stringBuilder.Append(' ');
                     stringBuilder.Append(value);
+                    stringBuilder.Append(' ');
                 }
 
-                stringBuilder.AppendLine(" | ");
+                stringBuilder.AppendLine("|");
             }
 
             return stringBuilder.ToString();
