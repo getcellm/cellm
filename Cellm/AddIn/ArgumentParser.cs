@@ -58,7 +58,7 @@ public class ArgumentParser
                 if (providerAndModelAsExcelReference.RowFirst != providerAndModelAsExcelReference.RowLast ||
                     providerAndModelAsExcelReference.ColumnFirst != providerAndModelAsExcelReference.ColumnLast)
                 {
-                    throw new ArgumentException("Model argument must be a single cell");
+                    throw new ArgumentException("Model argument argument must be a single cell");
                 }
 
                 var providerAndModelToString = providerAndModelAsExcelReference.GetValue()?.ToString() 
