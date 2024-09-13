@@ -66,7 +66,7 @@ Cellm must be built from source and installed via Excel. Follow the steps below.
    cd cellm
    ```
 
-3. Cellm uses Anthropic as the default model provider. You only need to add your API key. Rename `src/Cellm/appsettings.Anthropic.json` to `src/Cellm/appsettings.Local.json` and insert your API key. Example:
+3. Add your Anthropic API key. Rename `src/Cellm/appsettings.Anthropic.json` to `src/Cellm/appsettings.Local.json` and insert it. Example:
     ```json
     {
       "AnthropicConfiguration": {
@@ -75,7 +75,7 @@ Cellm must be built from source and installed via Excel. Follow the steps below.
     }
     ```
 
-   You can also use OpenAI or Google as model provider. See the `appsettings.Local.*.json*` files for examples.
+   Cellm uses Anthropic as the default model provider. You can also use models from OpenAI, Google, or run models locally. See the `appsettings.Local.*.json*` files for examples.
 
 4. Install dependencies:
    ```cmd
@@ -215,7 +215,7 @@ To get started, use Ollama with the Gemma 2 2B model with 4-bit quantization. Th
 
 1. Rename `appsettings.Ollama.json` to `appsettings.Local.json`, 
 2. Build and install Cellm.
-3. Run the following command in the root of the repository   
+3. Run the following command in the docker directory:   
    ```cmd
    docker compose -f docker-compose.Ollama.yml up --detach
    docker compose -f docker-compose.Ollama.yml exec backend ollama pull gemma2:2b
