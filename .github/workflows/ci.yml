@@ -22,7 +22,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore --locked-mode
     - name: Add appsettings.Local.json
-      run: mv Cellm/appsettings.Local.Example.json Cellm/appsettings.Local.json
+      run: cp Cellm/appsettings.Local.Ollama.json Cellm/appsettings.Local.json
     - name: Build
       run: dotnet build --no-restore
     - name: Test
