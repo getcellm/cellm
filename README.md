@@ -1,6 +1,12 @@
 # Cellm
 Cellm is an Excel extension that lets you use Large Language Models (LLMs) like ChatGPT in cell formulas.
 
+- [Getting Started](#getting-started)
+- [Usage](#usage)
+- [Use Cases](#use-cases)
+- [Run LLMs Locally](#run-llms-locally)
+- [Dos and Don'ts](#dos-and-donts)
+
 ## What is Cellm?
 Similar to Excel's `=SUM()` function that outputs the sum of a range of numbers, Cellm's `=PROMPT()` function outputs the AI response to a range of text. 
 
@@ -30,6 +36,63 @@ My girlfriend was writing a systematic review paper. She had to compare 7.500 pa
 
 She still did her analysis manually, of couse, because she cares about scientific integrity.
 
+## Getting Started
+
+Cellm must be built from source and installed via Excel. Follow the steps below.
+
+### Requirements
+
+#### Cellm
+
+- Windows
+- [.NET 6.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
+- [Excel 2010 or higher (desktop app)](https://www.microsoft.com/en-us/microsoft-365/excel)
+
+#### Local LLMs
+
+- [Docker](https://www.docker.com/products/docker-desktop/)
+- A GPU (optional)
+- [NVIDIA CUDA Toolkit 12.4](https://developer.nvidia.com/cuda-downloads) or higher (optional)
+
+### Build
+
+1. Clone this repository:
+   ```cmd
+   git clone https://github.com/getcellm/cellm.git
+   ```
+
+2. In your terminal, go into the root of the project directory:
+   ```cmd
+   cd cellm
+   ```
+
+3. Cellm uses Anthropic as the default model provider. You only need to add your API key. Rename `src/Cellm/appsettings.Anthropic.json` to `src/Cellm/appsettings.Local.json` and insert your API key. Example:
+    ```json
+    {
+      "AnthropicConfiguration": {
+        "ApiKey": "YOUR_ANTHROPIC_APIKEY"
+      }
+    }
+    ```
+
+   You can also use OpenAI or Google as model provider. See the `appsettings.Local.*.json*` files for examples.
+
+4. Install dependencies:
+   ```cmd
+   dotnet restore
+   ```
+
+5. Build the project:
+   ```cmd
+   dotnet build --configuration Release
+   ```
+
+### Install
+
+1. In Excel, go to File > Options > Add-Ins.
+2. In the `Manage` drop-down menu, select `Excel Add-ins` and click `Go...`.
+3. Click `Browse...` and select the `Cellm-AddIn64.xll` file in the bin/Release/net6.0-windows folder.
+4. Check the box next to Cellm and click `OK`.
 
 ## Usage
 Cellm provides the following functions:
@@ -73,7 +136,7 @@ Example usage:
 - `=PROMPTWITH("openai/gpt-4o-mini", A1:D10, "Extract keywords")` will extract keywords using OpenAI's GPT-4o mini model instead of the default model from app settings.
 
 ## Use Cases
-Cellm is useful for repetitive tasks on structured data. Here are some practical applications:
+Cellm is useful for repetitive tasks on both structured and unstructured data. Here are some practical applications:
 
 1. **Text Classification**
     ```excel
@@ -90,13 +153,13 @@ Cellm is useful for repetitive tasks on structured data. Here are some practical
 3. **Test LLM apps**
     Implement `Cellm/Models/IClient.cs` for your own app and quickly evaluate your own LLM app on large datasets. Manually score responses or use an LLM to evaluate performance. For example, imagine you have a test set of user queries in column A. You can use column B to send queries to your app and column C to get an automated score.
     ```excel
-    =PROMPTWITH("CLIENTNAME/MODELNAME", A1) [Column B]
+    =PROMPTWITH("OpenAI/gpt-4o", A1) [Column B]
     =PROMPT("Score the relevance of the answer in column B to the query in column A on a scale from 1 to 5 where 5 is most relevant.") [Column C]
     ```
 
 4. **Model Comparison**
     Make a sheet with user queries in column A and different models in row 1. Write this prompt in the cell B2:
-    ```
+    ```excell
     =PROMPTWITH(B$1,$A2,"Answer the question in column A")
     ```
     Drag the cell across the entire table to apply all models to all queries.
@@ -111,7 +174,7 @@ Cellm is useful for repetitive tasks on structured data. Here are some practical
     ```excel
     =PROMPT(E2, "Standardize the company name by removing any legal entity identifiers (e.g., Inc., LLC) and correcting common misspellings.")
     ```
-    Useful for cleaning and standardizing messy datasets, especially with company names or addresses.
+    Useful for cleaning and standardizing messy datasets.
 
 7. **Content Summarization**
     ```excel
@@ -145,68 +208,10 @@ Cellm is useful for repetitive tasks on structured data. Here are some practical
 
 These use cases are starting points. Experiment with different instructions to find what works best for your data. It works best when combined with human judgment and expertise in your specific domain.
 
-## Getting Started
+## Run LLMs Locally
+Cellm can use models running on your computer with its OpenAI client and Ollama or vLLM inference servers. This ensures none of your data ever leaves your machine. And its free.
 
-Cellm must be built from source and installed via Excel. Follow the steps below.
-
-### Requirements
-
-#### Cellm
-
-- Windows
-- [.NET 6.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0).
-- Excel 2010 or higher (desktop app).
-
-#### Local LLMs
-
-- Docker
-- A GPU (optional)
-- [NVIDIA CUDA Toolkit 12.4](https://developer.nvidia.com/cuda-downloads) or higher (optional)
-
-### Build
-
-1. Clone this repository:
-   ```cmd
-   git clone https://github.com/kaspermarstal/cellm.git
-   ```
-
-2. In your terminal, go into the root of the project directory:
-   ```cmd
-   cd cellm
-   ```
-
-3. Cellm uses Anthropic as the default model provider. You only need to add your API key. Rename `Cellm/appsettings.Anthropic.json` to `Cellm/appsettings.Local.json` and insert your API key. Example:
-   ```json
-   {
-     "AnthropicConfiguration": {
-         "ApiKey": "YOUR_OPENAI_APIKEY"
-     }
-   ```
-
-   You can also use OpenAI or Google as model provider. See the `appsettings.Local.*.json*` files for examples.
-
-4. Install dependencies:
-   ```cmd
-   dotnet restore
-   ```
-
-5. Build the project:
-   ```cmd
-   dotnet build --configuration Release
-   ```
-
-### Install
-
-1. In Excel, go to File > Options > Add-Ins.
-2. In the `Manage` drop-down menu, select `Excel Add-ins` and click `Go...`.
-3. Click `Browse...` and select the `Cellm-AddIn64.xll` file in the bin/Release/net6.0-windows folder.
-4. Check the box next to Cellm and click `OK`.
-
-### Run Local LLMs
-
-Cellm can use models running on your computer with the OpenAI provider and Ollama or vLLM inference servers. This ensures none of your data ever leaves your machine. And its free.
-
-To get started, use Ollama with the Gemma 2 2B model with 4-bit quantization. This runs fine without a GPU.
+To get started, use Ollama with the Gemma 2 2B model with 4-bit quantization. This clever little model runs fine on a CPU.
 
 1. Rename `appsettings.Ollama.json` to `appsettings.Local.json`, 
 2. Build and install Cellm.
@@ -225,7 +230,7 @@ If you want to speed up inference, you can use your GPU as well:
 docker compose -f docker-compose.Ollama.yml -f docker-compose.Ollama.GPU.yml up --detach
 ```
 
-A GPU is practically required if you want to use larger models than Gemma 2 2b. If you want to further speed up when running many requests in parallel, you can use vLLM instead of Ollama:
+A GPU is practically required if you want to use larger models than Gemma 2 2b. And if you want to further speed up when running many requests in parallel, you can use vLLM instead of Ollama:
 
 ```cmd
 docker compose -f docker-compose.vLLM.GPU.yml up --detach
@@ -240,7 +245,6 @@ Do:
 - Use local models for sensitive data. Always consider the privacy implications of the data you're sending cloud-based LLM providers.
 - Refer to the cell data as "context" in your instructions.
 - Verify responses, especially for critical decisions or analyses. These models will make errors and rely entirely on your input, which may also contain errors.
-- Be aware that you WILL spend API credits at incredible pace.
 
 Don't:
 
