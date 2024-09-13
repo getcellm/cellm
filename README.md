@@ -21,7 +21,7 @@ This extension does one thing and one thing well.
 ## Example
 Say you're reviewing medical studies and need to quickly identify papers relevant to your research. Here's how Cellm can help with this task:
 
-https://github.com/user-attachments/assets/94671655-09c5-42fa-9197-d8dffc439c27
+https://github.com/user-attachments/assets/c93f7da9-aabd-4c13-a4f5-3e12332c5794
 
 In this example, we copy the papers' title and abstract into Excel and write this prompt: 
 
