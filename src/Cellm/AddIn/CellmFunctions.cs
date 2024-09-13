@@ -34,10 +34,10 @@ public static class CellmFunctions
         var cellmConfiguration = ServiceLocator.Get<IOptions<CellmConfiguration>>().Value;
 
         return PromptWith(
-            $"{cellmConfiguration.DefaultModelProvider}/{cellmConfiguration.DefaultModel}",
-            context, 
-            instructionsOrTemperature, 
-            temperature);
+                   $"{cellmConfiguration.DefaultModelProvider}/{cellmConfiguration.DefaultModel}",
+                   context,
+                   instructionsOrTemperature,
+                   temperature);
     }
 
     /// <summary>

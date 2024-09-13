@@ -61,8 +61,7 @@ public class ArgumentParser
                     throw new ArgumentException("Model argument argument must be a single cell");
                 }
 
-                var providerAndModelToString = providerAndModelAsExcelReference.GetValue()?.ToString() 
-                    ?? throw new ArgumentException("Model argument must be a valid cell reference");
+                var providerAndModelToString = providerAndModelAsExcelReference.GetValue()?.ToString() ?? throw new ArgumentException("Model argument must be a valid cell reference");
                 _model = GetModel(providerAndModelToString);
                 break;
             default:
