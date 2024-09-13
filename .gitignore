@@ -364,3 +364,5 @@ FodyWeavers.xsd
 
 # Cellm
 appsettings.Local.json
+docker/ollama-cache
+docker/vllm-cache

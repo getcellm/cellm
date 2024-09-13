@@ -1,0 +1,47 @@
+name: vLLM
+
+services:
+  frontend:
+    image: ghcr.io/open-webui/open-webui:main
+    environment: 
+      - OPENAI_API_BASE_URLS=http://vllm:8000/v1  
+      - OPENAI_API_KEY=secret
+      - WEBUI_AUTH=False
+      - ENABLE_OLLAMA_API=False
+    ports:
+      - 3000:8080
+    volumes:
+      - ./vllm-cache/frontend:/app/backend/data
+    depends_on:
+      - backend
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://0.0.0.0:8080" ]
+      interval: 30s
+      timeout: 5s
+      retries: 20
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    restart: unless-stopped
+
+  backend:
+    image: vllm/vllm-openai:latest
+    environment:
+      - HF_TOKEN=${HF_TOKEN}
+    ports:
+      - 8000:8000
+    volumes:
+      - ./vllm-cache/backend:/root/.cache
+    command: --model unsloth/gemma-2-2b-it --max-model-len 4096 --enable-prefix-caching --disable-sliding-window --max-log-len 1000 --trust-remote-code
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://0.0.0.0:8000/health" ]
+      interval: 30s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            count: 1
+            capabilities: [gpu]

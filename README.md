@@ -26,7 +26,7 @@ We then use AutoFill to apply the prompt to many papers. Simple and powerful.
 A single paper is misclassified because the original inclusion and exclusion criteria were summarized in one sentence. This is a good example, however, because it shows that these models rely entirely on your input and can make mistakes.
 
 ## Why?
-My girlfriend was writing a systematic review paper. She had to compare 7.500 papers against inclusion and exclusion criterias. I told her this was a great use case for LLMs but I quickly realized that individually copying 7.500 papers in and out of chat windows was a total pain. This sparked the idea to make an AI tool to automate repetitive tasks for people like her who would rather avoid programming. I think Cellm is really cool because it enables everyone to automate repetitive tasks with AI to a level that was previously available only to programmers. 
+My girlfriend was writing a systematic review paper. She had to compare 7.500 papers against inclusion and exclusion criterias. I told her this was a great use case for LLMs but quickly realized that individually copying 7.500 papers in and out of chat windows was a total pain. This sparked the idea to make an AI tool to automate repetitive tasks for people like her who would rather avoid programming. I think Cellm is really cool because it enables everyone to automate repetitive tasks with AI to a level that was previously available only to programmers. 
 
 She still did her analysis manually, of couse, because she cares about scientific integrity.
 
@@ -164,11 +164,8 @@ Cellm must be built from source and installed via Excel. Follow the steps below.
 #### Local LLMs
 
 - Docker
-
-We recommend you use Ollama with the Gemma 2 2b model by default. This runs fine on a CPU. If you want to use larger models you will also need:
-
-- A GPU
-- NVIDIA container runtime
+- A GPU (optional)
+- [NVIDIA CUDA Toolkit 12.4](https://developer.nvidia.com/cuda-downloads) or higher (optional)
 
 ### Build
 
@@ -221,12 +218,22 @@ To get started, use Ollama with the Gemma 2 2B model with 4-bit quantization. Th
    ```cmd
    docker compose -f docker-compose.Ollama.yml up --detach
    docker compose -f docker-compose.Ollama.yml exec backend ollama pull gemma2:2b
-   docker compose -f docker-compose.Ollama.yml stop  // When you want to shut it down
+   docker compose -f docker-compose.Ollama.yml down  // When you want to shut it down
    ```
 
-This runs fine on a CPU. Open WebUI in included in the docker compose file so you test the local model outside of Cellm. It is available at `http://localhost:3000`.
+Open WebUI in included in the docker compose file so you test the local model outside of Cellm. It is available at `http://localhost:3000`.
 
-If you want to further speed up inference, you can use your GPU and/or use vLLM. A GPU is practically required if you want to use larger models than Gemma 2 2b.
+If you want to speed up inference, you can use your GPU as well:
+
+```cmd
+docker compose -f docker-compose.Ollama.yml -f docker-compose.Ollama.GPU.yml up --detach
+```
+
+A GPU is practically required if you want to use larger models than Gemma 2 2b. If you want to further speed up when running many requests in parallel, you can use vLLM instead of Ollama:
+
+```cmd
+docker compose -f docker-compose.vLLM.GPU.yml up --detach
+```
 
 ## Dos and Don'ts
 
