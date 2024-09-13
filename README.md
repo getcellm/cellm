@@ -76,76 +76,72 @@ Example usage:
 Cellm is useful for repetitive tasks on structured data. Here are some practical applications:
 
 1. **Text Classification**
-   ```excel
-   =PROMPT(B2, "Analyze the survey response. Categorize as 'Product', 'Service', 'Pricing', or 'Other'.")
-   ```
-   Use classification prompts to quickly categorize large volumes of e.g. open-ended survey responses.
+    ```excel
+    =PROMPT(B2, "Analyze the survey response. Categorize as 'Product', 'Service', 'Pricing', or 'Other'.")
+    ```
+    Use classification prompts to quickly categorize large volumes of e.g. open-ended survey responses.
 
-2. **Sentiment Analysis**
-   ```excel
-   =PROMPT(A1, "Score the customer email sentiment on a scale from 1 to 5 where 5 is very positive.")
-   ```
-   Useful for analyzing customer feedback, social media comments, or product reviews at scale.
+2.  **Sentiment Analysis**
+    ```excel
+    =PROMPT(A1, "Score the customer email sentiment on a scale from 1 to 5 where 5 is very positive.")
+    ```
+    Useful for analyzing customer feedback, social media comments, or product reviews at scale.
 
 3. **Test LLM apps**
-
-   Implement `Cellm/Models/IClient.cs` for your own app and quickly evaluate your own LLM app on large datasets. Manually score responses or use an LLM to evaluate performance. For example, imagine you have a test set of user queries in column A. You can use column B to send queries to your app and column C to get an automated score.
-   ```excel
-   =PROMPTWITH("CLIENTNAME/MODELNAME", A1) [Column B]
-   =PROMPT("Score the relevance of the answer in column B to the query in column A on a scale from 1 to 5 where 5 is most relevant.") [Column C]
-   ```
+    Implement `Cellm/Models/IClient.cs` for your own app and quickly evaluate your own LLM app on large datasets. Manually score responses or use an LLM to evaluate performance. For example, imagine you have a test set of user queries in column A. You can use column B to send queries to your app and column C to get an automated score.
+    ```excel
+    =PROMPTWITH("CLIENTNAME/MODELNAME", A1) [Column B]
+    =PROMPT("Score the relevance of the answer in column B to the query in column A on a scale from 1 to 5 where 5 is most relevant.") [Column C]
+    ```
 
 4. **Model Comparison**
-   
-   Make a sheet with user queries in column A and different models in row 1. Write this prompt in the cell B2:
-   
-   ```
-   =PROMPTWITH(B$1,$A2,"Answer the question in column A")
-   ```
-
-   Drag the cell across the entire table to apply all models to all queries.
+    Make a sheet with user queries in column A and different models in row 1. Write this prompt in the cell B2:
+    ```
+    =PROMPTWITH(B$1,$A2,"Answer the question in column A")
+    ```
+    Drag the cell across the entire table to apply all models to all queries.
 
 5. **Language Translation**
-   ```excel
-   =PROMPT(D2, "Translate the text in the context from English to Spanish.")
-   ```
-   Enables quick translation of product names, short descriptions, or customer communications.
+    ```excel
+    =PROMPT(D2, "Translate the text in the context from English to Spanish.")
+    ```
+    Enables quick translation of product names, short descriptions, or customer communications.
 
 6. **Data Cleaning**
-   ```excel
-   =PROMPT(E2, "Standardize the company name by removing any legal entity identifiers (e.g., Inc., LLC) and correcting common misspellings.")
-   ```
-   Useful for cleaning and standardizing messy datasets, especially with company names or addresses.
+    ```excel
+    =PROMPT(E2, "Standardize the company name by removing any legal entity identifiers (e.g., Inc., LLC) and correcting common misspellings.")
+    ```
+    Useful for cleaning and standardizing messy datasets, especially with company names or addresses.
 
 7. **Content Summarization**
-   ```excel
-   =PROMPT(F2, "Provide a 2-sentence summary of the article in the context.")
-   ```
-   Great for quickly digesting large amounts of text data, such as news articles or research papers.
+    ```excel
+    =PROMPT(F2, "Provide a 2-sentence summary of the article in the context.")
+    ```
+    Great for quickly digesting large amounts of text data, such as news articles or research papers.
 
 8. **RAG Evaluation**
-   ```excel
-   =PROMPT(A1:F1, "Score the relevancy of the retrieved documents to the user's question on a scale from 1 to 5 where 5 is most relevant.")
-   ```
-   Helpful for fine-tuning prompts and evaluating Retrieval-Augmented Generation (RAG) systems.
+    ```excel
+    =PROMPT(A1:F1, "Score the relevancy of the retrieved documents to the user's question on a scale from 1 to 5 where 5 is most relevant.")
+    ```
+    Helpful for fine-tuning prompts and evaluating Retrieval-Augmented Generation (RAG) systems.
 
 9. **Entity Extraction**
-   ```excel
-   =PROMPT(G2, "Extract all person names mentioned in the text.")
-   ```
-   Useful for analyzing unstructured text data in fields like journalism, research, or customer relationship management.
+    ```excel
+    =PROMPT(G2, "Extract all person names mentioned in the text.")
+    ```
+    Useful for analyzing unstructured text data in fields like journalism, research, or customer relationship management.
 
 10. **Keyword Extraction**
-   ```excel
-   =PROMPT(C2, "Extract the top 3 keywords from the product description.")
-   ```
-   Helpful for SEO optimization, content tagging, or quickly summarizing lengthy texts.
+    ```excel
+    =PROMPT(C2, "Extract the top 3 keywords from the product description.")
+    ```
+    Helpful for SEO optimization, content tagging, or quickly summarizing lengthy texts.
 
 11. **Fix mistakes**
-   ```
-   =PROMPT(A1, "Fix email formatting")
-   ```
-   Useful when an "auditor" inserts random spaces in a column with thousands of email adresses. Use a local model if you are worried about sending sensitive data to hosted models.
+    ```
+    =PROMPT(A1, "Fix email formatting")
+    ```
+    Useful when an "auditor" inserts random spaces in a column with thousands of email adresses. Use a local model if you are worried about sending sensitive data to hosted models.
 
 These use cases are starting points. Experiment with different instructions to find what works best for your data. It works best when combined with human judgment and expertise in your specific domain.
 
