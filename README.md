@@ -4,7 +4,7 @@ Cellm is an Excel extension that lets you use Large Language Models (LLMs) like 
 ## What is Cellm?
 Similar to Excel's `=SUM()` function that outputs the sum of a range of numbers, Cellm's `=PROMPT()` function outputs the AI response to a range of text. 
 
-For example, you can write `=PROMPT(A1:A10, "Extract all person names mentioned in the text.")` in a cell's formula and drag the cell to apply the prompt to many other rows. Cellm is useful when you want to use AI for repetitive tasks that would normally require copy-pasting data in and out of a chat window many times.
+For example, you can write `=PROMPT(A1:A10, "Extract all person names mentioned in the text.")` in a cell's formula and drag the cell to apply the prompt to many rows. Cellm is useful when you want to use AI for repetitive tasks that would normally require copy-pasting data in and out of a chat window many times.
 
 ## Key features
 This extension does one thing and one thing well.
@@ -13,11 +13,15 @@ This extension does one thing and one thing well.
 - Supports models from Anthropic, OpenAI, and Google as well as other providers that mirrors one of these APIs, e.g. local Ollama, llama.cpp or vLLM servers.
 
 ## Example
-Imagine you want to compare many scientific papers against inclusion and exclusion criteria for a systematic review. Here's how you could use Cellm for this task:
+Say you're reviewing medical studies and need to quickly identify papers relevant to your research. Here's how Cellm can help with this task:
 
 https://github.com/user-attachments/assets/94671655-09c5-42fa-9197-d8dffc439c27
 
-In this example, we copy the papers' title and abstract into Excel and write the prompt once. We then use AutoFill to apply the prompt to many papers. Simple and powerful.
+In this example, we copy the papers' title and abstract into Excel and write this prompt: 
+
+> "If the paper studies diabetic neuropathy and stroke, return "Include", otherwise, return "Exclude"."  
+
+We then use AutoFill to apply the prompt to many papers. Simple and powerful.
 
 A single paper is misclassified because the original inclusion and exclusion criteria were summarized in one sentence. This is a good example, however, because it shows that these models rely entirely on your input and can make mistakes.
 
@@ -56,17 +60,17 @@ Example usage:
 ### PROMPTWITH
 
 ```excel
-PROMPTWITH(modelAndProvider: string or cell, cells: range, [instruction: range | instruction: string | temperature: double], [temperature: double]): string
+PROMPTWITH(providerAndModel: string or cell, cells: range, [instruction: range | instruction: string | temperature: double], [temperature: double]): string
 ```
 
 Allows you to specify the model as the first argument.
 
-- **modelAndProvider (Required)**: A string on the form "provider/model".
+- **providerAndModel (Required)**: A string on the form "provider/model".
   - Default: anthropic/claude-3-5-sonnet-20240620
 
 Example usage:
 
-- `=PROMPTWITH("openai/gpt-4o-mini", A1:D10, "Extract keywords")` will do the same as above but use OpenAI's GPT-4o mini model instead of the default model from app settings.
+- `=PROMPTWITH("openai/gpt-4o-mini", A1:D10, "Extract keywords")` will extract keywords using OpenAI's GPT-4o mini model instead of the default model from app settings.
 
 ## Use Cases
 Cellm is useful for repetitive tasks on structured data. Here are some practical applications:
@@ -141,13 +145,30 @@ Cellm is useful for repetitive tasks on structured data. Here are some practical
    ```
    =PROMPT(A1, "Fix email formatting")
    ```
-   Useful when an "auditor" inserts random spaces in a column with thousands of emails. Use a local model if you are worried about sending sensitive data to hosted models.
+   Useful when an "auditor" inserts random spaces in a column with thousands of email adresses. Use a local model if you are worried about sending sensitive data to hosted models.
 
 These use cases are starting points. Experiment with different instructions to find what works best for your data. It works best when combined with human judgment and expertise in your specific domain.
 
 ## Getting Started
 
 Cellm must be built from source and installed via Excel. Follow the steps below.
+
+### Requirements
+
+#### Cellm
+
+- Windows
+- [.NET 6.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0).
+- Excel 2010 or higher (desktop app).
+
+#### Local LLMs
+
+- Docker
+
+We recommend you use Ollama with the Gemma 2 2b model by default. This runs fine on a CPU. If you want to use larger models you will also need:
+
+- A GPU
+- NVIDIA container runtime
 
 ### Build
 
@@ -190,29 +211,22 @@ Cellm must be built from source and installed via Excel. Follow the steps below.
 
 ### Run Local LLMs
 
-Cellm can use local models with the OpenAI provider and Ollama or vLLM inference servers.
+Cellm can use models running on your computer with the OpenAI provider and Ollama or vLLM inference servers. This ensures none of your data ever leaves your machine. And its free.
+
+To get started, use Ollama with the Gemma 2 2B model with 4-bit quantization. This runs fine without a GPU.
 
 1. Rename `appsettings.Ollama.json` to `appsettings.Local.json`, 
 2. Build and install Cellm.
 3. Run the following command in the root of the repository   
    ```cmd
-   docker compose -f docker.compose.Ollama.yml
+   docker compose -f docker-compose.Ollama.yml up --detach
+   docker compose -f docker-compose.Ollama.yml exec backend ollama pull gemma2:2b
+   docker compose -f docker-compose.Ollama.yml stop  // When you want to shut it down
    ```
 
-Open WebUI in included in the docker compose file so you test the local model outside of Cellm. It is available at `http://localhost:3000`.
+This runs fine on a CPU. Open WebUI in included in the docker compose file so you test the local model outside of Cellm. It is available at `http://localhost:3000`.
 
-### Requirements
-
-Cellm
-
-- Windows
-- [.NET 6.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0).
-- Excel 2010 or higher (desktop app).
-
-Local LLMs
-
-- Docker
-- GPU and drivers
+If you want to further speed up inference, you can use your GPU and/or use vLLM. A GPU is practically required if you want to use larger models than Gemma 2 2b.
 
 ## Dos and Don'ts
 
