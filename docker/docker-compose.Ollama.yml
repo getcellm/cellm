@@ -1,0 +1,38 @@
+name: ollama
+
+services:
+  frontend:
+    image: ghcr.io/open-webui/open-webui:main
+    environment: 
+      - OLLAMA_BASE_URL=http://backend:11434
+      - WEBUI_AUTH=False
+    ports:
+      - 3000:8080
+    volumes:
+      - ./ollama-cache/frontend:/app/backend/data
+    depends_on:
+      - backend
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://0.0.0.0:8080" ]
+      interval: 30s
+      timeout: 5s
+      retries: 20
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    restart: unless-stopped
+
+  backend:
+    image: ollama/ollama:latest
+    ports:
+      - 11434:11434
+    environment:
+      - OLLAMA_MODELS=/root/.ollama
+    volumes:
+      - ./ollama-cache/backend:/root/.ollama
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://0.0.0.0:11434/v1/models" ]
+      interval: 30s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
