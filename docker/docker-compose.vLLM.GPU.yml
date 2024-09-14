@@ -4,7 +4,7 @@ services:
   frontend:
     image: ghcr.io/open-webui/open-webui:main
     environment: 
-      - OPENAI_API_BASE_URLS=http://vllm:8000/v1  
+      - OPENAI_API_BASE_URLS=http://backend:8000/v1  
       - OPENAI_API_KEY=secret
       - WEBUI_AUTH=False
       - ENABLE_OLLAMA_API=False
