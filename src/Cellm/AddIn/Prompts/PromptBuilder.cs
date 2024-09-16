@@ -8,6 +8,17 @@ public class PromptBuilder
     private readonly List<Message> _messages = new();
     private double? _temperature;
 
+    public PromptBuilder()
+    {
+    }
+
+    public PromptBuilder(Prompt prompt)
+    {
+        _systemMessage = prompt.SystemMessage;
+        _messages = prompt.Messages;
+        _temperature = prompt.Temperature;
+    }
+
     public PromptBuilder SetSystemMessage(string systemMessage)
     {
         _systemMessage = systemMessage;
@@ -17,15 +28,6 @@ public class PromptBuilder
     public PromptBuilder SetTemperature(double temperature)
     {
         _temperature = temperature;
-        return this;
-    }
-
-    public PromptBuilder SetPrompt(Prompt prompt)
-    {
-        _systemMessage = prompt.SystemMessage;
-        _messages.AddRange(prompt.Messages);
-        _temperature = prompt.Temperature;
-
         return this;
     }
 

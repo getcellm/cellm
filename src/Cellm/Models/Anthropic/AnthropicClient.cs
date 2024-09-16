@@ -72,10 +72,9 @@ internal class AnthropicClient : IClient
             throw new CellmException(assistantMessage);
         }
 
-        var promptBuilder = new PromptBuilder();
-        promptBuilder.SetPrompt(prompt);
-        promptBuilder.AddAssistantMessage(assistantMessage);
-        assistantPrompt = promptBuilder.Build();
+        assistantPrompt = new PromptBuilder(prompt)
+            .AddAssistantMessage(assistantMessage)
+            .Build();
 
         _cache.Set(requestBody, assistantPrompt);
 
