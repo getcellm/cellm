@@ -1,12 +1,8 @@
 ﻿using System.Text;
-using System.Text.Encodings.Web;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.AddIn.Prompts;
-using Cellm.Models.Anthropic;
-using Cellm.Models.OpenAi;
 using Microsoft.Extensions.Options;
 
 namespace Cellm.Models.Google;
@@ -17,17 +13,20 @@ internal class GoogleClient : IClient
     private readonly CellmConfiguration _cellmConfiguration;
     private readonly HttpClient _httpClient;
     private readonly ICache _cache;
+    private readonly ISerde _serde;
 
     public GoogleClient(
         IOptions<GoogleConfiguration> googleConfiguration,
         IOptions<CellmConfiguration> cellmConfiguration,
         HttpClient httpClient,
-        ICache cache)
+        ICache cache,
+        ISerde serde)
     {
         _googleConfiguration = googleConfiguration.Value;
         _cellmConfiguration = cellmConfiguration.Value;
         _httpClient = httpClient;
         _cache = cache;
+        _serde = serde;
     }
 
     public async Task<Prompt> Send(Prompt prompt, string? provider, string? model)
@@ -55,13 +54,7 @@ internal class GoogleClient : IClient
             return assistantPrompt;
         }
 
-        var options = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-        };
-
-        var json = JsonSerializer.Serialize(requestBody, options);
+        var json = _serde.Serialize(requestBody);
         var jsonAsString = new StringContent(json, Encoding.UTF8, "application/json");
 
         var response = await _httpClient.PostAsync($"/v1beta/models/{model ?? _googleConfiguration.DefaultModel}:generateContent?key={_googleConfiguration.ApiKey}", jsonAsString);
@@ -72,7 +65,7 @@ internal class GoogleClient : IClient
             throw new HttpRequestException(responseBodyAsString, null, response.StatusCode);
         }
 
-        var responseBody = JsonSerializer.Deserialize<ResponseBody>(responseBodyAsString, options);
+        var responseBody = _serde.Deserialize<ResponseBody>(responseBodyAsString);
         var assistantMessage = responseBody?.Candidates?.SingleOrDefault()?.Content?.Parts?.SingleOrDefault()?.Text ?? throw new CellmException("#EMPTY_RESPONSE?");
 
         if (assistantMessage.StartsWith("#INSTRUCTION_ERROR?"))

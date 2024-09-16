@@ -1,6 +1,4 @@
 ﻿using System.Text;
-using System.Text.Encodings.Web;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
@@ -15,17 +13,20 @@ internal class OpenAiClient : IClient
     private readonly CellmConfiguration _cellmConfiguration;
     private readonly HttpClient _httpClient;
     private readonly ICache _cache;
+    private readonly ISerde _serde;
 
     public OpenAiClient(
         IOptions<OpenAiConfiguration> openAiConfiguration,
         IOptions<CellmConfiguration> cellmConfiguration,
         HttpClient httpClient,
-        ICache cache)
+        ICache cache,
+        ISerde serde)
     {
         _openAiConfiguration = openAiConfiguration.Value;
         _cellmConfiguration = cellmConfiguration.Value;
         _httpClient = httpClient;
         _cache = cache;
+        _serde = serde;
     }
 
     public async Task<Prompt> Send(Prompt prompt, string? provider, string? model)
@@ -46,13 +47,7 @@ internal class OpenAiClient : IClient
             return assistantPrompt;
         }
 
-        var options = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-        };
-
-        var json = JsonSerializer.Serialize(requestBody, options);
+        var json = _serde.Serialize(requestBody);
         var jsonAsString = new StringContent(json, Encoding.UTF8, "application/json");
 
         var response = await _httpClient.PostAsync("/v1/chat/completions", jsonAsString);
@@ -63,7 +58,7 @@ internal class OpenAiClient : IClient
             throw new HttpRequestException(responseBodyAsString, null, response.StatusCode);
         }
 
-        var responseBody = JsonSerializer.Deserialize<ResponseBody>(responseBodyAsString, options);
+        var responseBody = _serde.Deserialize<ResponseBody>(responseBodyAsString);
         var assistantMessage = responseBody?.Choices?.FirstOrDefault()?.Message?.Content ?? throw new CellmException("#EMPTY_RESPONSE?");
 
         if (assistantMessage.StartsWith("#INSTRUCTION_ERROR?"))
@@ -162,8 +157,10 @@ internal class OpenAiClient : IClient
     {
         [JsonPropertyName("prompt_tokens")]
         public int PromptTokens { get; set; }
+
         [JsonPropertyName("completion_tokens")]
         public int CompletionTokens { get; set; }
+
         [JsonPropertyName("total_tokens")]
         public int TotalTokens { get; set; }
     }

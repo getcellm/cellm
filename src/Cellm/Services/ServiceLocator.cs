@@ -79,7 +79,8 @@ internal static class ServiceLocator
             .AddTransient<ArgumentParser>()
             .AddSingleton<IClientFactory, ClientFactory>()
             .AddSingleton<IClient, Client>()
-            .AddSingleton<ICache, Cache>();
+            .AddSingleton<ICache, Cache>()
+            .AddSingleton<ISerde, Serde>();
 
         // Model Providers
         var rateLimiterConfiguration = configuration.GetRequiredSection(nameof(RateLimiterConfiguration)).Get<RateLimiterConfiguration>()

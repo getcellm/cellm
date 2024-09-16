@@ -1,6 +1,4 @@
 ﻿using System.Text;
-using System.Text.Encodings.Web;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
@@ -15,17 +13,20 @@ internal class AnthropicClient : IClient
     private readonly CellmConfiguration _cellmConfiguration;
     private readonly HttpClient _httpClient;
     private readonly ICache _cache;
+    private readonly ISerde _serde;
 
     public AnthropicClient(
         IOptions<AnthropicConfiguration> anthropicConfiguration,
         IOptions<CellmConfiguration> cellmConfiguration,
         HttpClient httpClient,
-        ICache cache)
+        ICache cache,
+        ISerde serde)
     {
         _anthropicConfiguration = anthropicConfiguration.Value;
         _cellmConfiguration = cellmConfiguration.Value;
         _httpClient = httpClient;
         _cache = cache;
+        _serde = serde;
     }
 
     public async Task<Prompt> Send(Prompt prompt, string? provider, string? model)
@@ -47,13 +48,7 @@ internal class AnthropicClient : IClient
             return assistantPrompt;
         }
 
-        var options = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-        };
-
-        var json = JsonSerializer.Serialize(requestBody, options);
+        var json = _serde.Serialize(requestBody);
         var jsonAsString = new StringContent(json, Encoding.UTF8, "application/json");
 
         var response = await _httpClient.PostAsync("/v1/messages", jsonAsString);
@@ -64,7 +59,7 @@ internal class AnthropicClient : IClient
             throw new HttpRequestException(responseBodyAsString, null, response.StatusCode);
         }
 
-        var responseBody = JsonSerializer.Deserialize<ResponseBody>(responseBodyAsString, options);
+        var responseBody = _serde.Deserialize<ResponseBody>(responseBodyAsString);
         var assistantMessage = responseBody?.Content?.Last()?.Text ?? throw new CellmException("#EMPTY_RESPONSE?");
 
         if (assistantMessage.StartsWith("#INSTRUCTION_ERROR?"))
@@ -92,7 +87,7 @@ internal class AnthropicClient : IClient
             );
         }
 
-        var outputTokens = responseBody?.Usage?.InputTokens ?? -1;
+        var outputTokens = responseBody?.Usage?.OutputTokens ?? -1;
         if (outputTokens > 0)
         {
             SentrySdk.Metrics.Distribution("OutputTokens",
