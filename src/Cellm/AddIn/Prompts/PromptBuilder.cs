@@ -38,12 +38,12 @@ public class PromptBuilder
 
     public PromptBuilder AddSystemMessage()
     {
-        if (!string.IsNullOrEmpty(_systemMessage))
+        if (string.IsNullOrEmpty(_systemMessage))
         {
             throw new CellmException("Cannot add empty system message");
         }
 
-        _messages.Prepend(new Message(_systemMessage!, Role.System));
+        _messages.Add(new Message(_systemMessage!, Role.System));
         return this;
     }
 
