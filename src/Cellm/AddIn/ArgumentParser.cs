@@ -1,7 +1,9 @@
 ﻿using System.Text;
+using Cellm.AddIn.Exceptions;
 using Cellm.AddIn.Prompts;
 using ExcelDna.Integration;
 using Microsoft.Extensions.Options;
+using Microsoft.Office.Interop.Excel;
 
 namespace Cellm.AddIn;
 
@@ -75,7 +77,7 @@ public class ArgumentParser
     {
         if (context is ExcelReference contextAsExcelReference)
         {
-            _context = Format.Cells(contextAsExcelReference);
+            _context = FormatCells(contextAsExcelReference);
         }
         else
         {
@@ -98,7 +100,7 @@ public class ArgumentParser
                 _instructions = instructionsOrTemperatureAsString;
                 break;
             case ExcelReference instructionsOrTemperatureAsExcelReference:
-                _instructions = Format.Cells(instructionsOrTemperatureAsExcelReference);
+                _instructions = FormatCells(instructionsOrTemperatureAsExcelReference);
                 break;
             case double instructionsOrTemperatureAsDouble:
                 AddTemperature(instructionsOrTemperatureAsDouble);
@@ -187,5 +189,66 @@ public class ArgumentParser
         }
 
         return providerAndModel[(index + 1)..];
+    }
+
+    private static string FormatCells(ExcelReference reference)
+    {
+        try
+        {
+            var app = (Application)ExcelDnaUtil.Application;
+            var sheetName = (string)XlCall.Excel(XlCall.xlSheetNm, reference);
+            sheetName = sheetName[(sheetName.LastIndexOf("]") + 1)..];
+            var worksheet = app.Sheets[sheetName];
+
+            var tableBuilder = new StringBuilder();
+            var valueBuilder = new StringBuilder();
+
+            var rows = reference.RowLast - reference.RowFirst + 1;
+            var columns = reference.ColumnLast - reference.ColumnFirst + 1;
+
+            for (int row = 0; row < rows; row++)
+            {
+                for (int column = 0; column < columns; column++)
+                {
+                    var value = worksheet.Cells[reference.RowFirst + row + 1, reference.ColumnFirst + column + 1].Text;
+                    valueBuilder.Append(value);
+
+                    tableBuilder.Append("| ");
+                    tableBuilder.Append(GetColumnName(reference.ColumnFirst + column) + GetRowName(reference.RowFirst + row));
+                    tableBuilder.Append(' ');
+                    tableBuilder.Append(value);
+                    tableBuilder.Append(' ');
+                }
+
+                tableBuilder.AppendLine("|");
+            }
+
+            if (string.IsNullOrEmpty(valueBuilder.ToString()))
+            {
+                throw new ArgumentException("Context cannot not be empty");
+            }
+
+            return tableBuilder.ToString();
+        }
+        catch (Exception ex)
+        {
+            throw new CellmException("Failed to format context: ", ex);
+        }
+    }
+
+    private static string GetColumnName(int columnNumber)
+    {
+        string columnName = "";
+        while (columnNumber >= 0)
+        {
+            columnName = (char)('A' + columnNumber % 26) + columnName;
+            columnNumber = columnNumber / 26 - 1;
+        }
+        return columnName;
+    }
+
+    private static string GetRowName(int rowNumber)
+    {
+        return (rowNumber + 1).ToString();
     }
 }
