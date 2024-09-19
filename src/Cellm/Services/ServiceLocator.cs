@@ -3,6 +3,7 @@ using Cellm.AddIn.Exceptions;
 using Cellm.Models;
 using Cellm.Models.Anthropic;
 using Cellm.Models.Google;
+using Cellm.Models.Llamafile;
 using Cellm.Models.OpenAi;
 using Cellm.Services.Configuration;
 using ExcelDna.Integration;
@@ -42,6 +43,7 @@ internal static class ServiceLocator
             .Configure<AnthropicConfiguration>(configuration.GetRequiredSection(nameof(AnthropicConfiguration)))
             .Configure<GoogleConfiguration>(configuration.GetRequiredSection(nameof(GoogleConfiguration)))
             .Configure<OpenAiConfiguration>(configuration.GetRequiredSection(nameof(OpenAiConfiguration)))
+            .Configure<LlamafileConfiguration>(configuration.GetRequiredSection(nameof(LlamafileConfiguration)))
             .Configure<RateLimiterConfiguration>(configuration.GetRequiredSection(nameof(RateLimiterConfiguration)))
             .Configure<CircuitBreakerConfiguration>(configuration.GetRequiredSection(nameof(CircuitBreakerConfiguration)))
             .Configure<RetryConfiguration>(configuration.GetRequiredSection(nameof(RetryConfiguration)))
@@ -83,7 +85,8 @@ internal static class ServiceLocator
             .AddSingleton<IClientFactory, ClientFactory>()
             .AddSingleton<IClient, Client>()
             .AddSingleton<ICache, Cache>()
-            .AddSingleton<ISerde, Serde>();
+            .AddSingleton<ISerde, Serde>()
+            .AddSingleton<LLamafileProcessManager>();
 
         // Model Providers
         var rateLimiterConfiguration = configuration.GetRequiredSection(nameof(RateLimiterConfiguration)).Get<RateLimiterConfiguration>()
@@ -124,6 +127,8 @@ internal static class ServiceLocator
             openAiHttpClient.BaseAddress = openAiConfiguration.BaseAddress;
             openAiHttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {openAiConfiguration.ApiKey}");
         }).AddResilienceHandler("OpenAiResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
+
+        services.AddSingleton<LlamafileClient>();
 
         return services;
     }

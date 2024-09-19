@@ -1,5 +1,6 @@
 ﻿using Cellm.Models.Anthropic;
 using Cellm.Models.Google;
+using Cellm.Models.Llamafile;
 using Cellm.Models.OpenAi;
 using Cellm.Services;
 
@@ -15,6 +16,7 @@ internal class ClientFactory : IClientFactory
             "anthropic" => ServiceLocator.Get<AnthropicClient>(),
             "google" => ServiceLocator.Get<GoogleClient>(),
             "openai" => ServiceLocator.Get<OpenAiClient>(),
+            "llamafile" => ServiceLocator.Get<LlamafileClient>(),
             _ => throw new ArgumentException($"Unsupported client type: {modelProvider}")
         };
     }
