@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
+using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.AddIn.Prompts;
-using Cellm.AddIn;
 using Cellm.Models.OpenAi;
 using Microsoft.Extensions.Options;
 
@@ -21,11 +21,10 @@ internal class LlamafileClient : IClient
     private readonly HttpClient _httpClient;
     private readonly LLamafileProcessManager _llamafileProcessManager;
 
-    public LlamafileClient(
-        IOptions<CellmConfiguration> cellmConfiguration, 
+    public LlamafileClient(IOptions<CellmConfiguration> cellmConfiguration,
         IOptions<LlamafileConfiguration> llamafileConfiguration,
         IOptions<OpenAiConfiguration> openAiConfiguration,
-        IClientFactory clientFactory, 
+        IClientFactory clientFactory,
         HttpClient httpClient,
         LLamafileProcessManager llamafileProcessManager)
     {
@@ -95,7 +94,7 @@ internal class LlamafileClient : IClient
     {
         var filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), nameof(Cellm), filename);
         Directory.CreateDirectory(Path.GetDirectoryName(filePath) ?? throw new CellmException("Failed to create Llamafile path"));
-        
+
         if (File.Exists(filePath))
         {
             return filePath;
@@ -114,7 +113,7 @@ internal class LlamafileClient : IClient
         using (var fileStream = File.Create(filePathPart))
         using (var httpStream = await response.Content.ReadAsStreamAsync())
         {
-            
+
             await httpStream.CopyToAsync(fileStream).ConfigureAwait(false);
         }
 
