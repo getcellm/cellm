@@ -6,8 +6,6 @@ internal class SentryConfiguration
 
     public string Dsn { get; init; } = string.Empty;
 
-    public bool Debug { get; init; }
-
     public float TracesSampleRate { get; init; }
 
     public float ProfilesSampleRate { get; init; }

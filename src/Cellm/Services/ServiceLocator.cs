@@ -48,6 +48,9 @@ internal static class ServiceLocator
             .Configure<SentryConfiguration>(configuration.GetRequiredSection(nameof(SentryConfiguration)));
 
         // Logging
+        var cellmConfiguration = configuration.GetRequiredSection(nameof(CellmConfiguration)).Get<CellmConfiguration>()
+            ?? throw new NullReferenceException(nameof(CellmConfiguration));
+
         var sentryConfiguration = configuration.GetRequiredSection(nameof(SentryConfiguration)).Get<SentryConfiguration>()
             ?? throw new NullReferenceException(nameof(SentryConfiguration));
 
@@ -61,7 +64,7 @@ internal static class ServiceLocator
                   {
                       sentryLoggingOptions.InitializeSdk = sentryConfiguration.IsEnabled;
                       sentryLoggingOptions.Dsn = sentryConfiguration.Dsn;
-                      sentryLoggingOptions.Debug = sentryConfiguration.Debug;
+                      sentryLoggingOptions.Debug = cellmConfiguration.Debug;
                       sentryLoggingOptions.DiagnosticLevel = SentryLevel.Debug;
                       sentryLoggingOptions.TracesSampleRate = sentryConfiguration.TracesSampleRate;
                       sentryLoggingOptions.ProfilesSampleRate = sentryConfiguration.ProfilesSampleRate;

@@ -2,6 +2,8 @@
 
 public class CellmConfiguration
 {
+    public bool Debug { get; init; }
+
     public string DefaultModelProvider { get; init; } = string.Empty;
 
     public string DefaultModel { get; init; } = string.Empty;
