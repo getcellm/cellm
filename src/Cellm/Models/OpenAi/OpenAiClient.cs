@@ -34,10 +34,17 @@ internal class OpenAiClient : IClient
         var transaction = SentrySdk.StartTransaction(typeof(OpenAiClient).Name, nameof(Send));
         SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
 
+        var openAiPrompt = new PromptBuilder()
+            .SetSystemMessage(prompt.SystemMessage)
+            .AddSystemMessage()
+            .AddMessages(prompt.Messages)
+            .SetTemperature(prompt.Temperature)
+            .Build();
+
         var requestBody = new RequestBody
         {
             Model = model ?? _openAiConfiguration.DefaultModel,
-            Messages = prompt.Messages.Select(x => new Message { Content = x.Content, Role = x.Role.ToString().ToLower() }).ToList(),
+            Messages = openAiPrompt.Messages.Select(x => new Message { Content = x.Content, Role = x.Role.ToString().ToLower() }).ToList(),
             MaxTokens = _cellmConfiguration.MaxTokens,
             Temperature = prompt.Temperature
         };
