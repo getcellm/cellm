@@ -42,7 +42,7 @@ internal class LlamafileClient : IClient
 
         _llamafileModelPath = new AsyncLazy<string>(async () =>
         {
-            return await DownloadFile(_llamafileConfiguration.Models[_llamafileConfiguration.DefaultModel], $"Llamafile-{_llamafileConfiguration.DefaultModel}", httpClient);
+            return await DownloadFile(_llamafileConfiguration.Models[_llamafileConfiguration.DefaultModel], $"Llamafile-model-weights-{_llamafileConfiguration.DefaultModel}", httpClient);
         });
 
         _llamafileProcess = new AsyncLazy<Process>(async () =>
@@ -79,7 +79,8 @@ internal class LlamafileClient : IClient
 
         try
         {
-            await WaitForLlamafile(process);
+            Thread.Sleep(5000);
+            // await WaitForLlamafile(process);
             _llamafileProcessManager.AssignProcessToCellm(process);
             return process;
         }
@@ -127,7 +128,7 @@ internal class LlamafileClient : IClient
         var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(1));
         var startTime = DateTime.UtcNow;
 
-        // 30 seconds timeout
+        // Max 30 seconds timeout
         while ((DateTime.UtcNow - startTime).TotalSeconds < 30)
         {
             if (process.HasExited)
@@ -144,14 +145,14 @@ internal class LlamafileClient : IClient
                     return;
                 }
             }
-            catch (TaskCanceledException)
-            {
-            }
             catch (HttpRequestException)
             {
             }
+            catch (TaskCanceledException)
+            {
+            }
 
-            // Wait for before next attempt
+            // Wait before next attempt
             await Task.Delay(500);
         }
 
