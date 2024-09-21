@@ -42,7 +42,7 @@ internal class LlamafileClient : IClient
 
         _llamafileModelPath = new AsyncLazy<string>(async () =>
         {
-            return await DownloadFile(_llamafileConfiguration.Models[_llamafileConfiguration.DefaultModel], $"Llamafile-{_llamafileConfiguration.DefaultModel}", httpClient);
+            return await DownloadFile(_llamafileConfiguration.Models[_llamafileConfiguration.DefaultModel], $"Llamafile-model-weights-{_llamafileConfiguration.DefaultModel}", httpClient);
         });
 
         _llamafileProcess = new AsyncLazy<Process>(async () =>
@@ -79,7 +79,8 @@ internal class LlamafileClient : IClient
 
         try
         {
-            await WaitForLlamafile(process);
+            Thread.Sleep(5000);
+            // await WaitForLlamafile(process);
             _llamafileProcessManager.AssignProcessToCellm(process);
             return process;
         }
@@ -127,7 +128,8 @@ internal class LlamafileClient : IClient
         var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(1));
         var startTime = DateTime.UtcNow;
 
-        while ((DateTime.UtcNow - startTime).TotalSeconds < 30) // Max 30 seconds timeout
+        // Max 30 seconds timeout
+        while ((DateTime.UtcNow - startTime).TotalSeconds < 30)
         {
             if (process.HasExited)
             {
@@ -139,17 +141,19 @@ internal class LlamafileClient : IClient
                 var response = await _httpClient.GetAsync($"{_openAiConfiguration.BaseAddress}/health", cancellationTokenSource.Token);
                 if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 {
-                    return; // Server is healthy
+                    // Server is healthy
+                    return;
                 }
-            }
-            catch (TaskCanceledException)
-            {
             }
             catch (HttpRequestException)
             {
             }
+            catch (TaskCanceledException)
+            {
+            }
 
-            await Task.Delay(500); // Wait for 500ms before next attempt
+            // Wait for 500ms before next attempt
+            await Task.Delay(500);
         }
 
         throw new CellmException("Timeout waiting for Llamafile server to be ready");

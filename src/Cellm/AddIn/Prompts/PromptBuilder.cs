@@ -21,11 +21,6 @@ public class PromptBuilder
 
     public PromptBuilder SetSystemMessage(string systemMessage)
     {
-        if (_messages.Any(x => x.Role.Equals(Role.System)))
-        {
-            throw new CellmException("Cannot set system message when messages already has one");
-        }
-
         _systemMessage = systemMessage;
         return this;
     }
@@ -38,7 +33,7 @@ public class PromptBuilder
 
     public PromptBuilder AddSystemMessage()
     {
-        if (!string.IsNullOrEmpty(_systemMessage))
+        if (string.IsNullOrEmpty(_systemMessage))
         {
             throw new CellmException("Cannot add empty system message");
         }
