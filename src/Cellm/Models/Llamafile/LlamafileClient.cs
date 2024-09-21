@@ -138,10 +138,10 @@ internal class LlamafileClient : IClient
 
             try
             {
-                var response = await _httpClient.GetAsync($"{_openAiConfiguration.BaseAddress}/health", cancellationTokenSource.Token);
+                var response = await _httpClient.GetAsync(new Uri(_openAiConfiguration.BaseAddress, "health"), cancellationTokenSource.Token);
                 if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 {
-                    // Server is healthy
+                    // Server is ready
                     return;
                 }
             }
@@ -152,10 +152,11 @@ internal class LlamafileClient : IClient
             {
             }
 
-            // Wait for 500ms before next attempt
+            // Wait before next attempt
             await Task.Delay(500);
         }
 
+        process.Kill();
         throw new CellmException("Timeout waiting for Llamafile server to be ready");
     }
 }
