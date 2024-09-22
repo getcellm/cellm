@@ -4,8 +4,10 @@ Cellm is an Excel extension that lets you use Large Language Models (LLMs) like 
 - [Getting Started](#getting-started)
 - [Usage](#usage)
 - [Use Cases](#use-cases)
-- [Run LLMs Locally](#run-llms-locally)
+- [Run Models Locally](#run-models-locally)
 - [Dos and Don'ts](#dos-and-donts)
+- [Why did you make Cellm?](#why-did-you-make-cellm)
+- [License](#license)
 
 ## What is Cellm?
 Similar to Excel's `=SUM()` function that outputs the sum of a range of numbers, Cellm's `=PROMPT()` function outputs the AI response to a range of text. 
@@ -21,6 +23,8 @@ This extension does one thing and one thing well.
 ## Example
 Say you're reviewing medical studies and need to quickly identify papers relevant to your research. Here's how Cellm can help with this task:
 
+Here's how Cellm can help with this task:
+
 https://github.com/user-attachments/assets/c93f7da9-aabd-4c13-a4f5-3e12332c5794
 
 In this example, we copy the papers' title and abstract into Excel and write this prompt: 
@@ -30,11 +34,6 @@ In this example, we copy the papers' title and abstract into Excel and write thi
 We then use AutoFill to apply the prompt to many papers. Simple and powerful.
 
 A single paper is misclassified because the original inclusion and exclusion criteria were summarized in one sentence. This is a good example, however, because it shows that these models rely entirely on your input and can make mistakes.
-
-## Why?
-My girlfriend was writing a systematic review paper. She had to compare 7.500 papers against inclusion and exclusion criterias. I told her this was a great use case for LLMs but quickly realized that individually copying 7.500 papers in and out of chat windows was a total pain. This sparked the idea to make an AI tool to automate repetitive tasks for people like her who would rather avoid programming. I think Cellm is really cool because it enables everyone to automate repetitive tasks with AI to a level that was previously available only to programmers. 
-
-She still did her analysis manually, of couse, because she cares about scientific integrity.
 
 ## Getting Started
 
@@ -50,9 +49,10 @@ Cellm must be built from source and installed via Excel. Follow the steps below.
 
 #### Local LLMs
 
-- [Docker](https://www.docker.com/products/docker-desktop/)
-- A GPU (optional)
-- [NVIDIA CUDA Toolkit 12.4](https://developer.nvidia.com/cuda-downloads) or higher (optional)
+- [Docker](https://www.docker.com/products/docker-desktop/) (optional)
+- A GPU and [NVIDIA CUDA Toolkit 12.4](https://developer.nvidia.com/cuda-downloads) or higher (optional)
+
+You can run small models with Llamafile without docker or a GPU. For Ollama and vLLM docker compose files in this repository you will need docker, and for higher quality models you will need a GPU.
 
 ### Build
 
@@ -75,7 +75,7 @@ Cellm must be built from source and installed via Excel. Follow the steps below.
     }
     ```
 
-   Cellm uses Anthropic as the default model provider. You can also use models from OpenAI, Google, or run models locally. See the `appsettings.Local.*.json*` files for examples.
+   Cellm uses Anthropic as the default model provider. You can also use models from OpenAI, Google, or run models locally. See the `appsettings.Local.*.json` files for examples.
 
 4. Install dependencies:
    ```cmd
@@ -133,7 +133,7 @@ Allows you to specify the model as the first argument.
 
 Example usage:
 
-- `=PROMPTWITH("openai/gpt-4o-mini", A1:D10, "Extract keywords")` will extract keywords using OpenAI's GPT-4o mini model instead of the default model from app settings.
+- `=PROMPTWITH("openai/gpt-4o-mini", A1:D10, "Extract keywords")` will extract keywords using OpenAI's GPT-4o mini model instead of the default model.
 
 ## Use Cases
 Cellm is useful for repetitive tasks on both structured and unstructured data. Here are some practical applications:
@@ -144,63 +144,32 @@ Cellm is useful for repetitive tasks on both structured and unstructured data. H
     ```
     Use classification prompts to quickly categorize large volumes of e.g. open-ended survey responses.
 
-2.  **Sentiment Analysis**
-    ```excel
-    =PROMPT(A1, "Score the customer email sentiment on a scale from 1 to 5 where 5 is very positive.")
-    ```
-    Useful for analyzing customer feedback, social media comments, or product reviews at scale.
-
-3. **Test LLM apps**
-    Implement `Cellm/Models/IClient.cs` for your own app and quickly evaluate your own LLM app on large datasets. Manually score responses or use an LLM to evaluate performance. For example, imagine you have a test set of user queries in column A. You can use column B to send queries to your app and column C to get an automated score.
-    ```excel
-    =PROMPTWITH("OpenAI/gpt-4o", A1) [Column B]
-    =PROMPT("Score the relevance of the answer in column B to the query in column A on a scale from 1 to 5 where 5 is most relevant.") [Column C]
-    ```
-
-4. **Model Comparison**
+2. **Model Comparison**
     Make a sheet with user queries in column A and different models in row 1. Write this prompt in the cell B2:
     ```excell
     =PROMPTWITH(B$1,$A2,"Answer the question in column A")
     ```
     Drag the cell across the entire table to apply all models to all queries.
 
-5. **Language Translation**
-    ```excel
-    =PROMPT(D2, "Translate the text in the context from English to Spanish.")
-    ```
-    Enables quick translation of product names, short descriptions, or customer communications.
-
-6. **Data Cleaning**
+3. **Data Cleaning**
     ```excel
     =PROMPT(E2, "Standardize the company name by removing any legal entity identifiers (e.g., Inc., LLC) and correcting common misspellings.")
     ```
     Useful for cleaning and standardizing messy datasets.
 
-7. **Content Summarization**
+4. **Content Summarization**
     ```excel
     =PROMPT(F2, "Provide a 2-sentence summary of the article in the context.")
     ```
     Great for quickly digesting large amounts of text data, such as news articles or research papers.
 
-8. **RAG Evaluation**
-    ```excel
-    =PROMPT(A1:F1, "Score the relevancy of the retrieved documents to the user's question on a scale from 1 to 5 where 5 is most relevant.")
-    ```
-    Helpful for fine-tuning prompts and evaluating Retrieval-Augmented Generation (RAG) systems.
-
-9. **Entity Extraction**
+5. **Entity Extraction**
     ```excel
     =PROMPT(G2, "Extract all person names mentioned in the text.")
     ```
     Useful for analyzing unstructured text data in fields like journalism, research, or customer relationship management.
 
-10. **Keyword Extraction**
-    ```excel
-    =PROMPT(C2, "Extract the top 3 keywords from the product description.")
-    ```
-    Helpful for SEO optimization, content tagging, or quickly summarizing lengthy texts.
-
-11. **Fix mistakes**
+6. **When Built-in Excel Functions Are Insufficient**
     ```
     =PROMPT(A1, "Fix email formatting")
     ```
@@ -208,8 +177,28 @@ Cellm is useful for repetitive tasks on both structured and unstructured data. H
 
 These use cases are starting points. Experiment with different instructions to find what works best for your data. It works best when combined with human judgment and expertise in your specific domain.
 
-## Run LLMs Locally
-Cellm can use models running on your computer with its OpenAI client and Ollama or vLLM inference servers. This ensures none of your data ever leaves your machine. And its free.
+## Run Models Locally
+
+Cellm can run LLM models locally on your computer via Llamafiles, Ollama, or vLLM. This ensures none of your data ever leaves your machine. And its free.
+
+By default Cellm uses Gemma 2 2B model with 4-bit quantization. This clever little model runs fine on a CPU.
+
+### LLamafile
+
+Llamafile is a stand-alone executable that is very easy to setup. Cellm will automatically download a Llamafile and run it for you the first time you use a Llamafile model. 
+
+To get started:
+
+1. Rename `appsettings.Llamafile.json` to `appsettings.Local.json`.
+2. Build and install Cellm.
+3. Run e.g. `=PROMPT(A1, "Extract keywords")` in a formula.
+4. Wait 5-10 min depending on your internet connection. The model will reply once it is ready. 
+
+Use `appsettings.Llamafile.GPU.json` to offload inference to your NVIDIA or AMD GPU.
+
+### Ollama and vLLM
+
+Ollama and vLLM are LLM inference servers. Ollama is designed for easy of use and vLLM is designed to run models efficiently with high-throughput. Both Ollama and vLLM are packaged up as docker compose files that can run models locally on your computer.
 
 To get started, use Ollama with the Gemma 2 2B model with 4-bit quantization. This clever little model runs fine on a CPU.
 
@@ -222,7 +211,7 @@ To get started, use Ollama with the Gemma 2 2B model with 4-bit quantization. Th
    docker compose -f docker-compose.Ollama.yml down  // When you want to shut it down
    ```
 
-Open WebUI in included in the docker compose file so you test the local model outside of Cellm. It is available at `http://localhost:3000`.
+Open WebUI in included in both docker compose files so you test the local model outside of Cellm. It is available at `http://localhost:3000`.
 
 If you want to speed up inference, you can use your GPU as well:
 
@@ -230,7 +219,9 @@ If you want to speed up inference, you can use your GPU as well:
 docker compose -f docker-compose.Ollama.yml -f docker-compose.Ollama.GPU.yml up --detach
 ```
 
-A GPU is practically required if you want to use larger models than Gemma 2 2b. And if you want to further speed up when running many requests in parallel, you can use vLLM instead of Ollama:
+A GPU is practically required if you want to use larger models than Gemma 2 2b.
+
+Iff you want to further speed up running many requests in parallel, you can use vLLM instead of Ollama. You must supply the docker compose file with a Huggingface token API key either via an environment variable or editing the docker compose file directy. If you don't know what an API key is just use a Llamafile model or Ollama. To start vLLM:
 
 ```cmd
 docker compose -f docker-compose.vLLM.GPU.yml up --detach
@@ -252,6 +243,11 @@ Don't:
 - Don't use cloud model providers to process sensitive or confidential information unless you've carefully reviewed your data and privacy policies of the LLM provider.
 - Don't use extremely long prompts or give Cellm complex tasks. A normal chat UI lets you have a back and forth conversation which is better for exploring complex topics.
 - Don't use Cellm for tasks that require up-to-date information beyond the AI model's knowledge cutoff date _unless_ you provide the information as context.
+
+## Why did you make Cellm?
+My girlfriend was writing a systematic review paper. She had to compare 7.500 papers against inclusion and exclusion criterias. I told her this was a great use case for LLMs but quickly realized that individually copying 7.500 papers in and out of chat windows was a total pain. This sparked the idea to make an AI tool to automate repetitive tasks for people like her who would rather avoid programming. 
+
+I think Cellm is really cool because it enables everyone to automate repetitive tasks with AI to a level that was previously available only to programmers. She still did her analysis manually, of couse, because she cares about scientific integrity.
 
 ## License
 
