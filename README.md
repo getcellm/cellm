@@ -1,13 +1,12 @@
 # Cellm
 Cellm is an Excel extension that lets you use Large Language Models (LLMs) like ChatGPT in cell formulas.
 
+- [Example](#example)
 - [Getting Started](#getting-started)
 - [Usage](#usage)
 - [Use Cases](#use-cases)
 - [Run Models Locally](#run-models-locally)
-- [Dos and Don'ts](#dos-and-donts)
 - [Why did you make Cellm?](#why-did-you-make-cellm)
-- [License](#license)
 
 ## What is Cellm?
 Similar to Excel's `=SUM()` function that outputs the sum of a range of numbers, Cellm's `=PROMPT()` function outputs the AI response to a range of text. 
@@ -18,7 +17,7 @@ For example, you can write `=PROMPT(A1:A10, "Extract all person names mentioned 
 This extension does one thing and one thing well.
 
 - Calls LLMs in formulas and returns short answers suitable for cells.
-- Supports models from Anthropic, OpenAI, and Google as well as other providers that mirrors one of these APIs, e.g. local Ollama, llama.cpp or vLLM servers.
+- Supports models from Anthropic, Mistral, OpenAI, and Google as well as locally hosted models via Llamafiles, Ollama, or vLLM.
 
 ## Example
 Say you're reviewing medical studies and need to quickly identify papers relevant to your research. Here's how Cellm can help with this task:
@@ -52,7 +51,7 @@ Cellm must be built from source and installed via Excel. Follow the steps below.
 - [Docker](https://www.docker.com/products/docker-desktop/) (optional)
 - A GPU and [NVIDIA CUDA Toolkit 12.4](https://developer.nvidia.com/cuda-downloads) or higher (optional)
 
-You can run small models with Llamafile without docker or a GPU. For Ollama and vLLM docker compose files in this repository you will need docker, and for higher quality models you will need a GPU.
+To get started, you can run small models with Llamafile on your CPU. Cellm can automatically download and run these models for you. For Ollama and vLLM you will need docker, and for higher quality models you will need a GPU.
 
 ### Build
 
@@ -75,7 +74,7 @@ You can run small models with Llamafile without docker or a GPU. For Ollama and 
     }
     ```
 
-   Cellm uses Anthropic as the default model provider. You can also use models from OpenAI, Google, or run models locally. See the `appsettings.Local.*.json` files for examples.
+   Cellm uses Anthropic as the default model provider. You can also use models from OpenAI, Mistral, Google, or run models locally. See the `appsettings.Local.*.json` files for examples.
 
 4. Install dependencies:
    ```cmd
@@ -129,7 +128,7 @@ PROMPTWITH(providerAndModel: string or cell, cells: range, [instruction: range |
 Allows you to specify the model as the first argument.
 
 - **providerAndModel (Required)**: A string on the form "provider/model".
-  - Default: anthropic/claude-3-5-sonnet-20240620
+  - Example: anthropic/claude-3-5-sonnet-20240620
 
 Example usage:
 
@@ -145,7 +144,8 @@ Cellm is useful for repetitive tasks on both structured and unstructured data. H
     Use classification prompts to quickly categorize large volumes of e.g. open-ended survey responses.
 
 2. **Model Comparison**
-    Make a sheet with user queries in column A and different models in row 1. Write this prompt in the cell B2:
+    
+    Make a sheet with user queries in the first column and provider/model pairs in the first row. Write this prompt in the cell B2:
     ```excell
     =PROMPTWITH(B$1,$A2,"Answer the question in column A")
     ```
@@ -247,7 +247,7 @@ Don't:
 ## Why did you make Cellm?
 My girlfriend was writing a systematic review paper. She had to compare 7.500 papers against inclusion and exclusion criterias. I told her this was a great use case for LLMs but quickly realized that individually copying 7.500 papers in and out of chat windows was a total pain. This sparked the idea to make an AI tool to automate repetitive tasks for people like her who would rather avoid programming. 
 
-I think Cellm is really cool because it enables everyone to automate repetitive tasks with AI to a level that was previously available only to programmers. She still did her analysis manually, of couse, because she cares about scientific integrity.
+I think Cellm is really cool because it enables everyone to automate repetitive tasks with AI to a level that was previously available only to programmers. My girlfriend still did her analysis manually, of couse, because she cares about scientific integrity.
 
 ## License
 

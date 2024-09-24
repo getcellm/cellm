@@ -9,7 +9,7 @@ public sealed class AsyncLazy<T>
     /// <summary>
     /// The underlying lazy task.
     /// </summary>
-    private readonly Lazy<Task<T>> instance;
+    private readonly Lazy<Task<T>> _instance;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AsyncLazy<T>"/> class.
@@ -17,7 +17,7 @@ public sealed class AsyncLazy<T>
     /// <param name="factory">The delegate that is invoked on a background thread to produce the value when it is needed.</param>
     public AsyncLazy(Func<T> factory)
     {
-        instance = new Lazy<Task<T>>(() => Task.Run(factory));
+        _instance = new Lazy<Task<T>>(() => Task.Run(factory));
     }
 
     /// <summary>
@@ -26,7 +26,7 @@ public sealed class AsyncLazy<T>
     /// <param name="factory">The asynchronous delegate that is invoked on a background thread to produce the value when it is needed.</param>
     public AsyncLazy(Func<Task<T>> factory)
     {
-        instance = new Lazy<Task<T>>(() => Task.Run(factory));
+        _instance = new Lazy<Task<T>>(() => Task.Run(factory));
     }
 
     /// <summary>
@@ -34,7 +34,7 @@ public sealed class AsyncLazy<T>
     /// </summary>
     public TaskAwaiter<T> GetAwaiter()
     {
-        return instance.Value.GetAwaiter();
+        return _instance.Value.GetAwaiter();
     }
 
     /// <summary>
@@ -42,6 +42,6 @@ public sealed class AsyncLazy<T>
     /// </summary>
     public void Start()
     {
-        _ = instance.Value;
+        _ = _instance.Value;
     }
 }
