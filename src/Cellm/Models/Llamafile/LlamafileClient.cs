@@ -24,14 +24,14 @@ internal class LlamafileClient : IClient
     public LlamafileClient(IOptions<CellmConfiguration> cellmConfiguration,
         IOptions<LlamafileConfiguration> llamafileConfiguration,
         IOptions<OpenAiConfiguration> openAiConfiguration,
-        IClientFactory clientFactory,
+        IClient openAiClient,
         HttpClient httpClient,
         LLamafileProcessManager llamafileProcessManager)
     {
         _cellmConfiguration = cellmConfiguration.Value;
         _llamafileConfiguration = llamafileConfiguration.Value;
         _openAiConfiguration = openAiConfiguration.Value;
-        _openAiClient = clientFactory.GetClient("openai");
+        _openAiClient = openAiClient;
         _httpClient = httpClient;
         _llamafileProcessManager = llamafileProcessManager;
 
@@ -56,7 +56,7 @@ internal class LlamafileClient : IClient
         await _llamafilePath;
         await _llamafileModelPath;
         await _llamafileProcess;
-        return await _openAiClient.Send(prompt, provider, model);
+        return await _openAiClient.Send(prompt, provider ?? "Llamafile", model ?? _llamafileConfiguration.DefaultModel);
     }
 
     private async Task<Process> StartProcess()
@@ -75,12 +75,10 @@ internal class LlamafileClient : IClient
             processStartInfo.Arguments += $"-ngl {_llamafileConfiguration.GpuLayers} ";
         }
 
-        var process = Process.Start(processStartInfo) ?? throw new CellmException("Failed to start Llamafile server");
+        var process = Process.Start(processStartInfo) ?? throw new CellmException("Failed to run Llamafile");
 
         try
         {
-            Thread.Sleep(5000);
-            // await WaitForLlamafile(process);
             _llamafileProcessManager.AssignProcessToCellm(process);
             return process;
         }
@@ -94,7 +92,7 @@ internal class LlamafileClient : IClient
     private static async Task<string> DownloadFile(Uri uri, string filename, HttpClient httpClient)
     {
         var filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), nameof(Cellm), filename);
-        Directory.CreateDirectory(Path.GetDirectoryName(filePath) ?? throw new CellmException("Failed to create Llamafile path"));
+        Directory.CreateDirectory(Path.GetDirectoryName(filePath) ?? throw new CellmException("Failed to create Llamafile folder"));
 
         if (File.Exists(filePath))
         {
@@ -115,7 +113,7 @@ internal class LlamafileClient : IClient
         using (var httpStream = await response.Content.ReadAsStreamAsync())
         {
 
-            await httpStream.CopyToAsync(fileStream).ConfigureAwait(false);
+            await httpStream.CopyToAsync(fileStream);
         }
 
         File.Move(filePathPart, filePath);
@@ -157,7 +155,8 @@ internal class LlamafileClient : IClient
         }
 
         process.Kill();
-        throw new CellmException("Timeout waiting for Llamafile server to be ready");
+
+        throw new CellmException("Timeout waiting for Llamafile server to start");
     }
 }
 
