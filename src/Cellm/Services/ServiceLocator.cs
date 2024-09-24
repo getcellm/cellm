@@ -132,4 +132,12 @@ internal static class ServiceLocator
 
         return services;
     }
+
+    public static void Dispose()
+    {
+        if (_serviceProvider.IsValueCreated)
+        {
+            (_serviceProvider.Value as IDisposable)?.Dispose();
+        }
+    }
 }
