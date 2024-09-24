@@ -1,6 +1,6 @@
-﻿namespace Cellm.Models.Google;
+﻿namespace Cellm.Models.GoogleAi;
 
-internal class GoogleConfiguration
+internal class GoogleAiConfiguration
 {
     public Uri BaseAddress { get; init; }
 
@@ -8,7 +8,7 @@ internal class GoogleConfiguration
 
     public string ApiKey { get; init; }
 
-    public GoogleConfiguration()
+    public GoogleAiConfiguration()
     {
         BaseAddress = default!;
         DefaultModel = default!;
