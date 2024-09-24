@@ -1,4 +1,5 @@
-﻿using ExcelDna.Integration;
+﻿using Cellm.Services;
+using ExcelDna.Integration;
 
 namespace Cellm.AddIn;
 
@@ -16,6 +17,7 @@ public class Cellm : IExcelAddIn
 
     public void AutoClose()
     {
+        ServiceLocator.Dispose();
         SentrySdk.Flush();
     }
 }
