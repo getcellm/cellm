@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Threading.RateLimiting;
-using Microsoft.Extensions.Configuration;
 using Polly;
 using Polly.CircuitBreaker;
 using Polly.Retry;
@@ -27,6 +26,11 @@ public class ResiliencePipelineConfigurator
     public void ConfigureResiliencePipeline(ResiliencePipelineBuilder<HttpResponseMessage> builder)
     {
         _ = builder
+            .AddConcurrencyLimiter(new ConcurrencyLimiterOptions
+            {
+                PermitLimit = _rateLimiterConfiguration.ConcurrencyLimit,
+                QueueLimit = _rateLimiterConfiguration.QueueLimit
+            })
             .AddRateLimiter(new TokenBucketRateLimiter(new TokenBucketRateLimiterOptions
             {
                 TokenLimit = _rateLimiterConfiguration.TokenLimit,
