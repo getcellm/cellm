@@ -81,7 +81,7 @@ internal class AnthropicClient : IClient
                 unit: MeasurementUnit.Custom("token"),
                 tags: new Dictionary<string, string> {
                     { nameof(provider), provider?.ToLower() ?? _cellmConfiguration.DefaultModelProvider },
-                    { nameof(model), model?.ToLower() ?? _cellmConfiguration.DefaultModelProvider },
+                    { nameof(model), model?.ToLower() ?? _anthropicConfiguration.DefaultModel },
                     { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
                 }
             );
@@ -95,7 +95,7 @@ internal class AnthropicClient : IClient
                 unit: MeasurementUnit.Custom("token"),
                 tags: new Dictionary<string, string> {
                     { nameof(provider), provider?.ToLower() ?? _cellmConfiguration.DefaultModelProvider },
-                    { nameof(model), model?.ToLower() ?? _cellmConfiguration.DefaultModelProvider },
+                    { nameof(model), model?.ToLower() ?? _anthropicConfiguration.DefaultModel },
                     { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
                 }
             );

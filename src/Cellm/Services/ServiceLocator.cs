@@ -2,7 +2,7 @@
 using Cellm.AddIn.Exceptions;
 using Cellm.Models;
 using Cellm.Models.Anthropic;
-using Cellm.Models.Google;
+using Cellm.Models.GoogleAi;
 using Cellm.Models.Llamafile;
 using Cellm.Models.OpenAi;
 using Cellm.Services.Configuration;
@@ -41,7 +41,7 @@ internal static class ServiceLocator
         services
             .Configure<CellmConfiguration>(configuration.GetRequiredSection(nameof(CellmConfiguration)))
             .Configure<AnthropicConfiguration>(configuration.GetRequiredSection(nameof(AnthropicConfiguration)))
-            .Configure<GoogleConfiguration>(configuration.GetRequiredSection(nameof(GoogleConfiguration)))
+            .Configure<GoogleAiConfiguration>(configuration.GetRequiredSection(nameof(GoogleAiConfiguration)))
             .Configure<OpenAiConfiguration>(configuration.GetRequiredSection(nameof(OpenAiConfiguration)))
             .Configure<LlamafileConfiguration>(configuration.GetRequiredSection(nameof(LlamafileConfiguration)))
             .Configure<RateLimiterConfiguration>(configuration.GetRequiredSection(nameof(RateLimiterConfiguration)))
@@ -109,15 +109,15 @@ internal static class ServiceLocator
             anthropicHttpClient.BaseAddress = anthropicConfiguration.BaseAddress;
             anthropicHttpClient.DefaultRequestHeaders.Add("x-api-key", anthropicConfiguration.ApiKey);
             anthropicHttpClient.DefaultRequestHeaders.Add("anthropic-version", anthropicConfiguration.Version);
-        }).AddResilienceHandler("AnthropicResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
+        }).AddResilienceHandler($"{nameof(AnthropicClient)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
 
-        var googleConfiguration = configuration.GetRequiredSection(nameof(GoogleConfiguration)).Get<GoogleConfiguration>()
-            ?? throw new NullReferenceException(nameof(GoogleConfiguration));
+        var googleAiConfiguration = configuration.GetRequiredSection(nameof(GoogleAiConfiguration)).Get<GoogleAiConfiguration>()
+            ?? throw new NullReferenceException(nameof(GoogleAiConfiguration));
 
-        services.AddHttpClient<GoogleClient>(googleHttpClient =>
+        services.AddHttpClient<GoogleAiClient>(googleHttpClient =>
         {
-            googleHttpClient.BaseAddress = googleConfiguration.BaseAddress;
-        }).AddResilienceHandler("GoogleResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
+            googleHttpClient.BaseAddress = googleAiConfiguration.BaseAddress;
+        }).AddResilienceHandler($"{nameof(GoogleAiClient)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
 
         var openAiConfiguration = configuration.GetRequiredSection(nameof(OpenAiConfiguration)).Get<OpenAiConfiguration>()
             ?? throw new NullReferenceException(nameof(OpenAiConfiguration));
@@ -126,7 +126,7 @@ internal static class ServiceLocator
         {
             openAiHttpClient.BaseAddress = openAiConfiguration.BaseAddress;
             openAiHttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {openAiConfiguration.ApiKey}");
-        }).AddResilienceHandler("OpenAiResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
+        }).AddResilienceHandler($"{nameof(OpenAiClient)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
 
         services.AddSingleton<LlamafileClient>();
 

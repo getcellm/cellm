@@ -5,24 +5,24 @@ using Cellm.AddIn.Exceptions;
 using Cellm.AddIn.Prompts;
 using Microsoft.Extensions.Options;
 
-namespace Cellm.Models.Google;
+namespace Cellm.Models.GoogleAi;
 
-internal class GoogleClient : IClient
+internal class GoogleAiClient : IClient
 {
-    private readonly GoogleConfiguration _googleConfiguration;
+    private readonly GoogleAiConfiguration _googleAiConfiguration;
     private readonly CellmConfiguration _cellmConfiguration;
     private readonly HttpClient _httpClient;
     private readonly ICache _cache;
     private readonly ISerde _serde;
 
-    public GoogleClient(
-        IOptions<GoogleConfiguration> googleConfiguration,
+    public GoogleAiClient(
+        IOptions<GoogleAiConfiguration> googleAiConfiguration,
         IOptions<CellmConfiguration> cellmConfiguration,
         HttpClient httpClient,
         ICache cache,
         ISerde serde)
     {
-        _googleConfiguration = googleConfiguration.Value;
+        _googleAiConfiguration = googleAiConfiguration.Value;
         _cellmConfiguration = cellmConfiguration.Value;
         _httpClient = httpClient;
         _cache = cache;
@@ -31,7 +31,7 @@ internal class GoogleClient : IClient
 
     public async Task<Prompt> Send(Prompt prompt, string? provider, string? model)
     {
-        var transaction = SentrySdk.StartTransaction(typeof(GoogleClient).Name, nameof(Send));
+        var transaction = SentrySdk.StartTransaction(typeof(GoogleAiClient).Name, nameof(Send));
         SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
 
         var requestBody = new RequestBody
@@ -57,7 +57,7 @@ internal class GoogleClient : IClient
         var json = _serde.Serialize(requestBody);
         var jsonAsString = new StringContent(json, Encoding.UTF8, "application/json");
 
-        var response = await _httpClient.PostAsync($"/v1beta/models/{model ?? _googleConfiguration.DefaultModel}:generateContent?key={_googleConfiguration.ApiKey}", jsonAsString);
+        var response = await _httpClient.PostAsync($"/v1beta/models/{model ?? _googleAiConfiguration.DefaultModel}:generateContent?key={_googleAiConfiguration.ApiKey}", jsonAsString);
         var responseBodyAsString = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)
@@ -87,7 +87,7 @@ internal class GoogleClient : IClient
                 unit: MeasurementUnit.Custom("token"),
                 tags: new Dictionary<string, string> {
                     { nameof(provider), provider?.ToLower() ?? _cellmConfiguration.DefaultModelProvider },
-                    { nameof(model), model?.ToLower() ?? _cellmConfiguration.DefaultModelProvider },
+                    { nameof(model), model?.ToLower() ?? _googleAiConfiguration.DefaultModel },
                     { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
                 }
             );
@@ -101,7 +101,7 @@ internal class GoogleClient : IClient
                 unit: MeasurementUnit.Custom("token"),
                 tags: new Dictionary<string, string> {
                     { nameof(provider), provider?.ToLower() ?? _cellmConfiguration.DefaultModelProvider },
-                    { nameof(model), model?.ToLower() ?? _cellmConfiguration.DefaultModelProvider },
+                    { nameof(model), model?.ToLower() ?? _googleAiConfiguration.DefaultModel },
                     { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
                 }
             );
