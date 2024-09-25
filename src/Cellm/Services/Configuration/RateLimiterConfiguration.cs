@@ -6,6 +6,8 @@ public class RateLimiterConfiguration
 
     public int QueueLimit { get; init; }
 
+    public int ConcurrencyLimit { get; init; }
+
     public int ReplenishmentPeriodInSeconds { get; init; }
 
     public int TokensPerPeriod { get; init; }

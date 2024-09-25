@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Threading.RateLimiting;
-using Microsoft.Extensions.Configuration;
 using Polly;
 using Polly.CircuitBreaker;
 using Polly.Retry;
@@ -34,13 +33,10 @@ public class ResiliencePipelineConfigurator
                 ReplenishmentPeriod = TimeSpan.FromSeconds(_rateLimiterConfiguration.ReplenishmentPeriodInSeconds),
                 TokensPerPeriod = _rateLimiterConfiguration.TokensPerPeriod,
             }))
-            .AddCircuitBreaker(new CircuitBreakerStrategyOptions<HttpResponseMessage>
+            .AddConcurrencyLimiter(new ConcurrencyLimiterOptions
             {
-                ShouldHandle = args => ValueTask.FromResult(ShouldBreakCircuit(args.Outcome)),
-                FailureRatio = _circuitBreakerConfiguration.FailureRatio,
-                SamplingDuration = TimeSpan.FromSeconds(_circuitBreakerConfiguration.SamplingDurationInSeconds),
-                MinimumThroughput = _circuitBreakerConfiguration.MinimumThroughput,
-                BreakDuration = TimeSpan.FromSeconds(_circuitBreakerConfiguration.BreakDurationInSeconds),
+                PermitLimit = _rateLimiterConfiguration.ConcurrencyLimit,
+                QueueLimit = _rateLimiterConfiguration.QueueLimit
             })
             .AddRetry(new RetryStrategyOptions<HttpResponseMessage>
             {
@@ -49,6 +45,14 @@ public class ResiliencePipelineConfigurator
                 UseJitter = true,
                 MaxRetryAttempts = _retryConfiguration.MaxRetryAttempts,
                 Delay = TimeSpan.FromSeconds(_retryConfiguration.DelayInSeconds),
+            })
+            .AddCircuitBreaker(new CircuitBreakerStrategyOptions<HttpResponseMessage>
+            {
+                ShouldHandle = args => ValueTask.FromResult(ShouldBreakCircuit(args.Outcome)),
+                FailureRatio = _circuitBreakerConfiguration.FailureRatio,
+                SamplingDuration = TimeSpan.FromSeconds(_circuitBreakerConfiguration.SamplingDurationInSeconds),
+                MinimumThroughput = _circuitBreakerConfiguration.MinimumThroughput,
+                BreakDuration = TimeSpan.FromSeconds(_circuitBreakerConfiguration.BreakDurationInSeconds),
             })
             .AddTimeout(TimeSpan.FromSeconds(_retryConfiguration.RequestTimeoutInSeconds))
             .Build();
