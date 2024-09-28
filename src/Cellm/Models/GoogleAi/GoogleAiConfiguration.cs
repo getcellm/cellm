@@ -1,6 +1,8 @@
-﻿namespace Cellm.Models.GoogleAi;
+﻿using Cellm.Services.Configuration;
 
-internal class GoogleAiConfiguration
+namespace Cellm.Models.GoogleAi;
+
+internal class GoogleAiConfiguration : IProviderConfiguration
 {
     public Uri BaseAddress { get; init; }
 

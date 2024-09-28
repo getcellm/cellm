@@ -1,6 +1,8 @@
-﻿namespace Cellm.Models.Llamafile;
+﻿using Cellm.Services.Configuration;
 
-internal class LlamafileConfiguration
+namespace Cellm.Models.Llamafile;
+
+internal class LlamafileConfiguration : IProviderConfiguration
 {
     public Uri LlamafileUrl { get; init; }
 

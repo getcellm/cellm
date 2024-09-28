@@ -1,6 +1,8 @@
-﻿namespace Cellm.Models.Anthropic;
+﻿using Cellm.Services.Configuration;
 
-internal class AnthropicConfiguration
+namespace Cellm.Models.Anthropic;
+
+internal class AnthropicConfiguration : IProviderConfiguration
 {
     public Uri BaseAddress { get; init; }
 
