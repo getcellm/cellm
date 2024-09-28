@@ -366,3 +366,4 @@ FodyWeavers.xsd
 appsettings.Local.json
 docker/ollama-cache
 docker/vllm-cache
+*.xlsx
