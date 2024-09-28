@@ -448,14 +448,6 @@
                 "resolved": "4.10.2",
                 "contentHash": "B5amIE3VXi4BdERxExlmaRWTfUNmv7uiznMdyVZBAbT9pq/uS8rabQ2/K3qNCpew9hzGvHeA7oRLaumS84COEA=="
             },
-            "System.Collections.Immutable": {
-                "type": "Transitive",
-                "resolved": "8.0.0",
-                "contentHash": "AurL6Y5BA1WotzlEvVaIDpqzpIPvYnnldxru8oXJU2yFxFUy3+pNXjXd1ymO+RA0rq0+590Q8gaz2l3Sr7fmqg==",
-                "dependencies": {
-                    "System.Runtime.CompilerServices.Unsafe": "6.0.0"
-                }
-            },
             "System.Diagnostics.DiagnosticSource": {
                 "type": "Transitive",
                 "resolved": "8.0.0",

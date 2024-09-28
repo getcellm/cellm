@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Net.Http;
+using System.Text;
 using System.Text.Json.Serialization;
 using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
@@ -29,7 +30,7 @@ internal class OpenAiClient : IClient
         _serde = serde;
     }
 
-    public async Task<Prompt> Send(Prompt prompt, string? provider, string? model)
+    public async Task<Prompt> Send(Prompt prompt, string? provider, string? model, Uri? baseAddress)
     {
         var transaction = SentrySdk.StartTransaction(typeof(OpenAiClient).Name, nameof(Send));
         SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
@@ -57,7 +58,10 @@ internal class OpenAiClient : IClient
         var json = _serde.Serialize(requestBody);
         var jsonAsString = new StringContent(json, Encoding.UTF8, "application/json");
 
-        var response = await _httpClient.PostAsync("/v1/chat/completions", jsonAsString);
+        const string path = "/v1/chat/completions";
+        var address = baseAddress is null ? new Uri(path, UriKind.Relative) : new Uri(baseAddress, path);
+
+        var response = await _httpClient.PostAsync(address, jsonAsString);
         var responseBodyAsString = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)
@@ -86,7 +90,7 @@ internal class OpenAiClient : IClient
                 inputTokens,
                 unit: MeasurementUnit.Custom("token"),
                 tags: new Dictionary<string, string> {
-                    { nameof(provider), provider?.ToLower() ?? _cellmConfiguration.DefaultModelProvider },
+                    { nameof(provider), provider?.ToLower() ?? _cellmConfiguration.DefaultProvider },
                     { nameof(model), model?.ToLower() ?? _openAiConfiguration.DefaultModel },
                     { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
                 }
@@ -101,7 +105,7 @@ internal class OpenAiClient : IClient
                 unit: MeasurementUnit.Custom("token"),
                 tags: new Dictionary<string, string>
                 {
-                    { nameof(provider), provider?.ToLower() ?? _cellmConfiguration.DefaultModelProvider },
+                    { nameof(provider), provider?.ToLower() ?? _cellmConfiguration.DefaultProvider },
                     { nameof(model), model?.ToLower() ?? _openAiConfiguration.DefaultModel },
                     { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
                 }

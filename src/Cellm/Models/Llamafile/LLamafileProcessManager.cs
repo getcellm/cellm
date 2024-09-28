@@ -83,7 +83,7 @@ public class LLamafileProcessManager
         Marshal.FreeHGlobal(extendedInfoPtr);
     }
 
-    public void AssignProcessToCellm(Process process)
+    public void AssignProcessToExcel(Process process)
     {
         AssignProcessToJobObject(_jobObject, process.Handle);
     }
