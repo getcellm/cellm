@@ -22,8 +22,6 @@ This extension does one thing and one thing well.
 ## Example
 Say you're reviewing medical studies and need to quickly identify papers relevant to your research. Here's how Cellm can help with this task:
 
-Here's how Cellm can help with this task:
-
 https://github.com/user-attachments/assets/c93f7da9-aabd-4c13-a4f5-3e12332c5794
 
 In this example, we copy the papers' title and abstract into Excel and write this prompt: 
@@ -40,18 +38,9 @@ Cellm must be built from source and installed via Excel. Follow the steps below.
 
 ### Requirements
 
-#### Cellm
-
 - Windows
 - [.NET 6.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
 - [Excel 2010 or higher (desktop app)](https://www.microsoft.com/en-us/microsoft-365/excel)
-
-#### Local LLMs
-
-- [Docker](https://www.docker.com/products/docker-desktop/) (optional)
-- A GPU and [NVIDIA CUDA Toolkit 12.4](https://developer.nvidia.com/cuda-downloads) or higher (optional)
-
-To get started, you can run small models with Llamafile on your CPU. Cellm can automatically download and run these models for you. For Ollama and vLLM you will need docker, and for higher quality models you will need a GPU.
 
 ### Build
 
@@ -179,13 +168,22 @@ These use cases are starting points. Experiment with different instructions to f
 
 ## Run Models Locally
 
+### Requirements
+
+- [Docker](https://www.docker.com/products/docker-desktop/) (optional)
+- A GPU and [NVIDIA CUDA Toolkit 12.4](https://developer.nvidia.com/cuda-downloads) or higher (optional)
+
+#### Local LLMs
+
 Cellm can run LLM models locally on your computer via Llamafiles, Ollama, or vLLM. This ensures none of your data ever leaves your machine. And its free.
 
-By default Cellm uses Gemma 2 2B model with 4-bit quantization. This clever little model runs fine on a CPU.
+Cellm uses Gemma 2 2B model with 4-bit quantization by default. This clever little model runs fine on a CPU. If you don't which model to use, try out this model with a Llamafile server.
+
+For Ollama and vLLM you will need docker, and for models larger than 3B you will need a GPU.
 
 ### LLamafile
 
-Llamafile is a stand-alone executable that is very easy to setup. Cellm will automatically download a Llamafile and run it for you the first time you use a Llamafile model. 
+Llamafile is a stand-alone executable that is very easy to setup. Cellm will automatically download a Llamafile model and start a Llamafile server the first time you call `=PROMPT()`. 
 
 To get started:
 
@@ -194,13 +192,15 @@ To get started:
 3. Run e.g. `=PROMPT(A1, "Extract keywords")` in a formula.
 4. Wait 5-10 min depending on your internet connection. The model will reply once it is ready. 
 
+This will use the Llama 3.2 1B model. To use other models, edit the file and rebuild.
+
 Use `appsettings.Llamafile.GPU.json` to offload inference to your NVIDIA or AMD GPU.
 
 ### Ollama and vLLM
 
-Ollama and vLLM are LLM inference servers. Ollama is designed for easy of use and vLLM is designed to run models efficiently with high-throughput. Both Ollama and vLLM are packaged up as docker compose files that can run models locally on your computer.
+Ollama and vLLM are LLM inference servers for running models locally. Ollama is designed for easy of use and vLLM is designed to run models efficiently with high throughput. Both Ollama and vLLM are packaged up with docker compose files in the `docker/` folder.
 
-To get started, use Ollama with the Gemma 2 2B model with 4-bit quantization. This clever little model runs fine on a CPU.
+To get started, use Ollama with the Gemma 2 2B model:
 
 1. Rename `appsettings.Ollama.json` to `appsettings.Local.json`, 
 2. Build and install Cellm.
@@ -210,6 +210,8 @@ To get started, use Ollama with the Gemma 2 2B model with 4-bit quantization. Th
    docker compose -f docker-compose.Ollama.yml exec backend ollama pull gemma2:2b
    docker compose -f docker-compose.Ollama.yml down  // When you want to shut it down
    ```
+
+To use other models, pull [another supported model](https://ollama.com/library) for Ollama or change the "--model" argument to another Huggingface model for vLLM.
 
 Open WebUI in included in both docker compose files so you test the local model outside of Cellm. It is available at `http://localhost:3000`.
 
@@ -233,14 +235,14 @@ Do:
 
 - Experiment with different prompts to find the most effective instructions for your data.
 - Use cell references to dynamically change your prompts based on other data in your spreadsheet.
-- Use local models for sensitive data. Always consider the privacy implications of the data you're sending cloud-based LLM providers.
+- Use local models for sensitive and confidential dataa.
 - Refer to the cell data as "context" in your instructions.
 - Verify responses, especially for critical decisions or analyses. These models will make errors and rely entirely on your input, which may also contain errors.
 
 Don't:
 
 - Don't use Cellm to compute sums, averages, and other numerical calculations. The current generation of LLMs are not designed for mathematical operations. Use Excel's existing functions instead.
-- Don't use cloud model providers to process sensitive or confidential information unless you've carefully reviewed your data and privacy policies of the LLM provider.
+- Don't use cloud model providers to process sensitive or confidential data.
 - Don't use extremely long prompts or give Cellm complex tasks. A normal chat UI lets you have a back and forth conversation which is better for exploring complex topics.
 - Don't use Cellm for tasks that require up-to-date information beyond the AI model's knowledge cutoff date _unless_ you provide the information as context.
 
