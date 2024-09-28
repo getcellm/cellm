@@ -1,6 +1,8 @@
-﻿namespace Cellm.Models.OpenAi;
+﻿using Cellm.Services.Configuration;
 
-internal class OpenAiConfiguration
+namespace Cellm.Models.OpenAi;
+
+internal class OpenAiConfiguration : IProviderConfiguration
 {
     public Uri BaseAddress { get; init; }
 

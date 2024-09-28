@@ -34,7 +34,7 @@ public static class CellmFunctions
         var cellmConfiguration = ServiceLocator.Get<IOptions<CellmConfiguration>>().Value;
 
         return PromptWith(
-                   $"{cellmConfiguration.DefaultModelProvider}/{cellmConfiguration.DefaultModel}",
+                   $"{cellmConfiguration.DefaultProvider}/{cellmConfiguration.DefaultModel}",
                    context,
                    instructionsOrTemperature,
                    temperature);
@@ -87,7 +87,7 @@ public static class CellmFunctions
             // ExcelAsyncUtil yields Excel's main thread, Task.Run enables async/await in inner code
             return ExcelAsyncUtil.Run(nameof(Prompt), new object[] { context, instructionsOrTemperature, temperature }, () =>
             {
-                return Task.Run(async () => await CallModelAsync(prompt)).GetAwaiter().GetResult();
+                return Task.Run(async () => await CallModelAsync(prompt, arguments.Provider, arguments.Model)).GetAwaiter().GetResult();
             });
         }
         catch (CellmException ex)
@@ -106,12 +106,12 @@ public static class CellmFunctions
     /// <returns>A task that represents the asynchronous operation. The task result contains the model's response as a string.</returns>
     /// <exception cref="CellmException">Thrown when an unexpected error occurs during the operation.</exception>
 
-    private static async Task<string> CallModelAsync(Prompt prompt, string? provider = null, string? model = null)
+    private static async Task<string> CallModelAsync(Prompt prompt, string? provider = null, string? model = null, Uri? baseAddress = null)
     {
         try
         {
             var client = ServiceLocator.Get<IClient>();
-            var response = await client.Send(prompt, provider, model);
+            var response = await client.Send(prompt, provider, model, baseAddress);
             return response.Messages.Last().Content;
         }
         catch (CellmException)

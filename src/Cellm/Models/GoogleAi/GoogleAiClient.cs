@@ -29,7 +29,7 @@ internal class GoogleAiClient : IClient
         _serde = serde;
     }
 
-    public async Task<Prompt> Send(Prompt prompt, string? provider, string? model)
+    public async Task<Prompt> Send(Prompt prompt, string? provider, string? model, Uri? baseAddress)
     {
         var transaction = SentrySdk.StartTransaction(typeof(GoogleAiClient).Name, nameof(Send));
         SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
@@ -57,7 +57,10 @@ internal class GoogleAiClient : IClient
         var json = _serde.Serialize(requestBody);
         var jsonAsString = new StringContent(json, Encoding.UTF8, "application/json");
 
-        var response = await _httpClient.PostAsync($"/v1beta/models/{model ?? _googleAiConfiguration.DefaultModel}:generateContent?key={_googleAiConfiguration.ApiKey}", jsonAsString);
+        string path = $"/v1beta/models/{model ?? _googleAiConfiguration.DefaultModel}:generateContent?key={_googleAiConfiguration.ApiKey}";
+        var address = baseAddress is null ? new Uri(path, UriKind.Relative) : new Uri(baseAddress, path);
+
+        var response = await _httpClient.PostAsync(address, jsonAsString);
         var responseBodyAsString = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)
@@ -86,7 +89,7 @@ internal class GoogleAiClient : IClient
                 inputTokens,
                 unit: MeasurementUnit.Custom("token"),
                 tags: new Dictionary<string, string> {
-                    { nameof(provider), provider?.ToLower() ?? _cellmConfiguration.DefaultModelProvider },
+                    { nameof(provider), provider?.ToLower() ?? _cellmConfiguration.DefaultProvider },
                     { nameof(model), model?.ToLower() ?? _googleAiConfiguration.DefaultModel },
                     { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
                 }
@@ -100,7 +103,7 @@ internal class GoogleAiClient : IClient
                 outputTokens,
                 unit: MeasurementUnit.Custom("token"),
                 tags: new Dictionary<string, string> {
-                    { nameof(provider), provider?.ToLower() ?? _cellmConfiguration.DefaultModelProvider },
+                    { nameof(provider), provider?.ToLower() ?? _cellmConfiguration.DefaultProvider },
                     { nameof(model), model?.ToLower() ?? _googleAiConfiguration.DefaultModel },
                     { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
                 }

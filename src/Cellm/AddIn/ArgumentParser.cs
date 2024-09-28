@@ -1,8 +1,9 @@
 ﻿using System.Text;
 using Cellm.AddIn.Exceptions;
 using Cellm.AddIn.Prompts;
+using Cellm.Services.Configuration;
 using ExcelDna.Integration;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Office.Interop.Excel;
 
 namespace Cellm.AddIn;
@@ -11,17 +12,17 @@ public record Arguments(string Provider, string Model, string Context, string In
 
 public class ArgumentParser
 {
-    private string _provider;
-    private string _model;
+    private string? _provider;
+    private string? _model;
     private string? _context;
     private string? _instructions;
-    private double _temperature;
+    private double? _temperature;
 
-    public ArgumentParser(IOptions<CellmConfiguration> cellmConfiguration)
+    private readonly IConfiguration _configuration;
+
+    public ArgumentParser(IConfiguration configuration)
     {
-        _provider = cellmConfiguration.Value.DefaultModelProvider;
-        _model = cellmConfiguration.Value.DefaultModel;
-        _temperature = cellmConfiguration.Value.DefaultTemperature;
+        _configuration = configuration;
     }
 
     public ArgumentParser AddProvider(object providerAndModel)
@@ -138,7 +139,23 @@ public class ArgumentParser
 
     public Arguments Parse()
     {
-        if (_context == null)
+        var provider = _configuration.GetSection(nameof(CellmConfiguration)).GetValue<string>(nameof(CellmConfiguration.DefaultProvider))
+            ?? throw new ArgumentException(nameof(CellmConfiguration.DefaultProvider));
+
+        if (!string.IsNullOrEmpty(_provider))
+        {
+            provider = _provider;
+        }
+
+        var model = _configuration.GetSection($"{provider}Configuration").GetValue<string>(nameof(IProviderConfiguration.DefaultModel))
+            ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
+
+        if (!string.IsNullOrEmpty(_model))
+        {
+            model = _model;
+        }
+
+        if (_context is null)
         {
             throw new InvalidOperationException("Context argument is required");
         }
@@ -164,7 +181,14 @@ public class ArgumentParser
 
         instructionsBuilder.AppendLine("</instructions>");
 
-        return new Arguments(_provider, _model, contextBuilder.ToString(), instructionsBuilder.ToString(), _temperature);
+        var temperature = _configuration.GetSection(nameof(CellmConfiguration)).GetValue<double>(nameof(CellmConfiguration.DefaultTemperature));
+
+        if (_temperature is not null)
+        {
+            temperature = Convert.ToDouble(_temperature);
+        }
+
+        return new Arguments(provider, model, contextBuilder.ToString(), instructionsBuilder.ToString(), temperature);
     }
 
     private static string GetProvider(string providerAndModel)

@@ -80,6 +80,7 @@ internal static class ServiceLocator
 
         // Internals
         services
+            .AddSingleton(configuration)
             .AddMemoryCache()
             .AddTransient<ArgumentParser>()
             .AddSingleton<IClientFactory, ClientFactory>()

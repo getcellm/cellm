@@ -1,14 +1,16 @@
-﻿namespace Cellm.Models.Llamafile;
+﻿using Cellm.Services.Configuration;
 
-internal class LlamafileConfiguration
+namespace Cellm.Models.Llamafile;
+
+internal class LlamafileConfiguration : IProviderConfiguration
 {
     public Uri LlamafileUrl { get; init; }
+
+    public Uri BaseAddress { get; init; }
 
     public Dictionary<string, Uri> Models { get; init; }
 
     public string DefaultModel { get; init; }
-
-    public ushort Port { get; init; }
 
     public bool Gpu { get; init; }
 
@@ -17,6 +19,7 @@ internal class LlamafileConfiguration
     public LlamafileConfiguration()
     {
         LlamafileUrl = default!;
+        BaseAddress = default!;
         Models = default!;
         DefaultModel = default!;
         Gpu = false;

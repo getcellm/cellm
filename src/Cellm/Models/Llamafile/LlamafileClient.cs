@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Net.NetworkInformation;
 using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.AddIn.Prompts;
@@ -9,9 +10,11 @@ namespace Cellm.Models.Llamafile;
 
 internal class LlamafileClient : IClient
 {
+    private record Llamafile(string ModelPath, Uri BaseAddress, Process Process);
+
     private readonly AsyncLazy<string> _llamafilePath;
-    private readonly AsyncLazy<string> _llamafileModelPath;
-    private readonly AsyncLazy<Process> _llamafileProcess;
+    private readonly Dictionary<string, AsyncLazy<Llamafile>> _llamafiles;
+    private readonly LLamafileProcessManager _llamafileProcessManager;
 
     private readonly CellmConfiguration _cellmConfiguration;
     private readonly LlamafileConfiguration _llamafileConfiguration;
@@ -19,12 +22,11 @@ internal class LlamafileClient : IClient
 
     private readonly IClient _openAiClient;
     private readonly HttpClient _httpClient;
-    private readonly LLamafileProcessManager _llamafileProcessManager;
 
     public LlamafileClient(IOptions<CellmConfiguration> cellmConfiguration,
         IOptions<LlamafileConfiguration> llamafileConfiguration,
         IOptions<OpenAiConfiguration> openAiConfiguration,
-        IClient openAiClient,
+        OpenAiClient openAiClient,
         HttpClient httpClient,
         LLamafileProcessManager llamafileProcessManager)
     {
@@ -36,77 +38,94 @@ internal class LlamafileClient : IClient
         _llamafileProcessManager = llamafileProcessManager;
 
         _llamafilePath = new AsyncLazy<string>(async () =>
-         {
-             return await DownloadFile(_llamafileConfiguration.LlamafileUrl, $"Llamafile.exe", httpClient);
-         });
-
-        _llamafileModelPath = new AsyncLazy<string>(async () =>
         {
-            return await DownloadFile(_llamafileConfiguration.Models[_llamafileConfiguration.DefaultModel], $"Llamafile-model-weights-{_llamafileConfiguration.DefaultModel}", httpClient);
+            return await DownloadFile(_llamafileConfiguration.LlamafileUrl, "Llamafile.exe");
         });
 
-        _llamafileProcess = new AsyncLazy<Process>(async () =>
+        _llamafiles = _llamafileConfiguration.Models.ToDictionary(x => x.Key, x => new AsyncLazy<Llamafile>(async () =>
         {
-            return await StartProcess();
-        });
+            // Download model
+            var modelPath = await DownloadFile(x.Value, CreateFilePath(CreateModelFileName(x.Key)));
+
+            // Run Llamafile
+            var baseAddress = CreateBaseAddress();
+            var process = await StartProcess(modelPath, baseAddress);
+
+            return new Llamafile(modelPath, baseAddress, process);
+        }));
     }
 
-    public async Task<Prompt> Send(Prompt prompt, string? provider, string? model)
+    public async Task<Prompt> Send(Prompt prompt, string? provider, string? model, Uri? baseAddress)
     {
-        await _llamafilePath;
-        await _llamafileModelPath;
-        await _llamafileProcess;
-        return await _openAiClient.Send(prompt, provider ?? "Llamafile", model ?? _llamafileConfiguration.DefaultModel);
+        // Download model and start Llamafile on first call
+        var llamafile = await _llamafiles[model ?? _llamafileConfiguration.DefaultModel];
+
+        return await _openAiClient.Send(
+            prompt,
+            provider ?? "Llamafile",
+            model ?? _llamafileConfiguration.DefaultModel,
+            baseAddress ?? llamafile.BaseAddress);
     }
 
-    private async Task<Process> StartProcess()
+    private async Task<Process> StartProcess(string modelPath, Uri baseAddress)
     {
         var processStartInfo = new ProcessStartInfo(await _llamafilePath);
-        processStartInfo.Arguments += $"-m {await _llamafileModelPath} ";
-        processStartInfo.Arguments += $"--port {_llamafileConfiguration.Port} ";
 
-        if (!_cellmConfiguration.Debug)
-        {
-            processStartInfo.Arguments += "--disable-browser ";
-        }
+        processStartInfo.Arguments += $"--server ";
+        processStartInfo.Arguments += "--nobrowser ";
+        processStartInfo.Arguments += $"-m {modelPath} ";
+        processStartInfo.Arguments += $"--host {baseAddress.Host} ";
+        processStartInfo.Arguments += $"--port {baseAddress.Port} ";
 
         if (_llamafileConfiguration.Gpu)
         {
             processStartInfo.Arguments += $"-ngl {_llamafileConfiguration.GpuLayers} ";
         }
 
+        processStartInfo.UseShellExecute = false;
+        processStartInfo.CreateNoWindow = true;
+        processStartInfo.RedirectStandardError = _cellmConfiguration.Debug;
+        processStartInfo.RedirectStandardOutput = _cellmConfiguration.Debug;
+
         var process = Process.Start(processStartInfo) ?? throw new CellmException("Failed to run Llamafile");
 
-        try
+        if (_cellmConfiguration.Debug)
         {
-            _llamafileProcessManager.AssignProcessToCellm(process);
-            return process;
+            process.OutputDataReceived += (sender, e) =>
+            {
+                if (!string.IsNullOrEmpty(e.Data))
+                {
+                    Debug.WriteLine(e.Data);
+                }
+            };
+
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
         }
-        catch
-        {
-            process.Kill();
-            throw;
-        }
+
+        await WaitForLlamafile(baseAddress, process);
+
+        // Kill the process when Excel exits or dies
+        _llamafileProcessManager.AssignProcessToExcel(process);
+
+        return process;
     }
 
-    private static async Task<string> DownloadFile(Uri uri, string filename, HttpClient httpClient)
+    private async Task<string> DownloadFile(Uri uri, string filePath)
     {
-        var filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), nameof(Cellm), filename);
-        Directory.CreateDirectory(Path.GetDirectoryName(filePath) ?? throw new CellmException("Failed to create Llamafile folder"));
-
         if (File.Exists(filePath))
         {
             return filePath;
         }
 
-        var filePathPart = filePath + ".part";
+        var filePathPart = $"{filePath}.part";
 
         if (File.Exists(filePathPart))
         {
             File.Delete(filePathPart);
         }
 
-        var response = await httpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead);
+        var response = await _httpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead);
         response.EnsureSuccessStatusCode();
 
         using (var fileStream = File.Create(filePathPart))
@@ -121,12 +140,11 @@ internal class LlamafileClient : IClient
         return filePath;
     }
 
-    private async Task WaitForLlamafile(Process process)
+    private async Task WaitForLlamafile(Uri baseAddress, Process process)
     {
-        var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(1));
         var startTime = DateTime.UtcNow;
 
-        // Max 30 seconds timeout
+        // Wait max 30 seconds to load model
         while ((DateTime.UtcNow - startTime).TotalSeconds < 30)
         {
             if (process.HasExited)
@@ -136,7 +154,8 @@ internal class LlamafileClient : IClient
 
             try
             {
-                var response = await _httpClient.GetAsync(new Uri(_openAiConfiguration.BaseAddress, "health"), cancellationTokenSource.Token);
+                var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(1));
+                var response = await _httpClient.GetAsync(new Uri(baseAddress, "health"), cancellationTokenSource.Token);
                 if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 {
                     // Server is ready
@@ -157,6 +176,57 @@ internal class LlamafileClient : IClient
         process.Kill();
 
         throw new CellmException("Timeout waiting for Llamafile server to start");
+    }
+
+    string CreateFilePath(string fileName)
+    {
+        var filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), nameof(Cellm), fileName);
+        Directory.CreateDirectory(Path.GetDirectoryName(filePath) ?? throw new CellmException("Failed to create Llamafile folder"));
+        return filePath;
+    }
+
+    private string CreateModelFileName(string modelName)
+    {
+        return $"Llamafile-model-weights-{modelName}";
+    }
+
+    private Uri CreateBaseAddress()
+    {
+        var uriBuilder = new UriBuilder(_llamafileConfiguration.BaseAddress)
+        {
+            Port = GetFirstUnusedPort()
+        };
+
+        return uriBuilder.Uri;
+    }
+
+    private static int GetFirstUnusedPort(ushort min = 49152, ushort max = 65535)
+    {
+        if (max < min)
+        {
+            throw new ArgumentException("Max port must be larger than min port.");
+        }
+
+        var ipProperties = IPGlobalProperties.GetIPGlobalProperties();
+
+        var activePorts = ipProperties.GetActiveTcpConnections()
+            .Where(connection => connection.State != TcpState.Closed)
+            .Select(connection => connection.LocalEndPoint)
+            .Concat(ipProperties.GetActiveTcpListeners())
+            .Concat(ipProperties.GetActiveUdpListeners())
+            .Select(endpoint => endpoint.Port)
+            .ToArray();
+
+        var firstInactivePort = Enumerable.Range(min, max)
+            .Where(port => !activePorts.Contains(port))
+            .FirstOrDefault();
+
+        if (firstInactivePort == default)
+        {
+            throw new CellmException($"All local TCP ports between {min} and {max} are currently in use.");
+        }
+
+        return firstInactivePort;
     }
 }
 
