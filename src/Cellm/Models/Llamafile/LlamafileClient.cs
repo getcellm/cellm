@@ -61,9 +61,9 @@ internal class LlamafileClient : IClient
         var llamafile = await _llamafiles[model ?? _llamafileConfiguration.DefaultModel];
 
         return await _openAiClient.Send(
-            prompt, 
-            provider ?? "Llamafile", 
-            model ?? _llamafileConfiguration.DefaultModel, 
+            prompt,
+            provider ?? "Llamafile",
+            model ?? _llamafileConfiguration.DefaultModel,
             baseAddress ?? llamafile.BaseAddress);
     }
 
@@ -102,7 +102,7 @@ internal class LlamafileClient : IClient
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
         }
-        
+
         await WaitForLlamafile(baseAddress, process);
 
         // Kill the process when Excel exits or dies
@@ -225,7 +225,7 @@ internal class LlamafileClient : IClient
         {
             throw new CellmException($"All local TCP ports between {min} and {max} are currently in use.");
         }
-            
+
         return firstInactivePort;
     }
 }
