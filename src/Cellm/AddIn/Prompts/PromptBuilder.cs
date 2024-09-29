@@ -5,7 +5,7 @@ namespace Cellm.AddIn.Prompts;
 public class PromptBuilder
 {
     private string? _systemMessage;
-    private readonly List<Message> _messages = new();
+    private List<Message> _messages = new();
     private double? _temperature;
 
     public PromptBuilder()
@@ -38,7 +38,7 @@ public class PromptBuilder
             throw new CellmException("Cannot add empty system message");
         }
 
-        _messages.Add(new Message(_systemMessage!, Role.System));
+        _messages.Insert(0, new Message(_systemMessage!, Role.System));
         return this;
     }
 

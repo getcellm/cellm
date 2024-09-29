@@ -5,6 +5,7 @@ using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.AddIn.Prompts;
 using Microsoft.Extensions.Options;
+using Microsoft.Vbe.Interop;
 
 namespace Cellm.Models.OpenAi;
 
@@ -35,11 +36,8 @@ internal class OpenAiClient : IClient
         var transaction = SentrySdk.StartTransaction(typeof(OpenAiClient).Name, nameof(Send));
         SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
 
-        var openAiPrompt = new PromptBuilder()
-            .SetSystemMessage(prompt.SystemMessage)
+        var openAiPrompt = new PromptBuilder(prompt)
             .AddSystemMessage()
-            .AddMessages(prompt.Messages)
-            .SetTemperature(prompt.Temperature)
             .Build();
 
         var requestBody = new RequestBody
@@ -47,7 +45,8 @@ internal class OpenAiClient : IClient
             Model = model ?? _openAiConfiguration.DefaultModel,
             Messages = openAiPrompt.Messages.Select(x => new Message { Content = x.Content, Role = x.Role.ToString().ToLower() }).ToList(),
             MaxTokens = _cellmConfiguration.MaxTokens,
-            Temperature = prompt.Temperature
+            Temperature = prompt.Temperature,
+            Tools = GetTool()
         };
 
         if (_cache.TryGetValue(requestBody, out object? value) && value is Prompt assistantPrompt)
@@ -117,7 +116,24 @@ internal class OpenAiClient : IClient
         return assistantPrompt;
     }
 
-    private class RequestBody
+    private List<Tool> GetTool()
+    {
+        return new List<Tool>()
+        {
+            new Tool
+            {
+                Function = new Function {
+                    Name = "Glob",
+                    Description = "Matches file paths or names using patterns containing wildcard characters. " +
+                                  "This function is useful for searching for files " +
+                                  "or filtering file lists based on naming patterns.",
+                    Parameters = new List<Dictionary<string, string>>()
+                }
+            }
+        };
+    }
+
+    class RequestBody
     {
         public string? Model { get; set; }
 
@@ -127,9 +143,11 @@ internal class OpenAiClient : IClient
         public int MaxTokens { get; set; }
 
         public double Temperature { get; set; }
+
+        public List<Tool>? Tools { get; set; }
     }
 
-    private class ResponseBody
+    class ResponseBody
     {
         public string? Id { get; set; }
 
@@ -145,14 +163,14 @@ internal class OpenAiClient : IClient
         public Usage? Usage { get; set; }
     }
 
-    private class Message
+    class Message
     {
         public string? Role { get; set; }
 
         public string? Content { get; set; }
     }
 
-    private class Choice
+    class Choice
     {
         public int Index { get; set; }
 
@@ -164,7 +182,7 @@ internal class OpenAiClient : IClient
         public string? FinishReason { get; set; }
     }
 
-    private class Usage
+    class Usage
     {
         [JsonPropertyName("prompt_tokens")]
         public int PromptTokens { get; set; }
@@ -174,5 +192,33 @@ internal class OpenAiClient : IClient
 
         [JsonPropertyName("total_tokens")]
         public int TotalTokens { get; set; }
+    }
+
+
+    public class Tool
+    {
+        public string Type { get; set; } = "function";
+
+        public Function? Function { get; set; }
+    }
+
+    public class Function
+    {
+        public string? Name { get; set; }
+
+        public string? Description { get; set; }
+
+        public List<Dictionary<string, string>>? Parameters { get; set; }
+    }
+
+    public class Parameters
+    {
+        public string? Type { get; set; }
+
+        public Properties? Properties { get; set; }
+
+        public List<string>? Required { get; set; }
+
+        public bool? AdditionalProperties { get; set; }
     }
 }
