@@ -3,7 +3,9 @@ using Cellm.AddIn.Exceptions;
 using Cellm.Models;
 using Cellm.Prompts;
 using Cellm.Services;
+using Cellm.Services.Configuration;
 using ExcelDna.Integration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
 namespace Cellm.AddIn;
@@ -31,10 +33,16 @@ public static class ExcelFunctions
     [ExcelArgument(Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
     [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
     {
-        var cellmConfiguration = ServiceLocator.Get<IOptions<CellmConfiguration>>().Value;
+        var configuration = ServiceLocator.Get<IConfiguration>();
+
+        var provider = configuration.GetSection(nameof(CellmConfiguration)).GetValue<string>(nameof(CellmConfiguration.DefaultProvider))
+            ?? throw new ArgumentException(nameof(CellmConfiguration.DefaultProvider));
+
+        var model = configuration.GetSection($"{provider}Configuration").GetValue<string>(nameof(IProviderConfiguration.DefaultModel))
+            ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
 
         return PromptWith(
-                   $"{cellmConfiguration.DefaultProvider}/{cellmConfiguration.DefaultModel}",
+                   $"{provider}/{model}",
                    context,
                    instructionsOrTemperature,
                    temperature);

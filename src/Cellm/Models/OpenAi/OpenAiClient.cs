@@ -1,13 +1,12 @@
 ﻿using System.ComponentModel;
-using System.Net.Http;
 using System.Text;
 using System.Text.Json.Serialization;
 using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
-using Cellm.Functions;
 using Cellm.Prompts;
 using Cellm.Tools;
 using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Models;
 using Microsoft.Vbe.Interop;
 
 namespace Cellm.Models.OpenAi;
@@ -19,22 +18,19 @@ internal class OpenAiClient : IClient
     private readonly HttpClient _httpClient;
     private readonly ICache _cache;
     private readonly ISerde _serde;
-    private readonly ITools _tools;
 
     public OpenAiClient(
         IOptions<OpenAiConfiguration> openAiConfiguration,
         IOptions<CellmConfiguration> cellmConfiguration,
         HttpClient httpClient,
         ICache cache,
-        ISerde serde,
-        ITools tools)
+        ISerde serde)
     {
         _openAiConfiguration = openAiConfiguration.Value;
         _cellmConfiguration = cellmConfiguration.Value;
         _httpClient = httpClient;
         _cache = cache;
         _serde = serde;
-        _tools = tools;
     }
 
     public async Task<Prompt> Send(Prompt prompt, string? provider, string? model, Uri? baseAddress)
@@ -52,7 +48,7 @@ internal class OpenAiClient : IClient
             Messages = openAiPrompt.Messages.Select(x => new Message { Content = x.Content, Role = x.Role.ToString().ToLower() }).ToList(),
             MaxTokens = _cellmConfiguration.MaxTokens,
             Temperature = prompt.Temperature,
-            Tools = _tools.Serialize()
+            Tools = GetTools()
         };
 
         if (_cache.TryGetValue(requestBody, out object? value) && value is Prompt assistantPrompt)
@@ -113,7 +109,7 @@ internal class OpenAiClient : IClient
         return assistantPrompt;
     }
 
-    private List<Tool> GetTool()
+    private List<Tool> GetTools()
     {
         var attributes = typeof(Glob).GetMethod(nameof(Glob.Handle))?.GetCustomAttributes(typeof(DescriptionAttribute), false);
         var description = ((DescriptionAttribute)attributes![0]).Description;
@@ -125,7 +121,7 @@ internal class OpenAiClient : IClient
                 Function = new Function {
                     Name = nameof(Glob),
                     Description = description,
-                    Parameters = new List<Dictionary<string, string>>()
+                    Parameters = new List<OpenApiSchema> { OpenAiToolSchemaGenerator.GenerateSchema<GlobRequest>() }
                 }
             }
         };
@@ -206,7 +202,7 @@ internal class OpenAiClient : IClient
 
         public string? Description { get; set; }
 
-        public List<Dictionary<string, string>>? Parameters { get; set; }
+        public List<OpenApiSchema>? Parameters { get; set; }
     }
 
     public class Parameters

@@ -9,8 +9,8 @@ internal class Tools
         _glob = glob;
     }
 
-    public List<string> Serialize()
+    public List<Type> ToList()
     {
-        return new List<string> { _glob.Serialize() };
+        return new List<Type> { typeof(GlobRequest) };
     }
 }
