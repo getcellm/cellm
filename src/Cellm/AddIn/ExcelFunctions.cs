@@ -1,14 +1,14 @@
 ﻿using System.Text;
 using Cellm.AddIn.Exceptions;
-using Cellm.AddIn.Prompts;
 using Cellm.Models;
+using Cellm.Prompts;
 using Cellm.Services;
 using ExcelDna.Integration;
 using Microsoft.Extensions.Options;
 
 namespace Cellm.AddIn;
 
-public static class CellmFunctions
+public static class ExcelFunctions
 {
     /// <summary>
     /// Sends a prompt to the default model configured in CellmConfiguration.
@@ -79,7 +79,7 @@ public static class CellmFunctions
                 .ToString();
 
             var prompt = new PromptBuilder()
-                .SetSystemMessage(CellmPrompts.SystemMessage)
+                .SetSystemMessage(Prompts.SystemMessage)
                 .SetTemperature(arguments.Temperature)
                 .AddUserMessage(userMessage)
                 .Build();
@@ -87,7 +87,7 @@ public static class CellmFunctions
             // ExcelAsyncUtil yields Excel's main thread, Task.Run enables async/await in inner code
             return ExcelAsyncUtil.Run(nameof(Prompt), new object[] { context, instructionsOrTemperature, temperature }, () =>
             {
-                return Task.Run(async () => await CallModelAsync(prompt, arguments.Provider, arguments.Model)).GetAwaiter().GetResult();
+                return Task.Run(async () => await CallModelAsync(prompt, arguments.Provider, arguments.Model));
             });
         }
         catch (CellmException ex)

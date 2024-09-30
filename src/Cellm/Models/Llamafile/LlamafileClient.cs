@@ -2,8 +2,8 @@
 using System.Net.NetworkInformation;
 using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
-using Cellm.AddIn.Prompts;
 using Cellm.Models.OpenAi;
+using Cellm.Prompts;
 using Microsoft.Extensions.Options;
 
 namespace Cellm.Models.Llamafile;

@@ -1,4 +1,4 @@
-﻿using Cellm.AddIn.Prompts;
+﻿using Cellm.Prompts;
 
 namespace Cellm.Models;
 

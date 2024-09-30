@@ -1,6 +1,6 @@
 ﻿using Cellm.AddIn.Exceptions;
 
-namespace Cellm.AddIn.Prompts;
+namespace Cellm.Prompts;
 
 public class PromptBuilder
 {

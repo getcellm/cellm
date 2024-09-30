@@ -2,7 +2,7 @@
 using System.Text.Json.Serialization;
 using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
-using Cellm.AddIn.Prompts;
+using Cellm.Prompts;
 using Microsoft.Extensions.Options;
 
 namespace Cellm.Models.GoogleAi;
@@ -71,16 +71,17 @@ internal class GoogleAiClient : IClient
         var responseBody = _serde.Deserialize<ResponseBody>(responseBodyAsString);
         var assistantMessage = responseBody?.Candidates?.SingleOrDefault()?.Content?.Parts?.SingleOrDefault()?.Text ?? throw new CellmException("#EMPTY_RESPONSE?");
 
-        if (assistantMessage.StartsWith("#INSTRUCTION_ERROR?"))
-        {
-            throw new CellmException(assistantMessage);
-        }
-
         assistantPrompt = new PromptBuilder(prompt)
             .AddAssistantMessage(assistantMessage)
             .Build();
 
         _cache.Set(requestBody, assistantPrompt);
+
+        var tags = new Dictionary<string, string> {
+            { nameof(provider), provider?.ToLower() ?? _cellmConfiguration.DefaultProvider },
+            { nameof(model), model?.ToLower() ?? _googleAiConfiguration.DefaultModel },
+            { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
+        };
 
         var inputTokens = responseBody?.UsageMetadata?.PromptTokenCount ?? -1;
         if (inputTokens > 0)
@@ -88,12 +89,7 @@ internal class GoogleAiClient : IClient
             SentrySdk.Metrics.Distribution("InputTokens",
                 inputTokens,
                 unit: MeasurementUnit.Custom("token"),
-                tags: new Dictionary<string, string> {
-                    { nameof(provider), provider?.ToLower() ?? _cellmConfiguration.DefaultProvider },
-                    { nameof(model), model?.ToLower() ?? _googleAiConfiguration.DefaultModel },
-                    { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
-                }
-            );
+                tags);
         }
 
         var outputTokens = responseBody?.UsageMetadata?.CandidatesTokenCount ?? -1;
@@ -102,12 +98,7 @@ internal class GoogleAiClient : IClient
             SentrySdk.Metrics.Distribution("OutputTokens",
                 outputTokens,
                 unit: MeasurementUnit.Custom("token"),
-                tags: new Dictionary<string, string> {
-                    { nameof(provider), provider?.ToLower() ?? _cellmConfiguration.DefaultProvider },
-                    { nameof(model), model?.ToLower() ?? _googleAiConfiguration.DefaultModel },
-                    { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
-                }
-            );
+                tags);
         }
 
         transaction.Finish();

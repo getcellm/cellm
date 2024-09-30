@@ -1,9 +1,12 @@
-﻿using System.Net.Http;
+﻿using System.ComponentModel;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json.Serialization;
 using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
-using Cellm.AddIn.Prompts;
+using Cellm.Functions;
+using Cellm.Prompts;
+using Cellm.Tools;
 using Microsoft.Extensions.Options;
 using Microsoft.Vbe.Interop;
 
@@ -16,19 +19,22 @@ internal class OpenAiClient : IClient
     private readonly HttpClient _httpClient;
     private readonly ICache _cache;
     private readonly ISerde _serde;
+    private readonly ITools _tools;
 
     public OpenAiClient(
         IOptions<OpenAiConfiguration> openAiConfiguration,
         IOptions<CellmConfiguration> cellmConfiguration,
         HttpClient httpClient,
         ICache cache,
-        ISerde serde)
+        ISerde serde,
+        ITools tools)
     {
         _openAiConfiguration = openAiConfiguration.Value;
         _cellmConfiguration = cellmConfiguration.Value;
         _httpClient = httpClient;
         _cache = cache;
         _serde = serde;
+        _tools = tools;
     }
 
     public async Task<Prompt> Send(Prompt prompt, string? provider, string? model, Uri? baseAddress)
@@ -46,7 +52,7 @@ internal class OpenAiClient : IClient
             Messages = openAiPrompt.Messages.Select(x => new Message { Content = x.Content, Role = x.Role.ToString().ToLower() }).ToList(),
             MaxTokens = _cellmConfiguration.MaxTokens,
             Temperature = prompt.Temperature,
-            Tools = GetTool()
+            Tools = _tools.Serialize()
         };
 
         if (_cache.TryGetValue(requestBody, out object? value) && value is Prompt assistantPrompt)
@@ -71,16 +77,18 @@ internal class OpenAiClient : IClient
         var responseBody = _serde.Deserialize<ResponseBody>(responseBodyAsString);
         var assistantMessage = responseBody?.Choices?.FirstOrDefault()?.Message?.Content ?? throw new CellmException("#EMPTY_RESPONSE?");
 
-        if (assistantMessage.StartsWith("#INSTRUCTION_ERROR?"))
-        {
-            throw new CellmException(assistantMessage);
-        }
-
         assistantPrompt = new PromptBuilder(prompt)
             .AddAssistantMessage(assistantMessage)
             .Build();
 
         _cache.Set(requestBody, assistantPrompt);
+
+        var tags = new Dictionary<string, string>
+            {
+                { nameof(provider), provider?.ToLower() ?? _cellmConfiguration.DefaultProvider },
+                { nameof(model), model?.ToLower() ?? _openAiConfiguration.DefaultModel },
+                { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
+            };
 
         var inputTokens = responseBody?.Usage?.PromptTokens ?? -1;
         if (inputTokens > 0)
@@ -88,12 +96,7 @@ internal class OpenAiClient : IClient
             SentrySdk.Metrics.Distribution("InputTokens",
                 inputTokens,
                 unit: MeasurementUnit.Custom("token"),
-                tags: new Dictionary<string, string> {
-                    { nameof(provider), provider?.ToLower() ?? _cellmConfiguration.DefaultProvider },
-                    { nameof(model), model?.ToLower() ?? _openAiConfiguration.DefaultModel },
-                    { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
-                }
-            );
+                tags);
         }
 
         var outputTokens = responseBody?.Usage?.CompletionTokens ?? -1;
@@ -102,13 +105,7 @@ internal class OpenAiClient : IClient
             SentrySdk.Metrics.Distribution("OutputTokens",
                 outputTokens,
                 unit: MeasurementUnit.Custom("token"),
-                tags: new Dictionary<string, string>
-                {
-                    { nameof(provider), provider?.ToLower() ?? _cellmConfiguration.DefaultProvider },
-                    { nameof(model), model?.ToLower() ?? _openAiConfiguration.DefaultModel },
-                    { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
-                }
-            );
+                tags);
         }
 
         transaction.Finish();
@@ -118,15 +115,16 @@ internal class OpenAiClient : IClient
 
     private List<Tool> GetTool()
     {
+        var attributes = typeof(Glob).GetMethod(nameof(Glob.Handle))?.GetCustomAttributes(typeof(DescriptionAttribute), false);
+        var description = ((DescriptionAttribute)attributes![0]).Description;
+
         return new List<Tool>()
         {
             new Tool
             {
                 Function = new Function {
-                    Name = "Glob",
-                    Description = "Matches file paths or names using patterns containing wildcard characters. " +
-                                  "This function is useful for searching for files " +
-                                  "or filtering file lists based on naming patterns.",
+                    Name = nameof(Glob),
+                    Description = description,
                     Parameters = new List<Dictionary<string, string>>()
                 }
             }

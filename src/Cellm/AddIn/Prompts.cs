@@ -1,6 +1,6 @@
-﻿namespace Cellm.AddIn.Prompts;
+﻿namespace Cellm.AddIn;
 
-internal static class CellmPrompts
+internal static class Prompts
 {
     public const string SystemMessage = @"
 <input>

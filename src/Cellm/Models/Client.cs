@@ -1,9 +1,12 @@
 ﻿using System.Text.Json;
 using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
-using Cellm.AddIn.Prompts;
+using Cellm.Prompts;
+using Microsoft.Diagnostics.Tracing.Parsers.FrameworkEventSource;
+using Microsoft.Diagnostics.Tracing.Parsers.IIS_Trace;
 using Microsoft.Extensions.Options;
 using Polly.Timeout;
+using Sentry.Protocol;
 
 namespace Cellm.Models;
 

@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using Cellm.AddIn.Exceptions;
-using Cellm.AddIn.Prompts;
 using Cellm.Services.Configuration;
 using ExcelDna.Integration;
 using Microsoft.Extensions.Configuration;
@@ -172,7 +171,7 @@ public class ArgumentParser
 
         if (string.IsNullOrEmpty(_instructions))
         {
-            instructionsBuilder.AppendLine(CellmPrompts.InlineInstructions);
+            instructionsBuilder.AppendLine(Prompts.InlineInstructions);
         }
         else
         {

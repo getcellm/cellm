@@ -1,4 +1,4 @@
-﻿namespace Cellm.AddIn.Prompts;
+﻿namespace Cellm.Prompts;
 
 public enum Role
 {
