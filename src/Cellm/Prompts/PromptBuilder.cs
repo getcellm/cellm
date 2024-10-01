@@ -54,9 +54,9 @@ public class PromptBuilder
         return this;
     }
 
-    public PromptBuilder AddAssistantMessage(string content)
+    public PromptBuilder AddAssistantMessage(string content, List<ToolCall>? toolCalls = null)
     {
-        _messages.Add(new Message(content, Role.Assistant));
+        _messages.Add(new Message(content, Role.Assistant, toolCalls));
         return this;
     }
 

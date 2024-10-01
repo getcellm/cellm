@@ -4,9 +4,12 @@ public enum Role
 {
     System,
     User,
-    Assistant
+    Assistant,
+    Tool
 }
 
-public record Message(string Content, Role Role);
+public record ToolCall(string Id, string Type, Dictionary<string, string> Function, string? Result);
+
+public record Message(string Content, Role Role, List<ToolCall>? ToolCall = null);
 
 public record Prompt(string SystemMessage, List<Message> Messages, double Temperature);

@@ -32,7 +32,6 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
-    <PackageReference Include="Microsoft.OpenApi" Version="1.6.22" />
     <PackageReference Include="Sentry.Extensions.Logging" Version="4.10.2" />
     <PackageReference Include="Sentry.Profiling" Version="4.10.2" />
     <Content Include="appsettings.json">

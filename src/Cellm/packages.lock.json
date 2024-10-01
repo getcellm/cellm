@@ -152,12 +152,6 @@
           "Microsoft.Extensions.Primitives": "8.0.0"
         }
       },
-      "Microsoft.OpenApi": {
-        "type": "Direct",
-        "requested": "[1.6.22, )",
-        "resolved": "1.6.22",
-        "contentHash": "aBvunmrdu/x+4CaA/UP1Jx4xWGwk4kymhoIRnn2Vp+zi5/KOPQJ9EkSXHRUr01WcGKtYl3Au7XfkPJbU1G2sjQ=="
-      },
       "Sentry.Extensions.Logging": {
         "type": "Direct",
         "requested": "[4.10.2, )",

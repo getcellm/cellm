@@ -6,8 +6,6 @@ using Cellm.AddIn.Exceptions;
 using Cellm.Prompts;
 using Cellm.Tools;
 using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Models;
-using Microsoft.Vbe.Interop;
 
 namespace Cellm.Models.OpenAi;
 
@@ -71,7 +69,17 @@ internal class OpenAiClient : IClient
         }
 
         var responseBody = _serde.Deserialize<ResponseBody>(responseBodyAsString);
-        var assistantMessage = responseBody?.Choices?.FirstOrDefault()?.Message?.Content ?? throw new CellmException("#EMPTY_RESPONSE?");
+        var choice = responseBody?.Choices?.FirstOrDefault();
+
+        var assistantMessage = choice?.Message?.Content ?? throw new CellmException("#EMPTY_RESPONSE?");
+
+        if (choice?.FinishReason == "tool_calls")
+        {
+            var toolPromptBuilder = new PromptBuilder(prompt)
+                .AddSystemMessage()
+                .AddAssistantMessage(new Message());
+
+        }        
 
         assistantPrompt = new PromptBuilder(prompt)
             .AddAssistantMessage(assistantMessage)
@@ -116,12 +124,35 @@ internal class OpenAiClient : IClient
 
         return new List<Tool>()
         {
-            new Tool
-            {
+            new() {
                 Function = new Function {
                     Name = nameof(Glob),
                     Description = description,
-                    Parameters = new List<OpenApiSchema> { OpenAiToolSchemaGenerator.GenerateSchema<GlobRequest>() }
+                    Parameters = new Parameters
+                    {
+                        Type = "object",
+                        Properties = new Dictionary<string, Property>
+                        {
+                            { 
+                                "Path", new Property
+                                {
+                                    Description = "The root directory to start the glob search from"
+                                }
+                            },
+                            { 
+                                "IncludePatterns", new Property
+                                {
+                                    Description = "List of patterns to include in the search"
+                                }
+                            },
+                            { 
+                                "ExcludePatterns", new Property
+                                {
+                                    Description = "Optional list of patterns to exclude from the search"
+                                }
+                            }
+                        }
+                    }
                 }
             }
         };
@@ -133,8 +164,8 @@ internal class OpenAiClient : IClient
 
         public List<Message>? Messages { get; set; }
 
-        [JsonPropertyName("max_tokens")]
-        public int MaxTokens { get; set; }
+        [JsonPropertyName("max_completion_tokens")]
+        public int MaxCompletionTokens { get; set; }
 
         public double Temperature { get; set; }
 
@@ -146,7 +177,9 @@ internal class OpenAiClient : IClient
         public string? Id { get; set; }
 
         public string? Object { get; set; }
+
         public long Created { get; set; }
+
         public string? Model { get; set; }
 
         [JsonPropertyName("system_fingerprint")]
@@ -174,6 +207,9 @@ internal class OpenAiClient : IClient
 
         [JsonPropertyName("finish_reason")]
         public string? FinishReason { get; set; }
+
+        [JsonPropertyName("tool_calls")]
+        public List<Tool>? ToolCalls;
     }
 
     class Usage
@@ -191,6 +227,8 @@ internal class OpenAiClient : IClient
 
     public class Tool
     {
+        public string? Id;
+
         public string Type { get; set; } = "function";
 
         public Function? Function { get; set; }
@@ -202,17 +240,26 @@ internal class OpenAiClient : IClient
 
         public string? Description { get; set; }
 
-        public List<OpenApiSchema>? Parameters { get; set; }
+        public Parameters? Parameters { get; set; }
+
+        public string? Arguments { get; set; }
     }
 
     public class Parameters
     {
         public string? Type { get; set; }
 
-        public Properties? Properties { get; set; }
+        public Dictionary<string, Property>? Properties { get; set; }
 
         public List<string>? Required { get; set; }
 
         public bool? AdditionalProperties { get; set; }
+    }
+
+    public class Property
+    {
+        public string? Type { get; set; }
+
+        public string? Description { get; set; }
     }
 }
