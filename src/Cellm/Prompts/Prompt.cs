@@ -8,8 +8,8 @@ public enum Role
     Tool
 }
 
-public record ToolCall(string Id, string Type, Dictionary<string, string> Function, string? Result);
+public record ToolCall(string Id, string Type, Dictionary<string, string> Function);
 
-public record Message(string Content, Role Role, List<ToolCall>? ToolCall = null);
+public record Message(string Content, Role Role, List<ToolCall>? ToolCalls);
 
 public record Prompt(string SystemMessage, List<Message> Messages, double Temperature);

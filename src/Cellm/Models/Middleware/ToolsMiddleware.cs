@@ -1,7 +1,5 @@
-﻿using Cellm.AddIn.Exceptions;
-using Cellm.Prompts;
+﻿using Cellm.Prompts;
 using MediatR;
-using Sentry.Protocol;
 
 namespace Cellm.Models.Middleware;
 
@@ -20,21 +18,25 @@ internal class ToolsMiddleware<TRequest, TResponse> : IPipelineBehavior<TRequest
     {
         var response = await next();
 
-        var lastMessage = response.Prompt.Messages.LastOrDefault();
+        var toolCalls = response.Prompt.Messages.LastOrDefault()?.ToolCalls;
 
-        if (lastMessage?.Role == Role.Tool)
+        if (toolCalls is not null)
         {
-            request.Prompt.Messages.Add(RunTool(lastMessage));
+            request.Prompt.Messages.AddRange(await RunTools(toolCalls));
             response = await _sender.Send(request, cancellationToken);
         }
 
         return response;
     }
 
-    private Message RunTool(Message message)
+    private async Task<IEnumerable<Message>> RunTools(List<ToolCall> toolCalls)
     {
-        message.ToolCalls.Select(x => _tools.Run(x));
-        var response = await _sender.Send(_tools.GetRequest(message.ToolCalls) ) 
-        return new Message()
+        var results = await Task.WhenAll(toolCalls.Select(x => _sender.Send(ToolRequestFactory(x))));
+        return results.Zip(toolCalls, (result, toolCall) => new Message(result, Role.Tool, new List<ToolCall> { toolCall }));
+    }
+
+    private IRequest<TResult> ToolRequestFactory(ToolCall x)
+    {
+        throw new NotImplementedException();
     }
 }
