@@ -45,7 +45,7 @@ internal class OpenAiRequestHandler : IRequestHandler<OpenAiRequest, OpenAiRespo
 
         if (_openAiConfiguration.EnableTools)
         {
-            requestBody.Tools = Convert(_tools);
+            requestBody.Tools = Convert();
         }
 
         var json = _serde.Serialize(requestBody);
@@ -74,7 +74,7 @@ internal class OpenAiRequestHandler : IRequestHandler<OpenAiRequest, OpenAiRespo
         return new OpenAiResponse(assistantPrompt);
     }
 
-    private List<Tool> ToOpenAiTools()
+    private List<OpenAiTool> ToOpenAiTools()
     {
         throw new NotImplementedException();
     }
@@ -87,31 +87,30 @@ internal class OpenAiRequestHandler : IRequestHandler<OpenAiRequest, OpenAiRespo
 
         return openAiPrompt
             .Messages
-            .Select(x => Convert(x))
+            .SelectMany(x => Convert(x))
             .ToList();
     }
 
-    private Message Convert(Prompts.Message message)
+    private IEnumerable<Message> Convert(Prompts.Message message)
     {
         return message.Role switch
         {
-            Roles.Tool => throw new NotImplementedException(),
-            _ => new Message {
-                Content = message.Content,
-                Role = message.Role.ToString().ToLower(),
-                ToolCallId = null
+            Roles.Tool => message?.ToolRequests?
+                .Select(x => new Message
+                    {
+                        Content = x.Arguments.ToString() + " Result: " + x.Response,
+                        Role = message.Role.ToString().ToLower(),
+                        ToolCallId = x.Id
+                    }) ?? throw new CellmException(),
+            _ => new List<Message> 
+            {
+                new Message {
+                    Content = message.Content,
+                    Role = message.Role.ToString().ToLower(),
+                    ToolCallId = null
+                }
             },
         };
-    }
-
-    private Tool Convert(ToolRequest toolRequest)
-    {
-        if (string.IsNullOrEmpty(toolRequest.Response))
-        {
-            return new Tool();
-        }
-
-        return new Tool();
     }
 
     private Prompt Convert(List<Message> messages)
@@ -119,12 +118,12 @@ internal class OpenAiRequestHandler : IRequestHandler<OpenAiRequest, OpenAiRespo
         throw new NotImplementedException();
     }
 
-    private List<Tool> Convert(ITools _)
+    private List<OpenAiTool> Convert()
     {
         var attributes = typeof(Glob).GetMethod(nameof(Glob.Handle))?.GetCustomAttributes(typeof(DescriptionAttribute), false);
         var description = ((DescriptionAttribute)attributes![0]).Description;
 
-        return new List<Tool>()
+        return new List<OpenAiTool>()
         {
             new() {
                 Function = new Function {
@@ -171,7 +170,7 @@ internal class OpenAiRequestHandler : IRequestHandler<OpenAiRequest, OpenAiRespo
 
         public double Temperature { get; set; }
 
-        public List<Tool>? Tools { get; set; }
+        public List<OpenAiTool>? Tools { get; set; }
     }
 
     class ResponseBody
@@ -199,6 +198,8 @@ internal class OpenAiRequestHandler : IRequestHandler<OpenAiRequest, OpenAiRespo
         public string? Content { get; set; }
 
         public string? ToolCallId { get; set; }
+
+        public List<OpenAiTool>? ToolCalls { get; set; }
     }
 
     class Choice
@@ -213,7 +214,7 @@ internal class OpenAiRequestHandler : IRequestHandler<OpenAiRequest, OpenAiRespo
         public string? FinishReason { get; set; }
 
         [JsonPropertyName("tool_calls")]
-        public List<Tool>? ToolCalls;
+        public List<OpenAiTool>? ToolCalls;
     }
 
     class Usage
@@ -229,7 +230,7 @@ internal class OpenAiRequestHandler : IRequestHandler<OpenAiRequest, OpenAiRespo
     }
 
 
-    public class Tool
+    public class OpenAiTool
     {
         public string? Id;
 
