@@ -4,6 +4,7 @@ using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.Models.OpenAi;
 using Cellm.Prompts;
+using MediatR;
 using Microsoft.Extensions.Options;
 
 namespace Cellm.Models.Llamafile;
@@ -20,20 +21,20 @@ internal class LlamafileClient : IClient
     private readonly LlamafileConfiguration _llamafileConfiguration;
     private readonly OpenAiConfiguration _openAiConfiguration;
 
-    private readonly IClient _openAiClient;
+    private readonly ISender _sender;
     private readonly HttpClient _httpClient;
 
     public LlamafileClient(IOptions<CellmConfiguration> cellmConfiguration,
         IOptions<LlamafileConfiguration> llamafileConfiguration,
         IOptions<OpenAiConfiguration> openAiConfiguration,
-        OpenAiClient openAiClient,
+        ISender sender,
         HttpClient httpClient,
         LLamafileProcessManager llamafileProcessManager)
     {
         _cellmConfiguration = cellmConfiguration.Value;
         _llamafileConfiguration = llamafileConfiguration.Value;
         _openAiConfiguration = openAiConfiguration.Value;
-        _openAiClient = openAiClient;
+        _sender = sender;
         _httpClient = httpClient;
         _llamafileProcessManager = llamafileProcessManager;
 
@@ -60,11 +61,9 @@ internal class LlamafileClient : IClient
         // Download model and start Llamafile on first call
         var llamafile = await _llamafiles[model ?? _llamafileConfiguration.DefaultModel];
 
-        return await _openAiClient.Send(
-            prompt,
-            provider ?? "Llamafile",
-            model ?? _llamafileConfiguration.DefaultModel,
-            baseAddress ?? llamafile.BaseAddress);
+        var openAiResponse = await _sender.Send(new OpenAiRequest(prompt, provider ?? "Llamafile", model ?? _llamafileConfiguration.DefaultModel, baseAddress ?? llamafile.BaseAddress));
+
+        return openAiResponse.Prompt;
     }
 
     private async Task<Process> StartProcess(string modelPath, Uri baseAddress)

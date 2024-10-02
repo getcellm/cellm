@@ -15,7 +15,6 @@ internal class ClientFactory : IClientFactory
         {
             "anthropic" => ServiceLocator.Get<AnthropicClient>(),
             "googleai" => ServiceLocator.Get<GoogleAiClient>(),
-            "openai" => ServiceLocator.Get<OpenAiClient>(),
             "llamafile" => ServiceLocator.Get<LlamafileClient>(),
             _ => throw new ArgumentException($"Unsupported client type: {modelProvider}")
         };

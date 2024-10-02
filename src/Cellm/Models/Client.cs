@@ -1,7 +1,9 @@
 ﻿using System.Text.Json;
 using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
+using Cellm.Models.OpenAi;
 using Cellm.Prompts;
+using MediatR;
 using Microsoft.Diagnostics.Tracing.Parsers.FrameworkEventSource;
 using Microsoft.Diagnostics.Tracing.Parsers.IIS_Trace;
 using Microsoft.Extensions.Options;
@@ -14,17 +16,24 @@ internal class Client : IClient
 {
     private readonly IClientFactory _clientFactory;
     private readonly CellmConfiguration _cellmConfiguration;
+    private readonly ISender _sender;
 
-    public Client(IClientFactory clientFactory, IOptions<CellmConfiguration> cellmConfiguration)
+    public Client(IClientFactory clientFactory, IOptions<CellmConfiguration> cellmConfiguration, ISender sender)
     {
         _clientFactory = clientFactory;
         _cellmConfiguration = cellmConfiguration.Value;
+        _sender = sender;
     }
 
     public async Task<Prompt> Send(Prompt prompt, string? provider, string? model, Uri? baseAddress)
     {
         try
         {
+            if (provider?.ToLower() == "opneai")
+            {
+                var response = await _sender.Send(new OpenAiRequest(prompt, provider, model, baseAddress));
+            }
+
             var client = _clientFactory.GetClient(provider ?? _cellmConfiguration.DefaultProvider);
             return await client.Send(prompt, provider, model, baseAddress);
         }

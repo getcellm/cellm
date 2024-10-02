@@ -38,25 +38,25 @@ public class PromptBuilder
             throw new CellmException("Cannot add empty system message");
         }
 
-        _messages.Insert(0, new Message(_systemMessage!, Role.System));
+        _messages.Insert(0, new Message(_systemMessage!, Roles.System));
         return this;
     }
 
     public PromptBuilder AddSystemMessage(string content)
     {
-        _messages.Add(new Message(content, Role.System));
+        _messages.Add(new Message(content, Roles.System));
         return this;
     }
 
     public PromptBuilder AddUserMessage(string content)
     {
-        _messages.Add(new Message(content, Role.User));
+        _messages.Add(new Message(content, Roles.User));
         return this;
     }
 
-    public PromptBuilder AddAssistantMessage(string content, List<ToolCall>? toolCalls = null)
+    public PromptBuilder AddAssistantMessage(string content, List<ToolRequest>? toolCalls = null)
     {
-        _messages.Add(new Message(content, Role.Assistant, toolCalls));
+        _messages.Add(new Message(content, Roles.Assistant, toolCalls));
         return this;
     }
 

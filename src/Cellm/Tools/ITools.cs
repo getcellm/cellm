@@ -1,6 +1,8 @@
-﻿namespace Cellm.Tools;
+﻿using Cellm.Prompts;
+
+namespace Cellm.Tools;
 
 internal interface ITools
 {
-    public List<string> Serialize();
+    public Task<string> Run(ToolRequest toolCall);
 }

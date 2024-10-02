@@ -123,11 +123,11 @@ internal static class ServiceLocator
         var openAiConfiguration = configuration.GetRequiredSection(nameof(OpenAiConfiguration)).Get<OpenAiConfiguration>()
             ?? throw new NullReferenceException(nameof(OpenAiConfiguration));
 
-        services.AddHttpClient<OpenAiClient>(openAiHttpClient =>
+        services.AddHttpClient<OpenAiRequestHandler>(openAiHttpClient =>
         {
             openAiHttpClient.BaseAddress = openAiConfiguration.BaseAddress;
             openAiHttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {openAiConfiguration.ApiKey}");
-        }).AddResilienceHandler($"{nameof(OpenAiClient)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
+        }).AddResilienceHandler($"{nameof(OpenAiRequestHandler)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
 
         services.AddSingleton<LlamafileClient>();
 

@@ -24,7 +24,7 @@ internal class CachingMiddleware<TRequest, TResponse> : IPipelineBehavior<TReque
         response = await next();
 
         // Tool responses must not be cached because their results depend on external state
-        if (response.Prompt.Messages.All(x => x.Role != Role.Tool))
+        if (response.Prompt.Messages.All(x => x.Role != Roles.Tool))
         {
             _cache.Set(request, response);
         }

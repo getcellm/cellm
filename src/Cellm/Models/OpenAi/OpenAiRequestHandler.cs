@@ -5,63 +5,57 @@ using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.Prompts;
 using Cellm.Tools;
+using MediatR;
 using Microsoft.Extensions.Options;
 
 namespace Cellm.Models.OpenAi;
 
-internal class OpenAiClient : IClient
+internal class OpenAiRequestHandler : IRequestHandler<OpenAiRequest, OpenAiResponse>
 {
     private readonly OpenAiConfiguration _openAiConfiguration;
     private readonly CellmConfiguration _cellmConfiguration;
     private readonly HttpClient _httpClient;
-    private readonly ICache _cache;
+    private readonly ITools _tools;
     private readonly ISerde _serde;
 
-    public OpenAiClient(
+    public OpenAiRequestHandler(
         IOptions<OpenAiConfiguration> openAiConfiguration,
         IOptions<CellmConfiguration> cellmConfiguration,
         HttpClient httpClient,
-        ICache cache,
+        ITools tools,
         ISerde serde)
     {
         _openAiConfiguration = openAiConfiguration.Value;
         _cellmConfiguration = cellmConfiguration.Value;
         _httpClient = httpClient;
-        _cache = cache;
+        _tools = tools;
         _serde = serde;
     }
 
-    public async Task<Prompt> Send(Prompt prompt, string? provider, string? model, Uri? baseAddress)
+    public async Task<OpenAiResponse> Handle(OpenAiRequest request, CancellationToken cancellationToken)
     {
-        var transaction = SentrySdk.StartTransaction(typeof(OpenAiClient).Name, nameof(Send));
-        SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
-
-        var openAiPrompt = new PromptBuilder(prompt)
-            .AddSystemMessage()
-            .Build();
 
         var requestBody = new RequestBody
         {
-            Model = model ?? _openAiConfiguration.DefaultModel,
-            Messages = openAiPrompt.Messages.Select(x => new Message { Content = x.Content, Role = x.Role.ToString().ToLower() }).ToList(),
-            MaxTokens = _cellmConfiguration.MaxTokens,
-            Temperature = prompt.Temperature,
-            Tools = GetTools()
+            Model = request.Model ?? _openAiConfiguration.DefaultModel,
+            Messages = Convert(request.Prompt),
+            MaxCompletionTokens = _cellmConfiguration.MaxOutputTokens,
+            Temperature = request.Prompt.Temperature,
         };
 
-        if (_cache.TryGetValue(requestBody, out object? value) && value is Prompt assistantPrompt)
+        if (_openAiConfiguration.EnableTools)
         {
-            return assistantPrompt;
+            requestBody.Tools = Convert(_tools);
         }
 
         var json = _serde.Serialize(requestBody);
         var jsonAsString = new StringContent(json, Encoding.UTF8, "application/json");
 
         const string path = "/v1/chat/completions";
-        var address = baseAddress is null ? new Uri(path, UriKind.Relative) : new Uri(baseAddress, path);
+        var address = request.BaseAddress is null ? new Uri(path, UriKind.Relative) : new Uri(request.BaseAddress, path);
 
-        var response = await _httpClient.PostAsync(address, jsonAsString);
-        var responseBodyAsString = await response.Content.ReadAsStringAsync();
+        var response = await _httpClient.PostAsync(address, jsonAsString, cancellationToken);
+        var responseBodyAsString = await response.Content.ReadAsStringAsync(cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {
@@ -73,51 +67,59 @@ internal class OpenAiClient : IClient
 
         var assistantMessage = choice?.Message?.Content ?? throw new CellmException("#EMPTY_RESPONSE?");
 
-        if (choice?.FinishReason == "tool_calls")
-        {
-            var toolPromptBuilder = new PromptBuilder(prompt)
-                .AddSystemMessage()
-                .AddAssistantMessage(new Message());
-
-        }        
-
-        assistantPrompt = new PromptBuilder(prompt)
+        var assistantPrompt = new PromptBuilder(request.Prompt)
             .AddAssistantMessage(assistantMessage)
             .Build();
 
-        _cache.Set(requestBody, assistantPrompt);
-
-        var tags = new Dictionary<string, string>
-            {
-                { nameof(provider), provider?.ToLower() ?? _cellmConfiguration.DefaultProvider },
-                { nameof(model), model?.ToLower() ?? _openAiConfiguration.DefaultModel },
-                { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
-            };
-
-        var inputTokens = responseBody?.Usage?.PromptTokens ?? -1;
-        if (inputTokens > 0)
-        {
-            SentrySdk.Metrics.Distribution("InputTokens",
-                inputTokens,
-                unit: MeasurementUnit.Custom("token"),
-                tags);
-        }
-
-        var outputTokens = responseBody?.Usage?.CompletionTokens ?? -1;
-        if (outputTokens > 0)
-        {
-            SentrySdk.Metrics.Distribution("OutputTokens",
-                outputTokens,
-                unit: MeasurementUnit.Custom("token"),
-                tags);
-        }
-
-        transaction.Finish();
-
-        return assistantPrompt;
+        return new OpenAiResponse(assistantPrompt);
     }
 
-    private List<Tool> GetTools()
+    private List<Tool> ToOpenAiTools()
+    {
+        throw new NotImplementedException();
+    }
+
+    private List<Message> Convert(Prompt prompt)
+    {
+        var openAiPrompt = new PromptBuilder(prompt)
+            .AddSystemMessage()
+            .Build();
+
+        return openAiPrompt
+            .Messages
+            .Select(x => Convert(x))
+            .ToList();
+    }
+
+    private Message Convert(Prompts.Message message)
+    {
+        return message.Role switch
+        {
+            Roles.Tool => throw new NotImplementedException(),
+            _ => new Message {
+                Content = message.Content,
+                Role = message.Role.ToString().ToLower(),
+                ToolCallId = null
+            },
+        };
+    }
+
+    private Tool Convert(ToolRequest toolRequest)
+    {
+        if (string.IsNullOrEmpty(toolRequest.Response))
+        {
+            return new Tool();
+        }
+
+        return new Tool();
+    }
+
+    private Prompt Convert(List<Message> messages)
+    {
+        throw new NotImplementedException();
+    }
+
+    private List<Tool> Convert(ITools _)
     {
         var attributes = typeof(Glob).GetMethod(nameof(Glob.Handle))?.GetCustomAttributes(typeof(DescriptionAttribute), false);
         var description = ((DescriptionAttribute)attributes![0]).Description;
@@ -195,6 +197,8 @@ internal class OpenAiClient : IClient
         public string? Role { get; set; }
 
         public string? Content { get; set; }
+
+        public string? ToolCallId { get; set; }
     }
 
     class Choice

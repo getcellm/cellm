@@ -21,6 +21,6 @@ internal class Serde : ISerde
 
     public TValue Deserialize<TValue>(string value, JsonSerializerOptions? options = null)
     {
-        return JsonSerializer.Deserialize<TValue>(value, options ?? _defaultOptions) ?? throw new CellmException("Failed to deserialize responds");
+        return JsonSerializer.Deserialize<TValue>(value, options ?? _defaultOptions) ?? throw new CellmException($"Failed to deserialize {value} to {typeof(TValue).Name}");
     }
 }
