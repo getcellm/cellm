@@ -1,3 +1,3 @@
 ﻿namespace Cellm.Prompts;
 
-public record Prompt(string SystemMessage, List<Message> Messages, double Temperature);
+public record Prompt(string SystemMessage, List<Message> Messages, double Temperature, List<Tool> Tools);

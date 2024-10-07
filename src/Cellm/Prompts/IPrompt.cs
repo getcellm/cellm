@@ -1,6 +1,6 @@
 ﻿namespace Cellm.Prompts;
 
-public interface IHasPrompt
+public interface IPrompt
 {
     Prompt Prompt { get; set; }
 }

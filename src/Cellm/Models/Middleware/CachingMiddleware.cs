@@ -5,7 +5,7 @@ namespace Cellm.Models.Middleware;
 
 internal class CachingMiddleware<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
-    where TResponse : IHasPrompt
+    where TResponse : IPrompt
 {
     private readonly ICache _cache;
 

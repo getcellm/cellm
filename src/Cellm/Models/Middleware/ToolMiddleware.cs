@@ -6,8 +6,8 @@ using Microsoft.Office.Core;
 namespace Cellm.Models.Middleware;
 
 internal class ToolMiddleware<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : IHasPrompt, IRequest<TResponse>
-    where TResponse : IHasPrompt
+    where TRequest : IPrompt, IRequest<TResponse>
+    where TResponse : IPrompt
 {
     private readonly ISender _sender;
     private readonly ITools _tools;

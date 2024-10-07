@@ -7,6 +7,7 @@ public class PromptBuilder
     private string? _systemMessage;
     private List<Message> _messages = new();
     private double? _temperature;
+    private List<Tool> _tools = new();
 
     public PromptBuilder()
     {
@@ -66,12 +67,19 @@ public class PromptBuilder
         return this;
     }
 
+    public PromptBuilder AddTools(List<Tool> tools)
+    {
+        _tools = tools;
+        return this;
+    }
+
     public Prompt Build()
     {
         return new Prompt(
             _systemMessage ?? string.Empty,
             _messages,
-            _temperature ?? throw new ArgumentNullException(nameof(_temperature))
+            _temperature ?? throw new ArgumentNullException(nameof(_temperature)),
+            _tools
         );
     }
 }
