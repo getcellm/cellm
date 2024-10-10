@@ -1,7 +1,6 @@
 ﻿using Cellm.Prompts;
 using Cellm.Tools;
 using MediatR;
-using Microsoft.Office.Core;
 
 namespace Cellm.Models.Middleware;
 

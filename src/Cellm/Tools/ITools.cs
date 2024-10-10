@@ -4,5 +4,7 @@ namespace Cellm.Tools;
 
 internal interface ITools
 {
-    public Task<string> Run(ToolRequest toolCall);
+    public List<Tool> GetTools();
+
+    public Task<string> Run(ToolRequest toolRequest);
 }

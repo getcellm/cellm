@@ -29,7 +29,7 @@ internal class GoogleAiClient : IClient
         _serde = serde;
     }
 
-    public async Task<Prompt> Send(Prompt prompt, string? provider, string? model, Uri? baseAddress)
+    public async Task<Prompt> Send(Prompt prompt, string? provider, Uri? baseAddress)
     {
         var transaction = SentrySdk.StartTransaction(typeof(GoogleAiClient).Name, nameof(Send));
         SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
@@ -57,7 +57,7 @@ internal class GoogleAiClient : IClient
         var json = _serde.Serialize(requestBody);
         var jsonAsString = new StringContent(json, Encoding.UTF8, "application/json");
 
-        string path = $"/v1beta/models/{model ?? _googleAiConfiguration.DefaultModel}:generateContent?key={_googleAiConfiguration.ApiKey}";
+        string path = $"/v1beta/models/{prompt.Model ?? _googleAiConfiguration.DefaultModel}:generateContent?key={_googleAiConfiguration.ApiKey}";
         var address = baseAddress is null ? new Uri(path, UriKind.Relative) : new Uri(baseAddress, path);
 
         var response = await _httpClient.PostAsync(address, jsonAsString);
@@ -79,7 +79,7 @@ internal class GoogleAiClient : IClient
 
         var tags = new Dictionary<string, string> {
             { nameof(provider), provider?.ToLower() ?? _cellmConfiguration.DefaultProvider },
-            { nameof(model), model?.ToLower() ?? _googleAiConfiguration.DefaultModel },
+            { nameof(prompt.Model), prompt.Model?.ToLower() ?? _googleAiConfiguration.DefaultModel },
             { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
         };
 

@@ -56,12 +56,12 @@ internal class LlamafileClient : IClient
         }));
     }
 
-    public async Task<Prompt> Send(Prompt prompt, string? provider, string? model, Uri? baseAddress)
+    public async Task<Prompt> Send(Prompt prompt, string? provider, Uri? baseAddress)
     {
         // Download model and start Llamafile on first call
-        var llamafile = await _llamafiles[model ?? _llamafileConfiguration.DefaultModel];
+        var llamafile = await _llamafiles[prompt.Model ?? _llamafileConfiguration.DefaultModel];
 
-        var openAiResponse = await _sender.Send(new OpenAiRequest(prompt, provider ?? "Llamafile", model ?? _llamafileConfiguration.DefaultModel, baseAddress ?? llamafile.BaseAddress));
+        var openAiResponse = await _sender.Send(new OpenAiRequest(prompt, provider ?? "Llamafile", baseAddress ?? llamafile.BaseAddress));
 
         return openAiResponse.Prompt;
     }

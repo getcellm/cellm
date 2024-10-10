@@ -171,7 +171,7 @@ public class ArgumentParser
 
         if (string.IsNullOrEmpty(_instructions))
         {
-            instructionsBuilder.AppendLine(Prompts.InlineInstructions);
+            instructionsBuilder.AppendLine(CellmPrompts.InlineInstructions);
         }
         else
         {

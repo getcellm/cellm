@@ -29,7 +29,7 @@ internal class AnthropicClient : IClient
         _serde = serde;
     }
 
-    public async Task<Prompt> Send(Prompt prompt, string? provider, string? model, Uri? baseAddress)
+    public async Task<Prompt> Send(Prompt prompt, string? provider, Uri? baseAddress)
     {
         var transaction = SentrySdk.StartTransaction(typeof(AnthropicClient).Name, nameof(Send));
         SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
@@ -38,7 +38,7 @@ internal class AnthropicClient : IClient
         {
             System = prompt.SystemMessage,
             Messages = prompt.Messages.Select(x => new Message { Content = x.Content, Role = x.Role.ToString().ToLower() }).ToList(),
-            Model = model ?? _anthropicConfiguration.DefaultModel,
+            Model = prompt.Model ?? _anthropicConfiguration.DefaultModel,
             MaxTokens = _cellmConfiguration.MaxOutputTokens,
             Temperature = prompt.Temperature
         };
@@ -73,7 +73,7 @@ internal class AnthropicClient : IClient
 
         var tags = new Dictionary<string, string> {
             { nameof(provider), provider?.ToLower() ?? _cellmConfiguration.DefaultProvider },
-            { nameof(model), model?.ToLower() ?? _anthropicConfiguration.DefaultModel },
+            { nameof(prompt.Model), prompt.Model ?.ToLower() ?? _anthropicConfiguration.DefaultModel },
             { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
         };
 

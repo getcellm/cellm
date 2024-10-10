@@ -25,17 +25,18 @@ internal class Client : IClient
         _sender = sender;
     }
 
-    public async Task<Prompt> Send(Prompt prompt, string? provider, string? model, Uri? baseAddress)
+    public async Task<Prompt> Send(Prompt prompt, string? provider, Uri? baseAddress)
     {
         try
         {
-            if (provider?.ToLower() == "opneai")
+            if (provider?.ToLower() == "openai")
             {
-                var response = await _sender.Send(new OpenAiRequest(prompt, provider, model, baseAddress));
+                var response = await _sender.Send(new OpenAiRequest(prompt, provider, baseAddress));
+                return response.Prompt;
             }
 
             var client = _clientFactory.GetClient(provider ?? _cellmConfiguration.DefaultProvider);
-            return await client.Send(prompt, provider, model, baseAddress);
+            return await client.Send(prompt, provider, baseAddress);
         }
         catch (HttpRequestException ex)
         {

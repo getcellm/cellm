@@ -1,4 +1,5 @@
-﻿using Cellm.AddIn;
+﻿using System.Reflection;
+using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.Models;
 using Cellm.Models.Anthropic;
@@ -6,7 +7,9 @@ using Cellm.Models.GoogleAi;
 using Cellm.Models.Llamafile;
 using Cellm.Models.OpenAi;
 using Cellm.Services.Configuration;
+using Cellm.Tools;
 using ExcelDna.Integration;
+using MediatR;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -81,10 +84,12 @@ internal static class ServiceLocator
         // Internals
         services
             .AddSingleton(configuration)
+            .AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()))
             .AddMemoryCache()
             .AddTransient<ArgumentParser>()
             .AddSingleton<IClientFactory, ClientFactory>()
             .AddSingleton<IClient, Client>()
+            .AddSingleton<ITools, Tools.Tools>()
             .AddSingleton<ICache, Cache>()
             .AddSingleton<ISerde, Serde>()
             .AddSingleton<LLamafileProcessManager>();
@@ -123,7 +128,7 @@ internal static class ServiceLocator
         var openAiConfiguration = configuration.GetRequiredSection(nameof(OpenAiConfiguration)).Get<OpenAiConfiguration>()
             ?? throw new NullReferenceException(nameof(OpenAiConfiguration));
 
-        services.AddHttpClient<OpenAiRequestHandler>(openAiHttpClient =>
+        services.AddHttpClient<IRequestHandler<OpenAiRequest, OpenAiResponse>, OpenAiRequestHandler>(openAiHttpClient =>
         {
             openAiHttpClient.BaseAddress = openAiConfiguration.BaseAddress;
             openAiHttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {openAiConfiguration.ApiKey}");

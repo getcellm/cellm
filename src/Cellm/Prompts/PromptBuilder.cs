@@ -4,6 +4,7 @@ namespace Cellm.Prompts;
 
 public class PromptBuilder
 {
+    private string? _model;
     private string? _systemMessage;
     private List<Message> _messages = new();
     private double? _temperature;
@@ -15,9 +16,16 @@ public class PromptBuilder
 
     public PromptBuilder(Prompt prompt)
     {
+        _model = prompt.Model;
         _systemMessage = prompt.SystemMessage;
         _messages = prompt.Messages;
         _temperature = prompt.Temperature;
+    }
+
+    public PromptBuilder SetModel(string model)
+    {
+        _model = model;
+        return this;
     }
 
     public PromptBuilder SetSystemMessage(string systemMessage)
@@ -61,6 +69,11 @@ public class PromptBuilder
         return this;
     }
 
+    public PromptBuilder AddMessage(Message message)
+    {
+        return AddMessages(new List<Message> { message });
+    }
+
     public PromptBuilder AddMessages(List<Message> messages)
     {
         _messages.AddRange(messages);
@@ -76,6 +89,7 @@ public class PromptBuilder
     public Prompt Build()
     {
         return new Prompt(
+            _model ?? throw new ArgumentNullException(nameof(_model)),
             _systemMessage ?? string.Empty,
             _messages,
             _temperature ?? throw new ArgumentNullException(nameof(_temperature)),
