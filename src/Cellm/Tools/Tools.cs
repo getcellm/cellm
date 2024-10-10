@@ -1,7 +1,10 @@
-﻿using System.ComponentModel;
-using System.Reflection;
+﻿using System.Reflection;
+using System.Text.Json;
 using Cellm.Models;
 using Cellm.Prompts;
+using Json.More;
+using Json.Schema;
+using Json.Schema.Generation;
 using MediatR;
 
 namespace Cellm.Tools;
@@ -28,17 +31,25 @@ internal class Tools : ITools
 
     public List<Tool> GetTools()
     {
+        var schema = new JsonSchemaBuilder()
+            .FromType<GlobRequest>().Build();
+
+        var jsonDocument = schema.ToJsonDocument();
+
+        var json = JsonSerializer.Serialize(jsonDocument);
+
         return new List<Tool>()
         {
             new Tool(
                 "Glob",
-                "Search in the specified directory based on include exclude glob patterns",
+                "Search for files on the user's disk using glob patterns. Useful when user asks you to find files.",
                 new Dictionary<string, (string Description, string Type)>
                 {
                     { "RootPath", ("The root directory to start the glob search from", "string") },
-                    { "include", ("List of patterns to include in the search", "string") },
-                    { "exclude", ("Optional list of patterns to exclude from the search", "string") }
-                }
+                    { "IncludePatterns", ("List of patterns to include in the search", "string") },
+                    { "ExcludePatterns", ("Optional list of patterns to exclude from the search", "string") }
+                },
+                new List<string> { "RootPath", "IncludePatterns" }
             )
         };
     }

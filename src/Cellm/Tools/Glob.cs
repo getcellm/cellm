@@ -12,7 +12,7 @@ internal record GlobRequest(
 internal record GlobResponse(
     [Description("List of file paths matching the glob patterns")] List<string> FilePaths);
 
-[Description("Search for files based on include and exclude glob patterns")]
+[Description("Search for files on the user's disk using glob patterns. Useful when user asks you to find files.")]
 internal class Glob : IRequestHandler<GlobRequest, GlobResponse>
 {
     public Task<GlobResponse> Handle(GlobRequest request, CancellationToken cancellationToken)
