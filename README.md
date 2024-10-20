@@ -24,11 +24,11 @@ Say you're reviewing medical studies and need to quickly identify papers relevan
 
 https://github.com/user-attachments/assets/c93f7da9-aabd-4c13-a4f5-3e12332c5794
 
-In this example, we copy the papers' title and abstract into Excel and write this prompt: 
+In this example, we copy the papers' titles and abstracts into Excel and write this prompt: 
 
 > "If the paper studies diabetic neuropathy and stroke, return "Include", otherwise, return "Exclude"."  
 
-We then use AutoFill to apply the prompt to many papers. Simple and powerful.
+We then use autofill to apply the prompt to many papers. Simple and powerful.
 
 A single paper is misclassified because the original inclusion and exclusion criteria were summarized in one sentence. This is a good example, however, because it shows that these models rely entirely on your input and can make mistakes.
 
@@ -92,7 +92,7 @@ PROMPT(cells: range, [instruction: range | instruction: string | temperature: do
 ```
 
 - **cells (Required):** A cell or a range of cells.
-  - Context and (optionally) instructions. The model will use the cells as context and follow any instructions as long as they present _somewhere_ in the cells.
+  - Context and (optionally) instructions. The model will use the cells as context and follow any instructions as long as they are present _somewhere_ in the cells.
 - **instructions (Optional):** A cell, a range of cells, or a string.
   - The model will follow these instructions and ignore instructions in the cells of the first argument.
   - Default: Empty. 
@@ -175,9 +175,9 @@ These use cases are starting points. Experiment with different instructions to f
 
 #### Local LLMs
 
-Cellm can run LLM models locally on your computer via Llamafiles, Ollama, or vLLM. This ensures none of your data ever leaves your machine. And its free.
+Cellm can run LLM models locally on your computer via Llamafiles, Ollama, or vLLM. This ensures none of your data ever leaves your machine. And it's free.
 
-Cellm uses Gemma 2 2B model with 4-bit quantization by default. This clever little model runs fine on a CPU. If you don't which model to use, try out this model with a Llamafile server.
+Cellm uses Gemma 2 2B model with 4-bit quantization by default. This clever little model runs fine on a CPU.
 
 For Ollama and vLLM you will need docker, and for models larger than 3B you will need a GPU.
 
@@ -192,15 +192,15 @@ To get started:
 3. Run e.g. `=PROMPT(A1, "Extract keywords")` in a formula.
 4. Wait 5-10 min depending on your internet connection. The model will reply once it is ready. 
 
-This will use the Llama 3.2 1B model. To use other models, edit the file and rebuild.
+This will use the Llama 3.2 1B model. To use other models, edit the appsettings file and rebuild.
 
-Use `appsettings.Llamafile.GPU.json` to offload inference to your NVIDIA or AMD GPU.
+Use `appsettings.Llamafile.GPU.json` to offload Llamafile inference to your NVIDIA or AMD GPU.
 
 ### Ollama and vLLM
 
 Ollama and vLLM are LLM inference servers for running models locally. Ollama is designed for easy of use and vLLM is designed to run models efficiently with high throughput. Both Ollama and vLLM are packaged up with docker compose files in the `docker/` folder.
 
-To get started, use Ollama with the Gemma 2 2B model:
+To get started, we recommend using Ollama with the Gemma 2 2B model:
 
 1. Rename `appsettings.Ollama.json` to `appsettings.Local.json`, 
 2. Build and install Cellm.
@@ -211,24 +211,25 @@ To get started, use Ollama with the Gemma 2 2B model:
    docker compose -f docker-compose.Ollama.yml down  // When you want to shut it down
    ```
 
-To use other models, pull [another supported model](https://ollama.com/library) for Ollama or change the "--model" argument to another Huggingface model for vLLM.
-
-Open WebUI in included in both docker compose files so you test the local model outside of Cellm. It is available at `http://localhost:3000`.
-
 If you want to speed up inference, you can use your GPU as well:
 
 ```cmd
 docker compose -f docker-compose.Ollama.yml -f docker-compose.Ollama.GPU.yml up --detach
 ```
 
-A GPU is practically required if you want to use larger models than Gemma 2 2b.
+A GPU is practically required if you want to use models larger than Gemma 2 2b.
 
-Iff you want to further speed up running many requests in parallel, you can use vLLM instead of Ollama. You must supply the docker compose file with a Huggingface token API key either via an environment variable or editing the docker compose file directy. If you don't know what an API key is just use a Llamafile model or Ollama. To start vLLM:
+If you want to speed up running many requests in parallel, you can use vLLM instead of Ollama. You must supply the docker compose file with a Huggingface API key either via an environment variable or editing the docker compose file directy. Look at the vLLM docker compose file for details. If you don't know what a Huggingface API key is, just use Ollama. 
+
+To start vLLM:
 
 ```cmd
 docker compose -f docker-compose.vLLM.GPU.yml up --detach
 ```
 
+To use other Ollama models, pull another of the [supported models](https://ollama.com/library). To use other vLLM models, change the "--model" argument to another Huggingface model.
+
+Open WebUI in included in both Ollama and vLLM docker compose files so you can test the local model outside of Cellm. It is available at `http://localhost:3000`.
 ## Dos and Don'ts
 
 Do:
@@ -249,7 +250,7 @@ Don't:
 ## Why did you make Cellm?
 My girlfriend was writing a systematic review paper. She had to compare 7.500 papers against inclusion and exclusion criterias. I told her this was a great use case for LLMs but quickly realized that individually copying 7.500 papers in and out of chat windows was a total pain. This sparked the idea to make an AI tool to automate repetitive tasks for people like her who would rather avoid programming. 
 
-I think Cellm is really cool because it enables everyone to automate repetitive tasks with AI to a level that was previously available only to programmers. My girlfriend still did her analysis manually, of couse, because she cares about scientific integrity.
+I think Cellm is really cool because it enables everyone to automate repetitive tasks with AI to a level that was previously available only to programmers.
 
 ## License
 
