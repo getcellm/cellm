@@ -1,8 +1,8 @@
 ﻿using MediatR;
 
-namespace Cellm.Models.Middleware;
+namespace Cellm.Models.PipelineBehavior;
 
-internal class SentryMiddleware<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+internal class SentryBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)

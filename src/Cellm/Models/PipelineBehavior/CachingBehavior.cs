@@ -1,15 +1,13 @@
-﻿using Cellm.Prompts;
-using MediatR;
+﻿using MediatR;
 
-namespace Cellm.Models.Middleware;
+namespace Cellm.Models.PipelineBehavior;
 
-internal class CachingMiddleware<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : notnull
-    where TResponse : IPrompt
+internal class CachingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+    where TRequest : IModelRequest<TResponse>
 {
     private readonly ICache _cache;
 
-    public CachingMiddleware(ICache cache)
+    public CachingBehavior(ICache cache)
     {
         _cache = cache;
     }
@@ -23,8 +21,8 @@ internal class CachingMiddleware<TRequest, TResponse> : IPipelineBehavior<TReque
 
         response = await next();
 
-        // Tool responses must not be cached because their results depend on external state
-        if (response.Prompt.Messages.All(x => x.Role != Roles.Tool))
+        // Tool results depend on state external to prompt and should not be cached
+        if (!request.Prompt.Messages.Any(x => x.Role == Prompts.Roles.Tool))
         {
             _cache.Set(request, response);
         }

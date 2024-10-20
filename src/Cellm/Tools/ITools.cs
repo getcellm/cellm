@@ -6,5 +6,5 @@ internal interface ITools
 {
     public List<Tool> GetTools();
 
-    public Task<string> Run(ToolRequest toolRequest);
+    public Task<string> Run(ToolCall toolRequest);
 }

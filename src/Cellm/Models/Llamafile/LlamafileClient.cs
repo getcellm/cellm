@@ -13,7 +13,7 @@ internal class LlamafileClient : IClient
 {
     private record Llamafile(string ModelPath, Uri BaseAddress, Process Process);
 
-    private readonly AsyncLazy<string> _llamafilePath;
+    private readonly AsyncLazy<string> _llamafileExePath;
     private readonly Dictionary<string, AsyncLazy<Llamafile>> _llamafiles;
     private readonly LLamafileProcessManager _llamafileProcessManager;
 
@@ -38,7 +38,7 @@ internal class LlamafileClient : IClient
         _httpClient = httpClient;
         _llamafileProcessManager = llamafileProcessManager;
 
-        _llamafilePath = new AsyncLazy<string>(async () =>
+        _llamafileExePath = new AsyncLazy<string>(async () =>
         {
             return await DownloadFile(_llamafileConfiguration.LlamafileUrl, "Llamafile.exe");
         });
@@ -68,7 +68,7 @@ internal class LlamafileClient : IClient
 
     private async Task<Process> StartProcess(string modelPath, Uri baseAddress)
     {
-        var processStartInfo = new ProcessStartInfo(await _llamafilePath);
+        var processStartInfo = new ProcessStartInfo(await _llamafileExePath);
 
         processStartInfo.Arguments += $"--server ";
         processStartInfo.Arguments += "--nobrowser ";
@@ -148,7 +148,7 @@ internal class LlamafileClient : IClient
         {
             if (process.HasExited)
             {
-                throw new CellmException($"Failed to run Llamafile. Exit code: {process.ExitCode}");
+                throw new CellmException($"Failed to run Llamafile, process exited. Exit code: {process.ExitCode}");
             }
 
             try
@@ -174,7 +174,7 @@ internal class LlamafileClient : IClient
 
         process.Kill();
 
-        throw new CellmException("Timeout waiting for Llamafile server to start");
+        throw new CellmException("Failed to run Llamafile, timeout waiting for Llamafile server to start");
     }
 
     string CreateFilePath(string fileName)
@@ -184,9 +184,9 @@ internal class LlamafileClient : IClient
         return filePath;
     }
 
-    private string CreateModelFileName(string modelName)
+    private static string CreateModelFileName(string modelName)
     {
-        return $"Llamafile-model-weights-{modelName}";
+        return $"Llamafile-model-{modelName}";
     }
 
     private Uri CreateBaseAddress()

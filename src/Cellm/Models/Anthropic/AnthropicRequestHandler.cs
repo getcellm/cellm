@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace Cellm.Models.Anthropic;
 
-internal class AnthropicClient : IClient
+internal class AnthropicRequestHandler : IModelRequestHandler<AnthropicRequest, AnthropicResponse>
 {
     private readonly AnthropicConfiguration _anthropicConfiguration;
     private readonly CellmConfiguration _cellmConfiguration;
@@ -15,7 +15,7 @@ internal class AnthropicClient : IClient
     private readonly ICache _cache;
     private readonly ISerde _serde;
 
-    public AnthropicClient(
+    public AnthropicRequestHandler(
         IOptions<AnthropicConfiguration> anthropicConfiguration,
         IOptions<CellmConfiguration> cellmConfiguration,
         HttpClient httpClient,
@@ -29,51 +29,46 @@ internal class AnthropicClient : IClient
         _serde = serde;
     }
 
-    public async Task<Prompt> Send(Prompt prompt, string? provider, Uri? baseAddress)
+    public async Task<AnthropicResponse> Handle(AnthropicRequest request, CancellationToken cancellationToken)
     {
-        var transaction = SentrySdk.StartTransaction(typeof(AnthropicClient).Name, nameof(Send));
-        SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
-
-        var requestBody = new RequestBody
-        {
-            System = prompt.SystemMessage,
-            Messages = prompt.Messages.Select(x => new Message { Content = x.Content, Role = x.Role.ToString().ToLower() }).ToList(),
-            Model = prompt.Model ?? _anthropicConfiguration.DefaultModel,
-            MaxTokens = _cellmConfiguration.MaxOutputTokens,
-            Temperature = prompt.Temperature
-        };
-
-        if (_cache.TryGetValue(requestBody, out object? value) && value is Prompt assistantPrompt)
-        {
-            return assistantPrompt;
-        }
-
-        var json = _serde.Serialize(requestBody);
-        var jsonAsString = new StringContent(json, Encoding.UTF8, "application/json");
-
         const string path = "/v1/messages";
-        var address = baseAddress is null ? new Uri(path, UriKind.Relative) : new Uri(baseAddress, path);
+        var address = request.BaseAddress is null ? new Uri(path, UriKind.Relative) : new Uri(request.BaseAddress, path);
 
-        var response = await _httpClient.PostAsync(address, jsonAsString);
-        var responseBodyAsString = await response.Content.ReadAsStringAsync();
+        var json = Serialize(request);
+        var jsonAsStringContent = new StringContent(json, Encoding.UTF8, "application/json");
+
+        var response = await _httpClient.PostAsync(address, jsonAsStringContent, cancellationToken);
+        var responseBodyAsString = await response.Content.ReadAsStringAsync(cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {
-            throw new HttpRequestException(responseBodyAsString, null, response.StatusCode);
+            throw new HttpRequestException($"OpenAI API request failed: {responseBodyAsString}", null, response.StatusCode);
         }
 
-        var responseBody = _serde.Deserialize<ResponseBody>(responseBodyAsString);
-        var assistantMessage = responseBody?.Content?.Last()?.Text ?? throw new CellmException("#EMPTY_RESPONSE?");
+        return Deserialize(request, responseBodyAsString);
+    }
 
-        assistantPrompt = new PromptBuilder(prompt)
-            .AddAssistantMessage(assistantMessage)
-            .Build();
+    public string Serialize(AnthropicRequest request)
+    {
+        var requestBody = new RequestBody
+        {
+            System = request.Prompt.SystemMessage,
+            Messages = request.Prompt.Messages.Select(x => new Message { Content = x.Content, Role = x.Role.ToString().ToLower() }).ToList(),
+            Model = request.Prompt.Model ?? _anthropicConfiguration.DefaultModel,
+            MaxTokens = _cellmConfiguration.MaxOutputTokens,
+            Temperature = request.Prompt.Temperature
+        };
 
-        _cache.Set(requestBody, assistantPrompt);
+        return _serde.Serialize(requestBody);
+    }
+
+    public AnthropicResponse Deserialize(AnthropicRequest request, string response)
+    {
+        var responseBody = _serde.Deserialize<ResponseBody>(response);
 
         var tags = new Dictionary<string, string> {
-            { nameof(provider), provider?.ToLower() ?? _cellmConfiguration.DefaultProvider },
-            { nameof(prompt.Model), prompt.Model ?.ToLower() ?? _anthropicConfiguration.DefaultModel },
+            { nameof(request.Provider), request.Provider?.ToLower() ?? _cellmConfiguration.DefaultProvider },
+            { nameof(request.Prompt.Model), request.Prompt.Model ?.ToLower() ?? _anthropicConfiguration.DefaultModel },
             { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
         };
 
@@ -95,9 +90,13 @@ internal class AnthropicClient : IClient
                 tags);
         }
 
-        transaction.Finish();
+        var assistantMessage = responseBody?.Content?.Last()?.Text ?? throw new CellmException("#EMPTY_RESPONSE?");
 
-        return assistantPrompt;
+        var prompt = new PromptBuilder(request.Prompt)
+            .AddAssistantMessage(assistantMessage)
+            .Build();
+
+        return new AnthropicResponse(prompt);
     }
 
     private class ResponseBody

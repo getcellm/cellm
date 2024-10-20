@@ -5,6 +5,7 @@ using Cellm.Models;
 using Cellm.Models.Anthropic;
 using Cellm.Models.GoogleAi;
 using Cellm.Models.Llamafile;
+using Cellm.Models.PipelineBehavior;
 using Cellm.Models.OpenAi;
 using Cellm.Services.Configuration;
 using Cellm.Tools;
@@ -85,6 +86,7 @@ internal static class ServiceLocator
         services
             .AddSingleton(configuration)
             .AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()))
+            .AddTransient(typeof(IPipelineBehavior<,>), typeof(ToolBehavior<,>))
             .AddMemoryCache()
             .AddTransient<ArgumentParser>()
             .AddSingleton<IClientFactory, ClientFactory>()
@@ -110,12 +112,12 @@ internal static class ServiceLocator
         var anthropicConfiguration = configuration.GetRequiredSection(nameof(AnthropicConfiguration)).Get<AnthropicConfiguration>()
             ?? throw new NullReferenceException(nameof(AnthropicConfiguration));
 
-        services.AddHttpClient<AnthropicClient>(anthropicHttpClient =>
+        services.AddHttpClient<AnthropicRequestHandler>(anthropicHttpClient =>
         {
             anthropicHttpClient.BaseAddress = anthropicConfiguration.BaseAddress;
             anthropicHttpClient.DefaultRequestHeaders.Add("x-api-key", anthropicConfiguration.ApiKey);
             anthropicHttpClient.DefaultRequestHeaders.Add("anthropic-version", anthropicConfiguration.Version);
-        }).AddResilienceHandler($"{nameof(AnthropicClient)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
+        }).AddResilienceHandler($"{nameof(AnthropicRequestHandler)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
 
         var googleAiConfiguration = configuration.GetRequiredSection(nameof(GoogleAiConfiguration)).Get<GoogleAiConfiguration>()
             ?? throw new NullReferenceException(nameof(GoogleAiConfiguration));

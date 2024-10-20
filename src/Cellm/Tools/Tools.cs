@@ -1,8 +1,12 @@
-﻿using System.Reflection;
+﻿using System.ComponentModel;
+using System.Reflection;
 using System.Text.Json;
+using Cellm.AddIn.Exceptions;
 using Cellm.Models;
 using Cellm.Prompts;
 using Json.More;
+using Json.Patch;
+using Json.Pointer;
 using Json.Schema;
 using Json.Schema.Generation;
 using MediatR;
@@ -20,77 +24,50 @@ internal class Tools : ITools
         _serde = serde;
     }
 
-    public async Task<string> Run(ToolRequest toolRequest)
+    public async Task<string> Run(ToolCall toolCall)
     {
-        return toolRequest.Name switch
+        var globRequest = _serde.Deserialize<GlobRequest>(toolCall.Arguments);
+
+        return toolCall.Name switch
         {
-            "Glob" => await RunGlob(toolRequest.Arguments),
-            _ => throw new ArgumentException($"Unknown tool: {toolRequest.Name}")
+            "Glob" => await RunGlob(globRequest),
+            _ => throw new ArgumentException($"Unsupported tool: {toolCall.Name}")
         };
+    }
+
+    private async Task<string> RunGlob(GlobRequest request)
+    {
+        var response = await _sender.Send(request);
+        return _serde.Serialize(response);
     }
 
     public List<Tool> GetTools()
     {
-        var schema = new JsonSchemaBuilder()
-            .FromType<GlobRequest>().Build();
+        // https://til.cazzulino.com/dotnet/how-to-emit-descriptions-for-exported-json-schema-using-jsonschemaexporter
+        var builder = new JsonSchemaBuilder()
+            .FromType<GlobRequest>()
+            .Required("RootPath", "IncludePatterns");
 
+        var schema = builder.Build();
         var jsonDocument = schema.ToJsonDocument();
 
-        var json = JsonSerializer.Serialize(jsonDocument);
+        var patchOperations = typeof(GlobRequest)
+          .GetProperties()
+          .Select(x => PatchOperation.Add(JsonPointer.Parse($"/properties/{x.Name}/description"), x.GetCustomAttribute<System.ComponentModel.DescriptionAttribute>()?.Description))
+          .ToList();
+
+        var patchDescriptions = new JsonPatch(patchOperations);
+        var jsonDocumentWithPatchedDescriptions = patchDescriptions.Apply(jsonDocument) ?? throw new CellmException();
+
+        var classDescription = typeof(Glob).GetCustomAttribute<System.ComponentModel.DescriptionAttribute>()?.Description ?? throw new CellmException();
 
         return new List<Tool>()
         {
             new Tool(
-                "Glob",
-                "Search for files on the user's disk using glob patterns. Useful when user asks you to find files.",
-                new Dictionary<string, (string Description, string Type)>
-                {
-                    { "RootPath", ("The root directory to start the glob search from", "string") },
-                    { "IncludePatterns", ("List of patterns to include in the search", "string") },
-                    { "ExcludePatterns", ("Optional list of patterns to exclude from the search", "string") }
-                },
-                new List<string> { "RootPath", "IncludePatterns" }
+                nameof(Glob),
+                classDescription,
+                jsonDocumentWithPatchedDescriptions
             )
         };
-    }
-
-    private async Task<string> RunGlob(Dictionary<string, string> toolCall)
-    {
-        var globRequest = new GlobRequest(
-            _serde.Deserialize<string>(toolCall[nameof(GlobRequest.RootPath)]),
-            _serde.Deserialize<List<string>>(toolCall[nameof(GlobRequest.IncludePatterns)]),
-            _serde.Deserialize<List<string>>(toolCall[nameof(GlobRequest.ExcludePatterns)]));
-
-        var globResponse = await _sender.Send(globRequest);
-
-        return _serde.Serialize(globResponse);
-    }
-
-    private T ToRequest<T>(IDictionary<string, string> dict)
-    where T : class
-    {
-        Type type = typeof(T);
-        T result = Activator.CreateInstance(type) as T ?? throw new NullReferenceException(nameof(Activator.CreateInstance));
-        foreach (var item in dict)
-        {
-            var property = type.GetProperty(item.Key) ?? throw new NullReferenceException(item.Key);
-            property.SetValue(result, item.Value, null);
-        }
-        return result;
-    }
-
-    private IDictionary<string, string> FromRequest<T>(T item)
-        where T : class
-    {
-        Type myObjectType = item.GetType();
-        IDictionary<string, string> dict = new Dictionary<string, string>();
-        var indexer = Array.Empty<object>();
-        PropertyInfo[] properties = myObjectType.GetProperties();
-        foreach (var info in properties)
-        {
-            var value = info.GetValue(item, indexer) ?? throw new NullReferenceException(info.Name);
-            dict.Add(info.Name, _serde.Serialize(value) ?? throw new NullReferenceException(nameof(value)));
-        }
-        return dict;
     }
 }

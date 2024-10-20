@@ -4,10 +4,29 @@ using Microsoft.Extensions.FileSystemGlobbing;
 
 namespace Cellm.Tools;
 
-internal record GlobRequest(
-    [Description("The root directory to start the glob search from")] string RootPath,
-    [Description("List of patterns to include in the search")] List<string> IncludePatterns,
-    [Description("Optional list of patterns to exclude from the search")] List<string>? ExcludePatterns) : IRequest<GlobResponse>;
+//internal record GlobRequest(
+//    [Description("The root directory to start the glob search from")] string RootPath,
+//    [Description("List of patterns to include in the search")] List<string> IncludePatterns,
+//    [Description("Optional list of patterns to exclude from the search")] List<string>? ExcludePatterns) : IRequest<GlobResponse>;
+
+internal record GlobRequest : IRequest<GlobResponse>
+{
+    public GlobRequest(string rootPath, List<string> includePatterns, List<string>? excludePatterns = null)
+    {
+        RootPath = rootPath;
+        IncludePatterns = includePatterns;
+        ExcludePatterns = excludePatterns;
+    }
+
+    [Description("The root directory to start the glob search from")]
+    public string RootPath { get; set; }
+
+    [Description("List of patterns to include in the search")]
+    public List<string> IncludePatterns { get; set; }
+
+    [Description("Optional list of patterns to exclude from the search")]
+    public List<string>? ExcludePatterns { get; set; }
+}
 
 internal record GlobResponse(
     [Description("List of file paths matching the glob patterns")] List<string> FilePaths);

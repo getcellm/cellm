@@ -1,3 +1,5 @@
-﻿namespace Cellm.Prompts;
+﻿using System.Text.Json;
 
-public record Tool(string Name, string Description, Dictionary<string, (string Description, string Type)> Parameters, List<string> Required);
+namespace Cellm.Prompts;
+
+public record Tool(string Name, string Description, JsonDocument Parameters);

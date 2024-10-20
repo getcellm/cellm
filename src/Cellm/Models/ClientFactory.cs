@@ -13,7 +13,6 @@ internal class ClientFactory : IClientFactory
 
         return modelProvider.ToLower() switch
         {
-            "anthropic" => ServiceLocator.Get<AnthropicClient>(),
             "googleai" => ServiceLocator.Get<GoogleAiClient>(),
             "llamafile" => ServiceLocator.Get<LlamafileClient>(),
             _ => throw new ArgumentException($"Unsupported client type: {modelProvider}")

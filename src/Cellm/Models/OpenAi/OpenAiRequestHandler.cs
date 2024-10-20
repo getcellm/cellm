@@ -6,12 +6,11 @@ using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.Prompts;
 using Cellm.Tools;
-using MediatR;
 using Microsoft.Extensions.Options;
 
 namespace Cellm.Models.OpenAi;
 
-internal class OpenAiRequestHandler : IRequestHandler<OpenAiRequest, OpenAiResponse>
+internal class OpenAiRequestHandler : IModelRequestHandler<OpenAiRequest, OpenAiResponse>
 {
     private readonly OpenAiConfiguration _openAiConfiguration;
     private readonly CellmConfiguration _cellmConfiguration;
@@ -49,14 +48,10 @@ internal class OpenAiRequestHandler : IRequestHandler<OpenAiRequest, OpenAiRespo
             throw new HttpRequestException($"OpenAI API request failed: {responseBodyAsString}", null, response.StatusCode);
         }
 
-        var assistantMessage = Deserialize(responseBodyAsString);
-        
-        return new OpenAiResponse(new PromptBuilder(request.Prompt)
-            .AddMessage(assistantMessage)
-            .Build());
+        return Deserialize(request, responseBodyAsString);
     }
 
-    private string Serialize(OpenAiRequest request)
+    public string Serialize(OpenAiRequest request)
     {
         var openAiPrompt = new PromptBuilder(request.Prompt)
             .AddSystemMessage()
@@ -65,43 +60,10 @@ internal class OpenAiRequestHandler : IRequestHandler<OpenAiRequest, OpenAiRespo
         var chatCompletionRequest = new OpenAiChatCompletionRequest
         {
             Model = openAiPrompt.Model,
-            Messages = openAiPrompt.Messages.Select(m => new OpenAiMessage
-            {
-                Role = m.Role.ToString().ToLower(),
-                Content = m.Content,
-                ToolCalls = m.ToolRequests?.Select(tr => new OpenAiToolCall
-                {
-                    Id = tr.Id,
-                    Type = "function",
-                    Function = new OpenAiFunctionCall
-                    {
-                        Name = tr.Name,
-                        Arguments = _serde.Serialize(tr.Arguments)
-                    }
-                }).ToList()
-            }).ToList(),
+            Messages = openAiPrompt.ToOpenAiMessages(),
             MaxTokens = _cellmConfiguration.MaxOutputTokens,
             Temperature = openAiPrompt.Temperature,
-            Tools = _tools.GetTools().Select(t => new OpenAiTool
-            {
-                Function = new OpenAiFunction
-                {
-                    Name = t.Name,
-                    Description = t.Description,
-                    Parameters = new OpenAiParameters
-                    {
-                        Properties = t.Parameters.ToDictionary(
-                            p => p.Key,
-                            p => new OpenAiProperty
-                            {
-                                Type = p.Value.Type,
-                                Description = p.Value.Description
-                            }
-                        ),
-                        Required = new List<string>() // We don't have this information in the Tool class
-                    }
-                }
-            }).ToList(),
+            Tools = _tools.ToOpenAiTools(),
             ToolChoice = "auto"
         };
 
@@ -113,19 +75,50 @@ internal class OpenAiRequestHandler : IRequestHandler<OpenAiRequest, OpenAiRespo
         });
     }
 
-    private Message Deserialize(string responseBodyAsString)
+    public OpenAiResponse Deserialize(OpenAiRequest request, string responseBodyAsString)
     {
-        var response = _serde.Deserialize<OpenAiChatCompletionResponse>(responseBodyAsString);
-        var choice = response.Choices.FirstOrDefault() ?? throw new CellmException("Empty response from OpenAI API");
+        var responseBody = _serde.Deserialize<OpenAiChatCompletionResponse>(responseBodyAsString);
 
-        var toolRequests = choice.Message.ToolCalls?
-            .Select(x => new ToolRequest(
+        var tags = new Dictionary<string, string> {
+            { nameof(request.Provider), request.Provider?.ToLower() ?? _cellmConfiguration.DefaultProvider },
+            { nameof(request.Prompt.Model), request.Prompt.Model ?.ToLower() ?? _openAiConfiguration.DefaultModel },
+            { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
+        };
+
+        var inputTokens = responseBody?.Usage?.PromptTokens ?? -1;
+        if (inputTokens > 0)
+        {
+            SentrySdk.Metrics.Distribution("InputTokens",
+                inputTokens,
+            unit: MeasurementUnit.Custom("token"),
+                tags);
+        }
+
+        var outputTokens = responseBody?.Usage?.CompletionTokens ?? -1;
+        if (outputTokens > 0)
+        {
+            SentrySdk.Metrics.Distribution("OutputTokens",
+                outputTokens,
+                unit: MeasurementUnit.Custom("token"),
+                tags);
+        }
+
+        var choice = responseBody?.Choices?.FirstOrDefault() ?? throw new CellmException("Empty response from OpenAI API");
+
+        var toolCalls = choice.Message.ToolCalls?
+            .Select(x => new ToolCall(
                 Id: x.Id,
                 Name: x.Function.Name,
-                Arguments: _serde.Deserialize<Dictionary<string, string>>(x.Function.Arguments),
-                Response: null))
+                Arguments: x.Function.Arguments,
+                Result: null))
             .ToList();
 
-        return new Message(choice.Message.Content, Roles.Assistant, toolRequests);
+        var message = new Message(choice.Message.Content, Roles.Assistant, toolCalls);
+
+        var prompt = new PromptBuilder(request.Prompt)
+            .AddMessage(message)
+            .Build();
+
+        return new OpenAiResponse(prompt);
     }
 }

@@ -7,26 +7,42 @@ internal static class Extensions
 {
     public static List<OpenAiMessage> ToOpenAiMessages(this Prompt prompt)
     {
-        return prompt.Messages.Select(x => ToOpenAiMessage(x)).ToList();
+        return prompt.Messages.SelectMany(x => ToOpenAiMessage(x)).ToList();
     }
 
-    private static OpenAiMessage ToOpenAiMessage(Prompts.Message message)
+    private static List<OpenAiMessage> ToOpenAiMessage(Message message)
     {
-        return new OpenAiMessage
-        {
-            Role = message.Role.ToString().ToLower(),
-            Content = message.Content,
-            ToolCalls = message.ToolRequests?.Select(x => new OpenAiToolCall
+        return message.Role switch {
+            Roles.Tool => ToOpenAiToolResults(message),
+            _ => new List<OpenAiMessage>() 
             {
-                Id = x.Id,
-                Type = "function",
-                Function = new OpenAiFunctionCall
+                new OpenAiMessage
                 {
-                    Name = x.Name,
-                    Arguments = System.Text.Json.JsonSerializer.Serialize(x.Arguments)
+                    Role = message.Role.ToString().ToLower(),
+                    Content = message.Content,
+                    ToolCalls = message.ToolCalls?.Select(x => new OpenAiToolCall
+                    {
+                        Id = x.Id,
+                        Type = "function",
+                        Function = new OpenAiFunctionCall
+                        {
+                            Name = x.Name,
+                            Arguments = x.Arguments
+                        }
+                    }).ToList()
                 }
-            }).ToList()
+            }
         };
+    }
+
+    private static List<OpenAiMessage> ToOpenAiToolResults(Message message)
+    {
+        return message.ToolCalls.Select(x => new OpenAiMessage
+        {
+            ToolCallId = x.Id,
+            Role = Roles.Tool.ToString().ToLower(),
+            Content = $"Tool: {x.Name}, Arguments: {x.Arguments}, Result: {x.Result}"
+        }).ToList();
     }
 
     public static List<OpenAiTool> ToOpenAiTools(this ITools tools)
@@ -38,18 +54,7 @@ internal static class Extensions
                 {
                     Name = x.Name,
                     Description = x.Description,
-                    Parameters = new OpenAiParameters
-                    {
-                        Properties = x.Parameters.ToDictionary(
-                            y => y.Key,
-                            y => new OpenAiProperty
-                            {
-                                Type = y.Value.Type,
-                                Description = y.Value.Description
-                            }
-                        ),
-                        Required = new List<string>() // We don't have this information in the Tool class
-                    }
+                    Parameters = x.Parameters
                 }
             })
             .ToList();

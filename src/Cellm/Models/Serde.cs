@@ -2,7 +2,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Cellm.AddIn.Exceptions;
-using FastSerialization;
 
 namespace Cellm.Models;
 
@@ -10,7 +9,6 @@ internal class Serde : ISerde
 {
     private readonly JsonSerializerOptions _defaultOptions = new()
     {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };

@@ -2,4 +2,4 @@
 
 namespace Cellm.Models.OpenAi;
 
-internal record OpenAiResponse(Prompt Prompt);
+internal record OpenAiResponse(Prompt Prompt) : IModelResponse;
