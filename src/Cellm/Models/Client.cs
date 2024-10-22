@@ -2,6 +2,8 @@
 using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.Models.Anthropic;
+using Cellm.Models.GoogleAi;
+using Cellm.Models.Llamafile;
 using Cellm.Models.OpenAi;
 using Cellm.Prompts;
 using MediatR;
@@ -15,7 +17,7 @@ internal class Client : IClient
     private readonly CellmConfiguration _cellmConfiguration;
     private readonly ISender _sender;
 
-    public Client(IClientFactory clientFactory, IOptions<CellmConfiguration> cellmConfiguration, ISender sender)
+    public Client(IOptions<CellmConfiguration> cellmConfiguration, ISender sender)
     {
         _cellmConfiguration = cellmConfiguration.Value;
         _sender = sender;
@@ -30,8 +32,8 @@ internal class Client : IClient
             IModelResponse response = provider.ToLower() switch
             {
                 "anthropic" => await _sender.Send(new AnthropicRequest(prompt, provider, baseAddress)),
-                //"googleai" => await _sender.Send(new GoogleAiRequest(prompt, provider, baseAddress)),
-                //"llamafile" => await _sender.Send(new LlamafileRequest(prompt, provider, baseAddress)),
+                "googleai" => await _sender.Send(new GoogleAiRequest(prompt, provider, baseAddress)),
+                "llamafile" => await _sender.Send(new LlamafileRequest(prompt)),
                 "openai" => await _sender.Send(new OpenAiRequest(prompt, provider, baseAddress)),
                 _ => throw new ArgumentException($"Unsupported client type: {provider}")
             };

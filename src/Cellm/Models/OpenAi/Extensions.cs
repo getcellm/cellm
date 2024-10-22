@@ -1,4 +1,6 @@
-﻿using Cellm.Prompts;
+﻿using Cellm.AddIn.Exceptions;
+using Cellm.Models.OpenAi.Models;
+using Cellm.Prompts;
 using Cellm.Tools;
 
 namespace Cellm.Models.OpenAi;
@@ -16,47 +18,32 @@ internal static class Extensions
             Roles.Tool => ToOpenAiToolResults(message),
             _ => new List<OpenAiMessage>() 
             {
-                new OpenAiMessage
-                {
-                    Role = message.Role.ToString().ToLower(),
-                    Content = message.Content,
-                    ToolCalls = message.ToolCalls?.Select(x => new OpenAiToolCall
-                    {
-                        Id = x.Id,
-                        Type = "function",
-                        Function = new OpenAiFunctionCall
-                        {
-                            Name = x.Name,
-                            Arguments = x.Arguments
-                        }
-                    }).ToList()
-                }
+                new OpenAiMessage(
+                    message.Role.ToString().ToLower(),
+                    message.Content,
+                    message.ToolCalls?
+                        .Select(x => new OpenAiToolCall(x.Id, "function", new OpenAiFunctionCall(x.Name, x.Arguments)))
+                        .ToList())
             }
         };
     }
 
     private static List<OpenAiMessage> ToOpenAiToolResults(Message message)
     {
-        return message.ToolCalls.Select(x => new OpenAiMessage
-        {
-            ToolCallId = x.Id,
-            Role = Roles.Tool.ToString().ToLower(),
-            Content = $"Tool: {x.Name}, Arguments: {x.Arguments}, Result: {x.Result}"
-        }).ToList();
+        var toolCalls = message?.ToolCalls ?? throw new CellmException("No tool calls in tool message");
+        return toolCalls
+            .Select(x => new OpenAiMessage(
+                Roles.Tool.ToString().ToLower(),
+                $"Tool: {x.Name}, Arguments: {x.Arguments}, Result: {x.Result}",
+                null,
+                x.Id)
+            ).ToList();
     }
 
     public static List<OpenAiTool> ToOpenAiTools(this ITools tools)
     {
         return tools.GetTools()
-            .Select(x => new OpenAiTool
-            {
-                Function = new OpenAiFunction
-                {
-                    Name = x.Name,
-                    Description = x.Description,
-                    Parameters = x.Parameters
-                }
-            })
+            .Select(x => new OpenAiTool("function", new OpenAiFunction(x.Name, x.Description, x.Parameters)))
             .ToList();
     }
 }

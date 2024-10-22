@@ -3,13 +3,12 @@ using System.Net.NetworkInformation;
 using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.Models.OpenAi;
-using Cellm.Prompts;
 using MediatR;
 using Microsoft.Extensions.Options;
 
 namespace Cellm.Models.Llamafile;
 
-internal class LlamafileClient : IClient
+internal class LlamafileRequestHandler : IProviderRequestHandler<LlamafileRequest, LlamafileResponse>
 {
     private record Llamafile(string ModelPath, Uri BaseAddress, Process Process);
 
@@ -24,7 +23,7 @@ internal class LlamafileClient : IClient
     private readonly ISender _sender;
     private readonly HttpClient _httpClient;
 
-    public LlamafileClient(IOptions<CellmConfiguration> cellmConfiguration,
+    public LlamafileRequestHandler(IOptions<CellmConfiguration> cellmConfiguration,
         IOptions<LlamafileConfiguration> llamafileConfiguration,
         IOptions<OpenAiConfiguration> openAiConfiguration,
         ISender sender,
@@ -40,7 +39,7 @@ internal class LlamafileClient : IClient
 
         _llamafileExePath = new AsyncLazy<string>(async () =>
         {
-            return await DownloadFile(_llamafileConfiguration.LlamafileUrl, "Llamafile.exe");
+            return await DownloadFile(_llamafileConfiguration.LlamafileUrl, $"{nameof(Llamafile)}.exe");
         });
 
         _llamafiles = _llamafileConfiguration.Models.ToDictionary(x => x.Key, x => new AsyncLazy<Llamafile>(async () =>
@@ -56,14 +55,14 @@ internal class LlamafileClient : IClient
         }));
     }
 
-    public async Task<Prompt> Send(Prompt prompt, string? provider, Uri? baseAddress)
+    public async Task<LlamafileResponse> Handle(LlamafileRequest request, CancellationToken cancellationToken)
     {
         // Download model and start Llamafile on first call
-        var llamafile = await _llamafiles[prompt.Model ?? _llamafileConfiguration.DefaultModel];
+        var llamafile = await _llamafiles[request.Prompt.Model ?? _llamafileConfiguration.DefaultModel];
 
-        var openAiResponse = await _sender.Send(new OpenAiRequest(prompt, provider ?? "Llamafile", baseAddress ?? llamafile.BaseAddress));
+        var openAiResponse = await _sender.Send(new OpenAiRequest(request.Prompt, nameof(Llamafile), llamafile.BaseAddress), cancellationToken);
 
-        return openAiResponse.Prompt;
+        return new LlamafileResponse(openAiResponse.Prompt);
     }
 
     private async Task<Process> StartProcess(string modelPath, Uri baseAddress)

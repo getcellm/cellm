@@ -4,37 +4,33 @@ using System.Text.Json.Serialization;
 using System.Text.Json;
 using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
-using Cellm.Models.Anthropic.Models;
 using Cellm.Prompts;
 using Microsoft.Extensions.Options;
 
-namespace Cellm.Models.Anthropic;
+namespace Cellm.Models.GoogleAi;
 
-internal class AnthropicRequestHandler : IModelRequestHandler<AnthropicRequest, AnthropicResponse>
+internal class GoogleAiRequestHandler : IModelRequestHandler<GoogleAiRequest, GoogleAiResponse>
 {
-    private readonly AnthropicConfiguration _anthropicConfiguration;
+    private readonly GoogleAiConfiguration _googleAiConfiguration;
     private readonly CellmConfiguration _cellmConfiguration;
     private readonly HttpClient _httpClient;
-    private readonly ICache _cache;
     private readonly ISerde _serde;
 
-    public AnthropicRequestHandler(
-        IOptions<AnthropicConfiguration> anthropicConfiguration,
+    public GoogleAiRequestHandler(
+        IOptions<GoogleAiConfiguration> googleAiConfiguration,
         IOptions<CellmConfiguration> cellmConfiguration,
         HttpClient httpClient,
-        ICache cache,
         ISerde serde)
     {
-        _anthropicConfiguration = anthropicConfiguration.Value;
+        _googleAiConfiguration = googleAiConfiguration.Value;
         _cellmConfiguration = cellmConfiguration.Value;
         _httpClient = httpClient;
-        _cache = cache;
         _serde = serde;
     }
 
-    public async Task<AnthropicResponse> Handle(AnthropicRequest request, CancellationToken cancellationToken)
+    public async Task<GoogleAiResponse> Handle(GoogleAiRequest request, CancellationToken cancellationToken)
     {
-        const string path = "/v1/messages";
+        string path = $"/v1beta/models/{request.Prompt.Model ?? _googleAiConfiguration.DefaultModel}:generateContent?key={_googleAiConfiguration.ApiKey}";
         var address = request.BaseAddress is null ? new Uri(path, UriKind.Relative) : new Uri(request.BaseAddress, path);
 
         var json = Serialize(request);
@@ -45,47 +41,53 @@ internal class AnthropicRequestHandler : IModelRequestHandler<AnthropicRequest, 
 
         if (!response.IsSuccessStatusCode)
         {
-            throw new HttpRequestException($"{nameof(AnthropicRequest)} failed: {responseBodyAsString}", null, response.StatusCode);
+            throw new HttpRequestException($"{nameof(GoogleAiRequest)} failed: {responseBodyAsString}", null, response.StatusCode);
         }
 
         return Deserialize(request, responseBodyAsString);
     }
 
-    public string Serialize(AnthropicRequest request)
+    public string Serialize(GoogleAiRequest request)
     {
-        var requestBody = new AnthropicRequestBody
+        var requestBody = new GoogleAiRequestBody
         {
-            System = request.Prompt.SystemMessage,
-            Messages = request.Prompt.Messages.Select(x => new AnthropicMessage { Content = x.Content, Role = x.Role.ToString().ToLower() }).ToList(),
-            Model = request.Prompt.Model ?? _anthropicConfiguration.DefaultModel,
-            MaxTokens = _cellmConfiguration.MaxOutputTokens,
-            Temperature = request.Prompt.Temperature
+            SystemInstruction = new GoogleAiContent
+            {
+                Parts = new List<GoogleAiPart> { new GoogleAiPart { Text = request.Prompt.SystemMessage } }
+            },
+            Contents = new List<GoogleAiContent>
+            {
+                new GoogleAiContent
+                {
+                    Parts = request.Prompt.Messages.Select(x => new GoogleAiPart { Text = x.Content }).ToList()
+                }
+            }
         };
 
         return _serde.Serialize(requestBody, new JsonSerializerOptions
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         });
     }
 
-    public AnthropicResponse Deserialize(AnthropicRequest request, string response)
+    public GoogleAiResponse Deserialize(GoogleAiRequest request, string response)
     {
-        var responseBody = _serde.Deserialize<AnthropicResponseBody>(response, new JsonSerializerOptions
+        var responseBody = _serde.Deserialize<GoogleAiResponseBody>(response, new JsonSerializerOptions
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         });
 
         var tags = new Dictionary<string, string> {
             { nameof(request.Provider), request.Provider?.ToLower() ?? _cellmConfiguration.DefaultProvider },
-            { nameof(request.Prompt.Model), request.Prompt.Model ?.ToLower() ?? _anthropicConfiguration.DefaultModel },
+            { nameof(request.Prompt.Model), request.Prompt.Model?.ToLower() ?? _googleAiConfiguration.DefaultModel },
             { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
         };
 
-        var inputTokens = responseBody?.Usage?.InputTokens ?? -1;
+        var inputTokens = responseBody?.UsageMetadata?.PromptTokenCount ?? -1;
         if (inputTokens > 0)
         {
             SentrySdk.Metrics.Distribution("InputTokens",
@@ -94,7 +96,7 @@ internal class AnthropicRequestHandler : IModelRequestHandler<AnthropicRequest, 
                 tags);
         }
 
-        var outputTokens = responseBody?.Usage?.OutputTokens ?? -1;
+        var outputTokens = responseBody?.UsageMetadata?.CandidatesTokenCount ?? -1;
         if (outputTokens > 0)
         {
             SentrySdk.Metrics.Distribution("OutputTokens",
@@ -103,12 +105,12 @@ internal class AnthropicRequestHandler : IModelRequestHandler<AnthropicRequest, 
                 tags);
         }
 
-        var assistantMessage = responseBody?.Content?.Last()?.Text ?? throw new CellmException("#EMPTY_RESPONSE?");
+        var assistantMessage = responseBody?.Candidates?.SingleOrDefault()?.Content?.Parts?.SingleOrDefault()?.Text ?? throw new CellmException("#EMPTY_RESPONSE?");
 
-        var prompt = new PromptBuilder(request.Prompt)
+        var assistantPrompt = new PromptBuilder(request.Prompt)
             .AddAssistantMessage(assistantMessage)
             .Build();
 
-        return new AnthropicResponse(prompt);
+        return new GoogleAiResponse(assistantPrompt);
     }
 }

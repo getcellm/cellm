@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
+using Cellm.Models.OpenAi.Models;
 using Cellm.Prompts;
 using Cellm.Tools;
 using Microsoft.Extensions.Options;
@@ -45,7 +46,7 @@ internal class OpenAiRequestHandler : IModelRequestHandler<OpenAiRequest, OpenAi
 
         if (!response.IsSuccessStatusCode)
         {
-            throw new HttpRequestException($"OpenAI API request failed: {responseBodyAsString}", null, response.StatusCode);
+            throw new HttpRequestException($"{nameof(OpenAiRequest)} failed: {responseBodyAsString}", null, response.StatusCode);
         }
 
         return Deserialize(request, responseBodyAsString);
@@ -57,15 +58,13 @@ internal class OpenAiRequestHandler : IModelRequestHandler<OpenAiRequest, OpenAi
             .AddSystemMessage()
             .Build();
 
-        var chatCompletionRequest = new OpenAiChatCompletionRequest
-        {
-            Model = openAiPrompt.Model,
-            Messages = openAiPrompt.ToOpenAiMessages(),
-            MaxTokens = _cellmConfiguration.MaxOutputTokens,
-            Temperature = openAiPrompt.Temperature,
-            Tools = _tools.ToOpenAiTools(),
-            ToolChoice = "auto"
-        };
+        var chatCompletionRequest = new OpenAiChatCompletionRequest(
+            openAiPrompt.Model,
+            openAiPrompt.ToOpenAiMessages(),
+            _cellmConfiguration.MaxOutputTokens,
+            openAiPrompt.Temperature,
+            _tools.ToOpenAiTools(),
+            "auto");
 
         return _serde.Serialize(chatCompletionRequest, new JsonSerializerOptions
         {
@@ -77,7 +76,12 @@ internal class OpenAiRequestHandler : IModelRequestHandler<OpenAiRequest, OpenAi
 
     public OpenAiResponse Deserialize(OpenAiRequest request, string responseBodyAsString)
     {
-        var responseBody = _serde.Deserialize<OpenAiChatCompletionResponse>(responseBodyAsString);
+        var responseBody = _serde.Deserialize<OpenAiChatCompletionResponse>(responseBodyAsString, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        });
 
         var tags = new Dictionary<string, string> {
             { nameof(request.Provider), request.Provider?.ToLower() ?? _cellmConfiguration.DefaultProvider },
@@ -104,16 +108,12 @@ internal class OpenAiRequestHandler : IModelRequestHandler<OpenAiRequest, OpenAi
         }
 
         var choice = responseBody?.Choices?.FirstOrDefault() ?? throw new CellmException("Empty response from OpenAI API");
-
         var toolCalls = choice.Message.ToolCalls?
-            .Select(x => new ToolCall(
-                Id: x.Id,
-                Name: x.Function.Name,
-                Arguments: x.Function.Arguments,
-                Result: null))
+            .Select(x => new ToolCall(x.Id, x.Function.Name, x.Function.Arguments, null))
             .ToList();
 
-        var message = new Message(choice.Message.Content, Roles.Assistant, toolCalls);
+        var content = choice.Message.Content;
+        var message = new Message(content, Roles.Assistant, toolCalls);
 
         var prompt = new PromptBuilder(request.Prompt)
             .AddMessage(message)

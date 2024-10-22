@@ -89,7 +89,6 @@ internal static class ServiceLocator
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(ToolBehavior<,>))
             .AddMemoryCache()
             .AddTransient<ArgumentParser>()
-            .AddSingleton<IClientFactory, ClientFactory>()
             .AddSingleton<IClient, Client>()
             .AddSingleton<ITools, Tools.Tools>()
             .AddSingleton<ICache, Cache>()
@@ -112,7 +111,7 @@ internal static class ServiceLocator
         var anthropicConfiguration = configuration.GetRequiredSection(nameof(AnthropicConfiguration)).Get<AnthropicConfiguration>()
             ?? throw new NullReferenceException(nameof(AnthropicConfiguration));
 
-        services.AddHttpClient<AnthropicRequestHandler>(anthropicHttpClient =>
+        services.AddHttpClient<IRequestHandler<AnthropicRequest, AnthropicResponse>, AnthropicRequestHandler>(anthropicHttpClient =>
         {
             anthropicHttpClient.BaseAddress = anthropicConfiguration.BaseAddress;
             anthropicHttpClient.DefaultRequestHeaders.Add("x-api-key", anthropicConfiguration.ApiKey);
@@ -122,10 +121,10 @@ internal static class ServiceLocator
         var googleAiConfiguration = configuration.GetRequiredSection(nameof(GoogleAiConfiguration)).Get<GoogleAiConfiguration>()
             ?? throw new NullReferenceException(nameof(GoogleAiConfiguration));
 
-        services.AddHttpClient<GoogleAiClient>(googleHttpClient =>
+        services.AddHttpClient<IRequestHandler<GoogleAiRequest, GoogleAiResponse>, GoogleAiRequestHandler>(googleHttpClient =>
         {
             googleHttpClient.BaseAddress = googleAiConfiguration.BaseAddress;
-        }).AddResilienceHandler($"{nameof(GoogleAiClient)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
+        }).AddResilienceHandler($"{nameof(GoogleAiRequestHandler)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
 
         var openAiConfiguration = configuration.GetRequiredSection(nameof(OpenAiConfiguration)).Get<OpenAiConfiguration>()
             ?? throw new NullReferenceException(nameof(OpenAiConfiguration));
@@ -136,7 +135,7 @@ internal static class ServiceLocator
             openAiHttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {openAiConfiguration.ApiKey}");
         }).AddResilienceHandler($"{nameof(OpenAiRequestHandler)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
 
-        services.AddSingleton<LlamafileClient>();
+        services.AddSingleton<LlamafileRequestHandler>();
 
         return services;
     }
