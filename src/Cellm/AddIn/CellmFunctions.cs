@@ -1,10 +1,12 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 using Cellm.AddIn.Exceptions;
-using Cellm.AddIn.Prompts;
 using Cellm.Models;
+using Cellm.Prompts;
 using Cellm.Services;
+using Cellm.Services.Configuration;
 using ExcelDna.Integration;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Configuration;
 
 namespace Cellm.AddIn;
 
@@ -31,17 +33,23 @@ public static class CellmFunctions
     [ExcelArgument(Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
     [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
     {
-        var cellmConfiguration = ServiceLocator.Get<IOptions<CellmConfiguration>>().Value;
+        var configuration = ServiceLocator.Get<IConfiguration>();
+
+        var provider = configuration.GetSection(nameof(CellmConfiguration)).GetValue<string>(nameof(CellmConfiguration.DefaultProvider))
+            ?? throw new ArgumentException(nameof(CellmConfiguration.DefaultProvider));
+
+        var model = configuration.GetSection($"{provider}Configuration").GetValue<string>(nameof(IProviderConfiguration.DefaultModel))
+            ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
 
         return PromptWith(
-                   $"{cellmConfiguration.DefaultProvider}/{cellmConfiguration.DefaultModel}",
+                   $"{provider}/{model}",
                    context,
                    instructionsOrTemperature,
                    temperature);
     }
 
     /// <summary>
-    /// Sends a prompt to a specific model.
+    /// Sends a prompt to the specified model.
     /// </summary>
     /// <param name="providerAndModel">The provider and model in the format "provider/model".</param>
     /// <param name="context">A cell or range of cells containing the context for the prompt.</param>
@@ -79,15 +87,16 @@ public static class CellmFunctions
                 .ToString();
 
             var prompt = new PromptBuilder()
+                .SetModel(arguments.Model)
                 .SetSystemMessage(CellmPrompts.SystemMessage)
                 .SetTemperature(arguments.Temperature)
                 .AddUserMessage(userMessage)
                 .Build();
 
             // ExcelAsyncUtil yields Excel's main thread, Task.Run enables async/await in inner code
-            return ExcelAsyncUtil.Run(nameof(Prompt), new object[] { context, instructionsOrTemperature, temperature }, () =>
+            return ExcelAsyncUtil.Run(nameof(PromptWith), new object[] { providerAndModel, context, instructionsOrTemperature, temperature }, () =>
             {
-                return Task.Run(async () => await CallModelAsync(prompt, arguments.Provider, arguments.Model)).GetAwaiter().GetResult();
+                return Task.Run(async () => await CallModelAsync(prompt, arguments.Provider)).GetAwaiter().GetResult();
             });
         }
         catch (CellmException ex)
@@ -106,20 +115,23 @@ public static class CellmFunctions
     /// <returns>A task that represents the asynchronous operation. The task result contains the model's response as a string.</returns>
     /// <exception cref="CellmException">Thrown when an unexpected error occurs during the operation.</exception>
 
-    private static async Task<string> CallModelAsync(Prompt prompt, string? provider = null, string? model = null, Uri? baseAddress = null)
+    private static async Task<string> CallModelAsync(Prompt prompt, string? provider = null, Uri? baseAddress = null)
     {
         try
         {
             var client = ServiceLocator.Get<IClient>();
-            var response = await client.Send(prompt, provider, model, baseAddress);
-            return response.Messages.Last().Content;
+            var response = await client.Send(prompt, provider, baseAddress);
+            var content = response.Messages.Last().Content;
+            return content;
         }
-        catch (CellmException)
+        catch (CellmException ex)
         {
+            Debug.WriteLine(ex);
             throw;
         }
         catch (Exception ex)
         {
+            Debug.WriteLine(ex);
             throw new CellmException("An unexpected error occurred", ex);
         }
     }

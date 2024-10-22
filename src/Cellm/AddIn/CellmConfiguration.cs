@@ -10,7 +10,7 @@ public class CellmConfiguration
 
     public double DefaultTemperature { get; init; }
 
-    public int MaxTokens { get; init; }
+    public int MaxOutputTokens { get; init; }
 
     public int CacheTimeoutInSeconds { get; init; }
 }

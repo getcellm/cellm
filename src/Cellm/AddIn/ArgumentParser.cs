@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using Cellm.AddIn.Exceptions;
-using Cellm.AddIn.Prompts;
 using Cellm.Services.Configuration;
 using ExcelDna.Integration;
 using Microsoft.Extensions.Configuration;

@@ -3,7 +3,7 @@ using ExcelDna.Integration;
 
 namespace Cellm.AddIn;
 
-public class Cellm : IExcelAddIn
+public class CellmAddIn : IExcelAddIn
 {
     public void AutoOpen()
     {
@@ -13,6 +13,8 @@ public class Cellm : IExcelAddIn
             SentrySdk.CaptureException(ex);
             return ex.Message;
         });
+
+        _ = ServiceLocator.ServiceProvider;
     }
 
     public void AutoClose()

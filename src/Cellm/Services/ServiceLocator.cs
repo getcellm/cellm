@@ -1,12 +1,16 @@
-﻿using Cellm.AddIn;
+﻿using System.Reflection;
+using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.Models;
 using Cellm.Models.Anthropic;
 using Cellm.Models.GoogleAi;
 using Cellm.Models.Llamafile;
 using Cellm.Models.OpenAi;
+using Cellm.Models.PipelineBehavior;
 using Cellm.Services.Configuration;
+using Cellm.Tools;
 using ExcelDna.Integration;
+using MediatR;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -81,10 +85,12 @@ internal static class ServiceLocator
         // Internals
         services
             .AddSingleton(configuration)
+            .AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()))
+            .AddTransient(typeof(IPipelineBehavior<,>), typeof(ToolBehavior<,>))
             .AddMemoryCache()
             .AddTransient<ArgumentParser>()
-            .AddSingleton<IClientFactory, ClientFactory>()
             .AddSingleton<IClient, Client>()
+            .AddSingleton<ITools, Tools.Tools>()
             .AddSingleton<ICache, Cache>()
             .AddSingleton<ISerde, Serde>()
             .AddSingleton<LLamafileProcessManager>();
@@ -105,31 +111,31 @@ internal static class ServiceLocator
         var anthropicConfiguration = configuration.GetRequiredSection(nameof(AnthropicConfiguration)).Get<AnthropicConfiguration>()
             ?? throw new NullReferenceException(nameof(AnthropicConfiguration));
 
-        services.AddHttpClient<AnthropicClient>(anthropicHttpClient =>
+        services.AddHttpClient<IRequestHandler<AnthropicRequest, AnthropicResponse>, AnthropicRequestHandler>(anthropicHttpClient =>
         {
             anthropicHttpClient.BaseAddress = anthropicConfiguration.BaseAddress;
             anthropicHttpClient.DefaultRequestHeaders.Add("x-api-key", anthropicConfiguration.ApiKey);
             anthropicHttpClient.DefaultRequestHeaders.Add("anthropic-version", anthropicConfiguration.Version);
-        }).AddResilienceHandler($"{nameof(AnthropicClient)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
+        }).AddResilienceHandler($"{nameof(AnthropicRequestHandler)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
 
         var googleAiConfiguration = configuration.GetRequiredSection(nameof(GoogleAiConfiguration)).Get<GoogleAiConfiguration>()
             ?? throw new NullReferenceException(nameof(GoogleAiConfiguration));
 
-        services.AddHttpClient<GoogleAiClient>(googleHttpClient =>
+        services.AddHttpClient<IRequestHandler<GoogleAiRequest, GoogleAiResponse>, GoogleAiRequestHandler>(googleHttpClient =>
         {
             googleHttpClient.BaseAddress = googleAiConfiguration.BaseAddress;
-        }).AddResilienceHandler($"{nameof(GoogleAiClient)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
+        }).AddResilienceHandler($"{nameof(GoogleAiRequestHandler)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
 
         var openAiConfiguration = configuration.GetRequiredSection(nameof(OpenAiConfiguration)).Get<OpenAiConfiguration>()
             ?? throw new NullReferenceException(nameof(OpenAiConfiguration));
 
-        services.AddHttpClient<OpenAiClient>(openAiHttpClient =>
+        services.AddHttpClient<IRequestHandler<OpenAiRequest, OpenAiResponse>, OpenAiRequestHandler>(openAiHttpClient =>
         {
             openAiHttpClient.BaseAddress = openAiConfiguration.BaseAddress;
             openAiHttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {openAiConfiguration.ApiKey}");
-        }).AddResilienceHandler($"{nameof(OpenAiClient)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
+        }).AddResilienceHandler($"{nameof(OpenAiRequestHandler)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
 
-        services.AddSingleton<LlamafileClient>();
+        services.AddSingleton<LlamafileRequestHandler>();
 
         return services;
     }

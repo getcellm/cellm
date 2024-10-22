@@ -20,10 +20,14 @@
   <ItemGroup>
     <PackageReference Include="ExcelDna.Addin" Version="1.8.0" />
     <PackageReference Include="ExcelDna.Interop" Version="15.0.1" />
+    <PackageReference Include="JsonPatch.Net" Version="3.1.1" />
+    <PackageReference Include="JsonSchema.Net.Generation" Version="4.5.1" />
+    <PackageReference Include="MediatR" Version="12.4.1" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="8.8.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />

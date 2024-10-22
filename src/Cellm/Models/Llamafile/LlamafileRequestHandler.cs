@@ -2,17 +2,17 @@
 using System.Net.NetworkInformation;
 using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
-using Cellm.AddIn.Prompts;
 using Cellm.Models.OpenAi;
+using MediatR;
 using Microsoft.Extensions.Options;
 
 namespace Cellm.Models.Llamafile;
 
-internal class LlamafileClient : IClient
+internal class LlamafileRequestHandler : IProviderRequestHandler<LlamafileRequest, LlamafileResponse>
 {
     private record Llamafile(string ModelPath, Uri BaseAddress, Process Process);
 
-    private readonly AsyncLazy<string> _llamafilePath;
+    private readonly AsyncLazy<string> _llamafileExePath;
     private readonly Dictionary<string, AsyncLazy<Llamafile>> _llamafiles;
     private readonly LLamafileProcessManager _llamafileProcessManager;
 
@@ -20,26 +20,26 @@ internal class LlamafileClient : IClient
     private readonly LlamafileConfiguration _llamafileConfiguration;
     private readonly OpenAiConfiguration _openAiConfiguration;
 
-    private readonly IClient _openAiClient;
+    private readonly ISender _sender;
     private readonly HttpClient _httpClient;
 
-    public LlamafileClient(IOptions<CellmConfiguration> cellmConfiguration,
+    public LlamafileRequestHandler(IOptions<CellmConfiguration> cellmConfiguration,
         IOptions<LlamafileConfiguration> llamafileConfiguration,
         IOptions<OpenAiConfiguration> openAiConfiguration,
-        OpenAiClient openAiClient,
+        ISender sender,
         HttpClient httpClient,
         LLamafileProcessManager llamafileProcessManager)
     {
         _cellmConfiguration = cellmConfiguration.Value;
         _llamafileConfiguration = llamafileConfiguration.Value;
         _openAiConfiguration = openAiConfiguration.Value;
-        _openAiClient = openAiClient;
+        _sender = sender;
         _httpClient = httpClient;
         _llamafileProcessManager = llamafileProcessManager;
 
-        _llamafilePath = new AsyncLazy<string>(async () =>
+        _llamafileExePath = new AsyncLazy<string>(async () =>
         {
-            return await DownloadFile(_llamafileConfiguration.LlamafileUrl, "Llamafile.exe");
+            return await DownloadFile(_llamafileConfiguration.LlamafileUrl, $"{nameof(Llamafile)}.exe");
         });
 
         _llamafiles = _llamafileConfiguration.Models.ToDictionary(x => x.Key, x => new AsyncLazy<Llamafile>(async () =>
@@ -55,21 +55,19 @@ internal class LlamafileClient : IClient
         }));
     }
 
-    public async Task<Prompt> Send(Prompt prompt, string? provider, string? model, Uri? baseAddress)
+    public async Task<LlamafileResponse> Handle(LlamafileRequest request, CancellationToken cancellationToken)
     {
         // Download model and start Llamafile on first call
-        var llamafile = await _llamafiles[model ?? _llamafileConfiguration.DefaultModel];
+        var llamafile = await _llamafiles[request.Prompt.Model ?? _llamafileConfiguration.DefaultModel];
 
-        return await _openAiClient.Send(
-            prompt,
-            provider ?? "Llamafile",
-            model ?? _llamafileConfiguration.DefaultModel,
-            baseAddress ?? llamafile.BaseAddress);
+        var openAiResponse = await _sender.Send(new OpenAiRequest(request.Prompt, nameof(Llamafile), llamafile.BaseAddress), cancellationToken);
+
+        return new LlamafileResponse(openAiResponse.Prompt);
     }
 
     private async Task<Process> StartProcess(string modelPath, Uri baseAddress)
     {
-        var processStartInfo = new ProcessStartInfo(await _llamafilePath);
+        var processStartInfo = new ProcessStartInfo(await _llamafileExePath);
 
         processStartInfo.Arguments += $"--server ";
         processStartInfo.Arguments += "--nobrowser ";
@@ -149,7 +147,7 @@ internal class LlamafileClient : IClient
         {
             if (process.HasExited)
             {
-                throw new CellmException($"Failed to run Llamafile. Exit code: {process.ExitCode}");
+                throw new CellmException($"Failed to run Llamafile, process exited. Exit code: {process.ExitCode}");
             }
 
             try
@@ -175,7 +173,7 @@ internal class LlamafileClient : IClient
 
         process.Kill();
 
-        throw new CellmException("Timeout waiting for Llamafile server to start");
+        throw new CellmException("Failed to run Llamafile, timeout waiting for Llamafile server to start");
     }
 
     string CreateFilePath(string fileName)
@@ -185,9 +183,9 @@ internal class LlamafileClient : IClient
         return filePath;
     }
 
-    private string CreateModelFileName(string modelName)
+    private static string CreateModelFileName(string modelName)
     {
-        return $"Llamafile-model-weights-{modelName}";
+        return $"Llamafile-model-{modelName}";
     }
 
     private Uri CreateBaseAddress()
