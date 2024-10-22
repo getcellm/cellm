@@ -25,29 +25,29 @@ public record OpenAiMessage(
    string? ToolCallId = null);
 
 public record OpenAiTool(
-    string Type, 
+    string Type,
     OpenAiFunction Function);
 
 public record OpenAiFunction(
-    string Name, 
-    string Description, 
+    string Name,
+    string Description,
     JsonDocument Parameters);
 
 public record OpenAiChoice(
     int Index,
-    OpenAiMessage Message, 
+    OpenAiMessage Message,
     string FinishReason);
 
 public record OpenAiToolCall(
-    string Id, 
-    string Type, 
+    string Id,
+    string Type,
     OpenAiFunctionCall Function);
 
 public record OpenAiFunctionCall(
-    string Name, 
+    string Name,
     string Arguments);
 
 public record OpenAiUsage(
-    int PromptTokens, 
+    int PromptTokens,
     int CompletionTokens,
     int TotalTokens);

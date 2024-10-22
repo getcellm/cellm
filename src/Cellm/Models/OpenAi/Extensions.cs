@@ -14,9 +14,10 @@ internal static class Extensions
 
     private static List<OpenAiMessage> ToOpenAiMessage(Message message)
     {
-        return message.Role switch {
+        return message.Role switch
+        {
             Roles.Tool => ToOpenAiToolResults(message),
-            _ => new List<OpenAiMessage>() 
+            _ => new List<OpenAiMessage>()
             {
                 new OpenAiMessage(
                     message.Role.ToString().ToLower(),
