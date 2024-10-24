@@ -33,13 +33,13 @@ internal class Client : IClient
             {
                 throw new ArgumentException($"Unsupported provider: {provider}");
             }
-                
+
             IModelResponse response = parsedProvider switch
             {
                 Providers.Anthropic => await _sender.Send(new AnthropicRequest(prompt, provider, baseAddress)),
                 Providers.GoogleAi => await _sender.Send(new GoogleAiRequest(prompt, provider, baseAddress)),
                 Providers.Llamafile => await _sender.Send(new LlamafileRequest(prompt)),
-                Providers.OpenAi => await _sender.Send(new OpenAiRequest(prompt, provider, baseAddress)), 
+                Providers.OpenAi => await _sender.Send(new OpenAiRequest(prompt, provider, baseAddress)),
                 _ => throw new InvalidOperationException($"Provider {parsedProvider} is defined but not implemented")
             };
 
