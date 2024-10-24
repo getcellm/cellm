@@ -29,13 +29,18 @@ internal class Client : IClient
         {
             provider ??= _cellmConfiguration.DefaultProvider;
 
-            IModelResponse response = provider.ToLower() switch
+            if (!Enum.TryParse<Providers>(provider, true, out var parsedProvider))
             {
-                "anthropic" => await _sender.Send(new AnthropicRequest(prompt, provider, baseAddress)),
-                "googleai" => await _sender.Send(new GoogleAiRequest(prompt, provider, baseAddress)),
-                "llamafile" => await _sender.Send(new LlamafileRequest(prompt)),
-                "openai" => await _sender.Send(new OpenAiRequest(prompt, provider, baseAddress)),
-                _ => throw new ArgumentException($"Unsupported client type: {provider}")
+                throw new ArgumentException($"Unsupported provider: {provider}");
+            }
+
+            IModelResponse response = parsedProvider switch
+            {
+                Providers.Anthropic => await _sender.Send(new AnthropicRequest(prompt, provider, baseAddress)),
+                Providers.GoogleAi => await _sender.Send(new GoogleAiRequest(prompt, provider, baseAddress)),
+                Providers.Llamafile => await _sender.Send(new LlamafileRequest(prompt)),
+                Providers.OpenAi => await _sender.Send(new OpenAiRequest(prompt, provider, baseAddress)),
+                _ => throw new InvalidOperationException($"Provider {parsedProvider} is defined but not implemented")
             };
 
             return response.Prompt;
