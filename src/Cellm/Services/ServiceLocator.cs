@@ -22,7 +22,7 @@ namespace Cellm.Services;
 internal static class ServiceLocator
 {
     private static readonly Lazy<IServiceProvider> _serviceProvider = new(() => ConfigureServices(new ServiceCollection()).BuildServiceProvider());
-
+    internal static string? ConfigurationPath { get; set; } = ExcelDnaUtil.XllPathInfo?.Directory?.FullName;
     public static IServiceProvider ServiceProvider => _serviceProvider.Value;
 
     public static T Get<T>() where T : notnull
@@ -32,12 +32,14 @@ internal static class ServiceLocator
 
     private static IServiceCollection ConfigureServices(IServiceCollection services)
     {
-        // Configurations
-        var XllPath = ExcelDnaUtil.XllPathInfo?.Directory?.FullName ??
-            throw new CellmException($"Unable to configure app, invalid value for ExcelDnaUtil.XllPathInfo='{ExcelDnaUtil.XllPathInfo}'");
+        if (string.IsNullOrEmpty(ConfigurationPath))
+        {
+            throw new CellmException($"Unable to configure app, invalid value for ExcelDnaUtil.XllPathInfo='{ConfigurationPath}'");
+        }
 
+        // Configurations
         IConfiguration configuration = new ConfigurationBuilder()
-            .SetBasePath(XllPath)
+            .SetBasePath(ConfigurationPath)
             .AddJsonFile("appsettings.json")
             .AddJsonFile("appsettings.Local.json", true)
             .Build();
