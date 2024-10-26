@@ -10,7 +10,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Cellm.AddIn;
 
-public static class CellmFunctions
+public static class Functions
 {
     /// <summary>
     /// Sends a prompt to the default model configured in CellmConfiguration.
@@ -88,7 +88,7 @@ public static class CellmFunctions
 
             var prompt = new PromptBuilder()
                 .SetModel(arguments.Model)
-                .SetSystemMessage(CellmPrompts.SystemMessage)
+                .SetSystemMessage(SystemMessages.SystemMessage)
                 .SetTemperature(arguments.Temperature)
                 .AddUserMessage(userMessage)
                 .Build();
