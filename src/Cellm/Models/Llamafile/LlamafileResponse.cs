@@ -2,4 +2,4 @@
 
 namespace Cellm.Models.Llamafile;
 
-internal record LlamafileResponse(Prompt Prompt) : IProviderResponse;
+internal record LlamafileResponse(Prompt Prompt) : IModelResponse;

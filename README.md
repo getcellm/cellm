@@ -117,7 +117,7 @@ PROMPTWITH(providerAndModel: string or cell, cells: range, [instruction: range |
 Allows you to specify the model as the first argument.
 
 - **providerAndModel (Required)**: A string on the form "provider/model".
-  - Example: anthropic/claude-3-5-sonnet-20240620
+  - Default: anthropic/claude-3-5-sonnet-20240620
 
 Example usage:
 
