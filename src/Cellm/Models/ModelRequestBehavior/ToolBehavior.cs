@@ -1,5 +1,4 @@
-﻿using Cellm.Models.OpenAi;
-using Cellm.Prompts;
+﻿using Cellm.Prompts;
 using Cellm.Tools;
 using MediatR;
 
@@ -10,12 +9,12 @@ internal class ToolBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, T
     where TResponse : IModelResponse
 {
     private readonly ISender _sender;
-    private readonly ITools _tools;
+    private readonly ToolRunner _toolRunner;
 
-    public ToolBehavior(ISender sender, ITools tools)
+    public ToolBehavior(ISender sender, ToolRunner toolRunner)
     {
         _sender = sender;
-        _tools = tools;
+        _toolRunner = toolRunner;
     }
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
@@ -27,7 +26,8 @@ internal class ToolBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, T
         if (toolCalls is not null)
         {
             // Model called tools, run tools and call model again
-            request.Prompt.Messages.Add(await RunTools(toolCalls));
+            var message = await RunTools(toolCalls);
+            request.Prompt.Messages.Add(message);
             response = await _sender.Send(request, cancellationToken);
         }
 
@@ -36,7 +36,7 @@ internal class ToolBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, T
 
     private async Task<Message> RunTools(List<ToolCall> toolCalls)
     {
-        var toolResults = await Task.WhenAll(toolCalls.Select(x => _tools.Run(x)));
+        var toolResults = await Task.WhenAll(toolCalls.Select(x => _toolRunner.Run(x)));
         var toolCallsWithResults = toolCalls
             .Zip(toolResults, (toolCall, toolResult) => toolCall with { Result = toolResult })
             .ToList();

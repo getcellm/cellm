@@ -16,20 +16,20 @@ internal class OpenAiRequestHandler : IModelRequestHandler<OpenAiRequest, OpenAi
     private readonly OpenAiConfiguration _openAiConfiguration;
     private readonly CellmConfiguration _cellmConfiguration;
     private readonly HttpClient _httpClient;
-    private readonly ITools _tools;
+    private readonly ToolRunner _toolRunner;
     private readonly ISerde _serde;
 
     public OpenAiRequestHandler(
         IOptions<OpenAiConfiguration> openAiConfiguration,
         IOptions<CellmConfiguration> cellmConfiguration,
         HttpClient httpClient,
-        ITools tools,
+        ToolRunner toolRunner,
         ISerde serde)
     {
         _openAiConfiguration = openAiConfiguration.Value;
         _cellmConfiguration = cellmConfiguration.Value;
         _httpClient = httpClient;
-        _tools = tools;
+        _toolRunner = toolRunner;
         _serde = serde;
     }
 
@@ -63,7 +63,7 @@ internal class OpenAiRequestHandler : IModelRequestHandler<OpenAiRequest, OpenAi
             openAiPrompt.ToOpenAiMessages(),
             _cellmConfiguration.MaxOutputTokens,
             openAiPrompt.Temperature,
-            _tools.ToOpenAiTools(),
+            _toolRunner.ToOpenAiTools(),
             "auto");
 
         return _serde.Serialize(chatCompletionRequest, new JsonSerializerOptions
