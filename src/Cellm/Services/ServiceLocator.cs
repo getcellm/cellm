@@ -9,6 +9,7 @@ using Cellm.Models.OpenAi;
 using Cellm.Models.PipelineBehavior;
 using Cellm.Services.Configuration;
 using Cellm.Tools;
+using Cellm.Tools.Glob;
 using ExcelDna.Integration;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
@@ -82,22 +83,28 @@ internal static class ServiceLocator
                       sentryLoggingOptions.ExperimentalMetrics = new ExperimentalMetricsOptions { EnableCodeLocations = true };
                       sentryLoggingOptions.AddIntegration(new ProfilingIntegration());
                   });
-          });
+          })
+          .AddSingleton(typeof(IPipelineBehavior<,>), typeof(SentryBehavior<,>));
 
         // Internals
         services
             .AddSingleton(configuration)
             .AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()))
-            .AddTransient(typeof(IPipelineBehavior<,>), typeof(SentryBehavior<,>))
-            .AddTransient(typeof(IPipelineBehavior<,>), typeof(CachingBehavior<,>))
-            .AddTransient(typeof(IPipelineBehavior<,>), typeof(ToolBehavior<,>))
-            .AddMemoryCache()
             .AddTransient<ArgumentParser>()
             .AddSingleton<IClient, Client>()
-            .AddSingleton<ITools, Tools.Tools>()
+            .AddSingleton<ISerde, Serde>();
+
+        // Cache
+        services
+            .AddMemoryCache()
             .AddSingleton<ICache, Cache>()
-            .AddSingleton<ISerde, Serde>()
-            .AddSingleton<LLamafileProcessManager>();
+            .AddSingleton(typeof(IPipelineBehavior<,>), typeof(CachingBehavior<,>));
+
+        // Tools
+        services
+            .AddSingleton<ToolRunner>()
+            .AddSingleton<ToolFactory>()
+            .AddSingleton(typeof(IPipelineBehavior<,>), typeof(ToolBehavior<,>));
 
         // Model Providers
         var rateLimiterConfiguration = configuration.GetRequiredSection(nameof(RateLimiterConfiguration)).Get<RateLimiterConfiguration>()
@@ -139,7 +146,9 @@ internal static class ServiceLocator
             openAiHttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {openAiConfiguration.ApiKey}");
         }).AddResilienceHandler($"{nameof(OpenAiRequestHandler)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
 
-        services.AddSingleton<LlamafileRequestHandler>();
+        services
+            .AddSingleton<LlamafileRequestHandler>()
+            .AddSingleton<LLamafileProcessManager>();
 
         return services;
     }

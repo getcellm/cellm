@@ -41,9 +41,9 @@ internal static class Extensions
             ).ToList();
     }
 
-    public static List<OpenAiTool> ToOpenAiTools(this ITools tools)
+    public static List<OpenAiTool> ToOpenAiTools(this ToolRunner toolRunner)
     {
-        return tools.GetTools()
+        return toolRunner.GetTools()
             .Select(x => new OpenAiTool("function", new OpenAiFunction(x.Name, x.Description, x.Parameters)))
             .ToList();
     }
