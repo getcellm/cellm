@@ -88,6 +88,8 @@ internal static class ServiceLocator
         services
             .AddSingleton(configuration)
             .AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()))
+            .AddTransient(typeof(IPipelineBehavior<,>), typeof(SentryBehavior<,>))
+            .AddTransient(typeof(IPipelineBehavior<,>), typeof(CachingBehavior<,>))
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(ToolBehavior<,>))
             .AddMemoryCache()
             .AddTransient<ArgumentParser>()
