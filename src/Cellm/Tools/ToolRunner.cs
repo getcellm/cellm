@@ -8,11 +8,11 @@ namespace Cellm.Tools;
 internal class ToolRunner
 {
     private readonly ISender _sender;
-    private readonly ISerde _serde;
+    private readonly Serde _serde;
     private readonly ToolFactory _toolFactory;
     private readonly IEnumerable<Type> _toolTypes;
 
-    public ToolRunner(ISender sender, ISerde serde, ToolFactory toolFactory)
+    public ToolRunner(ISender sender, Serde serde, ToolFactory toolFactory)
     {
         _sender = sender;
         _serde = serde;

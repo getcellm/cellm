@@ -17,14 +17,14 @@ internal class OpenAiRequestHandler : IModelRequestHandler<OpenAiRequest, OpenAi
     private readonly CellmConfiguration _cellmConfiguration;
     private readonly HttpClient _httpClient;
     private readonly ToolRunner _toolRunner;
-    private readonly ISerde _serde;
+    private readonly Serde _serde;
 
     public OpenAiRequestHandler(
         IOptions<OpenAiConfiguration> openAiConfiguration,
         IOptions<CellmConfiguration> cellmConfiguration,
         HttpClient httpClient,
         ToolRunner toolRunner,
-        ISerde serde)
+        Serde serde)
     {
         _openAiConfiguration = openAiConfiguration.Value;
         _cellmConfiguration = cellmConfiguration.Value;

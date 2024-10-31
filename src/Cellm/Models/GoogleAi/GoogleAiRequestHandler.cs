@@ -14,13 +14,13 @@ internal class GoogleAiRequestHandler : IModelRequestHandler<GoogleAiRequest, Go
     private readonly GoogleAiConfiguration _googleAiConfiguration;
     private readonly CellmConfiguration _cellmConfiguration;
     private readonly HttpClient _httpClient;
-    private readonly ISerde _serde;
+    private readonly Serde _serde;
 
     public GoogleAiRequestHandler(
         IOptions<GoogleAiConfiguration> googleAiConfiguration,
         IOptions<CellmConfiguration> cellmConfiguration,
         HttpClient httpClient,
-        ISerde serde)
+        Serde serde)
     {
         _googleAiConfiguration = googleAiConfiguration.Value;
         _cellmConfiguration = cellmConfiguration.Value;

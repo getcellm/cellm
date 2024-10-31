@@ -83,28 +83,26 @@ internal static class ServiceLocator
                       sentryLoggingOptions.ExperimentalMetrics = new ExperimentalMetricsOptions { EnableCodeLocations = true };
                       sentryLoggingOptions.AddIntegration(new ProfilingIntegration());
                   });
-          })
-          .AddSingleton(typeof(IPipelineBehavior<,>), typeof(SentryBehavior<,>));
+          });
 
         // Internals
         services
             .AddSingleton(configuration)
             .AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()))
             .AddTransient<ArgumentParser>()
-            .AddSingleton<IClient, Client>()
-            .AddSingleton<ISerde, Serde>();
+            .AddSingleton<Client>()
+            .AddSingleton<Serde>();
 
         // Cache
         services
             .AddMemoryCache()
-            .AddSingleton<ICache, Cache>()
-            .AddSingleton(typeof(IPipelineBehavior<,>), typeof(CachingBehavior<,>));
+            .AddSingleton<Cache>();
+
 
         // Tools
         services
             .AddSingleton<ToolRunner>()
-            .AddSingleton<ToolFactory>()
-            .AddSingleton(typeof(IPipelineBehavior<,>), typeof(ToolBehavior<,>));
+            .AddSingleton<ToolFactory>();
 
         // Model Providers
         var rateLimiterConfiguration = configuration.GetRequiredSection(nameof(RateLimiterConfiguration)).Get<RateLimiterConfiguration>()
@@ -149,6 +147,12 @@ internal static class ServiceLocator
         services
             .AddSingleton<LlamafileRequestHandler>()
             .AddSingleton<LLamafileProcessManager>();
+
+        // Model request pipeline
+        services
+            .AddSingleton(typeof(IPipelineBehavior<,>), typeof(SentryBehavior<,>))
+            .AddSingleton(typeof(IPipelineBehavior<,>), typeof(CachingBehavior<,>))
+            .AddSingleton(typeof(IPipelineBehavior<,>), typeof(ToolBehavior<,>));
 
         return services;
     }

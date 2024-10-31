@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace Cellm.Models;
 
-internal class Cache : ICache
+internal class Cache
 {
     private readonly IMemoryCache _memoryCache;
     private readonly MemoryCacheEntryOptions _memoryCacheEntryOptions;
