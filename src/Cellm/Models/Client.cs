@@ -12,7 +12,7 @@ using Polly.Timeout;
 
 namespace Cellm.Models;
 
-internal class Client : IClient
+internal class Client
 {
     private readonly CellmConfiguration _cellmConfiguration;
     private readonly ISender _sender;

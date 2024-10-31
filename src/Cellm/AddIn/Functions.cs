@@ -119,7 +119,7 @@ public static class Functions
     {
         try
         {
-            var client = ServiceLocator.Get<IClient>();
+            var client = ServiceLocator.Get<Client>();
             var response = await client.Send(prompt, provider, baseAddress);
             var content = response.Messages.Last().Content;
             return content;

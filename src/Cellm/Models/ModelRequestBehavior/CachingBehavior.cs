@@ -5,9 +5,9 @@ namespace Cellm.Models.PipelineBehavior;
 internal class CachingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IModelRequest<TResponse>
 {
-    private readonly ICache _cache;
+    private readonly Cache _cache;
 
-    public CachingBehavior(ICache cache)
+    public CachingBehavior(Cache cache)
     {
         _cache = cache;
     }

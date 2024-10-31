@@ -15,20 +15,17 @@ internal class AnthropicRequestHandler : IModelRequestHandler<AnthropicRequest, 
     private readonly AnthropicConfiguration _anthropicConfiguration;
     private readonly CellmConfiguration _cellmConfiguration;
     private readonly HttpClient _httpClient;
-    private readonly ICache _cache;
-    private readonly ISerde _serde;
+    private readonly Serde _serde;
 
     public AnthropicRequestHandler(
         IOptions<AnthropicConfiguration> anthropicConfiguration,
         IOptions<CellmConfiguration> cellmConfiguration,
         HttpClient httpClient,
-        ICache cache,
-        ISerde serde)
+        Serde serde)
     {
         _anthropicConfiguration = anthropicConfiguration.Value;
         _cellmConfiguration = cellmConfiguration.Value;
         _httpClient = httpClient;
-        _cache = cache;
         _serde = serde;
     }
 

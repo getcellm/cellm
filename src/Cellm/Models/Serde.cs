@@ -5,7 +5,7 @@ using Cellm.AddIn.Exceptions;
 
 namespace Cellm.Models;
 
-internal class Serde : ISerde
+internal class Serde
 {
     private readonly JsonSerializerOptions _defaultOptions = new()
     {
