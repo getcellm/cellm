@@ -57,6 +57,10 @@ internal class Client
         {
             throw new CellmException($"Method not supported: {ex.Message}", ex);
         }
+        catch (FileReaderException ex)
+        {
+            throw new CellmException($"File could not be read: {ex.Message}", ex);
+        }
         catch (NullReferenceException ex)
         {
             throw new CellmException($"Null reference error: {ex.Message}", ex);
