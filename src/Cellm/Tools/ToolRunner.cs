@@ -18,7 +18,7 @@ internal class ToolRunner
         _sender = sender;
         _serde = serde;
         _toolFactory = toolFactory;
-        _toolTypes = new List<Type>() { 
+        _toolTypes = new List<Type>() {
             typeof(GlobRequest),
             typeof(FileReaderRequest)
         };

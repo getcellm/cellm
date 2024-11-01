@@ -4,7 +4,8 @@ internal class TextReader : IFileReader
 {
     private readonly List<string> _extensions;
 
-    public TextReader() {
+    public TextReader()
+    {
         _extensions = new List<string> { ".c", ".cpp", ".cs", ".csv", ".cxx", ".h", ".hxx", ".html", ".java", ".json", ".jsonl", ".md", ".php", ".py", ".rb", ".txt", ".xml" };
     }
 
