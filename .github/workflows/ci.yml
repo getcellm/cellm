@@ -42,4 +42,5 @@ jobs:
     name: Conventional Commits
     steps:
       - name: Run commitlint
+        if: (github.actor!= 'dependabot[bot]') && (contains(github.head_ref, 'dependabot/') == false)
         uses: opensource-nepal/commitlint@v1
