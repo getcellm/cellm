@@ -9,6 +9,7 @@ using Cellm.Models.OpenAi;
 using Cellm.Models.PipelineBehavior;
 using Cellm.Services.Configuration;
 using Cellm.Tools;
+using Cellm.Tools.FileReader;
 using Cellm.Tools.Glob;
 using ExcelDna.Integration;
 using MediatR;
@@ -98,11 +99,13 @@ internal static class ServiceLocator
             .AddMemoryCache()
             .AddSingleton<Cache>();
 
-
         // Tools
         services
             .AddSingleton<ToolRunner>()
-            .AddSingleton<ToolFactory>();
+            .AddSingleton<ToolFactory>()
+            .AddSingleton<FileReaderFactory>()
+            .AddSingleton<IFileReader, PdfReader>()
+            .AddSingleton<IFileReader, TextReader>();
 
         // Model Providers
         var rateLimiterConfiguration = configuration.GetRequiredSection(nameof(RateLimiterConfiguration)).Get<RateLimiterConfiguration>()

@@ -1,5 +1,6 @@
 ﻿using Cellm.Models;
 using Cellm.Prompts;
+using Cellm.Tools.FileReader;
 using Cellm.Tools.Glob;
 using MediatR;
 
@@ -17,7 +18,10 @@ internal class ToolRunner
         _sender = sender;
         _serde = serde;
         _toolFactory = toolFactory;
-        _toolTypes = new List<Type>() { typeof(GlobRequest) };
+        _toolTypes = new List<Type>() { 
+            typeof(GlobRequest),
+            typeof(FileReaderRequest)
+        };
     }
 
     public List<Tool> GetTools()
@@ -30,6 +34,7 @@ internal class ToolRunner
         return toolCall.Name switch
         {
             nameof(GlobRequest) => await Run<GlobRequest>(toolCall.Arguments),
+            nameof(FileReaderRequest) => await Run<FileReaderRequest>(toolCall.Arguments),
             _ => throw new ArgumentException($"Unsupported tool: {toolCall.Name}")
         };
     }
