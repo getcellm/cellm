@@ -190,12 +190,12 @@
       },
       "Sentry.Profiling": {
         "type": "Direct",
-        "requested": "[4.10.2, )",
-        "resolved": "4.10.2",
-        "contentHash": "OgFfG7nnF6iENkq9AqDPn5T1H1/aPbo4zj990YdSddfrE/A5PCpU8cDKZ/JT2oWokb6igtQgpJHjFxAeZM9NBQ==",
+        "requested": "[4.12.1, )",
+        "resolved": "4.12.1",
+        "contentHash": "UbYfATbG7c8NH2TR5RrWeT2oySAsTB3pTcOKj24dCtIngpsp0qO/8ROwuUg8eYaIrRk3egHlf0ST1w+FV/w0jA==",
         "dependencies": {
           "Microsoft.Diagnostics.NETCore.Client": "0.2.510501",
-          "Sentry": "4.10.2"
+          "Sentry": "4.12.1"
         }
       },
       "ExcelDna.Integration": {
