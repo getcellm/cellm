@@ -37,9 +37,3 @@ jobs:
         dotnet-version: 6.0.x
     - name: Lint solution
       run: dotnet format --no-restore --verify-no-changes
-  commitlint:
-    runs-on: ubuntu-latest
-    name: Conventional Commits
-    steps:
-      - name: Run commitlint
-        uses: opensource-nepal/commitlint@v1
