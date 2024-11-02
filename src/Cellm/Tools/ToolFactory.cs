@@ -86,7 +86,7 @@ public class ToolFactory
 
     private static string GetDescriptionForType(Type type)
     {
-        var descriptionAttribute = type.GetCustomAttribute<DescriptionAttribute>();
-        return descriptionAttribute?.Description ?? type.Name;
+        var descriptionAttribute = type.GetCustomAttribute<System.ComponentModel.DescriptionAttribute>();
+        return descriptionAttribute?.Description ?? throw new ArgumentException($"Cannot get tool description for {type.Name}.");
     }
 }
