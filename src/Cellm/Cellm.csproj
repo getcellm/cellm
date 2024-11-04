@@ -36,7 +36,7 @@
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
     <PackageReference Include="PdfPig" Version="0.1.9" />
     <PackageReference Include="Sentry.Extensions.Logging" Version="4.12.1" />
-    <PackageReference Include="Sentry.Profiling" Version="4.12.1" />
+    <PackageReference Include="Sentry.Profiling" Version="4.12.2" />
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
