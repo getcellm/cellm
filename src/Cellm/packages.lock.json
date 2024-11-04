@@ -179,13 +179,13 @@
       },
       "Sentry.Extensions.Logging": {
         "type": "Direct",
-        "requested": "[4.12.1, )",
-        "resolved": "4.12.1",
-        "contentHash": "0u8QJxh58+i9D1EKBpcH87J8iAOAYB0oLzyWKMIW1NSUHND19pf9ZMG5gE/F4/iNRFefZ7GAVMyNpepg+mmL7w==",
+        "requested": "[4.12.2, )",
+        "resolved": "4.12.2",
+        "contentHash": "bL6vBVQEl+CgEjDQ9jK3z7ep4XDkys7SvW1ukR32nQSlR4V3cImFXPMVAxT0OzXwx7N3a8B6ZdL6SzhGqmM4kA==",
         "dependencies": {
           "Microsoft.Extensions.Http": "6.0.0",
           "Microsoft.Extensions.Logging.Configuration": "6.0.0",
-          "Sentry": "4.12.1"
+          "Sentry": "4.12.2"
         }
       },
       "Sentry.Profiling": {
@@ -517,8 +517,8 @@
       },
       "Sentry": {
         "type": "Transitive",
-        "resolved": "4.12.1",
-        "contentHash": "OLf7885OKHWLaTLTyw884mwOT4XKCWj2Hz5Wuz/TJemJqXwCIdIljkJBIoeHviRUPvtB7ulDgeYXf/Z7ScToSA=="
+        "resolved": "4.12.2",
+        "contentHash": "+/TAaObpM/0N+VC2RQAOR/nuFtWmXR/FGuOev7XWD9KpyNkzFwPbYb11sHeXLC3/9NeMPHIrvZCTKHBCXFPRHQ=="
       },
       "System.Collections.Immutable": {
         "type": "Transitive",
