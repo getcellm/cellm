@@ -190,12 +190,12 @@
       },
       "Sentry.Profiling": {
         "type": "Direct",
-        "requested": "[4.12.1, )",
-        "resolved": "4.12.1",
-        "contentHash": "UbYfATbG7c8NH2TR5RrWeT2oySAsTB3pTcOKj24dCtIngpsp0qO/8ROwuUg8eYaIrRk3egHlf0ST1w+FV/w0jA==",
+        "requested": "[4.13.0, )",
+        "resolved": "4.13.0",
+        "contentHash": "FJM5SDwHGN2+ceVGCeVQLHXNSBQEHSpvPrBVqVdbbduIdf7yWvaCdCn8MZyCJsvOuKMpwbrle6lXtxrKOZ2ESA==",
         "dependencies": {
           "Microsoft.Diagnostics.NETCore.Client": "0.2.510501",
-          "Sentry": "4.12.1"
+          "Sentry": "4.13.0"
         }
       },
       "ExcelDna.Integration": {
@@ -517,8 +517,8 @@
       },
       "Sentry": {
         "type": "Transitive",
-        "resolved": "4.12.1",
-        "contentHash": "OLf7885OKHWLaTLTyw884mwOT4XKCWj2Hz5Wuz/TJemJqXwCIdIljkJBIoeHviRUPvtB7ulDgeYXf/Z7ScToSA=="
+        "resolved": "4.13.0",
+        "contentHash": "Wfw3M1WpFcrYaGzPm7QyUTfIOYkVXQ1ry6p4WYjhbLz9fPwV23SGQZTFDpdox67NHM0V0g1aoQ4YKLm4ANtEEg=="
       },
       "System.Collections.Immutable": {
         "type": "Transitive",
