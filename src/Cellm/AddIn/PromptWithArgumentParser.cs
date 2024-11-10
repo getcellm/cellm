@@ -72,7 +72,7 @@ public class PromptWithArgumentParser
     {
         var provider = _provider ?? _configuration
             .GetSection(nameof(CellmConfiguration))
-            .GetValue<string>(nameof(CellmConfiguration.DefaultProvider)) 
+            .GetValue<string>(nameof(CellmConfiguration.DefaultProvider))
             ?? throw new ArgumentException(nameof(CellmConfiguration.DefaultProvider));
 
         var model = _model ?? _configuration
