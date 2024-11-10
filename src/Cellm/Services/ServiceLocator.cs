@@ -90,7 +90,7 @@ internal static class ServiceLocator
         services
             .AddSingleton(configuration)
             .AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()))
-            .AddTransient<ArgumentParser>()
+            .AddTransient<PromptWithArgumentParser>()
             .AddSingleton<Client>()
             .AddSingleton<Serde>();
 
