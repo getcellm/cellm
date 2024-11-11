@@ -29,7 +29,7 @@ public static class Functions
     /// </returns>
     [ExcelFunction(Name = "PROMPT", Description = "Send a prompt to the default model")]
     public static object Prompt(
-    [ExcelArgument(AllowReference = true, Name = "Context", Description = "A cell or range of cells")] object context,
+    [ExcelArgument(AllowReference = true, Name = "InstructionsOrContext", Description = "A string with instructions or a cell or range of cells with context")] object context,
     [ExcelArgument(Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
     [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
     {
@@ -52,7 +52,7 @@ public static class Functions
     /// Sends a prompt to the specified model.
     /// </summary>
     /// <param name="providerAndModel">The provider and model in the format "provider/model".</param>
-    /// <param name="context">A cell or range of cells containing the context for the prompt.</param>
+    /// <param name="instructionsOrContext">A string with instructions or a cell or range of cells with context.</param>
     /// <param name="instructionsOrTemperature">
     /// A cell or range of cells with instructions, or a temperature value.
     /// If omitted, any instructions found in the context will be used.
@@ -67,16 +67,16 @@ public static class Functions
     [ExcelFunction(Name = "PROMPTWITH", Description = "Send a prompt to a specific model")]
     public static object PromptWith(
         [ExcelArgument(AllowReference = true, Name = "Provider/Model")] object providerAndModel,
-        [ExcelArgument(AllowReference = true, Name = "Context", Description = "A cell or range of cells")] object context,
+        [ExcelArgument(AllowReference = true, Name = "InstructionsOrContext", Description = "A string with instructions or a cell or range of cells with context")] object instructionsOrContext,
         [ExcelArgument(Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
         [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
     {
         try
         {
-            var arguments = ServiceLocator.Get<ArgumentParser>()
+            var arguments = ServiceLocator.Get<PromptWithArgumentParser>()
                 .AddProvider(providerAndModel)
                 .AddModel(providerAndModel)
-                .AddContext(context)
+                .AddInstructionsOrContext(instructionsOrContext)
                 .AddInstructionsOrTemperature(instructionsOrTemperature)
                 .AddTemperature(temperature)
                 .Parse();
@@ -94,7 +94,7 @@ public static class Functions
                 .Build();
 
             // ExcelAsyncUtil yields Excel's main thread, Task.Run enables async/await in inner code
-            return ExcelAsyncUtil.Run(nameof(PromptWith), new object[] { providerAndModel, context, instructionsOrTemperature, temperature }, () =>
+            return ExcelAsyncUtil.Run(nameof(PromptWith), new object[] { providerAndModel, instructionsOrContext, instructionsOrTemperature, temperature }, () =>
             {
                 return Task.Run(async () => await CallModelAsync(prompt, arguments.Provider)).GetAwaiter().GetResult();
             });
