@@ -1,32 +1,51 @@
-﻿using MediatR;
+﻿using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
+using Cellm.AddIn;
+using MediatR;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 
 namespace Cellm.Models.PipelineBehavior;
 
 internal class CachingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IModelRequest<TResponse>
+    where TResponse : IModelResponse
 {
-    private readonly Cache _cache;
+    private readonly IMemoryCache _memoryCache;
+    private readonly MemoryCacheEntryOptions _memoryCacheEntryOptions;
 
-    public CachingBehavior(Cache cache)
+    public CachingBehavior(IMemoryCache memoryCache, IOptions<CellmConfiguration> _cellmConfiguration)
     {
-        _cache = cache;
+        _memoryCache = memoryCache;
+        _memoryCacheEntryOptions = new()
+        {
+            SlidingExpiration = TimeSpan.FromSeconds(_cellmConfiguration.Value.CacheTimeoutInSeconds)
+        };
     }
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
-        if (_cache.TryGetValue(request, out object? value) && value is TResponse response)
+        var key = GetKey(request);
+
+        if (_memoryCache.TryGetValue(key, out object? value) && value is TResponse response)
         {
             return response;
         }
 
         response = await next();
 
-        // Tool results depend on state external to prompt and should not be cached
-        if (!request.Prompt.Messages.Any(x => x.Role == Prompts.Roles.Tool))
-        {
-            _cache.Set(request, response);
-        }
+        _memoryCache.Set(key, response, _memoryCacheEntryOptions);
 
         return response;
+    }
+
+    private static string GetKey<T>(T key)
+    {
+        var json = JsonSerializer.Serialize(key);
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(json));
+        var hash = Convert.ToHexString(bytes);
+
+        return hash;
     }
 }

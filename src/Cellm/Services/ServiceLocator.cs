@@ -10,14 +10,12 @@ using Cellm.Models.PipelineBehavior;
 using Cellm.Services.Configuration;
 using Cellm.Tools;
 using Cellm.Tools.FileReader;
-using Cellm.Tools.Glob;
 using ExcelDna.Integration;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Sentry.Profiling;
 
 namespace Cellm.Services;
 
@@ -89,15 +87,11 @@ internal static class ServiceLocator
         // Internals
         services
             .AddSingleton(configuration)
+            .AddMemoryCache()
             .AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()))
             .AddTransient<PromptWithArgumentParser>()
             .AddSingleton<Client>()
             .AddSingleton<Serde>();
-
-        // Cache
-        services
-            .AddMemoryCache()
-            .AddSingleton<Cache>();
 
         // Tools
         services
