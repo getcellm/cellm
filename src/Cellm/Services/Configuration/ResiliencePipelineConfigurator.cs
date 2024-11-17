@@ -21,6 +21,7 @@ public class ResiliencePipelineConfigurator
         CircuitBreakerConfiguration circuitBreakerConfiguration,
         RetryConfiguration retryConfiguration)
     {
+        _cellmConfiguration = cellmConfiguration;
         _rateLimiterConfiguration = rateLimiterConfiguration;
         _circuitBreakerConfiguration = circuitBreakerConfiguration;
         _retryConfiguration = retryConfiguration;
