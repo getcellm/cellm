@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Threading.RateLimiting;
+using Cellm.AddIn;
 using Polly;
 using Polly.CircuitBreaker;
 using Polly.Retry;
@@ -9,11 +10,13 @@ namespace Cellm.Services.Configuration;
 
 public class ResiliencePipelineConfigurator
 {
+    private readonly CellmConfiguration _cellmConfiguration;
     private readonly RateLimiterConfiguration _rateLimiterConfiguration;
     private readonly CircuitBreakerConfiguration _circuitBreakerConfiguration;
     private readonly RetryConfiguration _retryConfiguration;
 
     public ResiliencePipelineConfigurator(
+        CellmConfiguration cellmConfiguration,
         RateLimiterConfiguration rateLimiterConfiguration,
         CircuitBreakerConfiguration circuitBreakerConfiguration,
         RetryConfiguration retryConfiguration)
@@ -54,7 +57,7 @@ public class ResiliencePipelineConfigurator
                 MinimumThroughput = _circuitBreakerConfiguration.MinimumThroughput,
                 BreakDuration = TimeSpan.FromSeconds(_circuitBreakerConfiguration.BreakDurationInSeconds),
             })
-            .AddTimeout(TimeSpan.FromSeconds(_retryConfiguration.RequestTimeoutInSeconds))
+            .AddTimeout(TimeSpan.FromSeconds(_cellmConfiguration.HttpTimeoutInSeconds))
             .Build();
     }
 

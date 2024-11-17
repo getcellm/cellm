@@ -12,6 +12,8 @@ public class CellmConfiguration
 
     public int MaxOutputTokens { get; init; }
 
+    public int HttpTimeoutInSeconds { get; init; }
+
     public int CacheTimeoutInSeconds { get; init; }
 }
 
