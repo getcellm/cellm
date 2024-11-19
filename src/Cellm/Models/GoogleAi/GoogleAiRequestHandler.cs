@@ -81,30 +81,6 @@ internal class GoogleAiRequestHandler : IModelRequestHandler<GoogleAiRequest, Go
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         });
 
-        var tags = new Dictionary<string, string> {
-            { nameof(request.Provider), request.Provider?.ToLower() ?? _cellmConfiguration.DefaultProvider },
-            { nameof(request.Prompt.Model), request.Prompt.Model?.ToLower() ?? _googleAiConfiguration.DefaultModel },
-            { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
-        };
-
-        var inputTokens = responseBody?.UsageMetadata?.PromptTokenCount ?? -1;
-        if (inputTokens > 0)
-        {
-            SentrySdk.Metrics.Distribution("InputTokens",
-                inputTokens,
-                unit: MeasurementUnit.Custom("token"),
-                tags);
-        }
-
-        var outputTokens = responseBody?.UsageMetadata?.CandidatesTokenCount ?? -1;
-        if (outputTokens > 0)
-        {
-            SentrySdk.Metrics.Distribution("OutputTokens",
-                outputTokens,
-                unit: MeasurementUnit.Custom("token"),
-                tags);
-        }
-
         var assistantMessage = responseBody?.Candidates?.SingleOrDefault()?.Content?.Parts?.SingleOrDefault()?.Text ?? throw new CellmException("#EMPTY_RESPONSE?");
 
         var assistantPrompt = new PromptBuilder(request.Prompt)
