@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Threading.RateLimiting;
+using Cellm.AddIn;
 using Polly;
 using Polly.CircuitBreaker;
 using Polly.Retry;
@@ -9,15 +10,18 @@ namespace Cellm.Services.Configuration;
 
 public class ResiliencePipelineConfigurator
 {
+    private readonly CellmConfiguration _cellmConfiguration;
     private readonly RateLimiterConfiguration _rateLimiterConfiguration;
     private readonly CircuitBreakerConfiguration _circuitBreakerConfiguration;
     private readonly RetryConfiguration _retryConfiguration;
 
     public ResiliencePipelineConfigurator(
+        CellmConfiguration cellmConfiguration,
         RateLimiterConfiguration rateLimiterConfiguration,
         CircuitBreakerConfiguration circuitBreakerConfiguration,
         RetryConfiguration retryConfiguration)
     {
+        _cellmConfiguration = cellmConfiguration;
         _rateLimiterConfiguration = rateLimiterConfiguration;
         _circuitBreakerConfiguration = circuitBreakerConfiguration;
         _retryConfiguration = retryConfiguration;
@@ -54,7 +58,7 @@ public class ResiliencePipelineConfigurator
                 MinimumThroughput = _circuitBreakerConfiguration.MinimumThroughput,
                 BreakDuration = TimeSpan.FromSeconds(_circuitBreakerConfiguration.BreakDurationInSeconds),
             })
-            .AddTimeout(TimeSpan.FromSeconds(_retryConfiguration.RequestTimeoutInSeconds))
+            .AddTimeout(TimeSpan.FromSeconds(_cellmConfiguration.HttpTimeoutInSeconds))
             .Build();
     }
 
@@ -66,9 +70,9 @@ public class ResiliencePipelineConfigurator
     };
 
     private static bool IsCircuitBreakerError(HttpResponseMessage response) =>
-        response.StatusCode >= HttpStatusCode.InternalServerError ||
-        response.StatusCode == HttpStatusCode.ServiceUnavailable ||
-        response.StatusCode == HttpStatusCode.TooManyRequests;
+        response.StatusCode == HttpStatusCode.RequestTimeout ||
+        response.StatusCode == HttpStatusCode.TooManyRequests ||
+        response.StatusCode == HttpStatusCode.GatewayTimeout;
 
     private static bool IsCircuitBreakerException(Exception exception) =>
         IsRetryableException(exception) || IsCatastrophicException(exception);
@@ -84,9 +88,12 @@ public class ResiliencePipelineConfigurator
     };
 
     private static bool IsRetryableError(HttpResponseMessage response) =>
-        response.StatusCode >= HttpStatusCode.InternalServerError ||
         response.StatusCode == HttpStatusCode.RequestTimeout ||
-        response.StatusCode == HttpStatusCode.TooManyRequests;
+        response.StatusCode == HttpStatusCode.TooManyRequests ||
+        response.StatusCode == HttpStatusCode.BadGateway ||
+        response.StatusCode == HttpStatusCode.ServiceUnavailable ||
+        response.StatusCode == HttpStatusCode.GatewayTimeout;
+
 
     private static bool IsRetryableException(Exception exception) =>
         exception is HttpRequestException or TimeoutRejectedException;
