@@ -83,30 +83,6 @@ internal class OpenAiRequestHandler : IModelRequestHandler<OpenAiRequest, OpenAi
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         });
 
-        var tags = new Dictionary<string, string> {
-            { nameof(request.Provider), request.Provider?.ToLower() ?? _cellmConfiguration.DefaultProvider },
-            { nameof(request.Prompt.Model), request.Prompt.Model ?.ToLower() ?? _openAiConfiguration.DefaultModel },
-            { nameof(_httpClient.BaseAddress), _httpClient.BaseAddress?.ToString() ?? string.Empty }
-        };
-
-        var inputTokens = responseBody?.Usage?.PromptTokens ?? -1;
-        if (inputTokens > 0)
-        {
-            SentrySdk.Metrics.Distribution("InputTokens",
-                inputTokens,
-            unit: MeasurementUnit.Custom("token"),
-                tags);
-        }
-
-        var outputTokens = responseBody?.Usage?.CompletionTokens ?? -1;
-        if (outputTokens > 0)
-        {
-            SentrySdk.Metrics.Distribution("OutputTokens",
-                outputTokens,
-                unit: MeasurementUnit.Custom("token"),
-                tags);
-        }
-
         var choice = responseBody?.Choices?.FirstOrDefault() ?? throw new CellmException("Empty response from OpenAI API");
         var toolCalls = choice.Message.ToolCalls?
             .Select(x => new ToolCall(x.Id, x.Function.Name, x.Function.Arguments, null))
