@@ -122,7 +122,7 @@ internal static class ServiceLocator
             anthropicHttpClient.BaseAddress = anthropicConfiguration.BaseAddress;
             anthropicHttpClient.DefaultRequestHeaders.Add("x-api-key", anthropicConfiguration.ApiKey);
             anthropicHttpClient.DefaultRequestHeaders.Add("anthropic-version", anthropicConfiguration.Version);
-            anthropicHttpClient.Timeout = TimeSpan.FromSeconds(cellmConfiguration.HttpTimeoutInSeconds + 1);
+            anthropicHttpClient.Timeout = TimeSpan.FromHours(1);
         }).AddResilienceHandler($"{nameof(AnthropicRequestHandler)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
 
         var googleAiConfiguration = configuration.GetRequiredSection(nameof(GoogleAiConfiguration)).Get<GoogleAiConfiguration>()
@@ -131,7 +131,7 @@ internal static class ServiceLocator
         services.AddHttpClient<IRequestHandler<GoogleAiRequest, GoogleAiResponse>, GoogleAiRequestHandler>(googleHttpClient =>
         {
             googleHttpClient.BaseAddress = googleAiConfiguration.BaseAddress;
-            googleHttpClient.Timeout = TimeSpan.FromSeconds(cellmConfiguration.HttpTimeoutInSeconds + 1);
+            googleHttpClient.Timeout = TimeSpan.FromHours(1);
         }).AddResilienceHandler($"{nameof(GoogleAiRequestHandler)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
 
         var openAiConfiguration = configuration.GetRequiredSection(nameof(OpenAiConfiguration)).Get<OpenAiConfiguration>()
@@ -141,7 +141,7 @@ internal static class ServiceLocator
         {
             openAiHttpClient.BaseAddress = openAiConfiguration.BaseAddress;
             openAiHttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {openAiConfiguration.ApiKey}");
-            openAiHttpClient.Timeout = TimeSpan.FromSeconds(cellmConfiguration.HttpTimeoutInSeconds + 1);
+            openAiHttpClient.Timeout = TimeSpan.FromHours(1);
         }).AddResilienceHandler($"{nameof(OpenAiRequestHandler)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
 
         services

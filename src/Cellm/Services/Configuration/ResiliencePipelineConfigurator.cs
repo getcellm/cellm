@@ -70,9 +70,9 @@ public class ResiliencePipelineConfigurator
     };
 
     private static bool IsCircuitBreakerError(HttpResponseMessage response) =>
-        response.StatusCode >= HttpStatusCode.InternalServerError ||
-        response.StatusCode == HttpStatusCode.ServiceUnavailable ||
-        response.StatusCode == HttpStatusCode.TooManyRequests;
+        response.StatusCode == HttpStatusCode.RequestTimeout ||
+        response.StatusCode == HttpStatusCode.TooManyRequests ||
+        response.StatusCode == HttpStatusCode.GatewayTimeout;
 
     private static bool IsCircuitBreakerException(Exception exception) =>
         IsRetryableException(exception) || IsCatastrophicException(exception);
@@ -88,9 +88,12 @@ public class ResiliencePipelineConfigurator
     };
 
     private static bool IsRetryableError(HttpResponseMessage response) =>
-        response.StatusCode >= HttpStatusCode.InternalServerError ||
         response.StatusCode == HttpStatusCode.RequestTimeout ||
-        response.StatusCode == HttpStatusCode.TooManyRequests;
+        response.StatusCode == HttpStatusCode.TooManyRequests ||
+        response.StatusCode == HttpStatusCode.BadGateway ||
+        response.StatusCode == HttpStatusCode.ServiceUnavailable ||
+        response.StatusCode == HttpStatusCode.GatewayTimeout;
+ 
 
     private static bool IsRetryableException(Exception exception) =>
         exception is HttpRequestException or TimeoutRejectedException;
