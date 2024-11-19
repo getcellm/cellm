@@ -93,7 +93,7 @@ public class ResiliencePipelineConfigurator
         response.StatusCode == HttpStatusCode.BadGateway ||
         response.StatusCode == HttpStatusCode.ServiceUnavailable ||
         response.StatusCode == HttpStatusCode.GatewayTimeout;
- 
+
 
     private static bool IsRetryableException(Exception exception) =>
         exception is HttpRequestException or TimeoutRejectedException;
