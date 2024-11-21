@@ -87,12 +87,13 @@ internal static class ServiceLocator
             .AddSingleton(configuration)
             .AddMemoryCache()
             .AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()))
-            .AddTransient<PromptWithArgumentParser>()
+            .AddTransient<PromptArgumentParser>()
             .AddSingleton<Client>()
             .AddSingleton<Serde>();
 
         // Tools
         services
+            .AddSingleton<Functions>()
             .AddSingleton<ToolRunner>()
             .AddSingleton<ToolFactory>()
             .AddSingleton<FileReaderFactory>()

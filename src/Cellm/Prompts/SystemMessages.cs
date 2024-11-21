@@ -1,4 +1,4 @@
-﻿namespace Cellm.AddIn;
+﻿namespace Cellm.Prompts;
 
 internal static class SystemMessages
 {
