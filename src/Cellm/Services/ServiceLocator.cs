@@ -3,7 +3,6 @@ using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.Models;
 using Cellm.Models.Anthropic;
-using Cellm.Models.GoogleAi;
 using Cellm.Models.Llamafile;
 using Cellm.Models.OpenAi;
 using Cellm.Models.PipelineBehavior;
@@ -47,7 +46,6 @@ internal static class ServiceLocator
         services
             .Configure<CellmConfiguration>(configuration.GetRequiredSection(nameof(CellmConfiguration)))
             .Configure<AnthropicConfiguration>(configuration.GetRequiredSection(nameof(AnthropicConfiguration)))
-            .Configure<GoogleAiConfiguration>(configuration.GetRequiredSection(nameof(GoogleAiConfiguration)))
             .Configure<OpenAiConfiguration>(configuration.GetRequiredSection(nameof(OpenAiConfiguration)))
             .Configure<LlamafileConfiguration>(configuration.GetRequiredSection(nameof(LlamafileConfiguration)))
             .Configure<RateLimiterConfiguration>(configuration.GetRequiredSection(nameof(RateLimiterConfiguration)))
@@ -124,15 +122,6 @@ internal static class ServiceLocator
             anthropicHttpClient.DefaultRequestHeaders.Add("anthropic-version", anthropicConfiguration.Version);
             anthropicHttpClient.Timeout = TimeSpan.FromHours(1);
         }).AddResilienceHandler($"{nameof(AnthropicRequestHandler)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
-
-        var googleAiConfiguration = configuration.GetRequiredSection(nameof(GoogleAiConfiguration)).Get<GoogleAiConfiguration>()
-            ?? throw new NullReferenceException(nameof(GoogleAiConfiguration));
-
-        services.AddHttpClient<IRequestHandler<GoogleAiRequest, GoogleAiResponse>, GoogleAiRequestHandler>(googleHttpClient =>
-        {
-            googleHttpClient.BaseAddress = googleAiConfiguration.BaseAddress;
-            googleHttpClient.Timeout = TimeSpan.FromHours(1);
-        }).AddResilienceHandler($"{nameof(GoogleAiRequestHandler)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
 
         var openAiConfiguration = configuration.GetRequiredSection(nameof(OpenAiConfiguration)).Get<OpenAiConfiguration>()
             ?? throw new NullReferenceException(nameof(OpenAiConfiguration));
