@@ -93,7 +93,6 @@ internal static class ServiceLocator
 
         // Tools
         services
-            .AddSingleton<Functions>()
             .AddSingleton<ToolRunner>()
             .AddSingleton<ToolFactory>()
             .AddSingleton<FileReaderFactory>()
