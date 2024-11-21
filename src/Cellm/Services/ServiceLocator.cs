@@ -4,8 +4,8 @@ using Cellm.AddIn.Exceptions;
 using Cellm.Models;
 using Cellm.Models.Anthropic;
 using Cellm.Models.Llamafile;
+using Cellm.Models.ModelRequestBehavior;
 using Cellm.Models.OpenAi;
-using Cellm.Models.PipelineBehavior;
 using Cellm.Services.Configuration;
 using Cellm.Tools;
 using Cellm.Tools.FileReader;
@@ -93,8 +93,6 @@ internal static class ServiceLocator
 
         // Tools
         services
-            .AddSingleton<ToolRunner>()
-            .AddSingleton<ToolFactory>()
             .AddSingleton<FileReaderFactory>()
             .AddSingleton<IFileReader, PdfReader>()
             .AddSingleton<IFileReader, TextReader>();

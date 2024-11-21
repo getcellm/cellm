@@ -1,3 +1,5 @@
-﻿namespace Cellm.Prompts;
+﻿using Microsoft.Extensions.AI;
 
-public record Prompt(string Model, string SystemMessage, List<Message> Messages, double Temperature, List<Tool> Tools);
+namespace Cellm.Prompts;
+
+public record Prompt(IList<ChatMessage> Messages, ChatOptions Options);

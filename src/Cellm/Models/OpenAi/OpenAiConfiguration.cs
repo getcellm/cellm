@@ -10,13 +10,10 @@ internal class OpenAiConfiguration : IProviderConfiguration
 
     public string ApiKey { get; init; }
 
-    public bool EnableTools { get; init; }
-
     public OpenAiConfiguration()
     {
         BaseAddress = default!;
         DefaultModel = default!;
         ApiKey = default!;
-        EnableTools = default;
     }
 }

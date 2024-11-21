@@ -9,7 +9,7 @@ internal class GlobRequestHandler : IRequestHandler<GlobRequest, GlobResponse>
     {
         var matcher = new Matcher();
         matcher.AddIncludePatterns(request.IncludePatterns);
-        matcher.AddExcludePatterns(request.ExcludePatterns ?? new List<string>());
+        matcher.AddExcludePatterns(request.ExcludePatterns ?? []);
         var fileNames = matcher.GetResultsInFullPath(request.RootPath);
 
         return Task.FromResult(new GlobResponse(fileNames.ToList()));
