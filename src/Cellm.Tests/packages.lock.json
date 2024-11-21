@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net6.0-windows7.0": {
+    "net8.0-windows7.0": {
       "ExcelDna.Testing": {
         "type": "Direct",
         "requested": "[1.8.0, )",
