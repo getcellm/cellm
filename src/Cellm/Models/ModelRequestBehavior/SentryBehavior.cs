@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace Cellm.Models.PipelineBehavior;
+namespace Cellm.Models.ModelRequestBehavior;
 
 internal class SentryBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull

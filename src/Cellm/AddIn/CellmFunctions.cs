@@ -120,6 +120,6 @@ public static class CellmFunctions
     {
         var client = ServiceLocator.Get<Client>();
         var response = await client.Send(prompt, provider, baseAddress);
-        return response.Messages.Last().Content;
+        return response.Messages.Last().Text ?? throw new NullReferenceException("No text response");
     }
 }

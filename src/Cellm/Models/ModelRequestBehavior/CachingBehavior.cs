@@ -6,7 +6,7 @@ using MediatR;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 
-namespace Cellm.Models.PipelineBehavior;
+namespace Cellm.Models.ModelRequestBehavior;
 
 internal class CachingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IModelRequest<TResponse>
