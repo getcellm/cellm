@@ -204,7 +204,7 @@ To get started, we recommend using Ollama with the Gemma 2 2B model:
 
 1. Rename `appsettings.Ollama.json` to `appsettings.Local.json`, 
 2. Build and install Cellm.
-3. Run the following command in the docker directory:   
+3. Run the following command in the `docker/` directory:   
    ```cmd
    docker compose -f docker-compose.Ollama.yml up --detach
    docker compose -f docker-compose.Ollama.yml exec backend ollama pull gemma2:2b

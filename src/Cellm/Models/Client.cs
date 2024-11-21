@@ -3,6 +3,7 @@ using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.Models.Anthropic;
 using Cellm.Models.Llamafile;
+using Cellm.Models.Ollama;
 using Cellm.Models.OpenAi;
 using Cellm.Prompts;
 using MediatR;
@@ -37,6 +38,7 @@ internal class Client
             {
                 Providers.Anthropic => await _sender.Send(new AnthropicRequest(prompt, provider, baseAddress)),
                 Providers.Llamafile => await _sender.Send(new LlamafileRequest(prompt)),
+                Providers.Ollama => await _sender.Send(new OllamaRequest(prompt, provider, baseAddress)),
                 Providers.OpenAi => await _sender.Send(new OpenAiRequest(prompt, provider, baseAddress)),
                 _ => throw new InvalidOperationException($"Provider {parsedProvider} is defined but not implemented")
             };

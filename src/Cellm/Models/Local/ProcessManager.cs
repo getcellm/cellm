@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-public class LLamafileProcessManager
+public class ProcessManager
 {
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
     static extern IntPtr CreateJobObject(IntPtr a, string lpName);
@@ -61,7 +61,7 @@ public class LLamafileProcessManager
 
     private IntPtr _jobObject;
 
-    public LLamafileProcessManager()
+    public ProcessManager()
     {
         _jobObject = CreateJobObject(IntPtr.Zero, string.Empty);
 

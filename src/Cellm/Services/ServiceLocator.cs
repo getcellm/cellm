@@ -4,10 +4,11 @@ using Cellm.AddIn.Exceptions;
 using Cellm.Models;
 using Cellm.Models.Anthropic;
 using Cellm.Models.Llamafile;
+using Cellm.Models.Local;
 using Cellm.Models.ModelRequestBehavior;
+using Cellm.Models.Ollama;
 using Cellm.Models.OpenAi;
 using Cellm.Services.Configuration;
-using Cellm.Tools;
 using Cellm.Tools.FileReader;
 using ExcelDna.Integration;
 using MediatR;
@@ -46,6 +47,7 @@ internal static class ServiceLocator
         services
             .Configure<CellmConfiguration>(configuration.GetRequiredSection(nameof(CellmConfiguration)))
             .Configure<AnthropicConfiguration>(configuration.GetRequiredSection(nameof(AnthropicConfiguration)))
+            .Configure<OllamaConfiguration>(configuration.GetRequiredSection(nameof(OllamaConfiguration)))
             .Configure<OpenAiConfiguration>(configuration.GetRequiredSection(nameof(OpenAiConfiguration)))
             .Configure<LlamafileConfiguration>(configuration.GetRequiredSection(nameof(LlamafileConfiguration)))
             .Configure<RateLimiterConfiguration>(configuration.GetRequiredSection(nameof(RateLimiterConfiguration)))
@@ -77,7 +79,6 @@ internal static class ServiceLocator
                       sentryLoggingOptions.Environment = sentryConfiguration.Environment;
                       sentryLoggingOptions.AutoSessionTracking = true;
                       sentryLoggingOptions.IsGlobalModeEnabled = true;
-                      sentryLoggingOptions.ExperimentalMetrics = new ExperimentalMetricsOptions { EnableCodeLocations = true };
                       sentryLoggingOptions.AddIntegration(new ProfilingIntegration());
                   });
           });
@@ -85,11 +86,17 @@ internal static class ServiceLocator
         // Internals
         services
             .AddSingleton(configuration)
-            .AddMemoryCache()
             .AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()))
             .AddTransient<PromptArgumentParser>()
             .AddSingleton<Client>()
-            .AddSingleton<Serde>();
+            .AddSingleton<Serde>()
+            .AddSingleton<LocalUtilities>()
+            .AddSingleton<ProcessManager>(); ;
+
+#pragma warning disable EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates.
+        services
+            .AddHybridCache();
+#pragma warning restore EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates.
 
         // Tools
         services
@@ -121,6 +128,15 @@ internal static class ServiceLocator
             anthropicHttpClient.Timeout = TimeSpan.FromHours(1);
         }).AddResilienceHandler($"{nameof(AnthropicRequestHandler)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
 
+        var ollamaConfiguration = configuration.GetRequiredSection(nameof(OllamaConfiguration)).Get<OllamaConfiguration>()
+            ?? throw new NullReferenceException(nameof(OllamaConfiguration));
+
+        services.AddHttpClient<IRequestHandler<OllamaRequest, OllamaResponse>, OllamaRequestHandler>(ollamaHttpClient =>
+        {
+            ollamaHttpClient.BaseAddress = ollamaConfiguration.BaseAddress;
+            ollamaHttpClient.Timeout = TimeSpan.FromHours(1);
+        }).AddResilienceHandler($"{nameof(OllamaRequestHandler)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
+
         var openAiConfiguration = configuration.GetRequiredSection(nameof(OpenAiConfiguration)).Get<OpenAiConfiguration>()
             ?? throw new NullReferenceException(nameof(OpenAiConfiguration));
 
@@ -130,10 +146,6 @@ internal static class ServiceLocator
             openAiHttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {openAiConfiguration.ApiKey}");
             openAiHttpClient.Timeout = TimeSpan.FromHours(1);
         }).AddResilienceHandler($"{nameof(OpenAiRequestHandler)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
-
-        services
-            .AddSingleton<LlamafileRequestHandler>()
-            .AddSingleton<LLamafileProcessManager>();
 
         // Model request pipeline
         services
