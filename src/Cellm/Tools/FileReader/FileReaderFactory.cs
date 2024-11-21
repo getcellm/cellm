@@ -9,7 +9,7 @@ internal class FileReaderFactory
         _readers = readers;
     }
 
-    public IFileReader GetReader(string filePath)
+    public IFileReader GetFileReader(string filePath)
     {
         return _readers.FirstOrDefault(r => r.CanRead(filePath))
             ?? throw new NotSupportedException($"No reader found for file: {filePath}");

@@ -22,7 +22,7 @@ internal class PdfReader : IFileReader
         return Path.GetExtension(filePath).ToLower() is ".pdf";
     }
 
-    public Task<string> ReadContent(string filePath, CancellationToken cancellationToken)
+    public Task<string> ReadFile(string filePath, CancellationToken cancellationToken)
     {
         var stringBuilder = new StringBuilder();
 

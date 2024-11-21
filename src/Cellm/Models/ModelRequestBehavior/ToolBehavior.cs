@@ -1,6 +1,8 @@
-﻿using Cellm.Prompts;
+﻿using Cellm.AddIn;
 using Cellm.Tools;
 using MediatR;
+using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Options;
 
 namespace Cellm.Models.PipelineBehavior;
 
@@ -8,39 +10,29 @@ internal class ToolBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, T
     where TRequest : IModelRequest<TResponse>
     where TResponse : IModelResponse
 {
-    private readonly ISender _sender;
-    private readonly ToolRunner _toolRunner;
+    private readonly CellmConfiguration _cellmConfiguration;
+    private readonly Functions _functions;
+    private readonly List<AITool> _tools;
 
-    public ToolBehavior(ISender sender, ToolRunner toolRunner)
+    public ToolBehavior(IOptions<CellmConfiguration> cellmConfiguration, Functions functions)
     {
-        _sender = sender;
-        _toolRunner = toolRunner;
+        _cellmConfiguration = cellmConfiguration.Value;
+        _functions = functions;
+        _tools = [
+            AIFunctionFactory.Create(_functions.GlobRequest),
+            AIFunctionFactory.Create(_functions.FileReaderRequest)
+        ];
     }
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
-        var response = await next();
-
-        var toolCalls = response.Prompt.Messages.LastOrDefault()?.ToolCalls;
-
-        if (toolCalls is not null)
+        if (_cellmConfiguration.EnableTools)
         {
-            // Model called tools, run tools and call model again
-            var message = await RunTools(toolCalls);
-            request.Prompt.Messages.Add(message);
-            response = await _sender.Send(request, cancellationToken);
-        }
-
-        return response;
+            request.Prompt.Options.Tools = _tools;
     }
 
-    private async Task<Message> RunTools(List<ToolCall> toolCalls)
-    {
-        var toolResults = await Task.WhenAll(toolCalls.Select(x => _toolRunner.Run(x)));
-        var toolCallsWithResults = toolCalls
-            .Zip(toolResults, (toolCall, toolResult) => toolCall with { Result = toolResult })
-            .ToList();
+        var response = await next();
 
-        return new Message(string.Empty, Roles.Tool, toolCallsWithResults);
+        return response;
     }
 }

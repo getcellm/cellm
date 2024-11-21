@@ -1,14 +1,13 @@
 ﻿using Cellm.AddIn.Exceptions;
+using Microsoft.Extensions.AI;
 
 namespace Cellm.Prompts;
 
 public class PromptBuilder
 {
-    private string? _model;
-    private string? _systemMessage;
-    private List<Message> _messages = new();
-    private double? _temperature;
-    private List<Tool> _tools = new();
+    private List<ChatMessage> _messages = new();
+    private ChatOptions _options = new();
+    private List<AIFunction> _tools = new();
 
     public PromptBuilder()
     {
@@ -16,84 +15,61 @@ public class PromptBuilder
 
     public PromptBuilder(Prompt prompt)
     {
-        _model = prompt.Model;
-        _systemMessage = prompt.SystemMessage;
-        _messages = prompt.Messages;
-        _temperature = prompt.Temperature;
+        // Do not mutate prompt
+        _messages = new List<ChatMessage>(prompt.Messages);
+        _options = prompt.Options.Clone();
     }
 
     public PromptBuilder SetModel(string model)
     {
-        _model = model;
-        return this;
-    }
-
-    public PromptBuilder SetSystemMessage(string systemMessage)
-    {
-        _systemMessage = systemMessage;
+        _options.ModelId = model;
         return this;
     }
 
     public PromptBuilder SetTemperature(double temperature)
     {
-        _temperature = temperature;
-        return this;
-    }
-
-    public PromptBuilder AddSystemMessage()
-    {
-        if (string.IsNullOrEmpty(_systemMessage))
-        {
-            throw new CellmException("Cannot add empty system message");
-        }
-
-        _messages.Insert(0, new Message(_systemMessage!, Roles.System));
+        _options.Temperature = (float)temperature;
         return this;
     }
 
     public PromptBuilder AddSystemMessage(string content)
     {
-        _messages.Add(new Message(content, Roles.System));
+        _messages.Add(new ChatMessage(ChatRole.System, content));
         return this;
     }
 
     public PromptBuilder AddUserMessage(string content)
     {
-        _messages.Add(new Message(content, Roles.User));
+        _messages.Add(new ChatMessage(ChatRole.User, content));
         return this;
     }
 
-    public PromptBuilder AddAssistantMessage(string content, List<ToolCall>? toolCalls = null)
+    public PromptBuilder AddAssistantMessage(string content)
     {
-        _messages.Add(new Message(content, Roles.Assistant, toolCalls));
+        _messages.Add(new ChatMessage(ChatRole.User, content));
         return this;
     }
 
-    public PromptBuilder AddMessage(Message message)
+    public PromptBuilder AddMessage(ChatMessage message)
     {
-        return AddMessages(new List<Message> { message });
+        _messages.Add(message);
+        return this;
     }
 
-    public PromptBuilder AddMessages(List<Message> messages)
+    public PromptBuilder AddMessages(List<ChatMessage> messages)
     {
         _messages.AddRange(messages);
         return this;
     }
 
-    public PromptBuilder AddTools(List<Tool> tools)
+    public PromptBuilder SetTools(IList<AITool> tools)
     {
-        _tools = tools;
+        _options.Tools = tools;
         return this;
     }
 
     public Prompt Build()
     {
-        return new Prompt(
-            _model ?? throw new ArgumentNullException(nameof(_model)),
-            _systemMessage ?? string.Empty,
-            _messages,
-            _temperature ?? throw new ArgumentNullException(nameof(_temperature)),
-            _tools
-        );
+        return new Prompt(_messages, _options);
     }
 }

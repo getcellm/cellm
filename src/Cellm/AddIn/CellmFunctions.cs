@@ -10,7 +10,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Cellm.AddIn;
 
-public static class Functions
+public static class CellmFunctions
 {
     /// <summary>
     /// Sends a prompt to the default model configured in CellmConfiguration.
@@ -73,7 +73,7 @@ public static class Functions
     {
         try
         {
-            var arguments = ServiceLocator.Get<PromptWithArgumentParser>()
+            var arguments = ServiceLocator.Get<PromptArgumentParser>()
                 .AddProvider(providerAndModel)
                 .AddModel(providerAndModel)
                 .AddInstructionsOrContext(instructionsOrContext)
@@ -88,8 +88,8 @@ public static class Functions
 
             var prompt = new PromptBuilder()
                 .SetModel(arguments.Model)
-                .SetSystemMessage(SystemMessages.SystemMessage)
                 .SetTemperature(arguments.Temperature)
+                .AddSystemMessage(SystemMessages.SystemMessage)
                 .AddUserMessage(userMessage)
                 .Build();
 
@@ -102,6 +102,7 @@ public static class Functions
         catch (CellmException ex)
         {
             SentrySdk.CaptureException(ex);
+            Debug.WriteLine(ex);
             return ex.Message;
         }
     }
@@ -117,22 +118,8 @@ public static class Functions
 
     private static async Task<string> CallModelAsync(Prompt prompt, string? provider = null, Uri? baseAddress = null)
     {
-        try
-        {
-            var client = ServiceLocator.Get<Client>();
-            var response = await client.Send(prompt, provider, baseAddress);
-            var content = response.Messages.Last().Content;
-            return content;
-        }
-        catch (CellmException ex)
-        {
-            Debug.WriteLine(ex);
-            throw;
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine(ex);
-            throw new CellmException("An unexpected error occurred", ex);
-        }
+        var client = ServiceLocator.Get<Client>();
+        var response = await client.Send(prompt, provider, baseAddress);
+        return response.Messages.Last().Text ?? throw new NullReferenceException("No text response");
     }
 }

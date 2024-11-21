@@ -6,6 +6,7 @@ using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.Models.Anthropic.Models;
 using Cellm.Prompts;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
 
 namespace Cellm.Models.Anthropic;
@@ -52,11 +53,11 @@ internal class AnthropicRequestHandler : IModelRequestHandler<AnthropicRequest, 
     {
         var requestBody = new AnthropicRequestBody
         {
-            System = request.Prompt.SystemMessage,
-            Messages = request.Prompt.Messages.Select(x => new AnthropicMessage { Content = x.Content, Role = x.Role.ToString().ToLower() }).ToList(),
-            Model = request.Prompt.Model ?? _anthropicConfiguration.DefaultModel,
+            System = request.Prompt.Messages.Where(x => x.Role == ChatRole.System).First().Text,
+            Messages = request.Prompt.Messages.Select(x => new AnthropicMessage { Content = x.Text, Role = x.Role.ToString().ToLower() }).ToList(),
+            Model = request.Prompt.Options.ModelId ?? _anthropicConfiguration.DefaultModel,
             MaxTokens = _cellmConfiguration.MaxOutputTokens,
-            Temperature = request.Prompt.Temperature
+            Temperature = request.Prompt.Options.Temperature ?? _cellmConfiguration.DefaultTemperature,
         };
 
         return _serde.Serialize(requestBody, new JsonSerializerOptions

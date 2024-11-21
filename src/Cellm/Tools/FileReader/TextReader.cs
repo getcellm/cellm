@@ -24,12 +24,12 @@ internal class TextReader : IFileReader
         return _extensions.Contains(Path.GetExtension(filePath).ToLowerInvariant());
     }
 
-    public async Task<string> ReadContent(string filePath, CancellationToken cancellationToken)
+    public async Task<string> ReadFile(string filePath, CancellationToken cancellationToken)
     {
         using (var stream = File.OpenRead(filePath))
         using (var reader = new StreamReader(stream, Encoding.UTF8, true))
         {
-            return await reader.ReadToEndAsync();
+            return await reader.ReadToEndAsync(cancellationToken);
         }
     }
 }
