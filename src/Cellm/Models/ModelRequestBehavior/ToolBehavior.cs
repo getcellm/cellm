@@ -29,7 +29,7 @@ internal class ToolBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, T
         {
             request.Prompt.Options.Tools = _tools;
         }
-        
+
         var response = await next();
 
         return response;
