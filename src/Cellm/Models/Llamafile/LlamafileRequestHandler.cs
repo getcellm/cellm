@@ -57,8 +57,8 @@ internal class LlamafileRequestHandler : IProviderRequestHandler<LlamafileReques
 
     public async Task<LlamafileResponse> Handle(LlamafileRequest request, CancellationToken cancellationToken)
     {
-        // Download model and start Llamafile on first call
-        var llamafile = await _llamafiles[request.Prompt.Model ?? _llamafileConfiguration.DefaultModel];
+        // Start server on first call
+        var llamafile = await _llamafiles[request.Prompt.Options.ModelId ?? _llamafileConfiguration.DefaultModel];
 
         var openAiResponse = await _sender.Send(new OpenAiRequest(request.Prompt, nameof(Llamafile), llamafile.BaseAddress), cancellationToken);
 
