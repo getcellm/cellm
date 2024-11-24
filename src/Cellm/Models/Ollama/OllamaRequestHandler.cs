@@ -13,13 +13,18 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Office.Interop.Excel;
+using Sentry.Protocol;
 
 namespace Cellm.Models.Ollama;
 
 internal class OllamaRequestHandler : IModelRequestHandler<OllamaRequest, OllamaResponse>
 {
     private record Ollama(Uri BaseAddress, Process Process);
+    
+    record Tags(List<Model> Models);
     record Model(string Name);
+    record Progress(string Status);
+
 
     private readonly CellmConfiguration _cellmConfiguration;
     private readonly OllamaConfiguration _ollamaConfiguration;
@@ -48,7 +53,7 @@ internal class OllamaRequestHandler : IModelRequestHandler<OllamaRequest, Ollama
 
         _ollamaExePath = new AsyncLazy<string>(async () =>
         {
-            var zipFileName = string.Join("-", _ollamaConfiguration.OllamaUri.Segments.TakeLast(2));
+            var zipFileName = string.Join("-", _ollamaConfiguration.OllamaUri.Segments.Select(x => x.Replace("/", string.Empty)).TakeLast(2));
             var zipFilePath = _localUtilities.CreateCellmFilePath(zipFileName);
 
             await _localUtilities.DownloadFile(_ollamaConfiguration.OllamaUri, zipFilePath);
@@ -127,18 +132,36 @@ internal class OllamaRequestHandler : IModelRequestHandler<OllamaRequest, Ollama
     private async Task<IChatClient> GetChatClient(Uri address, string modelId)
     {
         // Download model if it doesn't exist
-        var models = await _httpClient.GetFromJsonAsync<List<Model>>("api/tags") ?? throw new CellmException();
+        var tags = await _httpClient.GetFromJsonAsync<Tags>("api/tags") ?? throw new CellmException();
 
-        if (!models.Select(x => x.Name).Contains(modelId))
+        if (!tags.Models.Select(x => x.Name).Contains(modelId))
         {
-            var body = new StringContent($"{{\"model\":\"{modelId}\", \"stream\": \"false\"}}", Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync("api/pull", body);
-            response.EnsureSuccessStatusCode();
+
+
+            try
+            {
+                var modelName = JsonSerializer.Serialize(new { name = modelId });
+                var content = new StringContent(modelName, Encoding.UTF8, "application/json");
+                var response = await _httpClient.PostAsync("api/pull", content);
+
+                response.EnsureSuccessStatusCode();
+                var progress = await response.Content.ReadFromJsonAsync<List<Progress>>();
+
+                if (progress is null || progress.Last().Status != "success")
+                {
+                    throw new CellmException($"Ollama failed to download model {modelId}");
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new CellmException($"Ollama failed to download model {modelId} or {modelId} does not exist", ex);
+            }
+            
         }
 
-        return new ChatClientBuilder()
+        return new ChatClientBuilder(new OllamaChatClient(address, modelId, _httpClient))
             .UseLogging()
             .UseFunctionInvocation()
-            .Use(new OllamaChatClient(address, modelId, _httpClient));
+            .Build();
     }
 }

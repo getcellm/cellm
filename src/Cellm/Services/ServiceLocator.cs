@@ -9,6 +9,7 @@ using Cellm.Models.ModelRequestBehavior;
 using Cellm.Models.Ollama;
 using Cellm.Models.OpenAi;
 using Cellm.Services.Configuration;
+using Cellm.Tools;
 using Cellm.Tools.FileReader;
 using ExcelDna.Integration;
 using MediatR;
@@ -100,6 +101,7 @@ internal static class ServiceLocator
 
         // Tools
         services
+            .AddSingleton<Functions>()
             .AddSingleton<FileReaderFactory>()
             .AddSingleton<IFileReader, PdfReader>()
             .AddSingleton<IFileReader, TextReader>();

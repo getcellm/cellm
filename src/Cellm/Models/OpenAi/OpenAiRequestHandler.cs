@@ -13,13 +13,11 @@ internal class OpenAiRequestHandler(IOptions<OpenAiConfiguration> openAiConfigur
 
     public async Task<OpenAiResponse> Handle(OpenAiRequest request, CancellationToken cancellationToken)
     {
+        // Must instantiate manually because address can be set/changed only at instantiation
+        var baseAddress = request.BaseAddress is null ? _openAiConfiguration.BaseAddress : request.BaseAddress;
         var modelId = request.Prompt.Options.ModelId ?? _openAiConfiguration.DefaultModel;
 
-        const string path = "/v1/chat/completions";
-        var address = request.BaseAddress is null ? new Uri(path, UriKind.Relative) : new Uri(request.BaseAddress, path);
-
-        // Must instantiate manually because address can be set/changed only at instantiation
-        var chatClient = GetChatClient(address, modelId);
+        var chatClient = GetChatClient(baseAddress, modelId);
         var chatCompletion = await chatClient.CompleteAsync(request.Prompt.Messages, request.Prompt.Options, cancellationToken);
 
         var prompt = new PromptBuilder(request.Prompt)
@@ -40,9 +38,8 @@ internal class OpenAiRequestHandler(IOptions<OpenAiConfiguration> openAiConfigur
 
         var openAiClient = new OpenAIClient(openAiClientCredentials, openAiClientOptions);
 
-        return new ChatClientBuilder()
-            .UseLogging()
+        return new ChatClientBuilder(openAiClient.AsChatClient(modelId))
             .UseFunctionInvocation()
-            .Use(openAiClient.AsChatClient(modelId));
+            .Build();
     }
 }

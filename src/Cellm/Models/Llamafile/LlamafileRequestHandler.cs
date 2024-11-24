@@ -4,6 +4,7 @@ using Cellm.AddIn.Exceptions;
 using Cellm.Models.Local;
 using Cellm.Models.OpenAi;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Cellm.Models.Llamafile;
@@ -22,13 +23,15 @@ internal class LlamafileRequestHandler : IProviderRequestHandler<LlamafileReques
     private readonly ISender _sender;
     private readonly HttpClient _httpClient;
     private readonly LocalUtilities _localUtilities;
+    private readonly ILogger<LlamafileRequestHandler> _logger;
 
     public LlamafileRequestHandler(IOptions<CellmConfiguration> cellmConfiguration,
         IOptions<LlamafileConfiguration> llamafileConfiguration,
         ISender sender,
         HttpClient httpClient,
         LocalUtilities localUtilities,
-        ProcessManager processManager)
+        ProcessManager processManager,
+        ILogger<LlamafileRequestHandler> logger)
     {
         _cellmConfiguration = cellmConfiguration.Value;
         _llamafileConfiguration = llamafileConfiguration.Value;
@@ -36,6 +39,7 @@ internal class LlamafileRequestHandler : IProviderRequestHandler<LlamafileReques
         _httpClient = httpClient;
         _localUtilities = localUtilities;
         _processManager = processManager;
+        _logger = logger;
 
         _llamafileExePath = new AsyncLazy<string>(async () =>
         {
@@ -49,7 +53,12 @@ internal class LlamafileRequestHandler : IProviderRequestHandler<LlamafileReques
             var modelPath = await _localUtilities.DownloadFile(x.Value, _localUtilities.CreateCellmFilePath(CreateModelFileName(x.Key)));
 
             // Start server
-            var baseAddress = new UriBuilder("http", "localhost", _localUtilities.FindPort()).Uri;
+            var baseAddress = new UriBuilder(
+                _llamafileConfiguration.BaseAddress.Scheme,
+                _llamafileConfiguration.BaseAddress.Host,
+                _localUtilities.FindPort(),
+                _llamafileConfiguration.BaseAddress.AbsolutePath).Uri;
+
             var process = await StartProcess(modelPath, baseAddress);
 
             return new Llamafile(modelPath, baseAddress, process);
@@ -70,11 +79,14 @@ internal class LlamafileRequestHandler : IProviderRequestHandler<LlamafileReques
     {
         var processStartInfo = new ProcessStartInfo(await _llamafileExePath);
 
-        processStartInfo.Arguments += $"--server ";
-        processStartInfo.Arguments += "--nobrowser ";
-        processStartInfo.Arguments += $"-m {modelPath} ";
-        processStartInfo.Arguments += $"--host {baseAddress.Host} ";
-        processStartInfo.Arguments += $"--port {baseAddress.Port} ";
+        processStartInfo.ArgumentList.Add("--server");
+        processStartInfo.ArgumentList.Add("--nobrowser");
+        processStartInfo.ArgumentList.Add("-m");
+        processStartInfo.ArgumentList.Add(modelPath);
+        processStartInfo.ArgumentList.Add("--host");
+        processStartInfo.ArgumentList.Add(baseAddress.Host);
+        processStartInfo.ArgumentList.Add("--port");
+        processStartInfo.ArgumentList.Add(baseAddress.Port.ToString());
 
         if (_llamafileConfiguration.Gpu)
         {
@@ -94,16 +106,16 @@ internal class LlamafileRequestHandler : IProviderRequestHandler<LlamafileReques
             {
                 if (!string.IsNullOrEmpty(e.Data))
                 {
-                    Debug.WriteLine(e.Data);
+                    _logger.LogDebug(e.Data);
                 }
             };
-
+            
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
         }
-
-        var address = new Uri(baseAddress, "health");
-        await _localUtilities.WaitForServer(address, process);
+        
+        var uriBuilder = new UriBuilder(baseAddress.Scheme, baseAddress.Host, baseAddress.Port, "/health");
+        await _localUtilities.WaitForServer(uriBuilder.Uri, process);
 
         // Kill Llamafile when Excel exits or dies
         _processManager.AssignProcessToExcel(process);
@@ -113,7 +125,7 @@ internal class LlamafileRequestHandler : IProviderRequestHandler<LlamafileReques
 
     private static string CreateModelFileName(string modelName)
     {
-        return $"Llamafile-model-{modelName}";
+        return $"Llamafile-{modelName}";
     }
 }
 

@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
+using System.IO;
 using System.IO.Compression;
 using System.Net.NetworkInformation;
 using Cellm.AddIn.Exceptions;
-using Microsoft.Office.Interop.Excel;
 
 namespace Cellm.Models.Local;
 
@@ -53,6 +53,7 @@ internal class LocalUtilities(HttpClient httpClient)
             {
                 var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(1));
                 var response = await httpClient.GetAsync(endpoint, cancellationTokenSource.Token);
+
                 if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 {
                     // Server is ready
@@ -130,16 +131,9 @@ internal class LocalUtilities(HttpClient httpClient)
             {
                 string destinationPath = Path.Combine(targetDirectory, entry.FullName);
 
-                if (!File.Exists(destinationPath))
+                if (!File.Exists(destinationPath) || !Directory.Exists(destinationPath))
                 {
-                    ZipFile.ExtractToDirectory(zipFilePath, targetDirectory);
-                    return targetDirectory;
-                }
-
-                var fileInfo = new FileInfo(destinationPath);
-                if (fileInfo.Length != entry.Length)
-                {
-                    ZipFile.ExtractToDirectory(zipFilePath, targetDirectory);
+                    ZipFile.ExtractToDirectory(zipFilePath, targetDirectory, true);
                     return targetDirectory;
                 }
             }
