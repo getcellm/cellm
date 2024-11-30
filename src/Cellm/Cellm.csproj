@@ -46,6 +46,7 @@
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="9.0.0">
       <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
+    <PackageReference Include="System.Net.Http.Json" Version="9.0.0" />
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

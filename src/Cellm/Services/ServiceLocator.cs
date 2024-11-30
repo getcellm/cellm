@@ -87,12 +87,12 @@ internal static class ServiceLocator
         // Internals
         services
             .AddSingleton(configuration)
-            .AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()))
+            .AddMediatR(mediatrConfiguration => mediatrConfiguration.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()))
             .AddTransient<PromptArgumentParser>()
             .AddSingleton<Client>()
             .AddSingleton<Serde>()
             .AddSingleton<LocalUtilities>()
-            .AddSingleton<ProcessManager>(); ;
+            .AddSingleton<ProcessManager>();
 
 #pragma warning disable EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates.
         services
@@ -107,47 +107,25 @@ internal static class ServiceLocator
             .AddSingleton<IFileReader, TextReader>();
 
         // Model Providers
-        var rateLimiterConfiguration = configuration.GetRequiredSection(nameof(RateLimiterConfiguration)).Get<RateLimiterConfiguration>()
-            ?? throw new NullReferenceException(nameof(RateLimiterConfiguration));
 
-        var circuitBreakerConfiguration = configuration.GetRequiredSection(nameof(CircuitBreakerConfiguration)).Get<CircuitBreakerConfiguration>()
-            ?? throw new NullReferenceException(nameof(CircuitBreakerConfiguration));
-
-        var retryConfiguration = configuration.GetRequiredSection(nameof(RetryConfiguration)).Get<RetryConfiguration>()
-            ?? throw new NullReferenceException(nameof(RetryConfiguration));
-
-        var resiliencePipelineConfigurator = new ResiliencePipelineConfigurator(
-            cellmConfiguration, rateLimiterConfiguration, circuitBreakerConfiguration, retryConfiguration);
+        var resiliencePipelineConfigurator = new ResiliencePipelineConfigurator(configuration);
 
         var anthropicConfiguration = configuration.GetRequiredSection(nameof(AnthropicConfiguration)).Get<AnthropicConfiguration>()
             ?? throw new NullReferenceException(nameof(AnthropicConfiguration));
 
-        services.AddHttpClient<IRequestHandler<AnthropicRequest, AnthropicResponse>, AnthropicRequestHandler>(anthropicHttpClient =>
-        {
-            anthropicHttpClient.BaseAddress = anthropicConfiguration.BaseAddress;
-            anthropicHttpClient.DefaultRequestHeaders.Add("x-api-key", anthropicConfiguration.ApiKey);
-            anthropicHttpClient.DefaultRequestHeaders.Add("anthropic-version", anthropicConfiguration.Version);
-            anthropicHttpClient.Timeout = TimeSpan.FromHours(1);
-        }).AddResilienceHandler($"{nameof(AnthropicRequestHandler)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
+        services
+            .AddHttpClient<IRequestHandler<AnthropicRequest, AnthropicResponse>, AnthropicRequestHandler>(anthropicHttpClient =>
+            {
+                anthropicHttpClient.BaseAddress = anthropicConfiguration.BaseAddress;
+                anthropicHttpClient.DefaultRequestHeaders.Add("x-api-key", anthropicConfiguration.ApiKey);
+                anthropicHttpClient.DefaultRequestHeaders.Add("anthropic-version", anthropicConfiguration.Version);
+                anthropicHttpClient.Timeout = TimeSpan.FromHours(1);
+            })
+            .AddResilienceHandler($"{nameof(AnthropicRequestHandler)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
 
-        var ollamaConfiguration = configuration.GetRequiredSection(nameof(OllamaConfiguration)).Get<OllamaConfiguration>()
-            ?? throw new NullReferenceException(nameof(OllamaConfiguration));
-
-        services.AddHttpClient<IRequestHandler<OllamaRequest, OllamaResponse>, OllamaRequestHandler>(ollamaHttpClient =>
-        {
-            ollamaHttpClient.BaseAddress = ollamaConfiguration.BaseAddress;
-            ollamaHttpClient.Timeout = TimeSpan.FromHours(1);
-        }).AddResilienceHandler($"{nameof(OllamaRequestHandler)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
-
-        var openAiConfiguration = configuration.GetRequiredSection(nameof(OpenAiConfiguration)).Get<OpenAiConfiguration>()
-            ?? throw new NullReferenceException(nameof(OpenAiConfiguration));
-
-        services.AddHttpClient<IRequestHandler<OpenAiRequest, OpenAiResponse>, OpenAiRequestHandler>(openAiHttpClient =>
-        {
-            openAiHttpClient.BaseAddress = openAiConfiguration.BaseAddress;
-            openAiHttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {openAiConfiguration.ApiKey}");
-            openAiHttpClient.Timeout = TimeSpan.FromHours(1);
-        }).AddResilienceHandler($"{nameof(OpenAiRequestHandler)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
+        services
+            .AddOpenOllamaChatClient(configuration)
+            .AddOpenAiChatClient(configuration);
 
         // Model request pipeline
         services

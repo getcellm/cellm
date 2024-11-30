@@ -2,7 +2,7 @@
 using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.Models.Local;
-using Cellm.Models.OpenAi;
+using Cellm.Models.OpenAiCompatible;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -44,13 +44,16 @@ internal class LlamafileRequestHandler : IProviderRequestHandler<LlamafileReques
         _llamafileExePath = new AsyncLazy<string>(async () =>
         {
             var llamafileName = Path.GetFileName(_llamafileConfiguration.LlamafileUrl.Segments.Last());
-            return await _localUtilities.DownloadFile(_llamafileConfiguration.LlamafileUrl, $"{llamafileName}.exe");
+            return await _localUtilities.DownloadFileIfNotExists(_llamafileConfiguration.LlamafileUrl, _localUtilities.CreateCellmFilePath(CreateModelFileName($"{llamafileName}.exe"), "Llamafile"));
         });
 
         _llamafiles = _llamafileConfiguration.Models.ToDictionary(x => x.Key, x => new AsyncLazy<Llamafile>(async () =>
         {
+            // Download Llamafile
+            var exePath = await _llamafileExePath;
+
             // Download model
-            var modelPath = await _localUtilities.DownloadFile(x.Value, _localUtilities.CreateCellmFilePath(CreateModelFileName(x.Key)));
+            var modelPath = await _localUtilities.DownloadFileIfNotExists(x.Value, _localUtilities.CreateCellmFilePath(CreateModelFileName(x.Key), "Llamafile"));
 
             // Start server
             var baseAddress = new UriBuilder(
@@ -59,7 +62,7 @@ internal class LlamafileRequestHandler : IProviderRequestHandler<LlamafileReques
                 _localUtilities.FindPort(),
                 _llamafileConfiguration.BaseAddress.AbsolutePath).Uri;
 
-            var process = await StartProcess(modelPath, baseAddress);
+            var process = await StartProcess(exePath, modelPath, baseAddress);
 
             return new Llamafile(modelPath, baseAddress, process);
         }));
@@ -70,14 +73,14 @@ internal class LlamafileRequestHandler : IProviderRequestHandler<LlamafileReques
         // Start server on first call
         var llamafile = await _llamafiles[request.Prompt.Options.ModelId ?? _llamafileConfiguration.DefaultModel];
 
-        var openAiResponse = await _sender.Send(new OpenAiRequest(request.Prompt, nameof(Llamafile), llamafile.BaseAddress), cancellationToken);
+        var openAiResponse = await _sender.Send(new OpenAiCompatibleRequest(request.Prompt, nameof(Llamafile), llamafile.BaseAddress), cancellationToken);
 
         return new LlamafileResponse(openAiResponse.Prompt);
     }
 
-    private async Task<Process> StartProcess(string modelPath, Uri baseAddress)
+    private async Task<Process> StartProcess(string exePath, string modelPath, Uri baseAddress)
     {
-        var processStartInfo = new ProcessStartInfo(await _llamafileExePath);
+        var processStartInfo = new ProcessStartInfo(exePath);
 
         processStartInfo.ArgumentList.Add("--server");
         processStartInfo.ArgumentList.Add("--nobrowser");
@@ -109,11 +112,11 @@ internal class LlamafileRequestHandler : IProviderRequestHandler<LlamafileReques
                     _logger.LogDebug(e.Data);
                 }
             };
-            
+
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
         }
-        
+
         var uriBuilder = new UriBuilder(baseAddress.Scheme, baseAddress.Host, baseAddress.Port, "/health");
         await _localUtilities.WaitForServer(uriBuilder.Uri, process);
 

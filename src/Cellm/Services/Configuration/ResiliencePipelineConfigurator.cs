@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Threading.RateLimiting;
 using Cellm.AddIn;
+using Microsoft.Extensions.Configuration;
 using Polly;
 using Polly.CircuitBreaker;
 using Polly.Retry;
@@ -15,16 +16,19 @@ public class ResiliencePipelineConfigurator
     private readonly CircuitBreakerConfiguration _circuitBreakerConfiguration;
     private readonly RetryConfiguration _retryConfiguration;
 
-    public ResiliencePipelineConfigurator(
-        CellmConfiguration cellmConfiguration,
-        RateLimiterConfiguration rateLimiterConfiguration,
-        CircuitBreakerConfiguration circuitBreakerConfiguration,
-        RetryConfiguration retryConfiguration)
+    public ResiliencePipelineConfigurator(IConfiguration configuration)
     {
-        _cellmConfiguration = cellmConfiguration;
-        _rateLimiterConfiguration = rateLimiterConfiguration;
-        _circuitBreakerConfiguration = circuitBreakerConfiguration;
-        _retryConfiguration = retryConfiguration;
+        _cellmConfiguration = configuration.GetRequiredSection(nameof(CellmConfiguration)).Get<CellmConfiguration>()
+            ?? throw new NullReferenceException(nameof(CellmConfiguration));
+
+        _rateLimiterConfiguration = configuration.GetRequiredSection(nameof(RateLimiterConfiguration)).Get<RateLimiterConfiguration>()
+            ?? throw new NullReferenceException(nameof(RateLimiterConfiguration));
+
+        _circuitBreakerConfiguration = configuration.GetRequiredSection(nameof(CircuitBreakerConfiguration)).Get<CircuitBreakerConfiguration>()
+            ?? throw new NullReferenceException(nameof(CircuitBreakerConfiguration));
+
+        _retryConfiguration = configuration.GetRequiredSection(nameof(RetryConfiguration)).Get<RetryConfiguration>()
+            ?? throw new NullReferenceException(nameof(RetryConfiguration));
     }
 
     public void ConfigureResiliencePipeline(ResiliencePipelineBuilder<HttpResponseMessage> builder)
