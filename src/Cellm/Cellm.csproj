@@ -20,7 +20,7 @@
   <ItemGroup>
     <PackageReference Include="ExcelDna.Addin" Version="1.9.0-alpha3" />
     <PackageReference Include="ExcelDna.Interop" Version="15.0.1" />
-    <PackageReference Include="JsonPatch.Net" Version="3.1.1" />
+    <PackageReference Include="JsonPatch.Net" Version="3.2.0" />
     <PackageReference Include="JsonSchema.Net.Generation" Version="4.5.1" />
     <PackageReference Include="MediatR" Version="12.4.1" />
     <PackageReference Include="Microsoft.Extensions.AI" Version="9.0.1-preview.1.24570.5" />
