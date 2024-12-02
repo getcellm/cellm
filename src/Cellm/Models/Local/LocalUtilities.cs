@@ -2,13 +2,12 @@
 using System.IO.Compression;
 using System.Net.NetworkInformation;
 using Cellm.AddIn.Exceptions;
-using Microsoft.Office.Interop.Excel;
 
 namespace Cellm.Models.Local;
 
 internal class LocalUtilities(HttpClient httpClient)
 {
-    public async Task<string> DownloadFile(Uri uri, string filePath)
+    public async Task<string> DownloadFileIfNotExists(Uri uri, string filePath)
     {
         if (File.Exists(filePath))
         {
@@ -37,22 +36,23 @@ internal class LocalUtilities(HttpClient httpClient)
         return filePath;
     }
 
-    public async Task WaitForServer(Uri endpoint, Process process)
+    public async Task WaitForServer(Uri endpoint, Process process, int timeOutInSeconds = 30)
     {
         var startTime = DateTime.UtcNow;
 
         // Wait max 30 seconds to load model
-        while ((DateTime.UtcNow - startTime).TotalSeconds < 30)
+        while ((DateTime.UtcNow - startTime).TotalSeconds < timeOutInSeconds)
         {
             if (process.HasExited)
             {
-                throw new CellmException($"Failed to run Llamafile, process exited. Exit code: {process.ExitCode}");
+                throw new CellmException($"Server not responding: {endpoint}");
             }
 
             try
             {
                 var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(1));
                 var response = await httpClient.GetAsync(endpoint, cancellationTokenSource.Token);
+
                 if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 {
                     // Server is ready
@@ -67,7 +67,7 @@ internal class LocalUtilities(HttpClient httpClient)
             }
 
             // Wait before next attempt
-            await Task.Delay(500);
+            await Task.Delay(100);
         }
 
         process.Kill();
@@ -88,9 +88,9 @@ internal class LocalUtilities(HttpClient httpClient)
         return folderPath;
     }
 
-    public string CreateCellmFilePath(string fileName)
+    public string CreateCellmFilePath(string fileName, params string[] subFolders)
     {
-        return Path.Combine(CreateCellmDirectory(), fileName);
+        return Path.Combine(CreateCellmDirectory(subFolders), fileName);
     }
 
     public int FindPort(ushort min = 49152, ushort max = 65535)
@@ -122,28 +122,14 @@ internal class LocalUtilities(HttpClient httpClient)
         return firstInactivePort;
     }
 
-    public string ExtractFile(string zipFilePath, string targetDirectory)
+    public string ExtractZipFileIfNotExtracted(string zipFilePath, string targetDirectory)
     {
-        using (ZipArchive archive = ZipFile.OpenRead(zipFilePath))
+        if (Directory.Exists(targetDirectory))
         {
-            foreach (ZipArchiveEntry entry in archive.Entries)
-            {
-                string destinationPath = Path.Combine(targetDirectory, entry.FullName);
-
-                if (!File.Exists(destinationPath))
-                {
-                    ZipFile.ExtractToDirectory(zipFilePath, targetDirectory);
-                    return targetDirectory;
-                }
-
-                var fileInfo = new FileInfo(destinationPath);
-                if (fileInfo.Length != entry.Length)
-                {
-                    ZipFile.ExtractToDirectory(zipFilePath, targetDirectory);
-                    return targetDirectory;
-                }
-            }
+            return targetDirectory;
         }
+
+        ZipFile.ExtractToDirectory(zipFilePath, targetDirectory, true);
 
         return targetDirectory;
     }

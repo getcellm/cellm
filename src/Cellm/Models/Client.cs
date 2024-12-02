@@ -38,8 +38,8 @@ internal class Client
             {
                 Providers.Anthropic => await _sender.Send(new AnthropicRequest(prompt, provider, baseAddress)),
                 Providers.Llamafile => await _sender.Send(new LlamafileRequest(prompt)),
-                Providers.Ollama => await _sender.Send(new OllamaRequest(prompt, provider, baseAddress)),
-                Providers.OpenAi => await _sender.Send(new OpenAiRequest(prompt, provider, baseAddress)),
+                Providers.Ollama => await _sender.Send(new OllamaRequest(prompt)),
+                Providers.OpenAi => await _sender.Send(new OpenAiRequest(prompt)),
                 _ => throw new InvalidOperationException($"Provider {parsedProvider} is defined but not implemented")
             };
 

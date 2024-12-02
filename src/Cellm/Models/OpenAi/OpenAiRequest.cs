@@ -2,4 +2,4 @@
 
 namespace Cellm.Models.OpenAi;
 
-internal record OpenAiRequest(Prompt Prompt, string? Provider, Uri? BaseAddress) : IModelRequest<OpenAiResponse>;
+internal record OpenAiRequest(Prompt Prompt) : IModelRequest<OpenAiResponse>;

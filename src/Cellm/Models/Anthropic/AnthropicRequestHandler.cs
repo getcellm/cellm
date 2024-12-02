@@ -54,7 +54,7 @@ internal class AnthropicRequestHandler : IModelRequestHandler<AnthropicRequest, 
         var requestBody = new AnthropicRequestBody
         {
             System = request.Prompt.Messages.Where(x => x.Role == ChatRole.System).First().Text,
-            Messages = request.Prompt.Messages.Select(x => new AnthropicMessage { Content = x.Text, Role = x.Role.ToString().ToLower() }).ToList(),
+            Messages = request.Prompt.Messages.Where(x => x.Role != ChatRole.System).Select(x => new AnthropicMessage { Content = x.Text, Role = x.Role.ToString().ToLower() }).ToList(),
             Model = request.Prompt.Options.ModelId ?? _anthropicConfiguration.DefaultModel,
             MaxTokens = _cellmConfiguration.MaxOutputTokens,
             Temperature = request.Prompt.Options.Temperature ?? _cellmConfiguration.DefaultTemperature,

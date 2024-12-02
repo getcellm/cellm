@@ -5,5 +5,6 @@ public enum Providers
     Anthropic,
     Llamafile,
     Ollama,
-    OpenAi
+    OpenAi,
+    OpenAiCompatible
 }

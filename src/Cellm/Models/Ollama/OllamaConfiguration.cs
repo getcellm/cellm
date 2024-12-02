@@ -4,16 +4,11 @@ namespace Cellm.Models.Ollama;
 
 internal class OllamaConfiguration : IProviderConfiguration
 {
-    public Uri OllamaUri { get; init; }
+    public Uri ZipUrl { get; init; } = default!;
 
-    public Uri BaseAddress { get; init; }
+    public Uri BaseAddress { get; init; } = default!;
 
-    public string DefaultModel { get; init; }
+    public string DefaultModel { get; init; } = string.Empty;
 
-    public OllamaConfiguration()
-    {
-        OllamaUri = default!;
-        BaseAddress = default!;
-        DefaultModel = default!;
-    }
+    public bool EnableServer { get; init; } = false;
 }
