@@ -1,4 +1,4 @@
-﻿namespace Cellm.AddIn;
+﻿namespace Cellm.Services.Configuration;
 
 public class CellmConfiguration
 {
@@ -9,8 +9,6 @@ public class CellmConfiguration
     public string DefaultModel { get; init; } = string.Empty;
 
     public double DefaultTemperature { get; init; }
-
-    public int MaxOutputTokens { get; init; }
 
     public int HttpTimeoutInSeconds { get; init; }
 

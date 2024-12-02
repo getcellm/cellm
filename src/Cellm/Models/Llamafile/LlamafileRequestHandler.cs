@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
-using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.Models.Local;
 using Cellm.Models.OpenAiCompatible;
+using Cellm.Services.Configuration;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

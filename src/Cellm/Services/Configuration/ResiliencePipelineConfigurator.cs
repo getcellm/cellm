@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Threading.RateLimiting;
-using Cellm.AddIn;
 using Microsoft.Extensions.Configuration;
 using Polly;
 using Polly.CircuitBreaker;

@@ -2,10 +2,10 @@
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
-using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.Models.Local;
 using Cellm.Prompts;
+using Cellm.Services.Configuration;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

@@ -1,4 +1,4 @@
-﻿using Cellm.AddIn;
+﻿using Cellm.Services.Configuration;
 using Cellm.Tools;
 using MediatR;
 using Microsoft.Extensions.AI;

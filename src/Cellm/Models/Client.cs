@@ -1,11 +1,11 @@
 ﻿using System.Text.Json;
-using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.Models.Anthropic;
 using Cellm.Models.Llamafile;
 using Cellm.Models.Ollama;
 using Cellm.Models.OpenAi;
 using Cellm.Prompts;
+using Cellm.Services.Configuration;
 using MediatR;
 using Microsoft.Extensions.Options;
 using Polly.Timeout;

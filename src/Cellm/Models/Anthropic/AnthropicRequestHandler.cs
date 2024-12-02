@@ -2,10 +2,10 @@
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.Models.Anthropic.Models;
 using Cellm.Prompts;
+using Cellm.Services.Configuration;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
 
@@ -56,7 +56,6 @@ internal class AnthropicRequestHandler : IModelRequestHandler<AnthropicRequest, 
             System = request.Prompt.Messages.Where(x => x.Role == ChatRole.System).First().Text,
             Messages = request.Prompt.Messages.Where(x => x.Role != ChatRole.System).Select(x => new AnthropicMessage { Content = x.Text, Role = x.Role.ToString().ToLower() }).ToList(),
             Model = request.Prompt.Options.ModelId ?? _anthropicConfiguration.DefaultModel,
-            MaxTokens = _cellmConfiguration.MaxOutputTokens,
             Temperature = request.Prompt.Options.Temperature ?? _cellmConfiguration.DefaultTemperature,
         };
 
