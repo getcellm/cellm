@@ -17,25 +17,6 @@
         "resolved": "15.0.1",
         "contentHash": "CIKPXlw+6C6v2Em8DVFgkTsrMZoz978CtSG722+dwHi3Tt7JTxQ2BmmBH4yJuzcA9EaOC5AMEmioLkLsvhESQw=="
       },
-      "JsonPatch.Net": {
-        "type": "Direct",
-        "requested": "[3.1.1, )",
-        "resolved": "3.1.1",
-        "contentHash": "dLAUhmL7RgezL8lkBpzf+O4U4sEtbGE9DDF858MiQdNmGK8LYBfLqO73n5N288e5H8jVvwypQG/DUJunWvaJyQ==",
-        "dependencies": {
-          "JsonPointer.Net": "5.0.2"
-        }
-      },
-      "JsonSchema.Net.Generation": {
-        "type": "Direct",
-        "requested": "[4.5.1, )",
-        "resolved": "4.5.1",
-        "contentHash": "Fr6PxLs4aq/FTigJ1tQPhvZ28aBe9op1pieN6RqJBYPMa0NcZJuqeZSkBeqc1TfkckUwJwfWUQzr9uCkqe80fw==",
-        "dependencies": {
-          "Humanizer.Core": "2.14.1",
-          "JsonSchema.Net": "7.2.3"
-        }
-      },
       "MediatR": {
         "type": "Direct",
         "requested": "[12.4.1, )",
@@ -285,33 +266,6 @@
         "type": "Transitive",
         "resolved": "1.9.0-alpha3",
         "contentHash": "vQZP+bXCXkiIx4bkntd2iWnMDS57ECcul2XFQvMSvgcTy6+2q81xI2Sp6FGXr9tU/t7eHfpG7vVv/7TZKOLnxA=="
-      },
-      "Humanizer.Core": {
-        "type": "Transitive",
-        "resolved": "2.14.1",
-        "contentHash": "lQKvtaTDOXnoVJ20ibTuSIOf2i0uO0MPbDhd1jm238I+U/2ZnRENj0cktKZhtchBMtCUSRQ5v4xBCUbKNmyVMw=="
-      },
-      "Json.More.Net": {
-        "type": "Transitive",
-        "resolved": "2.0.1.2",
-        "contentHash": "uF3QeiaXEfH92emz0/BWUiNtMSfxIIvgynuB0Bf1vF4s8eWTcZitBx9l+g/FDaJk5XxqBv9buQXizXKQcXFG1w=="
-      },
-      "JsonPointer.Net": {
-        "type": "Transitive",
-        "resolved": "5.0.2",
-        "contentHash": "H/OtixKadr+ja1j7Fru3WG56V9zP0AKT1Bd0O7RWN/zH1bl8ZIwW9aCa4+xvzuVvt4SPmrvBu3G6NpAkNOwNAA==",
-        "dependencies": {
-          "Humanizer.Core": "2.14.1",
-          "Json.More.Net": "2.0.1.2"
-        }
-      },
-      "JsonSchema.Net": {
-        "type": "Transitive",
-        "resolved": "7.2.3",
-        "contentHash": "O3KclMcPVFYTZsTeZBpwtKd/lYrNc3AFR+xi9j3Q4CfhDufOUx25TMMWJOcFRrqVklvKQ4Kl+0UhlNX1iDGoRw==",
-        "dependencies": {
-          "JsonPointer.Net": "5.0.0"
-        }
       },
       "MediatR.Contracts": {
         "type": "Transitive",
