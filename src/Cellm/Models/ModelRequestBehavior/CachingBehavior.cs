@@ -1,51 +1,32 @@
-﻿using System.Security.Cryptography;
-using System.Text;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Cellm.Services.Configuration;
 using MediatR;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Options;
 
 namespace Cellm.Models.ModelRequestBehavior;
 
-internal class CachingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+internal class CachingBehavior<TRequest, TResponse>(HybridCache cache, IOptions<CellmConfiguration> cellmConfiguration) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IModelRequest<TResponse>
     where TResponse : IModelResponse
 {
-    private readonly IMemoryCache _memoryCache;
-    private readonly MemoryCacheEntryOptions _memoryCacheEntryOptions;
-
-    public CachingBehavior(IMemoryCache memoryCache, IOptions<CellmConfiguration> _cellmConfiguration)
+    private readonly HybridCacheEntryOptions _cacheEntryOptions = new()
     {
-        _memoryCache = memoryCache;
-        _memoryCacheEntryOptions = new()
-        {
-            SlidingExpiration = TimeSpan.FromSeconds(_cellmConfiguration.Value.CacheTimeoutInSeconds)
-        };
-    }
+        Expiration = TimeSpan.FromSeconds(cellmConfiguration.Value.CacheTimeoutInSeconds)
+    };
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
-        var key = GetKey(request);
-
-        if (_memoryCache.TryGetValue(key, out object? value) && value is TResponse response)
+        if (cellmConfiguration.Value.EnableCache)
         {
-            return response;
+            return await cache.GetOrCreateAsync(
+                JsonSerializer.Serialize(request.Prompt),
+                async cancel => await next(),
+                options: _cacheEntryOptions,
+                cancellationToken: cancellationToken
+            );
         }
 
-        response = await next();
-
-        _memoryCache.Set(key, response, _memoryCacheEntryOptions);
-
-        return response;
-    }
-
-    private static string GetKey<T>(T key)
-    {
-        var json = JsonSerializer.Serialize(key);
-        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(json));
-        var hash = Convert.ToHexString(bytes);
-
-        return hash;
+        return await next();
     }
 }
