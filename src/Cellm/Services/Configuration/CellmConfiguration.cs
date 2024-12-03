@@ -14,6 +14,8 @@ public class CellmConfiguration
 
     public int CacheTimeoutInSeconds { get; init; }
 
+    public bool EnableCache { get; init; }
+
     public bool EnableTools { get; init; }
 }
 
