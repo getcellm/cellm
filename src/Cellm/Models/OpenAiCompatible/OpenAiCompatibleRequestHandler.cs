@@ -8,7 +8,7 @@ using OpenAI;
 
 namespace Cellm.Models.OpenAiCompatible;
 
-internal class OpenAiCompatibleRequestHandler(HttpClient httpClient, IOptions<OpenAiCompatibleConfiguration> openAiCompatibleConfiguration) 
+internal class OpenAiCompatibleRequestHandler(HttpClient httpClient, IOptions<OpenAiCompatibleConfiguration> openAiCompatibleConfiguration)
     : IModelRequestHandler<OpenAiCompatibleRequest, OpenAiCompatibleResponse>
 {
     private readonly OpenAiCompatibleConfiguration _openAiCompatibleConfiguration = openAiCompatibleConfiguration.Value;
