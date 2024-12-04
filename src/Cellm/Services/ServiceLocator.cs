@@ -8,6 +8,7 @@ using Cellm.Models.Local;
 using Cellm.Models.ModelRequestBehavior;
 using Cellm.Models.Ollama;
 using Cellm.Models.OpenAi;
+using Cellm.Models.OpenAiCompatible;
 using Cellm.Services.Configuration;
 using Cellm.Tools;
 using Cellm.Tools.FileReader;
@@ -50,6 +51,7 @@ internal static class ServiceLocator
             .Configure<AnthropicConfiguration>(configuration.GetRequiredSection(nameof(AnthropicConfiguration)))
             .Configure<OllamaConfiguration>(configuration.GetRequiredSection(nameof(OllamaConfiguration)))
             .Configure<OpenAiConfiguration>(configuration.GetRequiredSection(nameof(OpenAiConfiguration)))
+            .Configure<OpenAiCompatibleConfiguration>(configuration.GetRequiredSection(nameof(OpenAiCompatibleConfiguration)))
             .Configure<LlamafileConfiguration>(configuration.GetRequiredSection(nameof(LlamafileConfiguration)))
             .Configure<RateLimiterConfiguration>(configuration.GetRequiredSection(nameof(RateLimiterConfiguration)))
             .Configure<CircuitBreakerConfiguration>(configuration.GetRequiredSection(nameof(CircuitBreakerConfiguration)))
@@ -124,8 +126,9 @@ internal static class ServiceLocator
             .AddResilienceHandler($"{nameof(AnthropicRequestHandler)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
 
         services
-            .AddOpenOllamaChatClient(configuration)
-            .AddOpenAiChatClient(configuration);
+            .AddOpenAiChatClient(configuration)
+            .AddOpenAiCompatibleChatClient(configuration)
+            .AddOpenOllamaChatClient(configuration);
 
         // Model request pipeline
         services
