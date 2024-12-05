@@ -4,6 +4,7 @@ using Cellm.Models.Anthropic;
 using Cellm.Models.Llamafile;
 using Cellm.Models.Ollama;
 using Cellm.Models.OpenAi;
+using Cellm.Models.OpenAiCompatible;
 using Cellm.Prompts;
 using Cellm.Services.Configuration;
 using MediatR;
@@ -12,18 +13,11 @@ using Polly.Timeout;
 
 namespace Cellm.Models;
 
-internal class Client
+internal class Client(ISender sender, IOptions<CellmConfiguration> cellmConfiguration)
 {
-    private readonly CellmConfiguration _cellmConfiguration;
-    private readonly ISender _sender;
+    private readonly CellmConfiguration _cellmConfiguration = cellmConfiguration.Value;
 
-    public Client(IOptions<CellmConfiguration> cellmConfiguration, ISender sender)
-    {
-        _cellmConfiguration = cellmConfiguration.Value;
-        _sender = sender;
-    }
-
-    public async Task<Prompt> Send(Prompt prompt, string? provider, Uri? baseAddress)
+    public async Task<Prompt> Send(Prompt prompt, string? provider, Uri? baseAddress, CancellationToken cancellationToken)
     {
         try
         {
@@ -36,10 +30,11 @@ internal class Client
 
             IModelResponse response = parsedProvider switch
             {
-                Providers.Anthropic => await _sender.Send(new AnthropicRequest(prompt, provider, baseAddress)),
-                Providers.Llamafile => await _sender.Send(new LlamafileRequest(prompt)),
-                Providers.Ollama => await _sender.Send(new OllamaRequest(prompt)),
-                Providers.OpenAi => await _sender.Send(new OpenAiRequest(prompt)),
+                Providers.Anthropic => await sender.Send(new AnthropicRequest(prompt, provider, baseAddress), cancellationToken),
+                Providers.Llamafile => await sender.Send(new LlamafileRequest(prompt), cancellationToken),
+                Providers.Ollama => await sender.Send(new OllamaRequest(prompt), cancellationToken),
+                Providers.OpenAi => await sender.Send(new OpenAiRequest(prompt), cancellationToken),
+                Providers.OpenAiCompatible => await sender.Send(new OpenAiCompatibleRequest(prompt, baseAddress), cancellationToken),
                 _ => throw new InvalidOperationException($"Provider {parsedProvider} is defined but not implemented")
             };
 

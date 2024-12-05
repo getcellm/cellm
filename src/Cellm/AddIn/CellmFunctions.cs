@@ -119,7 +119,7 @@ public static class CellmFunctions
     private static async Task<string> CallModelAsync(Prompt prompt, string? provider = null, Uri? baseAddress = null)
     {
         var client = ServiceLocator.Get<Client>();
-        var response = await client.Send(prompt, provider, baseAddress);
+        var response = await client.Send(prompt, provider, baseAddress, CancellationToken.None);
         return response.Messages.Last().Text ?? throw new NullReferenceException("No text response");
     }
 }
