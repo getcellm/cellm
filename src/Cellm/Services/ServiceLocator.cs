@@ -4,11 +4,12 @@ using Cellm.AddIn.Exceptions;
 using Cellm.Models;
 using Cellm.Models.Anthropic;
 using Cellm.Models.Llamafile;
-using Cellm.Models.Local;
+using Cellm.Models.Local.Utilities;
 using Cellm.Models.ModelRequestBehavior;
 using Cellm.Models.Ollama;
 using Cellm.Models.OpenAi;
 using Cellm.Models.OpenAiCompatible;
+using Cellm.Models.Providers.Anthropic;
 using Cellm.Services.Configuration;
 using Cellm.Tools;
 using Cellm.Tools.FileReader;
@@ -93,8 +94,9 @@ internal static class ServiceLocator
             .AddTransient<PromptArgumentParser>()
             .AddSingleton<Client>()
             .AddSingleton<Serde>()
-            .AddSingleton<LocalUtilities>()
-            .AddSingleton<ProcessManager>();
+            .AddSingleton<FileManager>()
+            .AddSingleton<ProcessManager>()
+            .AddSingleton<ServerManager>();
 
 #pragma warning disable EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates.
         services

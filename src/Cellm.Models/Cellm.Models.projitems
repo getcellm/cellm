@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>5e1720f7-e91f-4d99-a580-4bf4768fd32e</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Cellm.Models</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Client.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Configuration\CircuitBreakerConfiguration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Configuration\IProviderConfiguration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Configuration\RateLimiterConfiguration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Configuration\ResiliencePipelineConfigurator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Configuration\RetryConfiguration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Configuration\SentryConfiguration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IModelRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IModelRequestHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IModelResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IProviderRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IProviderRequestHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Local\Utilities\FileManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Local\Utilities\ProcessManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Local\Utilities\ServerManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ModelRequestBehavior\CachingBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ModelRequestBehavior\SentryBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ModelRequestBehavior\ToolBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Prompts\Prompt.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Prompts\PromptBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Provider.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\Anthropic\AnthropicConfiguration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\Anthropic\AnthropicRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\Anthropic\AnthropicRequestHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\Anthropic\AnthropicResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\Anthropic\Models.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\Llamafile\AsyncLazy.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\Llamafile\LlamafileConfiguration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\Llamafile\LlamafileRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\Llamafile\LlamafileRequestHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\Llamafile\LlamafileResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\Ollama\OllamaConfiguration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\Ollama\OllamaRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\Ollama\OllamaRequestHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\Ollama\OllamaResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\Ollama\ServiceCollectionExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\OpenAiCompatible\OpenAiCompatibleConfiguration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\OpenAiCompatible\OpenAiCompatibleRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\OpenAiCompatible\OpenAiCompatibleRequestHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\OpenAiCompatible\OpenAiCompatibleResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\OpenAiCompatible\SerrviceCollectionExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\OpenAi\OpenAiConfiguration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\OpenAi\OpenAiRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\OpenAi\OpenAiRequestHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\OpenAi\OpenAiResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\OpenAi\ServiceCollectionExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serde.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Providers\Llamafile\llama.log" />
+    <None Include="$(MSBuildThisFileDirectory)Providers\Llamafile\test.xlsb.xlsx" />
+    <None Include="$(MSBuildThisFileDirectory)Providers\Llamafile\test.xlsx" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Local\" />
+  </ItemGroup>
+</Project>
