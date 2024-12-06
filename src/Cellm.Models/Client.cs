@@ -10,19 +10,18 @@ using Cellm.Models.Prompts;
 using MediatR;
 using Microsoft.Extensions.Options;
 using Polly.Timeout;
-using Cellm.AddIn;
 
 namespace Cellm.Models;
 
-internal class Client(ISender sender, IOptions<CellmConfiguration> cellmConfiguration)
+internal class Client(ISender sender, IOptions<ProviderConfiguration> providerConfiguration)
 {
-    private readonly CellmConfiguration _cellmConfiguration = cellmConfiguration.Value;
+    private readonly ProviderConfiguration _providerConfiguration = providerConfiguration.Value;
 
     public async Task<Prompt> Send(Prompt prompt, string? provider, Uri? baseAddress, CancellationToken cancellationToken)
     {
         try
         {
-            provider ??= _cellmConfiguration.DefaultProvider;
+            provider ??= _providerConfiguration.DefaultProvider;
 
             if (!Enum.TryParse<Provider>(provider, true, out var parsedProvider))
             {

@@ -1,4 +1,4 @@
-﻿namespace Cellm.Services.Configuration;
+﻿namespace Cellm.Models;
 
 internal interface IProviderConfiguration
 {

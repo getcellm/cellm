@@ -1,23 +1,22 @@
 ﻿using System.Text.Json;
-using Cellm.AddIn;
 using MediatR;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Options;
 
-namespace Cellm.Models.ModelRequestBehavior;
+namespace Cellm.Models.Behaviors;
 
-internal class CachingBehavior<TRequest, TResponse>(HybridCache cache, IOptions<CellmConfiguration> cellmConfiguration) : IPipelineBehavior<TRequest, TResponse>
+internal class CacheBehavior<TRequest, TResponse>(HybridCache cache, IOptions<CacheConfiguration> cacheConfiguration) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IModelRequest<TResponse>
     where TResponse : IModelResponse
 {
     private readonly HybridCacheEntryOptions _cacheEntryOptions = new()
     {
-        Expiration = TimeSpan.FromSeconds(cellmConfiguration.Value.CacheTimeoutInSeconds)
+        Expiration = TimeSpan.FromSeconds(cacheConfiguration.Value.CacheTimeoutInSeconds)
     };
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
-        if (cellmConfiguration.Value.EnableCache)
+        if (cacheConfiguration.Value.EnableCache)
         {
             return await cache.GetOrCreateAsync(
                 JsonSerializer.Serialize(request.Prompt),

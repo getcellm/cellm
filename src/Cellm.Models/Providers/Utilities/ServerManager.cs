@@ -15,7 +15,7 @@ internal class ServerManager(HttpClient httpClient)
         {
             if (process.HasExited)
             {
-                throw new CellmException($"Server not responding: {endpoint}");
+                throw new CellmException($"Process exited early: {endpoint}");
             }
 
             try

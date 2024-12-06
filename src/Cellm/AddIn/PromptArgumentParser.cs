@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Cellm.AddIn.Exceptions;
+using Cellm.Models;
 using ExcelDna.Integration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Office.Interop.Excel;
@@ -71,19 +72,19 @@ public class PromptArgumentParser
     public Arguments Parse()
     {
         var provider = _provider ?? _configuration
-            .GetSection(nameof(CellmConfiguration))
-            .GetValue<string>(nameof(CellmConfiguration.DefaultProvider))
-            ?? throw new ArgumentException(nameof(CellmConfiguration.DefaultProvider));
+            .GetSection(nameof(ProviderConfiguration))
+            .GetValue<string>(nameof(ProviderConfiguration.DefaultProvider))
+            ?? throw new ArgumentException(nameof(ProviderConfiguration.DefaultProvider));
 
         var model = _model ?? _configuration
-            .GetSection(nameof(CellmConfiguration))
-            .GetValue<string>(nameof(CellmConfiguration.DefaultModel))
-            ?? throw new ArgumentException(nameof(CellmConfiguration.DefaultModel));
+            .GetSection($"{provider}Configuration")
+            .GetValue<string>(nameof(IProviderConfiguration.DefaultModel))
+            ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
 
         var defaultTemperature = _configuration
-            .GetSection(nameof(CellmConfiguration))
-            .GetValue<double?>(nameof(CellmConfiguration.DefaultTemperature))
-            ?? throw new ArgumentException(nameof(CellmConfiguration.DefaultTemperature));
+            .GetSection(nameof(ProviderConfiguration))
+            .GetValue<double?>(nameof(ProviderConfiguration.DefaultTemperature))
+            ?? throw new ArgumentException(nameof(ProviderConfiguration.DefaultTemperature));
 
         return (_instructionsOrContext, _instructionsOrTemperature, _temperature) switch
         {

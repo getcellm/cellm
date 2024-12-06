@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Cellm.Models.Providers;
-using Cellm.AddIn;
+using Cellm.Services.Configuration;
 
 namespace Cellm.Models.Ollama;
 

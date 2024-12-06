@@ -1,8 +1,10 @@
-﻿using Cellm.Models.Providers;
+﻿using Cellm.Models.Local.Utilities;
+using Cellm.Models.Providers;
 using Cellm.Services.Configuration;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Cellm.Models.Ollama;
 
@@ -22,7 +24,7 @@ internal static class ServiceCollectionExtensions
                 ollamaHttpClient.Timeout = TimeSpan.FromHours(1);
             })
             .AddResilienceHandler(
-                $"{nameof(OllamaRequestHandler)}ResiliencePipeline",
+                $"{nameof(OllamaRequestHandler)}",
                 resiliencePipelineConfigurator.ConfigureResiliencePipeline);
 
         services
@@ -33,6 +35,10 @@ internal static class ServiceCollectionExtensions
                     .GetRequiredService<IHttpClientFactory>()
                     .CreateClient(nameof(Provider.Ollama))))
             .UseFunctionInvocation();
+
+        services.TryAddSingleton<FileManager>();
+        services.TryAddSingleton<ProcessManager>();
+        services.TryAddSingleton<ServerManager>();
 
         return services;
     }

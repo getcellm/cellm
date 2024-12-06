@@ -1,5 +1,4 @@
-﻿using Cellm.Models.Anthropic;
-using Cellm.Services.Configuration;
+﻿using Cellm.Services.Configuration;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

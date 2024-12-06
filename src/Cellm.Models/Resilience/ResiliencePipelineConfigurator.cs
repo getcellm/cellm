@@ -1,6 +1,6 @@
 ﻿using System.Net;
 using System.Threading.RateLimiting;
-using Cellm.AddIn;
+using Cellm.Models.Resilience;
 using Microsoft.Extensions.Configuration;
 using Polly;
 using Polly.CircuitBreaker;
@@ -11,14 +11,14 @@ namespace Cellm.Services.Configuration;
 
 public class ResiliencePipelineConfigurator
 {
-    private readonly CellmConfiguration _cellmConfiguration;
+    private readonly HttpConfiguration _httpConfiguration;
     private readonly RateLimiterConfiguration _rateLimiterConfiguration;
     private readonly CircuitBreakerConfiguration _circuitBreakerConfiguration;
     private readonly RetryConfiguration _retryConfiguration;
 
     public ResiliencePipelineConfigurator(IConfiguration configuration)
     {
-        _cellmConfiguration = configuration.GetRequiredSection(nameof(CellmConfiguration)).Get<CellmConfiguration>()
+        _httpConfiguration = configuration.GetRequiredSection(nameof(HttpConfiguration)).Get<HttpConfiguration>()
             ?? throw new NullReferenceException(nameof(CellmConfiguration));
 
         _rateLimiterConfiguration = configuration.GetRequiredSection(nameof(RateLimiterConfiguration)).Get<RateLimiterConfiguration>()
@@ -62,7 +62,7 @@ public class ResiliencePipelineConfigurator
                 MinimumThroughput = _circuitBreakerConfiguration.MinimumThroughput,
                 BreakDuration = TimeSpan.FromSeconds(_circuitBreakerConfiguration.BreakDurationInSeconds),
             })
-            .AddTimeout(TimeSpan.FromSeconds(_cellmConfiguration.HttpTimeoutInSeconds))
+            .AddTimeout(TimeSpan.FromSeconds(_httpConfiguration.HttpTimeoutInSeconds))
             .Build();
     }
 

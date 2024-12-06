@@ -7,7 +7,7 @@ using Cellm.Models.Providers.Anthropic;
 using Cellm.Models.Prompts;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
-using Cellm.AddIn;
+using Cellm.Services.Configuration;
 
 namespace Cellm.Models.Anthropic;
 

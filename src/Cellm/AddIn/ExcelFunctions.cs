@@ -35,8 +35,8 @@ public static class CellmFunctions
     {
         var configuration = ServiceLocator.Get<IConfiguration>();
 
-        var provider = configuration.GetSection(nameof(CellmConfiguration)).GetValue<string>(nameof(CellmConfiguration.DefaultProvider))
-            ?? throw new ArgumentException(nameof(CellmConfiguration.DefaultProvider));
+        var provider = configuration.GetSection(nameof(ProviderConfiguration)).GetValue<string>(nameof(ProviderConfiguration.DefaultProvider))
+            ?? throw new ArgumentException(nameof(ProviderConfiguration.DefaultProvider));
 
         var model = configuration.GetSection($"{provider}Configuration").GetValue<string>(nameof(IProviderConfiguration.DefaultModel))
             ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
