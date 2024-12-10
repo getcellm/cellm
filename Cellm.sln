@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cellm", "src\Cellm\Cellm.cs
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cellm.Tests", "src\Cellm.Tests\Cellm.Tests.csproj", "{A2E6E336-7F53-45B6-B03F-FE7681FFE8F2}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Cellm.Models", "src\Cellm.Models\Cellm.Models.shproj", "{5E1720F7-E91F-4D99-A580-4BF4768FD32E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,5 +29,9 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {44E1ACC9-691B-4A19-BAE9-2A1033F12FB0}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		src\Cellm.Models\Cellm.Models.projitems*{5e1720f7-e91f-4d99-a580-4bf4768fd32e}*SharedItemsImports = 13
+		src\Cellm.Models\Cellm.Models.projitems*{ae73b93e-ab99-41b9-8367-46eefd550cb8}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal

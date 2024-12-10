@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Cellm.Tests;
 
-[ExcelTestSettings(AddIn = @"..\..\..\..\Cellm\bin\Debug\net6.0-windows\Cellm-AddIn")]
+[ExcelTestSettings(AddIn = @"..\..\..\..\Cellm\bin\Debug\net8.0-windows\Cellm-AddIn")]
 public class ExcelTests : IDisposable
 {
     readonly Workbook _testWorkbook;
@@ -54,17 +54,17 @@ public class ExcelTests : IDisposable
         Worksheet ws = (Worksheet)_testWorkbook.Sheets[1];
         ws.Range["A1"].Value = "Respond with \"Hello World\"";
         ws.Range["A2"].Formula = "=PROMPTWITH(\"Anthropic/claude-3-haiku-20240307\",A1)";
-        ExcelTestHelper.WaitForCellValue(ws.Range["A2"]);
+        Automation.Wait(5000);
         Assert.Equal("Hello World", ws.Range["A2"].Text);
 
         ws.Range["B1"].Value = "Respond with \"Hello World\"";
         ws.Range["B2"].Formula = "=PROMPTWITH(\"OpenAI/gpt-4o-mini\",B1)";
-        ExcelTestHelper.WaitForCellValue(ws.Range["B2"]);
+        Automation.Wait(5000);
         Assert.Equal("Hello World", ws.Range["B2"].Text);
 
         ws.Range["C1"].Value = "Respond with \"Hello World\"";
         ws.Range["C2"].Formula = "=PROMPTWITH(\"OpenAI/gemini-1.5-flash-latest\",C1)";
-        ExcelTestHelper.WaitForCellValue(ws.Range["C2"]);
+        Automation.Wait(5000);
         Assert.Equal("Hello World", ws.Range["C2"].Text);
     }
 }
