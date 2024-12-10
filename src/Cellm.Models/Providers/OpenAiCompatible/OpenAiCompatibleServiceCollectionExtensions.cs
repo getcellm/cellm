@@ -1,17 +1,19 @@
-﻿using Cellm.Services.Configuration;
+﻿using System.Reflection;
+using Cellm.Models.Resilience;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Cellm.Models.OpenAiCompatible;
+namespace Cellm.Models.Providers.OpenAiCompatible;
 
-internal static class ServiceCollectionExtensions
+internal static class OpenAiCompatibleServiceCollectionExtensions
 {
     public static IServiceCollection AddOpenAiCompatibleChatClient(this IServiceCollection services, IConfiguration configuration)
     {
         var resiliencePipelineConfigurator = new ResiliencePipelineConfigurator(configuration);
 
         services
+            .AddMediatR(mediatrConfiguration => mediatrConfiguration.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()))
             .AddHttpClient<IRequestHandler<OpenAiCompatibleRequest, OpenAiCompatibleResponse>, OpenAiCompatibleRequestHandler>(openAiCompatibleHttpClient =>
             {
                 openAiCompatibleHttpClient.Timeout = TimeSpan.FromHours(1);

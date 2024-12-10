@@ -9,16 +9,13 @@
     <Import_RootNamespace>Cellm.Models</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)Behaviors\Cache\CacheConfiguration.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Behaviors\Tools\ToolConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Client.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Behaviors\ServiceCollectionExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Behaviors\BehaviorsServiceCollectionExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ProviderConfiguration.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Providers\Anthropic\ServiceCollectionExtensions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Providers\Llamafile\ServiceCollectionExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\Anthropic\AnthropicServiceCollectionExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\Llamafile\LlamafileServiceCollectionExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Resilience\CircuitBreakerConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\IProviderConfiguration.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Resilience\HttpConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Resilience\RateLimiterConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Resilience\ResiliencePipelineConfigurator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Resilience\RetryConfiguration.cs" />
@@ -30,9 +27,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Providers\Utilities\FileManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\Utilities\ProcessManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\Utilities\ServerManager.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Behaviors\Cache\CacheBehavior.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Behaviors\Sentry\SentryBehavior.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Behaviors\Tools\ToolBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Behaviors\CacheBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Behaviors\SentryBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Behaviors\ToolBehavior.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Prompts\Prompt.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Prompts\PromptBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Provider.cs" />
@@ -41,7 +38,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Providers\Anthropic\AnthropicRequestHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\Anthropic\AnthropicResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\Anthropic\Models.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Providers\Llamafile\AsyncLazy.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\Utilities\AsyncLazy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\Llamafile\LlamafileConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\Llamafile\LlamafileRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\Llamafile\LlamafileRequestHandler.cs" />
@@ -50,22 +47,17 @@
     <Compile Include="$(MSBuildThisFileDirectory)Providers\Ollama\OllamaRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\Ollama\OllamaRequestHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\Ollama\OllamaResponse.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Providers\Ollama\ServiceCollectionExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\Ollama\OllamaServiceCollectionExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\OpenAiCompatible\OpenAiCompatibleConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\OpenAiCompatible\OpenAiCompatibleRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\OpenAiCompatible\OpenAiCompatibleRequestHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\OpenAiCompatible\OpenAiCompatibleResponse.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Providers\OpenAiCompatible\ServiceCollectionExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\OpenAiCompatible\OpenAiCompatibleServiceCollectionExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\OpenAi\OpenAiConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\OpenAi\OpenAiRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\OpenAi\OpenAiRequestHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\OpenAi\OpenAiResponse.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Providers\OpenAi\ServiceCollectionExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\OpenAi\OpenAiServiceCollectionExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serde.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="$(MSBuildThisFileDirectory)Behaviors\Cache\" />
-    <Folder Include="$(MSBuildThisFileDirectory)Behaviors\Tools\" />
-    <Folder Include="$(MSBuildThisFileDirectory)Behaviors\Sentry\" />
   </ItemGroup>
 </Project>

@@ -2,26 +2,22 @@
 using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.Models;
-using Cellm.Models.Anthropic;
-using Cellm.Models.Llamafile;
-using Cellm.Models.Local.Utilities;
 using Cellm.Models.Behaviors;
-using Cellm.Models.Ollama;
-using Cellm.Models.OpenAi;
-using Cellm.Models.OpenAiCompatible;
 using Cellm.Models.Providers.Anthropic;
 using Cellm.Models.Providers.Llamafile;
+using Cellm.Models.Providers.Ollama;
+using Cellm.Models.Providers.OpenAi;
+using Cellm.Models.Providers.OpenAiCompatible;
+using Cellm.Models.Resilience;
 using Cellm.Services.Configuration;
 using Cellm.Tools;
 using Cellm.Tools.FileReader;
 using ExcelDna.Integration;
-using MediatR;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Cellm.Models.Resilience;
 
 namespace Cellm.Services;
 
@@ -53,14 +49,11 @@ internal static class ServiceLocator
         services
             .Configure<CellmConfiguration>(configuration.GetRequiredSection(nameof(CellmConfiguration)))
             .Configure<ProviderConfiguration>(configuration.GetRequiredSection(nameof(ProviderConfiguration)))
-            .Configure<ToolConfiguration>(configuration.GetRequiredSection(nameof(ToolConfiguration)))
-            .Configure<CacheConfiguration>(configuration.GetRequiredSection(nameof(CacheConfiguration)))
             .Configure<AnthropicConfiguration>(configuration.GetRequiredSection(nameof(AnthropicConfiguration)))
             .Configure<OllamaConfiguration>(configuration.GetRequiredSection(nameof(OllamaConfiguration)))
             .Configure<OpenAiConfiguration>(configuration.GetRequiredSection(nameof(OpenAiConfiguration)))
             .Configure<OpenAiCompatibleConfiguration>(configuration.GetRequiredSection(nameof(OpenAiCompatibleConfiguration)))
             .Configure<LlamafileConfiguration>(configuration.GetRequiredSection(nameof(LlamafileConfiguration)))
-            .Configure<HttpConfiguration>(configuration.GetRequiredSection(nameof(HttpConfiguration)))
             .Configure<RateLimiterConfiguration>(configuration.GetRequiredSection(nameof(RateLimiterConfiguration)))
             .Configure<CircuitBreakerConfiguration>(configuration.GetRequiredSection(nameof(CircuitBreakerConfiguration)))
             .Configure<RetryConfiguration>(configuration.GetRequiredSection(nameof(RetryConfiguration)))
@@ -97,8 +90,7 @@ internal static class ServiceLocator
         // Internals
         services
             .AddSingleton(configuration)
-            .AddMediatR(mediatrConfiguration => mediatrConfiguration.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()))
-            .AddTransient<PromptArgumentParser>()
+            .AddTransient<ArgumentParser>()
             .AddSingleton<Client>()
             .AddSingleton<Serde>();
 
@@ -110,7 +102,7 @@ internal static class ServiceLocator
             .AddOpenAiCompatibleChatClient(configuration)
             .AddOpenOllamaChatClient(configuration);
 
-        // Add pipeline middleware
+        // Add model request middleware
         services
             .AddSentryBehavior()
             .AddCachingBehavior()
@@ -123,8 +115,8 @@ internal static class ServiceLocator
             .AddSingleton<IFileReader, TextReader>()
             .AddSingleton<Functions>()
             .AddTools(
-                (serviceProvider) => AIFunctionFactory.Create(serviceProvider.GetRequiredService<Functions>().GlobRequest),
-                (serviceProvider) => AIFunctionFactory.Create(serviceProvider.GetRequiredService<Functions>().FileReaderRequest));     
+                serviceProvider => AIFunctionFactory.Create(serviceProvider.GetRequiredService<Functions>().GlobRequest),
+                serviceProvider => AIFunctionFactory.Create(serviceProvider.GetRequiredService<Functions>().FileReaderRequest));
 
         return services;
     }

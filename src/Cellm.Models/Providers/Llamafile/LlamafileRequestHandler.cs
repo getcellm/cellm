@@ -1,13 +1,13 @@
 ﻿using System.Diagnostics;
 using Cellm.AddIn.Exceptions;
 using Cellm.Models.Local.Utilities;
-using Cellm.Models.OpenAiCompatible;
+using Cellm.Models.Providers.OpenAiCompatible;
 using Cellm.Services.Configuration;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Cellm.Models.Llamafile;
+namespace Cellm.Models.Providers.Llamafile;
 
 internal class LlamafileRequestHandler : IProviderRequestHandler<LlamafileRequest, LlamafileResponse>
 {
@@ -22,7 +22,7 @@ internal class LlamafileRequestHandler : IProviderRequestHandler<LlamafileReques
     private readonly CellmConfiguration _cellmConfiguration;
     private readonly LlamafileConfiguration _llamafileConfiguration;
 
-    private readonly ISender _sender;    
+    private readonly ISender _sender;
     private readonly ILogger<LlamafileRequestHandler> _logger;
 
     public LlamafileRequestHandler(IOptions<CellmConfiguration> cellmConfiguration,

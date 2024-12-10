@@ -1,9 +1,8 @@
 ﻿using Cellm.Models.Prompts;
-using Cellm.Models.Providers;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Cellm.Models.OpenAi;
+namespace Cellm.Models.Providers.OpenAi;
 
 internal class OpenAiRequestHandler([FromKeyedServices(Provider.OpenAi)] IChatClient chatClient) : IModelRequestHandler<OpenAiRequest, OpenAiResponse>
 {

@@ -1,6 +1,4 @@
-﻿using Cellm.Services.Configuration;
-
-namespace Cellm.Models.OpenAi;
+﻿namespace Cellm.Models.Providers.OpenAi;
 
 internal class OpenAiConfiguration : IProviderConfiguration
 {

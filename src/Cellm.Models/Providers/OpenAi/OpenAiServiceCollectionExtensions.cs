@@ -1,12 +1,13 @@
-﻿using Cellm.Models.Providers;
+﻿using System.Reflection;
+using Cellm.Models;
+using Cellm.Models.Providers.OpenAi;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using OpenAI;
 
-namespace Cellm.Models.OpenAi;
+namespace Microsoft.Extensions.DependencyInjection;
 
-internal static class ServiceCollectionExtensions
+internal static class OpenAiServiceCollectionExtensions
 {
     public static IServiceCollection AddOpenAiChatClient(this IServiceCollection services, IConfiguration configuration)
     {
@@ -14,6 +15,7 @@ internal static class ServiceCollectionExtensions
             ?? throw new NullReferenceException(nameof(OpenAiConfiguration));
 
         services
+            .AddMediatR(mediatrConfiguration => mediatrConfiguration.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()))
             .AddKeyedChatClient(Provider.OpenAi, new OpenAIClient(openAiConfiguration.ApiKey).AsChatClient(openAiConfiguration.DefaultModel))
             .UseFunctionInvocation();
 

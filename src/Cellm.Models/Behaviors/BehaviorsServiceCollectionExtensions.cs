@@ -1,11 +1,11 @@
-﻿using Cellm.Models.Tools;
+﻿using Cellm.Models.Behaviors;
+using Cellm.Models.Tools;
 using MediatR;
 using Microsoft.Extensions.AI;
-using Microsoft.Extensions.DependencyInjection;
 
-namespace Cellm.Models.Behaviors;
+namespace Microsoft.Extensions.DependencyInjection;
 
-internal static class ServiceCollectionExtensions
+internal static class BehaviorsServiceCollectionExtensions
 {
     public static IServiceCollection AddSentryBehavior(this IServiceCollection services)
     {
@@ -45,7 +45,7 @@ internal static class ServiceCollectionExtensions
 
     public static IServiceCollection AddTools(this IServiceCollection services, params Func<IServiceProvider, AIFunction>[] toolBuilders)
     {
-        
+
 
         foreach (var toolBuilder in toolBuilders)
         {

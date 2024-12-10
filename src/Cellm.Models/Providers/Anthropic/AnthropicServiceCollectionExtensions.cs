@@ -1,12 +1,12 @@
-﻿using Cellm.Models.Anthropic;
-using Cellm.Services.Configuration;
+﻿using System.Reflection;
+using Cellm.Models.Providers.Anthropic;
+using Cellm.Models.Resilience;
 using MediatR;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
-namespace Cellm.Models.Providers.Anthropic;
+namespace Microsoft.Extensions.DependencyInjection;
 
-internal static class ServiceCollectionExtensions
+internal static class AnthropicServiceCollectionExtensions
 {
     public static IServiceCollection AddAnthropicChatClient(this IServiceCollection services, IConfiguration configuration)
     {
@@ -16,6 +16,7 @@ internal static class ServiceCollectionExtensions
             ?? throw new NullReferenceException(nameof(AnthropicConfiguration));
 
         services
+            .AddMediatR(mediatrConfiguration => mediatrConfiguration.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()))
             .AddHttpClient<IRequestHandler<AnthropicRequest, AnthropicResponse>, AnthropicRequestHandler>(anthropicHttpClient =>
             {
                 anthropicHttpClient.BaseAddress = anthropicConfiguration.BaseAddress;

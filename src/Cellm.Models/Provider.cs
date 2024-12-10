@@ -1,4 +1,4 @@
-﻿namespace Cellm.Models.Providers;
+﻿namespace Cellm.Models;
 
 public enum Provider
 {

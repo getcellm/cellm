@@ -1,6 +1,4 @@
-﻿using Cellm.Services.Configuration;
-
-namespace Cellm.Models.Llamafile;
+﻿namespace Cellm.Models.Providers.Llamafile;
 
 internal class LlamafileConfiguration : IProviderConfiguration
 {

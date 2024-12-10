@@ -1,5 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 
+namespace Cellm.Models.Local.Utilities;
+
 /// <summary>
 /// Provides threadsafe asynchronous lazy initialization. This type is fully threadsafe.
 /// </summary>

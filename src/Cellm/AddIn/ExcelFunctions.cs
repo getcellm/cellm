@@ -73,7 +73,7 @@ public static class CellmFunctions
     {
         try
         {
-            var arguments = ServiceLocator.Get<PromptArgumentParser>()
+            var arguments = ServiceLocator.Get<ArgumentParser>()
                 .AddProvider(providerAndModel)
                 .AddModel(providerAndModel)
                 .AddInstructionsOrContext(instructionsOrContext)

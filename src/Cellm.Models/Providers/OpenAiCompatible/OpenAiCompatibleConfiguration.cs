@@ -1,4 +1,4 @@
-﻿namespace Cellm.Models.OpenAiCompatible;
+﻿namespace Cellm.Models.Providers.OpenAiCompatible;
 
 internal class OpenAiCompatibleConfiguration
 {

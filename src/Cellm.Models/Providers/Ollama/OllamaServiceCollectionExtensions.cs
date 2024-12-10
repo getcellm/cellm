@@ -1,14 +1,14 @@
-﻿using Cellm.Models.Local.Utilities;
-using Cellm.Models.Providers;
-using Cellm.Services.Configuration;
+﻿using System.Reflection;
+using Cellm.Models.Local.Utilities;
+using Cellm.Models.Resilience;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace Cellm.Models.Ollama;
+namespace Cellm.Models.Providers.Ollama;
 
-internal static class ServiceCollectionExtensions
+internal static class OllamaServiceCollectionExtensions
 {
     public static IServiceCollection AddOpenOllamaChatClient(this IServiceCollection services, IConfiguration configuration)
     {
@@ -18,6 +18,7 @@ internal static class ServiceCollectionExtensions
             ?? throw new NullReferenceException(nameof(OllamaConfiguration));
 
         services
+            .AddMediatR(mediatrConfiguration => mediatrConfiguration.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()))
             .AddHttpClient(nameof(Provider.Ollama), ollamaHttpClient =>
             {
                 ollamaHttpClient.BaseAddress = ollamaConfiguration.BaseAddress;
@@ -31,9 +32,7 @@ internal static class ServiceCollectionExtensions
             .AddKeyedChatClient(Provider.Ollama, serviceProvider => new OllamaChatClient(
                 ollamaConfiguration.BaseAddress,
                 ollamaConfiguration.DefaultModel,
-                serviceProvider
-                    .GetRequiredService<IHttpClientFactory>()
-                    .CreateClient(nameof(Provider.Ollama))))
+                serviceProvider.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(Provider.Ollama))))
             .UseFunctionInvocation();
 
         services.TryAddSingleton<FileManager>();

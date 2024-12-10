@@ -5,14 +5,13 @@ using System.Text.Json;
 using Cellm.AddIn.Exceptions;
 using Cellm.Models.Local.Utilities;
 using Cellm.Models.Prompts;
+using Cellm.Services.Configuration;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Cellm.Models.Providers;
-using Cellm.Services.Configuration;
 
-namespace Cellm.Models.Ollama;
+namespace Cellm.Models.Providers.Ollama;
 
 internal class OllamaRequestHandler : IModelRequestHandler<OllamaRequest, OllamaResponse>
 {

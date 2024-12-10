@@ -1,6 +1,4 @@
-﻿using Cellm.Services.Configuration;
-
-namespace Cellm.Models.Ollama;
+﻿namespace Cellm.Models.Providers.Ollama;
 
 internal class OllamaConfiguration : IProviderConfiguration
 {

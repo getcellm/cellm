@@ -1,6 +1,4 @@
-﻿using Cellm.Services.Configuration;
-
-namespace Cellm.Models.Providers.Anthropic;
+﻿namespace Cellm.Models.Providers.Anthropic;
 
 internal class AnthropicConfiguration : IProviderConfiguration
 {

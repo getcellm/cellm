@@ -9,7 +9,7 @@ namespace Cellm.AddIn;
 
 public record Arguments(string Provider, string Model, string Context, string Instructions, double Temperature);
 
-public class PromptArgumentParser
+public class ArgumentParser
 {
     private string? _provider;
     private string? _model;
@@ -19,12 +19,12 @@ public class PromptArgumentParser
 
     private readonly IConfiguration _configuration;
 
-    public PromptArgumentParser(IConfiguration configuration)
+    public ArgumentParser(IConfiguration configuration)
     {
         _configuration = configuration;
     }
 
-    public PromptArgumentParser AddProvider(object providerAndModel)
+    public ArgumentParser AddProvider(object providerAndModel)
     {
         _provider = providerAndModel switch
         {
@@ -36,7 +36,7 @@ public class PromptArgumentParser
         return this;
     }
 
-    public PromptArgumentParser AddModel(object providerAndModel)
+    public ArgumentParser AddModel(object providerAndModel)
     {
         _model = providerAndModel switch
         {
@@ -48,21 +48,21 @@ public class PromptArgumentParser
         return this;
     }
 
-    public PromptArgumentParser AddInstructionsOrContext(object instructionsOrContext)
+    public ArgumentParser AddInstructionsOrContext(object instructionsOrContext)
     {
         _instructionsOrContext = instructionsOrContext;
 
         return this;
     }
 
-    public PromptArgumentParser AddInstructionsOrTemperature(object instructionsOrTemperature)
+    public ArgumentParser AddInstructionsOrTemperature(object instructionsOrTemperature)
     {
         _instructionsOrTemperature = instructionsOrTemperature;
 
         return this;
     }
 
-    public PromptArgumentParser AddTemperature(object temperature)
+    public ArgumentParser AddTemperature(object temperature)
     {
         _temperature = temperature;
 

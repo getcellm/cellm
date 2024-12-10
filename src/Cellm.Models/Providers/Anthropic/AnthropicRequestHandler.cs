@@ -3,29 +3,27 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Cellm.AddIn.Exceptions;
-using Cellm.Models.Providers.Anthropic;
 using Cellm.Models.Prompts;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
-using Cellm.Services.Configuration;
 
-namespace Cellm.Models.Anthropic;
+namespace Cellm.Models.Providers.Anthropic;
 
 internal class AnthropicRequestHandler : IModelRequestHandler<AnthropicRequest, AnthropicResponse>
 {
     private readonly AnthropicConfiguration _anthropicConfiguration;
-    private readonly CellmConfiguration _cellmConfiguration;
+    private readonly ProviderConfiguration _providerConfiguration;
     private readonly HttpClient _httpClient;
     private readonly Serde _serde;
 
     public AnthropicRequestHandler(
         IOptions<AnthropicConfiguration> anthropicConfiguration,
-        IOptions<CellmConfiguration> cellmConfiguration,
+        IOptions<ProviderConfiguration> providerConfiguration,
         HttpClient httpClient,
         Serde serde)
     {
         _anthropicConfiguration = anthropicConfiguration.Value;
-        _cellmConfiguration = cellmConfiguration.Value;
+        _providerConfiguration = providerConfiguration.Value;
         _httpClient = httpClient;
         _serde = serde;
     }
@@ -56,7 +54,7 @@ internal class AnthropicRequestHandler : IModelRequestHandler<AnthropicRequest, 
             System = request.Prompt.Messages.Where(x => x.Role == ChatRole.System).First().Text,
             Messages = request.Prompt.Messages.Where(x => x.Role != ChatRole.System).Select(x => new AnthropicMessage { Content = x.Text, Role = x.Role.ToString().ToLower() }).ToList(),
             Model = request.Prompt.Options.ModelId ?? _anthropicConfiguration.DefaultModel,
-            Temperature = request.Prompt.Options.Temperature ?? _cellmConfiguration.DefaultTemperature,
+            Temperature = request.Prompt.Options.Temperature ?? _providerConfiguration.DefaultTemperature,
         };
 
         return _serde.Serialize(requestBody, new JsonSerializerOptions

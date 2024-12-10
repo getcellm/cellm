@@ -1,12 +1,11 @@
-﻿
-using System.ClientModel;
+﻿using System.ClientModel;
 using System.ClientModel.Primitives;
 using Cellm.Models.Prompts;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
 using OpenAI;
 
-namespace Cellm.Models.OpenAiCompatible;
+namespace Cellm.Models.Providers.OpenAiCompatible;
 
 internal class OpenAiCompatibleRequestHandler(HttpClient httpClient, IOptions<OpenAiCompatibleConfiguration> openAiCompatibleConfiguration)
     : IModelRequestHandler<OpenAiCompatibleRequest, OpenAiCompatibleResponse>
