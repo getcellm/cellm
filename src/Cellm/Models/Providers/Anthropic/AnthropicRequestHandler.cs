@@ -55,6 +55,7 @@ internal class AnthropicRequestHandler : IModelRequestHandler<AnthropicRequest, 
             Messages = request.Prompt.Messages.Where(x => x.Role != ChatRole.System).Select(x => new AnthropicMessage { Content = x.Text, Role = x.Role.ToString().ToLower() }).ToList(),
             Model = request.Prompt.Options.ModelId ?? _anthropicConfiguration.DefaultModel,
             Temperature = request.Prompt.Options.Temperature ?? _providerConfiguration.DefaultTemperature,
+            MaxTokens = 2048
         };
 
         return _serde.Serialize(requestBody, new JsonSerializerOptions
