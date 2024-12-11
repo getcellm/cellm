@@ -1,11 +1,11 @@
 ﻿using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Cellm.AddIn.Exceptions;
+using Cellm.Models.Exceptions;
 
 namespace Cellm.Models;
 
-internal class Serde
+public class Serde
 {
     private readonly JsonSerializerOptions _defaultOptions = new()
     {
@@ -20,6 +20,6 @@ internal class Serde
 
     public TDeserialize Deserialize<TDeserialize>(string value, JsonSerializerOptions? options = null)
     {
-        return JsonSerializer.Deserialize<TDeserialize>(value, options ?? _defaultOptions) ?? throw new CellmException($"Failed to deserialize {value} to {typeof(TDeserialize).Name}");
+        return JsonSerializer.Deserialize<TDeserialize>(value, options ?? _defaultOptions) ?? throw new CellmModelException($"Failed to deserialize {value} to {typeof(TDeserialize).Name}");
     }
 }
