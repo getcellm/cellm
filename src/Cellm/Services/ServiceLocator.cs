@@ -3,6 +3,7 @@ using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.Models;
 using Cellm.Models.Behaviors;
+using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
 using Cellm.Models.Providers.Llamafile;
 using Cellm.Models.Providers.Ollama;
@@ -89,6 +90,7 @@ internal static class ServiceLocator
 
         // Internals
         services
+            .AddMediatR(mediatrConfiguration => mediatrConfiguration.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()))
             .AddSingleton(configuration)
             .AddTransient<ArgumentParser>()
             .AddSingleton<Client>()

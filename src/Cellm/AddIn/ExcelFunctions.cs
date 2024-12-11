@@ -3,6 +3,7 @@ using System.Text;
 using Cellm.AddIn.Exceptions;
 using Cellm.Models;
 using Cellm.Models.Prompts;
+using Cellm.Models.Providers;
 using Cellm.Services;
 using Cellm.Services.Configuration;
 using ExcelDna.Integration;

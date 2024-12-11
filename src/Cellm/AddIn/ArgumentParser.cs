@@ -1,6 +1,6 @@
 ﻿using System.Text;
 using Cellm.AddIn.Exceptions;
-using Cellm.Models;
+using Cellm.Models.Providers;
 using ExcelDna.Integration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Office.Interop.Excel;
