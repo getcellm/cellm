@@ -2,7 +2,6 @@
 using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.Models;
-using Cellm.Models.Behaviors;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
 using Cellm.Models.Providers.Llamafile;
@@ -25,6 +24,7 @@ namespace Cellm.Services;
 internal static class ServiceLocator
 {
     private static readonly Lazy<IServiceProvider> _serviceProvider = new(() => ConfigureServices(new ServiceCollection()).BuildServiceProvider());
+
     internal static string? ConfigurationPath { get; set; } = ExcelDnaUtil.XllPathInfo?.Directory?.FullName;
     public static IServiceProvider ServiceProvider => _serviceProvider.Value;
 

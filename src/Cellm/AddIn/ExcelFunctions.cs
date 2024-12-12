@@ -5,13 +5,12 @@ using Cellm.Models;
 using Cellm.Models.Prompts;
 using Cellm.Models.Providers;
 using Cellm.Services;
-using Cellm.Services.Configuration;
 using ExcelDna.Integration;
 using Microsoft.Extensions.Configuration;
 
 namespace Cellm.AddIn;
 
-public static class CellmFunctions
+public static class ExcelFunctions
 {
     /// <summary>
     /// Sends a prompt to the default model configured in CellmConfiguration.
@@ -117,7 +116,7 @@ public static class CellmFunctions
     /// <returns>A task that represents the asynchronous operation. The task result contains the model's response as a string.</returns>
     /// <exception cref="CellmException">Thrown when an unexpected error occurs during the operation.</exception>
 
-    private static async Task<string> CallModelAsync(Prompt prompt, string? provider = null, Uri? baseAddress = null)
+    internal static async Task<string> CallModelAsync(Prompt prompt, string? provider = null, Uri? baseAddress = null)
     {
         var client = ServiceLocator.Get<Client>();
         var response = await client.Send(prompt, provider, baseAddress, CancellationToken.None);

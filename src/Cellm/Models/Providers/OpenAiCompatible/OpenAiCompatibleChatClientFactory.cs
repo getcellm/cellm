@@ -1,7 +1,6 @@
 ﻿using System.ClientModel.Primitives;
 using System.ClientModel;
 using Microsoft.Extensions.AI;
-using Microsoft.Extensions.DependencyInjection;
 using OpenAI;
 
 namespace Cellm.Models.Providers.OpenAiCompatible;
