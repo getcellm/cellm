@@ -1,5 +1,5 @@
-﻿using System.ClientModel.Primitives;
-using System.ClientModel;
+﻿using System.ClientModel;
+using System.ClientModel.Primitives;
 using Microsoft.Extensions.AI;
 using OpenAI;
 

@@ -103,7 +103,7 @@ public static class ServiceCollectionExtensions
                 openAiCompatibleHttpClient.Timeout = TimeSpan.FromHours(1);
             })
             .AddResilienceHandler(nameof(OpenAiCompatibleChatClientFactory), resiliencePipelineConfigurator.ConfigureResiliencePipeline);
-        
+
 
         return services;
     }
