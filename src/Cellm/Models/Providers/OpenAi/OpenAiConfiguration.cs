@@ -1,6 +1,6 @@
 ﻿namespace Cellm.Models.Providers.OpenAi;
 
-public class OpenAiConfiguration : IProviderConfiguration
+internal class OpenAiConfiguration : IProviderConfiguration
 {
     public string DefaultModel { get; init; } = string.Empty;
 

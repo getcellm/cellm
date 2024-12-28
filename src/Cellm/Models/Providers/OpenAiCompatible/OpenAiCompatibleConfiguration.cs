@@ -1,6 +1,6 @@
 ﻿namespace Cellm.Models.Providers.OpenAiCompatible;
 
-public class OpenAiCompatibleConfiguration
+internal class OpenAiCompatibleConfiguration
 {
     public Uri BaseAddress { get; set; } = default!;
 

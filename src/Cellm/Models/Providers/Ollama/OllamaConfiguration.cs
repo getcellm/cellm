@@ -1,6 +1,6 @@
 ﻿namespace Cellm.Models.Providers.Ollama;
 
-public class OllamaConfiguration : IProviderConfiguration
+internal class OllamaConfiguration : IProviderConfiguration
 {
     public Uri ZipUrl { get; init; } = default!;
 
