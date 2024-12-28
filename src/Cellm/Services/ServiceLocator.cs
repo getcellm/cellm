@@ -2,18 +2,18 @@
 using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.Models;
-using Cellm.Models.Anthropic;
-using Cellm.Models.Llamafile;
-using Cellm.Models.Local;
-using Cellm.Models.ModelRequestBehavior;
-using Cellm.Models.Ollama;
-using Cellm.Models.OpenAi;
-using Cellm.Models.OpenAiCompatible;
+using Cellm.Models.Providers;
+using Cellm.Models.Providers.Anthropic;
+using Cellm.Models.Providers.Llamafile;
+using Cellm.Models.Providers.Ollama;
+using Cellm.Models.Providers.OpenAi;
+using Cellm.Models.Providers.OpenAiCompatible;
+using Cellm.Models.Resilience;
 using Cellm.Services.Configuration;
 using Cellm.Tools;
 using Cellm.Tools.FileReader;
 using ExcelDna.Integration;
-using MediatR;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,6 +24,7 @@ namespace Cellm.Services;
 internal static class ServiceLocator
 {
     private static readonly Lazy<IServiceProvider> _serviceProvider = new(() => ConfigureServices(new ServiceCollection()).BuildServiceProvider());
+
     internal static string? ConfigurationPath { get; set; } = ExcelDnaUtil.XllPathInfo?.Directory?.FullName;
     public static IServiceProvider ServiceProvider => _serviceProvider.Value;
 
@@ -48,6 +49,7 @@ internal static class ServiceLocator
 
         services
             .Configure<CellmConfiguration>(configuration.GetRequiredSection(nameof(CellmConfiguration)))
+            .Configure<ProviderConfiguration>(configuration.GetRequiredSection(nameof(ProviderConfiguration)))
             .Configure<AnthropicConfiguration>(configuration.GetRequiredSection(nameof(AnthropicConfiguration)))
             .Configure<OllamaConfiguration>(configuration.GetRequiredSection(nameof(OllamaConfiguration)))
             .Configure<OpenAiConfiguration>(configuration.GetRequiredSection(nameof(OpenAiConfiguration)))
@@ -88,53 +90,35 @@ internal static class ServiceLocator
 
         // Internals
         services
-            .AddSingleton(configuration)
             .AddMediatR(mediatrConfiguration => mediatrConfiguration.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()))
-            .AddTransient<PromptArgumentParser>()
+            .AddSingleton(configuration)
+            .AddTransient<ArgumentParser>()
             .AddSingleton<Client>()
-            .AddSingleton<Serde>()
-            .AddSingleton<LocalUtilities>()
-            .AddSingleton<ProcessManager>();
+            .AddSingleton<Serde>();
 
-#pragma warning disable EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates.
+        // Add providers
         services
-            .AddHybridCache();
-#pragma warning restore EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates.
-
-        // Tools
-        services
-            .AddSingleton<Functions>()
-            .AddSingleton<FileReaderFactory>()
-            .AddSingleton<IFileReader, PdfReader>()
-            .AddSingleton<IFileReader, TextReader>();
-
-        // Model Providers
-
-        var resiliencePipelineConfigurator = new ResiliencePipelineConfigurator(configuration);
-
-        var anthropicConfiguration = configuration.GetRequiredSection(nameof(AnthropicConfiguration)).Get<AnthropicConfiguration>()
-            ?? throw new NullReferenceException(nameof(AnthropicConfiguration));
-
-        services
-            .AddHttpClient<IRequestHandler<AnthropicRequest, AnthropicResponse>, AnthropicRequestHandler>(anthropicHttpClient =>
-            {
-                anthropicHttpClient.BaseAddress = anthropicConfiguration.BaseAddress;
-                anthropicHttpClient.DefaultRequestHeaders.Add("x-api-key", anthropicConfiguration.ApiKey);
-                anthropicHttpClient.DefaultRequestHeaders.Add("anthropic-version", anthropicConfiguration.Version);
-                anthropicHttpClient.Timeout = TimeSpan.FromHours(1);
-            })
-            .AddResilienceHandler($"{nameof(AnthropicRequestHandler)}ResiliencePipeline", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
-
-        services
+            .AddAnthropicChatClient(configuration)
+            .AddLlamafileChatClient(configuration)
             .AddOpenAiChatClient(configuration)
             .AddOpenAiCompatibleChatClient(configuration)
             .AddOpenOllamaChatClient(configuration);
 
-        // Model request pipeline
+        // Add model request middleware
         services
-            .AddSingleton(typeof(IPipelineBehavior<,>), typeof(SentryBehavior<,>))
-            .AddSingleton(typeof(IPipelineBehavior<,>), typeof(CachingBehavior<,>))
-            .AddSingleton(typeof(IPipelineBehavior<,>), typeof(ToolBehavior<,>));
+            .AddSentryBehavior()
+            .AddCachingBehavior()
+            .AddToolBehavior();
+
+        // Add tools
+        services
+            .AddSingleton<FileReaderFactory>()
+            .AddSingleton<IFileReader, PdfReader>()
+            .AddSingleton<IFileReader, TextReader>()
+            .AddSingleton<Functions>()
+            .AddTools(
+                serviceProvider => AIFunctionFactory.Create(serviceProvider.GetRequiredService<Functions>().GlobRequest),
+                serviceProvider => AIFunctionFactory.Create(serviceProvider.GetRequiredService<Functions>().FileReaderRequest));
 
         return services;
     }
