@@ -40,7 +40,7 @@
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.0" />
     <PackageReference Include="PdfPig" Version="0.1.9" />
     <PackageReference Include="Sentry.Extensions.Logging" Version="4.13.0" />
-    <PackageReference Include="Sentry.Profiling" Version="4.13.0" />
+    <PackageReference Include="Sentry.Profiling" Version="5.0.1" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="9.0.0">
       <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
