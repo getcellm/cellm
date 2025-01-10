@@ -223,14 +223,14 @@
       },
       "Sentry.Extensions.Logging": {
         "type": "Direct",
-        "requested": "[4.13.0, )",
-        "resolved": "4.13.0",
-        "contentHash": "yZ5+TtJKWcss6cG17YjnovImx4X56T8O6Qy6bsMC8tMDttYy8J7HJ2F+WdaZNyjOCo0Rfi6N2gc+Clv/5pf+TQ==",
+        "requested": "[5.0.1, )",
+        "resolved": "5.0.1",
+        "contentHash": "SBeyXmc7q2xX2FA2fJniMkHYtowdc6tCwtv9rHuW9e/NtazxIeRt5ltpSbBRn9UtodOvxB5bRLFOvFExuGeIag==",
         "dependencies": {
           "Microsoft.Extensions.Configuration.Binder": "8.0.0",
           "Microsoft.Extensions.Http": "8.0.0",
           "Microsoft.Extensions.Logging.Configuration": "8.0.0",
-          "Sentry": "4.13.0"
+          "Sentry": "5.0.1"
         }
       },
       "Sentry.Profiling": {
@@ -528,8 +528,8 @@
       },
       "Sentry": {
         "type": "Transitive",
-        "resolved": "4.13.0",
-        "contentHash": "Wfw3M1WpFcrYaGzPm7QyUTfIOYkVXQ1ry6p4WYjhbLz9fPwV23SGQZTFDpdox67NHM0V0g1aoQ4YKLm4ANtEEg=="
+        "resolved": "5.0.1",
+        "contentHash": "h1rKFYXx58dUtAcsWpTlJGHhG1bpy0JjGh8b2sRKw2wdk3NKCGd8KTLSWnzIqIjjZP2PNeUZFUyDeWVKs8Dk2A=="
       },
       "System.ClientModel": {
         "type": "Transitive",
