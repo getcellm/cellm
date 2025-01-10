@@ -5,8 +5,10 @@ using Cellm.Models;
 using Cellm.Models.Prompts;
 using Cellm.Models.Providers;
 using Cellm.Services;
+using Cellm.Services.Configuration;
 using ExcelDna.Integration;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Cellm.AddIn;
 
@@ -93,11 +95,23 @@ public static class ExcelFunctions
                 .AddUserMessage(userMessage)
                 .Build();
 
-            // ExcelAsyncUtil yields Excel's main thread, Task.Run enables async/await in inner code
-            return ExcelAsyncUtil.Run(nameof(PromptWith), new object[] { providerAndModel, instructionsOrContext, instructionsOrTemperature, temperature }, () =>
+            var cellmConfiguration = ServiceLocator.Get<IOptions<CellmConfiguration>>().Value;
+
+            if (cellmConfiguration.Stream)
             {
-                return Task.Run(async () => await CallModelAsync(prompt, arguments.Provider)).GetAwaiter().GetResult();
-            });
+                return ExcelAsyncUtil.Observe(
+                    nameof(PromptWith),
+                    new object[] { providerAndModel, instructionsOrContext, instructionsOrTemperature, temperature },
+                    () => new CompleteStreaming(prompt, arguments.Provider, null));
+
+            }
+            else
+            {
+                return ExcelAsyncUtil.RunTask(
+                    nameof(PromptWith),
+                    new object[] { providerAndModel, instructionsOrContext, instructionsOrTemperature, temperature },
+                    () => Complete(prompt, arguments.Provider, null));
+            }
         }
         catch (CellmException ex)
         {
@@ -115,8 +129,7 @@ public static class ExcelFunctions
     /// <param name="model">The specific model to use. If null, the default model is used.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the model's response as a string.</returns>
     /// <exception cref="CellmException">Thrown when an unexpected error occurs during the operation.</exception>
-
-    internal static async Task<string> CallModelAsync(Prompt prompt, string? provider = null, Uri? baseAddress = null)
+    internal static async Task<string> Complete(Prompt prompt, Provider? provider = null, Uri? baseAddress = null)
     {
         var client = ServiceLocator.Get<Client>();
         var response = await client.Send(prompt, provider, baseAddress, CancellationToken.None);

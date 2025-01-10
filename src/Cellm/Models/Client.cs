@@ -1,4 +1,8 @@
-﻿using Cellm.Models.Exceptions;
+﻿using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using Cellm.Models.Exceptions;
 using Cellm.Models.Prompts;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
@@ -7,6 +11,7 @@ using Cellm.Models.Providers.Ollama;
 using Cellm.Models.Providers.OpenAi;
 using Cellm.Models.Providers.OpenAiCompatible;
 using MediatR;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
 using Polly.Timeout;
 
@@ -14,27 +19,18 @@ namespace Cellm.Models;
 
 public class Client(ISender sender, IOptions<ProviderConfiguration> providerConfiguration)
 {
-    private readonly ProviderConfiguration _providerConfiguration = providerConfiguration.Value;
-
-    public async Task<Prompt> Send(Prompt prompt, string? provider, Uri? baseAddress, CancellationToken cancellationToken)
+    public async Task<Prompt> Send(Prompt prompt, Provider? provider, Uri? baseAddress, CancellationToken cancellationToken)
     {
         try
         {
-            provider ??= _providerConfiguration.DefaultProvider;
-
-            if (!Enum.TryParse<Provider>(provider, true, out var parsedProvider))
+            IModelResponse response = provider switch
             {
-                throw new ArgumentException($"Unsupported provider: {provider}");
-            }
-
-            IModelResponse response = parsedProvider switch
-            {
-                Provider.Anthropic => await sender.Send(new AnthropicRequest(prompt, provider, baseAddress), cancellationToken),
+                Provider.Anthropic => await sender.Send(new AnthropicRequest(prompt, provider.ToString(), baseAddress), cancellationToken),
                 Provider.Llamafile => await sender.Send(new LlamafileRequest(prompt), cancellationToken),
                 Provider.Ollama => await sender.Send(new OllamaRequest(prompt), cancellationToken),
                 Provider.OpenAi => await sender.Send(new OpenAiRequest(prompt), cancellationToken),
                 Provider.OpenAiCompatible => await sender.Send(new OpenAiCompatibleRequest(prompt, baseAddress), cancellationToken),
-                _ => throw new InvalidOperationException($"Provider {parsedProvider} is defined but not implemented")
+                _ => throw new InvalidOperationException($"Provider {provider} is defined but not implemented")
             };
 
             return response.Prompt;
@@ -55,6 +51,24 @@ public class Client(ISender sender, IOptions<ProviderConfiguration> providerConf
         {
             // Handle any other unexpected exceptions
             throw new CellmModelException($"An unexpected error occurred: {ex.Message}", ex);
+        }
+    }
+
+    internal async IAsyncEnumerable<StreamingChatCompletionUpdate> CreateStream(Prompt prompt, Provider? provider, Uri? baseAddress, [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        IAsyncEnumerable<IModelStreamResponse> stream = provider switch
+        {
+            Provider.Anthropic => throw new NotSupportedException($"{nameof(Provider.Anthropic)} streaming"),
+            Provider.Llamafile => throw new NotSupportedException($"{nameof(Provider.Anthropic)} streaming"),
+            Provider.Ollama => throw new NotSupportedException($"{nameof(Provider.Anthropic)} streaming"),
+            Provider.OpenAi => sender.CreateStream(new OpenAiStreamRequest(prompt), cancellationToken),
+            Provider.OpenAiCompatible => throw new NotSupportedException($"{nameof(Provider.Anthropic)} streaming"),
+            _ => throw new InvalidOperationException($"Provider {provider} is defined but not implemented")
+        };
+
+        await foreach (var response in stream)
+        {
+            yield return response.Update;
         }
     }
 }
