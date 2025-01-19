@@ -1,5 +1,4 @@
-﻿using Cellm.Models.Behaviors;
-using Cellm.Models.Providers;
+﻿using Cellm.Models.Providers;
 using MediatR;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;

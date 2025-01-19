@@ -1,5 +1,4 @@
 ﻿using Cellm.Models.Behaviors;
-using Cellm.Models.Local.Utilities;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
 using Cellm.Models.Providers.Ollama;
@@ -11,7 +10,6 @@ using MediatR;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using OpenAI;
 
 namespace Cellm.Models;
@@ -40,15 +38,6 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddLlamafileChatClient(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.TryAddSingleton<FileManager>();
-        services.TryAddSingleton<ProcessManager>();
-        services.TryAddSingleton<ServerManager>();
-
-        return services;
-    }
-
     public static IServiceCollection AddOpenOllamaChatClient(this IServiceCollection services, IConfiguration configuration)
     {
         var resiliencePipelineConfigurator = new ResiliencePipelineConfigurator(configuration);
@@ -57,25 +46,10 @@ public static class ServiceCollectionExtensions
             ?? throw new NullReferenceException(nameof(OllamaConfiguration));
 
         services
-            .AddHttpClient(nameof(Provider.Ollama), ollamaHttpClient =>
-            {
-                ollamaHttpClient.BaseAddress = ollamaConfiguration.BaseAddress;
-                ollamaHttpClient.Timeout = TimeSpan.FromHours(1);
-            })
-            .AddResilienceHandler(
-                $"{nameof(OllamaRequestHandler)}",
-                resiliencePipelineConfigurator.ConfigureResiliencePipeline);
-
-        services
             .AddKeyedChatClient(Provider.Ollama, serviceProvider => new OllamaChatClient(
                 ollamaConfiguration.BaseAddress,
-                ollamaConfiguration.DefaultModel,
-                serviceProvider.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(Provider.Ollama))))
+                ollamaConfiguration.DefaultModel))
             .UseFunctionInvocation();
-
-        services.TryAddSingleton<FileManager>();
-        services.TryAddSingleton<ProcessManager>();
-        services.TryAddSingleton<ServerManager>();
 
         return services;
     }
@@ -100,7 +74,7 @@ public static class ServiceCollectionExtensions
             .AddSingleton<OpenAiCompatibleChatClientFactory>()
             .AddHttpClient<OpenAiCompatibleChatClientFactory>(openAiCompatibleHttpClient =>
             {
-                openAiCompatibleHttpClient.Timeout = TimeSpan.FromHours(1);
+                openAiCompatibleHttpClient.Timeout = Timeout.InfiniteTimeSpan;
             })
             .AddResilienceHandler(nameof(OpenAiCompatibleChatClientFactory), resiliencePipelineConfigurator.ConfigureResiliencePipeline);
 

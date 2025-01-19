@@ -8,14 +8,13 @@ internal class OpenAiCompatibleRequestHandler(
     IOptions<OpenAiCompatibleConfiguration> openAiCompatibleConfiguration)
     : IModelRequestHandler<OpenAiCompatibleRequest, OpenAiCompatibleResponse>
 {
-    private readonly OpenAiCompatibleConfiguration _openAiCompatibleConfiguration = openAiCompatibleConfiguration.Value;
 
     public async Task<OpenAiCompatibleResponse> Handle(OpenAiCompatibleRequest request, CancellationToken cancellationToken)
     {
         var chatClient = openAiCompatibleChatClientFactory.Create(
-            request.BaseAddress ?? _openAiCompatibleConfiguration.BaseAddress,
-            request.Prompt.Options.ModelId ?? _openAiCompatibleConfiguration.DefaultModel,
-            request.ApiKey ?? _openAiCompatibleConfiguration.ApiKey);
+            request.BaseAddress,
+            request.Prompt.Options.ModelId ?? string.Empty,
+            request.ApiKey ?? "API_KEY");
 
         var chatCompletion = await chatClient.CompleteAsync(request.Prompt.Messages, request.Prompt.Options, cancellationToken);
 

@@ -3,7 +3,7 @@ using ExcelDna.Integration;
 
 namespace Cellm.AddIn;
 
-public class ExcelAddin : IExcelAddIn
+public class ExcelAddIn : IExcelAddIn
 {
     public void AutoOpen()
     {
