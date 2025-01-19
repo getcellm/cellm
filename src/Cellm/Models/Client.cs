@@ -7,34 +7,24 @@ using Cellm.Models.Providers.Ollama;
 using Cellm.Models.Providers.OpenAi;
 using Cellm.Models.Providers.OpenAiCompatible;
 using MediatR;
-using Microsoft.Extensions.Options;
 using Polly.Timeout;
 
 namespace Cellm.Models;
 
-public class Client(ISender sender, IOptions<ProviderConfiguration> providerConfiguration)
+public class Client(ISender sender)
 {
-    private readonly ProviderConfiguration _providerConfiguration = providerConfiguration.Value;
-
-    public async Task<Prompt> Send(Prompt prompt, string? provider, Uri? baseAddress, CancellationToken cancellationToken)
+    public async Task<Prompt> Send(Prompt prompt, Provider? provider, Uri? baseAddress, CancellationToken cancellationToken)
     {
         try
         {
-            provider ??= _providerConfiguration.DefaultProvider;
-
-            if (!Enum.TryParse<Provider>(provider, true, out var parsedProvider))
+            IModelResponse response = provider switch
             {
-                throw new ArgumentException($"Unsupported provider: {provider}");
-            }
-
-            IModelResponse response = parsedProvider switch
-            {
-                Provider.Anthropic => await sender.Send(new AnthropicRequest(prompt, provider, baseAddress), cancellationToken),
+                Provider.Anthropic => await sender.Send(new AnthropicRequest(prompt, provider.ToString(), baseAddress), cancellationToken),
                 Provider.Llamafile => await sender.Send(new LlamafileRequest(prompt), cancellationToken),
                 Provider.Ollama => await sender.Send(new OllamaRequest(prompt), cancellationToken),
                 Provider.OpenAi => await sender.Send(new OpenAiRequest(prompt), cancellationToken),
-                Provider.OpenAiCompatible => await sender.Send(new OpenAiCompatibleRequest(prompt, baseAddress), cancellationToken),
-                _ => throw new InvalidOperationException($"Provider {parsedProvider} is defined but not implemented")
+                Provider.OpenAiCompatible => await sender.Send(new OpenAiCompatibleRequest(prompt, baseAddress ?? throw new NullReferenceException($"{nameof(Provider.OpenAiCompatible)} requires BaseAddress")), cancellationToken),
+                _ => throw new NotSupportedException($"Provider {provider} is not supported")
             };
 
             return response.Prompt;
