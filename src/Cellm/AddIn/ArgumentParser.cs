@@ -3,11 +3,10 @@ using Cellm.AddIn.Exceptions;
 using Cellm.Models.Providers;
 using ExcelDna.Integration;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Office.Interop.Excel;
 
 namespace Cellm.AddIn;
 
-public record Arguments(string Provider, string Model, string Context, string Instructions, double Temperature);
+public record Arguments(Provider Provider, string Model, string Context, string Instructions, double Temperature);
 
 public class ArgumentParser
 {
@@ -71,10 +70,15 @@ public class ArgumentParser
 
     public Arguments Parse()
     {
-        var provider = _provider ?? _configuration
+        var providerAsString = _provider ?? _configuration
             .GetSection(nameof(ProviderConfiguration))
             .GetValue<string>(nameof(ProviderConfiguration.DefaultProvider))
             ?? throw new ArgumentException(nameof(ProviderConfiguration.DefaultProvider));
+
+        if (!Enum.TryParse<Provider>(providerAsString, true, out var provider))
+        {
+            throw new ArgumentException($"Unsupported default provider: {providerAsString}");
+        }
 
         var model = _model ?? _configuration
             .GetSection($"{provider}Configuration")
@@ -147,9 +151,9 @@ public class ArgumentParser
     {
         try
         {
-            var app = (Application)ExcelDnaUtil.Application;
+            var app = ExcelDnaUtil.Application;
             var sheetName = (string)XlCall.Excel(XlCall.xlSheetNm, reference);
-            sheetName = sheetName[(sheetName.LastIndexOf("]") + 1)..];
+            sheetName = sheetName[(sheetName.LastIndexOf(']') + 1)..];
             var worksheet = app.Sheets[sheetName];
 
             var tableBuilder = new StringBuilder();
