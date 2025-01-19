@@ -99,12 +99,11 @@ internal static class ServiceLocator
         // Add providers
         services
             .AddAnthropicChatClient(configuration)
-            .AddLlamafileChatClient(configuration)
             .AddOpenAiChatClient(configuration)
             .AddOpenAiCompatibleChatClient(configuration)
             .AddOpenOllamaChatClient(configuration);
 
-        // Add model request middleware
+        // Add provider middleware
         services
             .AddSentryBehavior()
             .AddCachingBehavior()
