@@ -93,11 +93,10 @@ public static class ExcelFunctions
                 .AddUserMessage(userMessage)
                 .Build();
 
-            // ExcelAsyncUtil yields Excel's main thread, Task.Run enables async/await in inner code
-            return ExcelAsyncUtil.Run(nameof(PromptWith), new object[] { providerAndModel, instructionsOrContext, instructionsOrTemperature, temperature }, () =>
-            {
-                return Task.Run(async () => await CallModelAsync(prompt, arguments.Provider)).GetAwaiter().GetResult();
-            });
+            return ExcelAsyncUtil.RunTask(
+                nameof(PromptWith),
+                new object[] { providerAndModel, instructionsOrContext, instructionsOrTemperature, temperature },
+                () => CompleteAsync(prompt, arguments.Provider, null));
         }
         catch (CellmException ex)
         {
@@ -116,7 +115,7 @@ public static class ExcelFunctions
     /// <returns>A task that represents the asynchronous operation. The task result contains the model's response as a string.</returns>
     /// <exception cref="CellmException">Thrown when an unexpected error occurs during the operation.</exception>
 
-    internal static async Task<string> CallModelAsync(Prompt prompt, string? provider = null, Uri? baseAddress = null)
+    internal static async Task<string> CompleteAsync(Prompt prompt, Provider? provider = null, Uri? baseAddress = null)
     {
         var client = ServiceLocator.Get<Client>();
         var response = await client.Send(prompt, provider, baseAddress, CancellationToken.None);
