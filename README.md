@@ -11,7 +11,7 @@ Cellm is an Excel extension that lets you use Large Language Models (LLMs) like 
 ## What is Cellm?
 Similar to Excel's `=SUM()` function that outputs the sum of a range of numbers, Cellm's `=PROMPT()` function outputs the AI response to a range of text. 
 
-For example, you can write `=PROMPT(A1:A10, "Extract all person names mentioned in the text.")` in a cell's formula and drag the cell to apply the prompt to many rows. Cellm is useful when you want to use AI for repetitive tasks that would normally require copy-pasting data in and out of a chat window many times.
+For example, you can write `=PROMPT(A1, "Extract all person names mentioned in the text.")` in a cell's formula and drag the cell to apply the prompt to many rows. Cellm is useful when you want to use AI for repetitive tasks that would normally require copy-pasting data in and out of a chat window many times.
 
 ## Key features
 This extension does one thing and one thing well.
@@ -30,7 +30,7 @@ In this example, we copy the papers' titles and abstracts into Excel and write t
 
 We then use autofill to apply the prompt to many papers. Simple and powerful.
 
-A single paper is misclassified because the original inclusion and exclusion criteria were summarized in one sentence. This is a good example, however, because it shows that these models rely entirely on your input and can make mistakes.
+Note that a paper is misclassified. The models _will_ make mistakes. It is your responsibility to cross validate if a model is accurate enough for your use case and upgrade model or use another approach if not.
 
 ## Getting Started
 
@@ -39,7 +39,7 @@ Cellm must be built from source and installed via Excel. Follow the steps below.
 ### Requirements
 
 - Windows
-- [.NET 6.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
+- [.NET 9.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
 - [Excel 2010 or higher (desktop app)](https://www.microsoft.com/en-us/microsoft-365/excel)
 
 ### Build
@@ -54,32 +54,30 @@ Cellm must be built from source and installed via Excel. Follow the steps below.
    cd cellm
    ```
 
-3. Add your Anthropic API key. Rename `src/Cellm/appsettings.Anthropic.json` to `src/Cellm/appsettings.Local.json` and insert it. Example:
-    ```json
-    {
-      "AnthropicConfiguration": {
-        "ApiKey": "YOUR_ANTHROPIC_APIKEY"
-      }
-    }
-    ```
-
-   Cellm uses Anthropic as the default model provider. You can also use models from OpenAI, Mistral, Google, or run models locally. See the `appsettings.Local.*.json` files for examples.
-
-4. Install dependencies:
+3. Install dependencies:
    ```cmd
    dotnet restore
    ```
 
-5. Build the project:
+4. Build the project:
    ```cmd
    dotnet build --configuration Release
    ```
+
+5. Cellm uses Ollama and the Gemma 2 2B model by default. Download and install [Ollama](https://ollama.com/) and run the following command in your Windows terminal to download the model:
+    ```cmd
+    ollama pull gemma2:2b
+    ```
+
+    To use other models, see the [Models](#models) section below.
+
+These steps will build Cellm on your computer. Continue with the steps below to install Cellm in Excel.
 
 ### Install
 
 1. In Excel, go to File > Options > Add-Ins.
 2. In the `Manage` drop-down menu, select `Excel Add-ins` and click `Go...`.
-3. Click `Browse...` and select the `Cellm-AddIn64.xll` file in the bin/Release/net6.0-windows folder.
+3. Click `Browse...` and select the `Cellm-AddIn64.xll` file in the bin/Release/net9.0-windows. This folder is located in the root of git repository that you cloned.
 4. Check the box next to Cellm and click `OK`.
 
 ## Usage
@@ -166,60 +164,84 @@ Cellm is useful for repetitive tasks on both structured and unstructured data. H
 
 These use cases are starting points. Experiment with different instructions to find what works best for your data. It works best when combined with human judgment and expertise in your specific domain.
 
-## Run Models Locally
+## Models
 
-### Requirements
+### Hosted LLMs
 
-- [Docker](https://www.docker.com/products/docker-desktop/) (optional)
-- A GPU and [NVIDIA CUDA Toolkit 12.4](https://developer.nvidia.com/cuda-downloads) or higher (optional)
+Cellm supports hosted models from Anthropic, Google, OpenAI, and any OpenAI-compatible provider. To use e.g. Claude 3.5 Sonnet from Anthropic:
 
-#### Local LLMs
+1. Rename `src/Cellm/appsettings.Anthropic.json` to `src/Cellm/appsettings.Local.json`.
+ 
+2. Add your Anthropic API key to `src/Cellm/appsettings.Local.json`:
+    ```json
+    {
+        "AnthropicConfiguration": {
+            "ApiKey": "ADD_YOUR_ANTHROPIC_API_KEY_HERE"
+        },
+        "ProviderConfiguration": {
+            "DefaultProvider": "Anthropic"
+        }
+    }
+    ```
 
-Cellm can run LLM models locally on your computer via Llamafiles, Ollama, or vLLM. This ensures none of your data ever leaves your machine. And it's free.
+See the `appsettings.Local.*.json` files for examples on other providers.
 
-Cellm uses Gemma 2 2B model with 4-bit quantization by default. This clever little model runs fine on a CPU.
+### Local LLMs
 
-For Ollama and vLLM you will need docker, and for models larger than 3B you will need a GPU.
+Cellm supports local models that run on your computer via Llamafiles, Ollama, or vLLM. This ensures none of your data ever leaves your machine. And it's free. 
 
-### LLamafile
+#### Ollama 
 
-Llamafile is a stand-alone executable that is very easy to setup. Cellm will automatically download a Llamafile model and start a Llamafile server the first time you call `=PROMPT()`. 
+Cellm uses Ollama Gemma 2 2B model by default. This clever little model runs fine on a CPU. For any model larger than 3B you will need a GPU. Ollama will automatically use your GPU if you have one. To get started:
 
-To get started:
+1. Download and install Ollama from [https://ollama.com/](https://ollama.com/).
+2. Download the model by running the following command in your Windows terminal:
+   ```cmd
+   ollama pull gemma2:2b
+   ```
 
-1. Rename `appsettings.Llamafile.json` to `appsettings.Local.json`.
-2. Build and install Cellm.
-3. Run e.g. `=PROMPT(A1, "Extract keywords")` in a formula.
-4. Wait 5-10 min depending on your internet connection. The model will reply once it is ready. 
+See [https://ollama.com/search](https://ollama.com/search) for a complete list of supported models.
 
-This will use the Llama 3.2 1B model. To use other models, edit the appsettings file and rebuild.
+#### LLamafile
 
-Use `appsettings.Llamafile.GPU.json` to offload Llamafile inference to your NVIDIA or AMD GPU.
+Llamafile is a stand-alone executable that is very easy to setup. To get started:
 
-### Ollama and vLLM
+1. Download a llamafile from https://github.com/Mozilla-Ocho/llamafile (e.g. [Gemma 2 2B](https://huggingface.co/Mozilla/gemma-2-2b-it-llamafile/blob/main/gemma-2-2b-it.Q6_K.llamafile?download=true)).
+2. Run the following command in your Windows terminal:
+    ```cmd
+    .\gemma-2-2b-it.Q6_K.llamafile.exe --server --v2
+    ```
 
-Ollama and vLLM are LLM inference servers for running models locally. Ollama is designed for easy of use and vLLM is designed to run models efficiently with high throughput. Both Ollama and vLLM are packaged up with docker compose files in the `docker/` folder.
+    To offload inference to your NVIDIA or AMD GPU, run:
+
+    ```cmd
+    .\gemma-2-2b-it.Q6_K.llamafile.exe --server --v2 -ngl 999
+    ```
+
+3. Rename `appsettings.Llamafile.json` to `appsettings.Local.json`.
+4. Build and install Cellm.
+
+### Dockerized Ollama and vLLM
+
+Both Ollama and vLLM are packaged up with docker compose files in the `docker/` folder. Ollama is designed for easy of use and vLLM is designed to run many requests in parallel which is particularly useful for this Add-In. Open WebUI in included in both Ollama and vLLM docker compose files so you can test the local model outside of Cellm. It is available at `http://localhost:3000`.
 
 To get started, we recommend using Ollama with the Gemma 2 2B model:
 
-1. Rename `appsettings.Ollama.json` to `appsettings.Local.json`, 
-2. Build and install Cellm.
-3. Run the following command in the `docker/` directory:   
+1. Build and install Cellm.
+2. Run the following command in the `docker/` directory:   
    ```cmd
    docker compose -f docker-compose.Ollama.yml up --detach
    docker compose -f docker-compose.Ollama.yml exec backend ollama pull gemma2:2b
    docker compose -f docker-compose.Ollama.yml down  // When you want to shut it down
    ```
 
-If you want to speed up inference, you can use your GPU as well:
+To use other Ollama models, pull another of the [supported models](https://ollama.com/search). If you want to speed up inference, you can use your GPU as well:
 
 ```cmd
 docker compose -f docker-compose.Ollama.yml -f docker-compose.Ollama.GPU.yml up --detach
 ```
 
-A GPU is practically required if you want to use models larger than Gemma 2 2b.
-
-If you want to speed up running many requests in parallel, you can use vLLM instead of Ollama. You must supply the docker compose file with a Huggingface API key either via an environment variable or editing the docker compose file directy. Look at the vLLM docker compose file for details. If you don't know what a Huggingface API key is, just use Ollama. 
+If you want to further speed up running many requests in parallel, you can use vLLM instead of Ollama. You must supply the docker compose file with a Huggingface API key either via an environment variable or editing the docker compose file directy. Look at the vLLM docker compose file for details. If you don't know what a Huggingface API key is, just use Ollama. 
 
 To start vLLM:
 
@@ -227,9 +249,8 @@ To start vLLM:
 docker compose -f docker-compose.vLLM.GPU.yml up --detach
 ```
 
-To use other Ollama models, pull another of the [supported models](https://ollama.com/library). To use other vLLM models, change the "--model" argument to another Huggingface model.
+To use other vLLM models, change the "--model" argument in the docker compose file to another Huggingface model.
 
-Open WebUI in included in both Ollama and vLLM docker compose files so you can test the local model outside of Cellm. It is available at `http://localhost:3000`.
 ## Dos and Don'ts
 
 Do:

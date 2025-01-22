@@ -1,11 +1,9 @@
 ﻿using Cellm.Models.Prompts;
-using Microsoft.Extensions.Options;
 
 namespace Cellm.Models.Providers.OpenAiCompatible;
 
 internal class OpenAiCompatibleRequestHandler(
-    OpenAiCompatibleChatClientFactory openAiCompatibleChatClientFactory,
-    IOptions<OpenAiCompatibleConfiguration> openAiCompatibleConfiguration)
+    OpenAiCompatibleChatClientFactory openAiCompatibleChatClientFactory)
     : IModelRequestHandler<OpenAiCompatibleRequest, OpenAiCompatibleResponse>
 {
 

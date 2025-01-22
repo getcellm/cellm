@@ -74,7 +74,9 @@ public static class ServiceCollectionExtensions
             .AddSingleton<OpenAiCompatibleChatClientFactory>()
             .AddHttpClient<OpenAiCompatibleChatClientFactory>(openAiCompatibleHttpClient =>
             {
-                openAiCompatibleHttpClient.Timeout = Timeout.InfiniteTimeSpan;
+                openAiCompatibleHttpClient.Timeout = TimeSpan.FromSeconds(configuration
+                    .GetSection(nameof(ProviderConfiguration))
+                    .GetValue<int>(nameof(ProviderConfiguration.HttpTimeoutInSeconds)));
             })
             .AddResilienceHandler(nameof(OpenAiCompatibleChatClientFactory), resiliencePipelineConfigurator.ConfigureResiliencePipeline);
 

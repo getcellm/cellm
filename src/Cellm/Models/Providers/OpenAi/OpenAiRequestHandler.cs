@@ -4,7 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Cellm.Models.Providers.OpenAi;
 
-internal class OpenAiRequestHandler([FromKeyedServices(Provider.OpenAi)] IChatClient chatClient) : IModelRequestHandler<OpenAiRequest, OpenAiResponse>
+internal class OpenAiRequestHandler(
+    [FromKeyedServices(Provider.OpenAi)] IChatClient chatClient) : IModelRequestHandler<OpenAiRequest, OpenAiResponse>
 {
 
     public async Task<OpenAiResponse> Handle(OpenAiRequest request, CancellationToken cancellationToken)

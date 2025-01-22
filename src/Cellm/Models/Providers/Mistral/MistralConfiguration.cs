@@ -1,9 +1,7 @@
-﻿namespace Cellm.Models.Providers.Ollama;
+﻿namespace Cellm.Models.Providers.Mistral;
 
-internal class OllamaConfiguration : IProviderConfiguration
+internal class MistralConfiguration : IProviderConfiguration
 {
-    public Uri ZipUrl { get; init; } = default!;
-
     public Uri BaseAddress { get; init; } = default!;
 
     public string DefaultModel { get; init; } = string.Empty;

@@ -5,4 +5,6 @@ internal class OpenAiConfiguration : IProviderConfiguration
     public string DefaultModel { get; init; } = string.Empty;
 
     public string ApiKey { get; init; } = string.Empty;
+
+    public List<string> Models { get; init; } = new();
 }
