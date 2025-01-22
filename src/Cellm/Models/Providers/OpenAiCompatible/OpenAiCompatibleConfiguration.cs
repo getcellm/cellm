@@ -7,4 +7,6 @@ internal class OpenAiCompatibleConfiguration
     public string DefaultModel { get; init; } = string.Empty;
 
     public string ApiKey { get; init; } = string.Empty;
+
+    public int HttpTimeoutInSeconds = 3600;
 }

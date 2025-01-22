@@ -10,6 +10,8 @@ internal class AnthropicConfiguration : IProviderConfiguration
 
     public string ApiKey { get; init; }
 
+    public List<string> Models { get; init; } = new();
+
     public AnthropicConfiguration()
     {
         BaseAddress = default!;
