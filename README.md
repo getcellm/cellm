@@ -166,6 +166,10 @@ These use cases are starting points. Experiment with different instructions to f
 
 ## Models
 
+Cellm supports both hosted and local models. These are configured via appsettings files. In general, you should leave `appsettings.json` alone and add your own configuration to `appsettings.Local.json` only. Any settings in this file will override the default settings in `appsettings.json`. 
+
+You can use `appsettings.Local.OpenAiCompatible.json` as a starting point for configuring any model provider that is compatible with OpenAI's API. Just rename it to `appsettings.Local.json` and edit the values. The following sections shows you how to configure `appsettings.Local.json` for commonly used hosted and local models.
+
 ### Hosted LLMs
 
 Cellm supports hosted models from Anthropic, Google, OpenAI, and any OpenAI-compatible provider. To use e.g. Claude 3.5 Sonnet from Anthropic:
@@ -221,7 +225,7 @@ Llamafile is a stand-alone executable that is very easy to setup. To get started
 3. Rename `appsettings.Llamafile.json` to `appsettings.Local.json`.
 4. Build and install Cellm.
 
-### Dockerized Ollama and vLLM
+#### Dockerized Ollama and vLLM
 
 Both Ollama and vLLM are packaged up with docker compose files in the `docker/` folder. Ollama is designed for easy of use and vLLM is designed to run many requests in parallel which is particularly useful for this Add-In. Open WebUI in included in both Ollama and vLLM docker compose files so you can test the local model outside of Cellm. It is available at `http://localhost:3000`.
 
