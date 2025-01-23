@@ -257,7 +257,7 @@ Do:
 
 - Experiment with different prompts to find the most effective instructions for your data.
 - Use cell references to dynamically change your prompts based on other data in your spreadsheet.
-- Use local models for sensitive and confidential dataa.
+- Use local models for sensitive and confidential data.
 - Refer to the cell data as "context" in your instructions.
 - Verify responses, especially for critical decisions or analyses. These models will make errors and rely entirely on your input, which may also contain errors.
 
