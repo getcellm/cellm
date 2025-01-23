@@ -11,7 +11,7 @@ using Polly.Timeout;
 
 namespace Cellm.Models;
 
-public class Client(ISender sender)
+internal class Client(ISender sender)
 {
     public async Task<Prompt> Send(Prompt prompt, Provider? provider, Uri? baseAddress, CancellationToken cancellationToken)
     {
@@ -23,7 +23,7 @@ public class Client(ISender sender)
                 Provider.Llamafile => await sender.Send(new LlamafileRequest(prompt), cancellationToken),
                 Provider.Ollama => await sender.Send(new OllamaRequest(prompt), cancellationToken),
                 Provider.OpenAi => await sender.Send(new OpenAiRequest(prompt), cancellationToken),
-                Provider.OpenAiCompatible => await sender.Send(new OpenAiCompatibleRequest(prompt, baseAddress ?? throw new NullReferenceException($"{nameof(Provider.OpenAiCompatible)} requires BaseAddress")), cancellationToken),
+                Provider.OpenAiCompatible => await sender.Send(new OpenAiCompatibleRequest(prompt, baseAddress), cancellationToken),
                 _ => throw new NotSupportedException($"Provider {provider} is not supported")
             };
 
