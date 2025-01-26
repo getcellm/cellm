@@ -5,7 +5,7 @@ Cellm is an Excel extension that lets you use Large Language Models (LLMs) like 
 - [Getting Started](#getting-started)
 - [Usage](#usage)
 - [Use Cases](#use-cases)
-- [Run Models Locally](#run-models-locally)
+- [Models](#models)
 - [Why did you make Cellm?](#why-did-you-make-cellm)
 
 ## What is Cellm?
@@ -261,9 +261,9 @@ Do:
 
 - Experiment with different prompts to find the most effective instructions for your data.
 - Use cell references to dynamically change your prompts based on other data in your spreadsheet.
-- Use local models for sensitive and confidential dataa.
+- Use local models for sensitive and confidential data.
 - Refer to the cell data as "context" in your instructions.
-- Verify responses, especially for critical decisions or analyses. These models will make errors and rely entirely on your input, which may also contain errors.
+- Verify at least a subset of the model's responses. These models will make errors and rely entirely on your input, which may also contain errors.
 
 Don't:
 
