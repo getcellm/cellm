@@ -96,7 +96,7 @@ public static class ExcelFunctions
             return ExcelAsyncUtil.RunTask(
                 nameof(PromptWith),
                 new object[] { providerAndModel, instructionsOrContext, instructionsOrTemperature, temperature },
-                () => CompleteAsync(prompt, arguments.Provider, null));
+                () => CompleteAsync(prompt, arguments.Provider));
         }
         catch (CellmException ex)
         {
@@ -115,10 +115,10 @@ public static class ExcelFunctions
     /// <returns>A task that represents the asynchronous operation. The task result contains the model's response as a string.</returns>
     /// <exception cref="CellmException">Thrown when an unexpected error occurs during the operation.</exception>
 
-    internal static async Task<string> CompleteAsync(Prompt prompt, Provider? provider = null, Uri? baseAddress = null)
+    internal static async Task<string> CompleteAsync(Prompt prompt, Provider provider)
     {
         var client = ServiceLocator.Get<Client>();
-        var response = await client.Send(prompt, provider, baseAddress, CancellationToken.None);
+        var response = await client.Send(prompt, provider, CancellationToken.None);
         return response.Messages.Last().Text ?? throw new NullReferenceException("No text response");
     }
 }

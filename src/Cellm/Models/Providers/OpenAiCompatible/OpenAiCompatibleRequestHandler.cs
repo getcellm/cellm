@@ -4,17 +4,16 @@ using Microsoft.Extensions.Options;
 namespace Cellm.Models.Providers.OpenAiCompatible;
 
 internal class OpenAiCompatibleRequestHandler(
-    OpenAiCompatibleChatClientFactory openAiCompatibleChatClientFactory,
-    IOptions<OpenAiCompatibleConfiguration> openAiCompatibleConfiguration)
+    OpenAiCompatibleChatClientFactory openAiCompatibleChatClientFactory)
     : IModelRequestHandler<OpenAiCompatibleRequest, OpenAiCompatibleResponse>
 {
 
     public async Task<OpenAiCompatibleResponse> Handle(OpenAiCompatibleRequest request, CancellationToken cancellationToken)
     {
         var chatClient = openAiCompatibleChatClientFactory.Create(
-            request.BaseAddress ?? openAiCompatibleConfiguration.Value.BaseAddress,
+            request.BaseAddress,
             request.Prompt.Options.ModelId ?? string.Empty,
-            openAiCompatibleConfiguration.Value.ApiKey);
+            request.ApiKey);
 
         var chatCompletion = await chatClient.CompleteAsync(request.Prompt.Messages, request.Prompt.Options, cancellationToken);
 
