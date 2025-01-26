@@ -6,5 +6,5 @@ internal class MistralConfiguration : IProviderConfiguration
 
     public string DefaultModel { get; init; } = string.Empty;
 
-    public List<string> Models { get; init; } = new();
+    public string ApiKey { get; init; } = string.Empty;
 }

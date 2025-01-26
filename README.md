@@ -5,7 +5,7 @@ Cellm is an Excel extension that lets you use Large Language Models (LLMs) like 
 - [Getting Started](#getting-started)
 - [Usage](#usage)
 - [Use Cases](#use-cases)
-- [Run Models Locally](#run-models-locally)
+- [Models](#models)
 - [Why did you make Cellm?](#why-did-you-make-cellm)
 
 ## What is Cellm?
@@ -166,9 +166,11 @@ These use cases are starting points. Experiment with different instructions to f
 
 ## Models
 
-Cellm supports both hosted and local models. These are configured via appsettings files. In general, you should leave `appsettings.json` alone and add your own configuration to `appsettings.Local.json` only. Any settings in this file will override the default settings in `appsettings.json`. 
+Cellm supports both hosted and local models. These are configured via appsettings files. 
 
-You can use `appsettings.Local.OpenAiCompatible.json` as a starting point for configuring any model provider that is compatible with OpenAI's API. Just rename it to `appsettings.Local.json` and edit the values. The following sections shows you how to configure `appsettings.Local.json` for commonly used hosted and local models.
+You can use `appsettings.Local.OpenAiCompatible.json` as a starting point for configuring any model provider that is compatible with OpenAI's API. Just rename it to `appsettings.Local.json` and edit the values. In general, you should leave `appsettings.json` alone and add your own configuration to `appsettings.Local.json` only. Any settings in this file will override the default settings in `appsettings.json`.
+
+The following sections shows you how to configure `appsettings.Local.json` for commonly used hosted and local models.
 
 ### Hosted LLMs
 
@@ -227,7 +229,7 @@ Llamafile is a stand-alone executable that is very easy to setup. To get started
 
 #### Dockerized Ollama and vLLM
 
-Both Ollama and vLLM are packaged up with docker compose files in the `docker/` folder. Ollama is designed for easy of use and vLLM is designed to run many requests in parallel which is particularly useful for this Add-In. Open WebUI in included in both Ollama and vLLM docker compose files so you can test the local model outside of Cellm. It is available at `http://localhost:3000`.
+If you prefer to run models via docker, both Ollama and vLLM are packaged up with docker compose files in the `docker/` folder. Ollama is designed for easy of use and vLLM is designed to run many requests in parallel. vLLM is particularly useful if you need to process a lot of data locally. Open WebUI in included in both Ollama and vLLM docker compose files so you can test the local model outside of Cellm. It is available at `http://localhost:3000`.
 
 To get started, we recommend using Ollama with the Gemma 2 2B model:
 
@@ -261,9 +263,9 @@ Do:
 
 - Experiment with different prompts to find the most effective instructions for your data.
 - Use cell references to dynamically change your prompts based on other data in your spreadsheet.
-- Use local models for sensitive and confidential dataa.
+- Use local models for sensitive and confidential data.
 - Refer to the cell data as "context" in your instructions.
-- Verify responses, especially for critical decisions or analyses. These models will make errors and rely entirely on your input, which may also contain errors.
+- Verify at least a subset of a model's responses. Models will make errors and rely entirely on your input, which may also contain errors.
 
 Don't:
 
