@@ -11,7 +11,7 @@ internal class LlamafileRequestHandler(ISender sender, IOptions<LlamafileConfigu
     {
         request.Prompt.Options.ModelId ??= llamafileConfiguration.Value.DefaultModel;
 
-        var openAiResponse = await sender.Send(new OpenAiCompatibleRequest(request.Prompt, llamafileConfiguration.Value.BaseAddress), cancellationToken);
+        var openAiResponse = await sender.Send(new OpenAiCompatibleRequest(request.Prompt, llamafileConfiguration.Value.BaseAddress, llamafileConfiguration.Value.ApiKey), cancellationToken);
 
         return new LlamafileResponse(openAiResponse.Prompt);
     }
