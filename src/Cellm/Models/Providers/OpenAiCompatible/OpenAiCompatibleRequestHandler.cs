@@ -1,4 +1,4 @@
-﻿using Cellm.Models.Prompts;
+using Cellm.Models.Prompts;
 using Microsoft.Extensions.Options;
 
 namespace Cellm.Models.Providers.OpenAiCompatible;
