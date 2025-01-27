@@ -1,17 +1,17 @@
-﻿using System.Diagnostics;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Text;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
+using Cellm.Models.Providers.DeepSeek;
+using Cellm.Models.Providers.Llamafile;
+using Cellm.Models.Providers.Mistral;
 using Cellm.Models.Providers.Ollama;
 using Cellm.Models.Providers.OpenAi;
+using Cellm.Models.Providers.OpenAiCompatible;
 using Cellm.Services;
-using ExcelDna.Integration;
 using ExcelDna.Integration.CustomUI;
-using Microsoft.Diagnostics.Tracing.Parsers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using Microsoft.Office.Interop.Excel;
 
 namespace Cellm.AddIn.RibbonController;
 
@@ -19,6 +19,7 @@ namespace Cellm.AddIn.RibbonController;
 public class ExcelRibbonController : ExcelRibbon
 {
     private IRibbonUI? _ribbonUi;
+
     private bool _baseAddressEnabled = false;
     private bool _apiKeyEnabled = false;
 
@@ -42,69 +43,49 @@ public class ExcelRibbonController : ExcelRibbon
         _ribbonUi = ribbonUi;
     }
 
-    public string AccountGroup()
-    {
-        return $"""
-<group id="account" label="Account">
-    <editBox id="email" label="Email" onChange="OnEmailChanged" sizeString="WWWWWWWWWWWWWWW"/>
-    <editBox id="password" label="Password" sizeString="WWWWWWWWWWWWWWW"/>
-    <box id="loginbox" boxStyle="horizontal">
-        <button id="login" label="Login" onAction="OnButtonPressed"/>
-        <button id="register" label="Register" onAction="OnButtonPressed"/>
-        <checkBox id="rememberme" label="Remember Me" />
-    </box>
-</group>
-""";
-    }
-
     public string ModelGroup()
     {
-        var stringBuilder = new StringBuilder();
+        var modelIds = new List<string>();
 
         var anthropicConfiguration = ServiceLocator.Get<IOptions<AnthropicConfiguration>>().Value;
-        foreach (var model in anthropicConfiguration.Models)
-        {
-            stringBuilder.AppendLine($"<item label=\"{nameof(Provider.Anthropic).ToLower()}/{model}\" id=\"A{Guid.NewGuid()}\" />");
-        }
-
+        var deepSeekConfiguration = ServiceLocator.Get<IOptions<DeepSeekConfiguration>>().Value;
+        var llamafileConfiguration = ServiceLocator.Get<IOptions<LlamafileConfiguration>>().Value;
+        var mistralConfiguration = ServiceLocator.Get<IOptions<MistralConfiguration>>().Value;
         var ollamaConfiguration = ServiceLocator.Get<IOptions<OllamaConfiguration>>().Value;
-        foreach (var model in ollamaConfiguration.Models)
-        {
-            stringBuilder.AppendLine($"<item label=\"{nameof(Provider.Ollama).ToLower()}/{model}\" id=\"A{Guid.NewGuid()}\" />");
-        }
-
-
         var openAiConfiguration = ServiceLocator.Get<IOptions<OpenAiConfiguration>>().Value;
-        foreach (var model in openAiConfiguration.Models)
-        {
-            stringBuilder.AppendLine($"<item label=\"{nameof(Provider.OpenAi).ToLower()}/{model}\" id=\"A{Guid.NewGuid()}\"/>");
-        }
+        var openAiCompatibleConfiguration = ServiceLocator.Get<IOptions<OpenAiCompatibleConfiguration>>().Value;
 
+        modelIds.AddRange(anthropicConfiguration.Models.Select(m => $"{nameof(Provider.Anthropic)}/{m}"));
+        modelIds.AddRange(deepSeekConfiguration.Models.Select(m => $"{nameof(Provider.DeepSeek)}/{m}"));
+        modelIds.AddRange(llamafileConfiguration.Models.Select(m => $"{nameof(Provider.Llamafile)}/{m}"));
+        modelIds.AddRange(mistralConfiguration.Models.Select(m => $"{nameof(Provider.Mistral)}/{m}"));
+        modelIds.AddRange(ollamaConfiguration.Models.Select(m => $"{nameof(Provider.Ollama)}/{m}"));
+        modelIds.AddRange(openAiConfiguration.Models.Select(m => $"{nameof(Provider.OpenAi)}/{m}"));
+        modelIds.AddRange(openAiCompatibleConfiguration.Models.Select(m => $"{nameof(Provider.OpenAiCompatible)}/{m}"));
+
+        var stringBuilder = new StringBuilder();
+
+        foreach (var modelId in modelIds)
+        {
+            stringBuilder.AppendLine($"<item label=\"{modelId.ToLower()}\" id=\"{new String(modelId.Where(Char.IsLetterOrDigit).ToArray())}\" />");
+        }
 
         return $"""
-<group id="models" label="Model">
-    <comboBox id="comboBox" label="Model" sizeString="WWWWWWWWWWWWWWW" onChange="OnModelChanged">
+<group id="models" label="Provider">
+    <comboBox id="comboBox" 
+        label="Model" 
+        sizeString="WWWWWWWWWWWWWWW" 
+        onChange="OnModelChanged"
+        getText="OnGetSelectedModel">
         {stringBuilder}
     </comboBox>
-    <editBox id="baseAddress" label="Address" sizeString="WWWWWWWWWWWWWWW" enabled="{_baseAddressEnabled}"/>
-    <editBox id="apiKey" label="API Key" sizeString="WWWWWWWWWWWWWWW" enabled="{_apiKeyEnabled}"/>
+    <editBox id="baseAddress" label="Address" sizeString="WWWWWWWWWWWWWWW" enabled="{_baseAddressEnabled.ToString().ToLower()}" />
+    <editBox id="apiKey" label="API Key" sizeString="WWWWWWWWWWWWWWW" enabled="{_apiKeyEnabled.ToString().ToLower()}" />
 </group>
 """;
     }
 
-    public void OnEmailChanged(IRibbonControl email)
-    {
-        Debug.WriteLine(email);
-    }
-
-    public void OnButtonPressed(IRibbonControl control)
-    {
-        _ribbonUi?.Invalidate();
-
-        MessageBox.Show("Hello from control " + control.Id);
-    }
-
-    public void OnModelChanged(IRibbonControl control, string providerAndModel)
+    public void OnModelChanged(IRibbonControl control, string providerAndModel, int selectedIndex)
     {
         if (!Enum.TryParse<Provider>(GetProvider(providerAndModel), true, out var provider))
         {
@@ -117,6 +98,20 @@ public class ExcelRibbonController : ExcelRibbon
         SetConfiguration($"{provider}Configuration:{nameof(ProviderConfiguration.DefaultModel)}", model);
 
         _ribbonUi?.Invalidate();
+    }
+
+    public string OnGetSelectedModel(IRibbonControl control)
+    {
+        var providerConfiguration = ServiceLocator.Get<IOptions<ProviderConfiguration>>().Value;
+        var provider = providerConfiguration.DefaultProvider;
+
+        var configuration = ServiceLocator.Get<IConfiguration>();
+        var model = configuration
+            .GetSection($"{provider}Configuration")
+            .GetValue<string>(nameof(IProviderConfiguration.DefaultModel))
+            ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
+
+        return $"{provider.ToLower()}/{model}";
     }
 
     private void SetConfiguration(string key, string value)

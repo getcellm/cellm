@@ -8,4 +8,5 @@ internal class LlamafileConfiguration : IProviderConfiguration
 
     public string ApiKey { get; init; } = string.Empty;
 
+    public List<string> Models { get; init; } = [];
 }
