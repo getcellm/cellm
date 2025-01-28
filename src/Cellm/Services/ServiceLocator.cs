@@ -5,6 +5,7 @@ using Cellm.Models;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
 using Cellm.Models.Providers.DeepSeek;
+using Cellm.Models.Providers.Google;
 using Cellm.Models.Providers.Llamafile;
 using Cellm.Models.Providers.Mistral;
 using Cellm.Models.Providers.Ollama;
@@ -28,6 +29,7 @@ internal static class ServiceLocator
     private static readonly Lazy<IServiceProvider> _serviceProvider = new(() => ConfigureServices(new ServiceCollection()).BuildServiceProvider());
 
     internal static string? ConfigurationPath { get; set; } = ExcelDnaUtil.XllPathInfo?.Directory?.FullName;
+
     public static IServiceProvider ServiceProvider => _serviceProvider.Value;
 
     public static T Get<T>() where T : notnull
@@ -45,8 +47,8 @@ internal static class ServiceLocator
         // Configurations
         IConfiguration configuration = new ConfigurationBuilder()
             .SetBasePath(ConfigurationPath)
-            .AddJsonFile("appsettings.json")
-            .AddJsonFile("appsettings.Local.json", true)
+            .AddJsonFile("appsettings.json", reloadOnChange: true, optional: false)
+            .AddJsonFile("appsettings.Local.json", reloadOnChange: true, optional: true)
             .Build();
 
         services
@@ -54,6 +56,7 @@ internal static class ServiceLocator
             .Configure<ProviderConfiguration>(configuration.GetRequiredSection(nameof(ProviderConfiguration)))
             .Configure<AnthropicConfiguration>(configuration.GetRequiredSection(nameof(AnthropicConfiguration)))
             .Configure<DeepSeekConfiguration>(configuration.GetRequiredSection(nameof(DeepSeekConfiguration)))
+            .Configure<GoogleConfiguration>(configuration.GetRequiredSection(nameof(GoogleConfiguration)))
             .Configure<LlamafileConfiguration>(configuration.GetRequiredSection(nameof(LlamafileConfiguration)))
             .Configure<OllamaConfiguration>(configuration.GetRequiredSection(nameof(OllamaConfiguration)))
             .Configure<OpenAiConfiguration>(configuration.GetRequiredSection(nameof(OpenAiConfiguration)))
