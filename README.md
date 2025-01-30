@@ -81,9 +81,33 @@ These steps will build Cellm on your computer. Continue with the steps below to 
 4. Check the box next to Cellm and click `OK`.
 
 ## Usage
-Cellm provides the following functions:
 
-### PROMPT
+Just like Excel's built-in functions, you can start typing `=PROMPT(` in any cell to use AI in your spreadsheet. For example:
+
+<img src="https://github.com/user-attachments/assets/4a044178-bc30-4253-9c97-9c9321800725" width=100%>
+
+In this example we use openai/gpt-4o-mini to list PDF files in a folder.
+
+```
+=PROMPT(A1, "Which pdf files do I have in my downloads folder?")
+```
+
+To configure which AI model processes your prompts, use the Cellm tab in Excel's ribbon menu:
+
+- **Model**: Select which AI model to use (e.g., "openai/gpt-4o-mini")
+- **Address**: The API endpoint for your chosen provider (e.g., "https://api.openai.com/v1")
+- **API Key**: Your authentication key for the selected provider
+
+Additional tools in the Cellm tab:
+- **Cache**: Enable/disable local caching of model responses. Useful when Excel triggers recalculation of many cells.
+- **Functions**: Enable/disable tools.
+
+See the Functions section below for detailed syntax and examples.
+
+### Functions
+Cellm provides the following functions that can be used in Excel formulas:
+
+#### PROMPT
 
 ```excel
 PROMPT(cells: range, [instruction: range | instruction: string | temperature: double], [temperature: double]): string
@@ -106,7 +130,7 @@ Example usage:
 - `=PROMPT(A1:D10)` will use the range of cells as context and follow instructions as long as they present _somewhere_ in the cells.
 - `=PROMPT(A1:D10, 0.7)` will use the selected range of cells as context, follow any instruction within the cells, and use a temperature of 0.7.
 
-### PROMPTWITH
+#### PROMPTWITH
 
 ```excel
 PROMPTWITH(providerAndModel: string or cell, cells: range, [instruction: range | instruction: string | temperature: double], [temperature: double]): string
@@ -115,7 +139,7 @@ PROMPTWITH(providerAndModel: string or cell, cells: range, [instruction: range |
 Allows you to specify the model as the first argument.
 
 - **providerAndModel (Required)**: A string on the form "provider/model".
-  - Default: anthropic/claude-3-5-sonnet-20240620
+  - Default: ollama/gemma2:2b
 
 Example usage:
 
@@ -166,7 +190,7 @@ These use cases are starting points. Experiment with different instructions to f
 
 ## Models
 
-Cellm supports both hosted and local models. These are configured via appsettings files. 
+Cellm supports hosted models from Anthropic, DeepSeek, Google, OpenAI, Mistral, and any OpenAI-compatible provider. To use e.g. Claude 3.5 Sonnet from Anthropic:
 
 You can use `appsettings.Local.OpenAiCompatible.json` as a starting point for configuring any model provider that is compatible with OpenAI's API. Just rename it to `appsettings.Local.json` and edit the values. In general, you should leave `appsettings.json` alone and add your own configuration to `appsettings.Local.json` only. Any settings in this file will override the default settings in `appsettings.json`.
 
