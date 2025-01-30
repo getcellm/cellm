@@ -64,14 +64,9 @@ Cellm must be built from source and installed via Excel. Follow the steps below.
    dotnet build --configuration Release
    ```
 
-5. Cellm uses Ollama and the Gemma 2 2B model by default. Download and install [Ollama](https://ollama.com/) and run the following command in your Windows terminal to download the model:
-    ```cmd
-    ollama pull gemma2:2b
-    ```
+5. Download and install [Ollama](https://ollama.com/). Cellm uses Ollama and the Gemma 2 2B model by default. Gemma 2 2B will be downloaded automatically the first time you call `=PROMPT()`. To call other models, see the [Models](#models) section below.
 
-    To use other models, see the [Models](#models) section below.
-
-These steps will build Cellm on your computer. Continue with the steps below to install Cellm in Excel.
+The above steps will build Cellm on your computer. Continue with the steps below to install Cellm in Excel.
 
 ### Install
 
@@ -100,9 +95,7 @@ To configure which AI model processes your prompts, use the Cellm tab in Excel's
 
 Additional tools in the Cellm tab:
 - **Cache**: Enable/disable local caching of model responses. Useful when Excel triggers recalculation of many cells.
-- **Functions**: Enable/disable tools.
-
-See the Functions section below for detailed syntax and examples.
+- **Functions**: Enable/disable tools (not to be confused with Excel _formula_ functions below).
 
 ### Functions
 Cellm provides the following functions that can be used in Excel formulas:
@@ -110,7 +103,7 @@ Cellm provides the following functions that can be used in Excel formulas:
 #### PROMPT
 
 ```excel
-PROMPT(cells: range, [instruction: range | instruction: string | temperature: double], [temperature: double]): string
+PROMPT(cells: range | instruction: string, [instruction: range | instruction: string | temperature: double], [temperature: double]): string
 ```
 
 - **cells (Required):** A cell or a range of cells.
@@ -133,7 +126,7 @@ Example usage:
 #### PROMPTWITH
 
 ```excel
-PROMPTWITH(providerAndModel: string or cell, cells: range, [instruction: range | instruction: string | temperature: double], [temperature: double]): string
+PROMPTWITH(providerAndModel: string or cell, cells: range | instruction: string, [instruction: range | instruction: string | temperature: double], [temperature: double]): string
 ```
 
 Allows you to specify the model as the first argument.
@@ -198,7 +191,7 @@ The following sections shows you how to configure `appsettings.Local.json` for c
 
 ### Hosted LLMs
 
-Cellm supports hosted models from Anthropic, Google, OpenAI, and any OpenAI-compatible provider. To use e.g. Claude 3.5 Sonnet from Anthropic:
+Cellm supports hosted models from Anthropic, DeepSeek, Google, OpenAI, Mistral, and any OpenAI-compatible provider. To use e.g. Claude 3.5 Sonnet from Anthropic:
 
 1. Rename `src/Cellm/appsettings.Anthropic.json` to `src/Cellm/appsettings.Local.json`.
  
