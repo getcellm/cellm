@@ -30,7 +30,7 @@ In this example, we copy the papers' titles and abstracts into Excel and write t
 
 We then use autofill to apply the prompt to many papers. Simple and powerful.
 
-Note that a paper is misclassified. The models _will_ make mistakes. It is your responsibility to cross validate if a model is accurate enough for your use case and upgrade model or use another approach if not.
+Green denotes a correct classification and read denotes and incorrect classification. The models _will_ make mistakes at times and it is your responsibility to cross-validate if a model is accurate enough for your use case and upgrade model or use another approach if not.
 
 ## Getting Started
 
@@ -64,14 +64,9 @@ Cellm must be built from source and installed via Excel. Follow the steps below.
    dotnet build --configuration Release
    ```
 
-5. Cellm uses Ollama and the Gemma 2 2B model by default. Download and install [Ollama](https://ollama.com/) and run the following command in your Windows terminal to download the model:
-    ```cmd
-    ollama pull gemma2:2b
-    ```
+5. Download and install [Ollama](https://ollama.com/). Cellm uses Ollama and the Gemma 2 2B model by default. Gemma 2 2B will be downloaded automatically the first time you call `=PROMPT()`. To call other models, see the [Models](#models) section below.
 
-    To use other models, see the [Models](#models) section below.
-
-These steps will build Cellm on your computer. Continue with the steps below to install Cellm in Excel.
+The above steps will build Cellm on your computer. Continue with the steps below to install Cellm in Excel.
 
 ### Install
 
@@ -92,17 +87,15 @@ In this example we use openai/gpt-4o-mini to list PDF files in a folder.
 =PROMPT(A1, "Which pdf files do I have in my downloads folder?")
 ```
 
-To configure which AI model processes your prompts, use the Cellm tab in Excel's ribbon menu:
+To configure which AI model you call, use the Cellm tab in Excel's ribbon menu:
 
 - **Model**: Select which AI model to use (e.g., "openai/gpt-4o-mini")
 - **Address**: The API endpoint for your chosen provider (e.g., "https://api.openai.com/v1")
 - **API Key**: Your authentication key for the selected provider
 
-Additional tools in the Cellm tab:
+The other options in the Cellm tab are:
 - **Cache**: Enable/disable local caching of model responses. Useful when Excel triggers recalculation of many cells.
-- **Functions**: Enable/disable tools.
-
-See the Functions section below for detailed syntax and examples.
+- **Functions**: Enable/disable tools (not to be confused with Excel _formula_ functions below).
 
 ### Functions
 Cellm provides the following functions that can be used in Excel formulas:
@@ -110,7 +103,7 @@ Cellm provides the following functions that can be used in Excel formulas:
 #### PROMPT
 
 ```excel
-PROMPT(cells: range, [instruction: range | instruction: string | temperature: double], [temperature: double]): string
+PROMPT(cells: range | instruction: string, [instruction: range | instruction: string | temperature: double], [temperature: double]): string
 ```
 
 - **cells (Required):** A cell or a range of cells.
@@ -133,7 +126,7 @@ Example usage:
 #### PROMPTWITH
 
 ```excel
-PROMPTWITH(providerAndModel: string or cell, cells: range, [instruction: range | instruction: string | temperature: double], [temperature: double]): string
+PROMPTWITH(providerAndModel: string or cell, cells: range | instruction: string, [instruction: range | instruction: string | temperature: double], [temperature: double]): string
 ```
 
 Allows you to specify the model as the first argument.
@@ -198,7 +191,7 @@ The following sections shows you how to configure `appsettings.Local.json` for c
 
 ### Hosted LLMs
 
-Cellm supports hosted models from Anthropic, Google, OpenAI, and any OpenAI-compatible provider. To use e.g. Claude 3.5 Sonnet from Anthropic:
+Cellm supports hosted models from Anthropic, DeepSeek, Google, OpenAI, Mistral, and any OpenAI-compatible provider. To use e.g. Claude 3.5 Sonnet from Anthropic:
 
 1. Rename `src/Cellm/appsettings.Anthropic.json` to `src/Cellm/appsettings.Local.json`.
  
