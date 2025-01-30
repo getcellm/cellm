@@ -8,7 +8,7 @@ public class ProviderConfiguration : IProviderConfiguration
 
     public double DefaultTemperature { get; init; }
 
-    public bool EnableTools { get; init; } = true;
+    public Dictionary<string, bool> EnableTools { get; init; } = [];
 
     public bool EnableCache { get; init; } = true;
 

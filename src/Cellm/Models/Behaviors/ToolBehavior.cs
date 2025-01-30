@@ -5,17 +5,14 @@ using Microsoft.Extensions.Options;
 
 namespace Cellm.Models.Tools;
 
-internal class ToolBehavior<TRequest, TResponse>(IOptions<ProviderConfiguration> providerConfiguration, IEnumerable<AIFunction> functions)
+internal class ToolBehavior<TRequest, TResponse>(IOptionsMonitor<ProviderConfiguration> providerConfiguration, IEnumerable<AIFunction> functions)
     : IPipelineBehavior<TRequest, TResponse> where TRequest : IModelRequest<TResponse>
 {
-    private readonly ProviderConfiguration _providerConfiguration = providerConfiguration.Value;
-    private readonly List<AITool> _tools = new(functions);
-
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
-        if (_providerConfiguration.EnableTools)
+        if (providerConfiguration.CurrentValue.EnableTools.Any(t => t.Value))
         {
-            request.Prompt.Options.Tools = _tools;
+            request.Prompt.Options.Tools = functions.Where(f => providerConfiguration.CurrentValue.EnableTools[f.Metadata.Name]).ToList<AITool>();
         }
 
         return await next();

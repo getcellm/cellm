@@ -6,23 +6,26 @@ using Microsoft.Extensions.Options;
 
 namespace Cellm.Models.Behaviors;
 
-internal class CacheBehavior<TRequest, TResponse>(HybridCache cache, IOptions<ProviderConfiguration> providerConfiguration) : IPipelineBehavior<TRequest, TResponse>
+internal class CacheBehavior<TRequest, TResponse>(HybridCache cache, IOptionsMonitor<ProviderConfiguration> providerConfiguration) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IModelRequest<TResponse>
     where TResponse : IModelResponse
 {
     private readonly HybridCacheEntryOptions _cacheEntryOptions = new()
     {
-        Expiration = TimeSpan.FromSeconds(providerConfiguration.Value.CacheTimeoutInSeconds)
+        Expiration = TimeSpan.FromSeconds(providerConfiguration.CurrentValue.CacheTimeoutInSeconds)
     };
+
+    private static List<string> Tags = [nameof(IModelResponse)];
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
-        if (providerConfiguration.Value.EnableCache)
+        if (providerConfiguration.CurrentValue.EnableCache)
         {
             return await cache.GetOrCreateAsync(
                 JsonSerializer.Serialize(request.Prompt),
                 async cancel => await next(),
                 options: _cacheEntryOptions,
+                Tags,
                 cancellationToken: cancellationToken
             );
         }

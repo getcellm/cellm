@@ -4,7 +4,6 @@ public enum Provider
 {
     Anthropic,
     DeepSeek,
-    Google,
     Llamafile,
     Mistral,
     Ollama,
