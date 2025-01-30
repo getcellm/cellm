@@ -30,7 +30,7 @@ In this example, we copy the papers' titles and abstracts into Excel and write t
 
 We then use autofill to apply the prompt to many papers. Simple and powerful.
 
-Note that a paper is misclassified. The models _will_ make mistakes. It is your responsibility to cross validate if a model is accurate enough for your use case and upgrade model or use another approach if not.
+Green denotes a correct classification and read denotes and incorrect classification. The models _will_ make mistakes at times and it is your responsibility to cross-validate if a model is accurate enough for your use case and upgrade model or use another approach if not.
 
 ## Getting Started
 
