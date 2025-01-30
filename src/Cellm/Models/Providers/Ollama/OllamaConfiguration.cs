@@ -8,5 +8,5 @@ internal class OllamaConfiguration : IProviderConfiguration
 
     public string DefaultModel { get; init; } = string.Empty;
 
-    public List<string> Models { get; init; } = new();
+    public List<string> Models { get; init; } = [];
 }

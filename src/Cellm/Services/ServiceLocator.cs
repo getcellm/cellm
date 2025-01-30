@@ -27,7 +27,8 @@ internal static class ServiceLocator
 {
     private static readonly Lazy<IServiceProvider> _serviceProvider = new(() => ConfigureServices(new ServiceCollection()).BuildServiceProvider());
 
-    internal static string? ConfigurationPath { get; set; } = ExcelDnaUtil.XllPathInfo?.Directory?.FullName;
+    internal static string ConfigurationPath { get; set; } = ExcelDnaUtil.XllPathInfo?.Directory?.FullName ?? throw new NullReferenceException("Could not get Cellm path");
+
     public static IServiceProvider ServiceProvider => _serviceProvider.Value;
 
     public static T Get<T>() where T : notnull
@@ -45,8 +46,8 @@ internal static class ServiceLocator
         // Configurations
         IConfiguration configuration = new ConfigurationBuilder()
             .SetBasePath(ConfigurationPath)
-            .AddJsonFile("appsettings.json")
-            .AddJsonFile("appsettings.Local.json", true)
+            .AddJsonFile("appsettings.json", reloadOnChange: true, optional: false)
+            .AddJsonFile("appsettings.Local.json", reloadOnChange: true, optional: true)
             .Build();
 
         services
