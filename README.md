@@ -4,12 +4,13 @@ Cellm is an Excel extension that lets you use Large Language Models (LLMs) like 
 - [Example](#example)
 - [Getting Started](#getting-started)
 - [Usage](#usage)
-- [Use Cases](#use-cases)
 - [Models](#models)
+- [Use Cases](#use-cases)
+- [Development](#development)
 - [Why did you make Cellm?](#why-did-you-make-cellm)
 
 ## What is Cellm?
-Similar to Excel's `=SUM()` function that outputs the sum of a range of numbers, Cellm's `=PROMPT()` function outputs the AI response to a range of text. 
+Cellm's `=PROMPT()` function outputs the AI response to a range of text, similar to how Excel's `=SUM()` function that outputs the sum of a range of numbers.  
 
 For example, you can write `=PROMPT(A1, "Extract all person names mentioned in the text.")` in a cell's formula and drag the cell to apply the prompt to many rows. Cellm is useful when you want to use AI for repetitive tasks that would normally require copy-pasting data in and out of a chat window many times.
 
@@ -34,46 +35,25 @@ Green denotes a correct classification and read denotes and incorrect classifica
 
 ## Getting Started
 
-Cellm must be built from source and installed via Excel. Follow the steps below.
-
 ### Requirements
 
 - Windows
-- [.NET 9.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
+- [.NET 9.0 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
 - [Excel 2010 or higher (desktop app)](https://www.microsoft.com/en-us/microsoft-365/excel)
-
-### Build
-
-1. Clone this repository:
-   ```cmd
-   git clone https://github.com/getcellm/cellm.git
-   ```
-
-2. In your terminal, go into the root of the project directory:
-   ```cmd
-   cd cellm
-   ```
-
-3. Install dependencies:
-   ```cmd
-   dotnet restore
-   ```
-
-4. Build the project:
-   ```cmd
-   dotnet build --configuration Release
-   ```
-
-5. Download and install [Ollama](https://ollama.com/). Cellm uses Ollama and the Gemma 2 2B model by default. Gemma 2 2B will be downloaded automatically the first time you call `=PROMPT()`. To call other models, see the [Models](#models) section below.
-
-The above steps will build Cellm on your computer. Continue with the steps below to install Cellm in Excel.
 
 ### Install
 
+1. Go to the [Release page](https://github.com/getcellm/cellm/releases) and download `Cellm-AddIn64-packed.xll` and `appsettings.json`. Put them in the _same_ folder.
+
+2. Double-click on `Cellm-AddIn64-packed.xll`. Excel will open and install Cellm.
+
+3. Download and install [Ollama](https://ollama.com/). Cellm uses Ollama and the Gemma 2 2B model by default. Gemma 2 2B will be downloaded automatically the first time you call `=PROMPT()`. To call other models, see the [Models](#models) section below. 
+
+### Uninstall
+
 1. In Excel, go to File > Options > Add-Ins.
 2. In the `Manage` drop-down menu, select `Excel Add-ins` and click `Go...`.
-3. Click `Browse...` and select the `Cellm-AddIn64.xll` file in the bin/Release/net9.0-windows. This folder is located in the root of git repository that you cloned.
-4. Check the box next to Cellm and click `OK`.
+3. Uncheck `Cellm-AddIn64.xll` and click `OK`.
 
 ## Usage
 
@@ -138,52 +118,9 @@ Example usage:
 
 - `=PROMPTWITH("openai/gpt-4o-mini", A1:D10, "Extract keywords")` will extract keywords using OpenAI's GPT-4o mini model instead of the default model.
 
-## Use Cases
-Cellm is useful for repetitive tasks on both structured and unstructured data. Here are some practical applications:
-
-1. **Text Classification**
-    ```excel
-    =PROMPT(B2, "Analyze the survey response. Categorize as 'Product', 'Service', 'Pricing', or 'Other'.")
-    ```
-    Use classification prompts to quickly categorize large volumes of e.g. open-ended survey responses.
-
-2. **Model Comparison**
-    
-    Make a sheet with user queries in the first column and provider/model pairs in the first row. Write this prompt in the cell B2:
-    ```excell
-    =PROMPTWITH(B$1,$A2,"Answer the question in column A")
-    ```
-    Drag the cell across the entire table to apply all models to all queries.
-
-3. **Data Cleaning**
-    ```excel
-    =PROMPT(E2, "Standardize the company name by removing any legal entity identifiers (e.g., Inc., LLC) and correcting common misspellings.")
-    ```
-    Useful for cleaning and standardizing messy datasets.
-
-4. **Content Summarization**
-    ```excel
-    =PROMPT(F2, "Provide a 2-sentence summary of the article in the context.")
-    ```
-    Great for quickly digesting large amounts of text data, such as news articles or research papers.
-
-5. **Entity Extraction**
-    ```excel
-    =PROMPT(G2, "Extract all person names mentioned in the text.")
-    ```
-    Useful for analyzing unstructured text data in fields like journalism, research, or customer relationship management.
-
-6. **When Built-in Excel Functions Are Insufficient**
-    ```
-    =PROMPT(A1, "Fix email formatting")
-    ```
-    Useful when an "auditor" inserts random spaces in a column with thousands of email adresses. Use a local model if you are worried about sending sensitive data to hosted models.
-
-These use cases are starting points. Experiment with different instructions to find what works best for your data. It works best when combined with human judgment and expertise in your specific domain.
-
 ## Models
 
-Cellm supports hosted models from Anthropic, DeepSeek, Google, OpenAI, Mistral, and any OpenAI-compatible provider. To use e.g. Claude 3.5 Sonnet from Anthropic:
+Cellm supports hosted models from Anthropic, DeepSeek, Google, OpenAI, Mistral, and any OpenAI-compatible provider.
 
 You can use `appsettings.Local.OpenAiCompatible.json` as a starting point for configuring any model provider that is compatible with OpenAI's API. Just rename it to `appsettings.Local.json` and edit the values. In general, you should leave `appsettings.json` alone and add your own configuration to `appsettings.Local.json` only. Any settings in this file will override the default settings in `appsettings.json`.
 
@@ -290,6 +227,81 @@ Don't:
 - Don't use cloud model providers to process sensitive or confidential data.
 - Don't use extremely long prompts or give Cellm complex tasks. A normal chat UI lets you have a back and forth conversation which is better for exploring complex topics.
 - Don't use Cellm for tasks that require up-to-date information beyond the AI model's knowledge cutoff date _unless_ you provide the information as context.
+- 
+## Use Cases
+Cellm is useful for repetitive tasks on both structured and unstructured data. Here are some practical applications:
+
+1. **Text Classification**
+    ```excel
+    =PROMPT(B2, "Analyze the survey response. Categorize as 'Product', 'Service', 'Pricing', or 'Other'.")
+    ```
+    Use classification prompts to quickly categorize large volumes of e.g. open-ended survey responses.
+
+2. **Model Comparison**
+    
+    Make a sheet with user queries in the first column and provider/model pairs in the first row. Write this prompt in the cell B2:
+    ```excell
+    =PROMPTWITH(B$1,$A2,"Answer the question in column A")
+    ```
+    Drag the cell across the entire table to apply all models to all queries.
+
+3. **Data Cleaning**
+    ```excel
+    =PROMPT(E2, "Standardize the company name by removing any legal entity identifiers (e.g., Inc., LLC) and correcting common misspellings.")
+    ```
+    Useful for cleaning and standardizing messy datasets.
+
+4. **Content Summarization**
+    ```excel
+    =PROMPT(F2, "Provide a 2-sentence summary of the article in the context.")
+    ```
+    Great for quickly digesting large amounts of text data, such as news articles or research papers.
+
+5. **Entity Extraction**
+    ```excel
+    =PROMPT(G2, "Extract all person names mentioned in the text.")
+    ```
+    Useful for analyzing unstructured text data in fields like journalism, research, or customer relationship management.
+
+6. **When Built-in Excel Functions Are Insufficient**
+    ```
+    =PROMPT(A1, "Fix email formatting")
+    ```
+    Useful when an "auditor" inserts random spaces in a column with thousands of email adresses. Use a local model if you are worried about sending sensitive data to hosted models.
+
+These use cases are starting points. Experiment with different instructions to find what works best for your data. It works best when combined with human judgment and expertise in your specific domain.
+
+## Development
+
+### Build with Visual Studio
+
+1. In Visual Studio, go to File > Clone Repository.
+ 
+2. Set the Repository Location to `https://github.com/getcellm/cellm`, the Path to a directory of your choice, and click Clone.
+
+3. Run the "Excel" configuration. Visual Studio will build Cellm and open Excel with the output build installed.
+ 
+### Build with command line
+
+1. Clone this repository:
+   ```cmd
+   git clone https://github.com/getcellm/cellm.git
+   ```
+
+2. In your terminal, go into the root of the project directory:
+   ```cmd
+   cd cellm
+   ```
+
+3. Install dependencies:
+   ```cmd
+   dotnet restore
+   ```
+
+4. Build the project:
+   ```cmd
+   dotnet build --configuration Debug
+   ```
 
 ## Why did you make Cellm?
 My girlfriend was writing a systematic review paper. She had to compare 7.500 papers against inclusion and exclusion criterias. I told her this was a great use case for LLMs but quickly realized that individually copying 7.500 papers in and out of chat windows was a total pain. This sparked the idea to make an AI tool to automate repetitive tasks for people like her who would rather avoid programming. 
