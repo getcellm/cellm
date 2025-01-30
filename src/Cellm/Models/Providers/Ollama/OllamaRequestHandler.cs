@@ -1,15 +1,15 @@
-﻿using Cellm.Models.Prompts;
+﻿using System.Text;
+using System.Text.Json;
+using Cellm.Models.Prompts;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using System.Text;
-using System.Text.Json;
 
 namespace Cellm.Models.Providers.Ollama;
 
 internal class OllamaRequestHandler(
     IOptionsMonitor<OllamaConfiguration> ollamaConfiguration,
-    [FromKeyedServices(Provider.Ollama)] IChatClient chatClient, 
+    [FromKeyedServices(Provider.Ollama)] IChatClient chatClient,
     HttpClient httpClient) : IModelRequestHandler<OllamaRequest, OllamaResponse>
 {
     public async Task<OllamaResponse> Handle(OllamaRequest request, CancellationToken cancellationToken)
