@@ -1,8 +1,9 @@
 ﻿using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Encodings.Web;
-using System.Text.Json.Nodes;
 using System.Text.Json;
+using System.Text.Json.Nodes;
+using Cellm.Models;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
 using Cellm.Models.Providers.DeepSeek;
@@ -13,10 +14,8 @@ using Cellm.Models.Providers.OpenAi;
 using Cellm.Models.Providers.OpenAiCompatible;
 using Cellm.Services;
 using ExcelDna.Integration.CustomUI;
-using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Caching.Hybrid;
-using Cellm.Models;
-using ExcelDna.Integration;
+using Microsoft.Extensions.Options;
 
 namespace Cellm.AddIn.RibbonController;
 
@@ -265,7 +264,8 @@ public class ExcelRibbon : ExcelDna.Integration.CustomUI.ExcelRibbon
             throw new ArgumentException($"Provider and model argument must on the form \"Provider/Model\"");
         }
 
-        if (!Enum.TryParse<Provider>(providerAndModel[..index], true, out var provider)) {
+        if (!Enum.TryParse<Provider>(providerAndModel[..index], true, out var provider))
+        {
             throw new ArgumentException($"Unsupported default provider: {providerAndModel[..index]}");
         }
 
