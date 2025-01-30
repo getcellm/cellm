@@ -87,13 +87,13 @@ In this example we use openai/gpt-4o-mini to list PDF files in a folder.
 =PROMPT(A1, "Which pdf files do I have in my downloads folder?")
 ```
 
-To configure which AI model processes your prompts, use the Cellm tab in Excel's ribbon menu:
+To configure which AI model you call, use the Cellm tab in Excel's ribbon menu:
 
 - **Model**: Select which AI model to use (e.g., "openai/gpt-4o-mini")
 - **Address**: The API endpoint for your chosen provider (e.g., "https://api.openai.com/v1")
 - **API Key**: Your authentication key for the selected provider
 
-Additional tools in the Cellm tab:
+The other options in the Cellm tab are:
 - **Cache**: Enable/disable local caching of model responses. Useful when Excel triggers recalculation of many cells.
 - **Functions**: Enable/disable tools (not to be confused with Excel _formula_ functions below).
 
