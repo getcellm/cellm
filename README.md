@@ -31,19 +31,19 @@ In this example, we copy the papers' titles and abstracts into Excel and write t
 
 We then use autofill to apply the prompt to many papers. Simple and powerful.
 
-Green denotes a correct classification and read denotes and incorrect classification. The models _will_ make mistakes at times and it is your responsibility to cross-validate if a model is accurate enough for your use case and upgrade model or use another approach if not.
+Green cells denote correct classifications and red cells denote and incorrect classifications. The models _will_ make mistakes at times and it is your responsibility to cross-validate if a model is accurate enough for your use case and upgrade model or use another approach if not.
 
 ## Getting Started
 
 ### Requirements
 
-- Windows
+- Windows 10 or higher
 - [.NET 9.0 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
 - [Excel 2010 or higher (desktop app)](https://www.microsoft.com/en-us/microsoft-365/excel)
 
 ### Install
 
-1. Go to the [Release page](https://github.com/getcellm/cellm/releases) and download `Cellm-AddIn64-packed.xll` and `appsettings.json`. Put them in the _same_ folder.
+1. Go to the [Release page](https://github.com/getcellm/cellm/releases) and download `Cellm-AddIn64.xll` and `appsettings.json`. Put them in the _same_ folder.
 
 2. Double-click on `Cellm-AddIn64-packed.xll`. Excel will open and install Cellm.
 
@@ -53,7 +53,7 @@ Green denotes a correct classification and read denotes and incorrect classifica
 
 1. In Excel, go to File > Options > Add-Ins.
 2. In the `Manage` drop-down menu, select `Excel Add-ins` and click `Go...`.
-3. Uncheck `Cellm-AddIn64.xll` and click `OK`.
+3. Uncheck `Cellm-AddIn64-packed.xll` and click `OK`.
 
 ## Usage
 
@@ -61,7 +61,7 @@ Just like Excel's built-in functions, you can start typing `=PROMPT(` in any cel
 
 <img src="https://github.com/user-attachments/assets/4a044178-bc30-4253-9c97-9c9321800725" width=100%>
 
-In this example we use openai/gpt-4o-mini to list PDF files in a folder.
+In this example we use openai/gpt-4o-mini to list PDF files in a local folder.
 
 ```
 =PROMPT(A1, "Which pdf files do I have in my downloads folder?")
