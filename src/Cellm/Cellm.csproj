@@ -40,7 +40,7 @@
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.1" />
     <PackageReference Include="PdfPig" Version="0.1.9" />
     <PackageReference Include="Sentry.Extensions.Logging" Version="5.0.1" />
-    <PackageReference Include="Sentry.Profiling" Version="5.0.1" />
+    <PackageReference Include="Sentry.Profiling" Version="5.1.0" />
     <PackageReference Include="System.Net.Http.Json" Version="9.0.1" />
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

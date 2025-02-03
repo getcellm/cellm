@@ -233,12 +233,12 @@
       },
       "Sentry.Profiling": {
         "type": "Direct",
-        "requested": "[5.0.1, )",
-        "resolved": "5.0.1",
-        "contentHash": "pZOwEEE20rFac0kBGLQxmPRnSqMYld55J7zKxwVKMMP0QvUdG0NLCtE8pIi4032dltT3pwYjv3MtuXOBYb/MbA==",
+        "requested": "[5.1.0, )",
+        "resolved": "5.1.0",
+        "contentHash": "KKWy5sTbcN4WYMKLTbzhdK0HqJyBIjcn2JmWCTqaP8tU9pGEvk/ACeiohgE4S0Hkkx8CudwzHzKiKaklTrds6w==",
         "dependencies": {
           "Microsoft.Diagnostics.NETCore.Client": "0.2.510501",
-          "Sentry": "5.0.1"
+          "Sentry": "5.1.0"
         }
       },
       "System.Net.Http.Json": {
@@ -510,8 +510,8 @@
       },
       "Sentry": {
         "type": "Transitive",
-        "resolved": "5.0.1",
-        "contentHash": "h1rKFYXx58dUtAcsWpTlJGHhG1bpy0JjGh8b2sRKw2wdk3NKCGd8KTLSWnzIqIjjZP2PNeUZFUyDeWVKs8Dk2A=="
+        "resolved": "5.1.0",
+        "contentHash": "G9ynQGBc937yO+TFda09WQfTHKiwqVN8pgtM7LU6o2ciu8WVAE8IceSW0olp6nI9nWj99DtV/KAS2OKGK4B+Vg=="
       },
       "System.ClientModel": {
         "type": "Transitive",
