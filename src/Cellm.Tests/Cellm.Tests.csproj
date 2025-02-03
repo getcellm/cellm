@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ExcelDna.Testing" Version="1.9.0-alpha3" />
+    <PackageReference Include="ExcelDna.Testing" Version="1.9.0-beta1" />
     <PackageReference Include="xunit" Version="2.9.3" />
   </ItemGroup>
 
