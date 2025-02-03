@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ExcelDna.Addin" Version="1.9.0-alpha3" />
+    <PackageReference Include="ExcelDna.Addin" Version="1.9.0-beta1" />
     <PackageReference Include="ExcelDna.Interop" Version="15.0.1" />
     <PackageReference Include="MediatR" Version="12.4.1" />
     <PackageReference Include="Microsoft.Extensions.AI" Version="9.1.0-preview.1.25064.3" />

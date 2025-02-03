@@ -4,11 +4,11 @@
     "net9.0-windows7.0": {
       "ExcelDna.AddIn": {
         "type": "Direct",
-        "requested": "[1.9.0-alpha3, )",
-        "resolved": "1.9.0-alpha3",
-        "contentHash": "N77/NrKCNQTjoVrNKFyYIZIPxVTLEbkoU7B0lLGuEbfFQLzBZ/CAEfQDSRYB0qo47os1yPAbE7y+LWTRR3S4Bw==",
+        "requested": "[1.9.0-beta1, )",
+        "resolved": "1.9.0-beta1",
+        "contentHash": "olWBMjZrkpQPVYXgbf2tRPl4pcnbe2WKVYlyH+X895ANJ92BX08Eb6Ax5n9LGM+LNk3bkBSqfxI61TJsRG9g3A==",
         "dependencies": {
-          "ExcelDna.Integration": "[1.9.0-alpha3]"
+          "ExcelDna.Integration": "[1.9.0-beta1]"
         }
       },
       "ExcelDna.Interop": {
@@ -249,8 +249,8 @@
       },
       "ExcelDna.Integration": {
         "type": "Transitive",
-        "resolved": "1.9.0-alpha3",
-        "contentHash": "vQZP+bXCXkiIx4bkntd2iWnMDS57ECcul2XFQvMSvgcTy6+2q81xI2Sp6FGXr9tU/t7eHfpG7vVv/7TZKOLnxA=="
+        "resolved": "1.9.0-beta1",
+        "contentHash": "FoERZdM8IuG9cokcjte7lckVssZXnKzRR6KrLoTdgburkL+isHtdY9sLKU3UMBWHtOohimCcU7RwC3vMa2nLBQ=="
       },
       "MediatR.Contracts": {
         "type": "Transitive",
