@@ -104,15 +104,20 @@ internal static class ServiceLocator
         // Add providers
         services
             .AddAnthropicChatClient(configuration)
-            .AddOpenAiChatClient(configuration)
-            .AddOpenAiCompatibleChatClient(configuration)
-            .AddOpenOllamaChatClient(configuration);
+            .AddOllamaChatClient(configuration);
+
+        services
+            .AddHttpClient<IModelRequestHandler<OpenAiCompatibleRequest, OpenAiCompatibleResponse>>(openAiCompatibleHttpClient =>
+            {
+                openAiCompatibleHttpClient.Timeout = TimeSpan.FromSeconds(configuration
+                    .GetSection(nameof(ProviderConfiguration))
+                    .GetValue<int>(nameof(ProviderConfiguration.HttpTimeoutInSeconds)));
+            });
 
         // Add provider middleware
         services
             .AddSentryBehavior()
-            .AddCachingBehavior()
-            .AddToolBehavior();
+            .AddCachingBehavior();
 
         // Add tools
         services

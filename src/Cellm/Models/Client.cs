@@ -16,9 +16,10 @@ namespace Cellm.Models;
 
 internal class Client(
     ISender sender,
-    IOptions<DeepSeekConfiguration> deepSeekConfiguration,
-    IOptions<MistralConfiguration> mistralConfiguration,
-    IOptions<OpenAiCompatibleConfiguration> openAiCompatibleConfiguration)
+    IOptionsMonitor<DeepSeekConfiguration> deepSeekConfiguration,
+    IOptionsMonitor<LlamafileConfiguration> llamafileConfiguration,
+    IOptionsMonitor<MistralConfiguration> mistralConfiguration,
+    IOptionsMonitor<OpenAiCompatibleConfiguration> openAiCompatibleConfiguration)
 {
     public async Task<Prompt> Send(Prompt prompt, Provider provider, CancellationToken cancellationToken)
     {
@@ -26,13 +27,13 @@ internal class Client(
         {
             IModelResponse response = provider switch
             {
-                Provider.Anthropic => await sender.Send(new AnthropicRequest(prompt, provider.ToString()), cancellationToken),
-                Provider.DeepSeek => await sender.Send(new OpenAiCompatibleRequest(prompt, deepSeekConfiguration.Value.BaseAddress, deepSeekConfiguration.Value.ApiKey), cancellationToken),
-                Provider.Llamafile => await sender.Send(new LlamafileRequest(prompt), cancellationToken),
-                Provider.Mistral => await sender.Send(new OpenAiCompatibleRequest(prompt, mistralConfiguration.Value.BaseAddress, mistralConfiguration.Value.ApiKey), cancellationToken),
+                Provider.Anthropic => await sender.Send(new AnthropicRequest(prompt), cancellationToken),
+                Provider.DeepSeek => await sender.Send(new OpenAiCompatibleRequest(prompt, deepSeekConfiguration.CurrentValue.BaseAddress, deepSeekConfiguration.CurrentValue.ApiKey), cancellationToken),
+                Provider.Llamafile => await sender.Send(new OpenAiCompatibleRequest(prompt, llamafileConfiguration.CurrentValue.BaseAddress, llamafileConfiguration.CurrentValue.ApiKey), cancellationToken),
+                Provider.Mistral => await sender.Send(new OpenAiCompatibleRequest(prompt, mistralConfiguration.CurrentValue.BaseAddress, mistralConfiguration.CurrentValue.ApiKey), cancellationToken),
                 Provider.Ollama => await sender.Send(new OllamaRequest(prompt), cancellationToken),
                 Provider.OpenAi => await sender.Send(new OpenAiRequest(prompt), cancellationToken),
-                Provider.OpenAiCompatible => await sender.Send(new OpenAiCompatibleRequest(prompt, openAiCompatibleConfiguration.Value.BaseAddress, openAiCompatibleConfiguration.Value.ApiKey), cancellationToken),
+                Provider.OpenAiCompatible => await sender.Send(new OpenAiCompatibleRequest(prompt, openAiCompatibleConfiguration.CurrentValue.BaseAddress, openAiCompatibleConfiguration.CurrentValue.ApiKey), cancellationToken),
                 _ => throw new NotSupportedException($"Provider {provider} is not supported")
             };
 

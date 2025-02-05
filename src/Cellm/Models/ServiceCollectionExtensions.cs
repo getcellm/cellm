@@ -2,15 +2,12 @@
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
 using Cellm.Models.Providers.Ollama;
-using Cellm.Models.Providers.OpenAi;
-using Cellm.Models.Providers.OpenAiCompatible;
 using Cellm.Models.Resilience;
 using Cellm.Models.Tools;
 using MediatR;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using OpenAI;
 
 namespace Cellm.Models;
 
@@ -27,7 +24,6 @@ public static class ServiceCollectionExtensions
             .AddHttpClient<IRequestHandler<AnthropicRequest, AnthropicResponse>, AnthropicRequestHandler>(anthropicHttpClient =>
             {
                 anthropicHttpClient.BaseAddress = anthropicConfiguration.BaseAddress;
-                anthropicHttpClient.DefaultRequestHeaders.Add("x-api-key", anthropicConfiguration.ApiKey);
                 anthropicHttpClient.DefaultRequestHeaders.Add("anthropic-version", anthropicConfiguration.Version);
                 anthropicHttpClient.Timeout = TimeSpan.FromHours(1);
             })
@@ -38,7 +34,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddOpenOllamaChatClient(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddOllamaChatClient(this IServiceCollection services, IConfiguration configuration)
     {
         var resiliencePipelineConfigurator = new ResiliencePipelineConfigurator(configuration);
 
@@ -50,36 +46,6 @@ public static class ServiceCollectionExtensions
                 ollamaConfiguration.BaseAddress,
                 ollamaConfiguration.DefaultModel))
             .UseFunctionInvocation();
-
-        return services;
-    }
-
-    public static IServiceCollection AddOpenAiChatClient(this IServiceCollection services, IConfiguration configuration)
-    {
-        var openAiConfiguration = configuration.GetRequiredSection(nameof(OpenAiConfiguration)).Get<OpenAiConfiguration>()
-            ?? throw new NullReferenceException(nameof(OpenAiConfiguration));
-
-        services
-            .AddKeyedChatClient(Provider.OpenAi, new OpenAIClient(openAiConfiguration.ApiKey).AsChatClient(openAiConfiguration.DefaultModel))
-            .UseFunctionInvocation();
-
-        return services;
-    }
-
-    public static IServiceCollection AddOpenAiCompatibleChatClient(this IServiceCollection services, IConfiguration configuration)
-    {
-        var resiliencePipelineConfigurator = new ResiliencePipelineConfigurator(configuration);
-
-        services
-            .AddSingleton<OpenAiCompatibleChatClientFactory>()
-            .AddHttpClient<OpenAiCompatibleChatClientFactory>(openAiCompatibleHttpClient =>
-            {
-                openAiCompatibleHttpClient.Timeout = TimeSpan.FromSeconds(configuration
-                    .GetSection(nameof(ProviderConfiguration))
-                    .GetValue<int>(nameof(ProviderConfiguration.HttpTimeoutInSeconds)));
-            })
-            .AddResilienceHandler(nameof(OpenAiCompatibleChatClientFactory), resiliencePipelineConfigurator.ConfigureResiliencePipeline);
-
 
         return services;
     }
@@ -105,13 +71,10 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddToolBehavior(this IServiceCollection services)
-    {
-        return services.AddSingleton(typeof(IPipelineBehavior<,>), typeof(ToolBehavior<,>));
-    }
-
     public static IServiceCollection AddTools(this IServiceCollection services, params Delegate[] tools)
     {
+        services.AddSingleton(typeof(IPipelineBehavior<,>), typeof(ToolBehavior<,>));
+
         foreach (var tool in tools)
         {
             services.AddSingleton(AIFunctionFactory.Create(tool));

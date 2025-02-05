@@ -17,13 +17,13 @@ internal class AnthropicRequestHandler : IModelRequestHandler<AnthropicRequest, 
     private readonly Serde _serde;
 
     public AnthropicRequestHandler(
-        IOptions<AnthropicConfiguration> anthropicConfiguration,
-        IOptions<ProviderConfiguration> providerConfiguration,
+        IOptionsMonitor<AnthropicConfiguration> anthropicConfiguration,
+        IOptionsMonitor<ProviderConfiguration> providerConfiguration,
         HttpClient httpClient,
         Serde serde)
     {
-        _anthropicConfiguration = anthropicConfiguration.Value;
-        _providerConfiguration = providerConfiguration.Value;
+        _anthropicConfiguration = anthropicConfiguration.CurrentValue;
+        _providerConfiguration = providerConfiguration.CurrentValue;
         _httpClient = httpClient;
         _serde = serde;
     }
@@ -35,6 +35,7 @@ internal class AnthropicRequestHandler : IModelRequestHandler<AnthropicRequest, 
 
         var json = Serialize(request);
         var jsonAsStringContent = new StringContent(json, Encoding.UTF8, "application/json");
+        jsonAsStringContent.Headers.Add("x-api-key", _anthropicConfiguration.ApiKey);
 
         var response = await _httpClient.PostAsync(address, jsonAsStringContent, cancellationToken);
         var responseBodyAsString = await response.Content.ReadAsStringAsync(cancellationToken);
