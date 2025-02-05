@@ -1,5 +1,5 @@
-using System.ClientModel.Primitives;
 using System.ClientModel;
+using System.ClientModel.Primitives;
 using Cellm.Models.Prompts;
 using Microsoft.Extensions.AI;
 using OpenAI;
