@@ -19,7 +19,7 @@ internal class OpenAiRequestHandler(
             .AddMessage(chatCompletion.Message)
             .Build();
 
-        return new OpenAiResponse(prompt);
+        return new OpenAiResponse(prompt, chatCompletion);
     }
 
     public IChatClient CreateChatClient(string modelId, string apiKey)
