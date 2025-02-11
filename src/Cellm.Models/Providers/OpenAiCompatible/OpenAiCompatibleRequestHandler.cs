@@ -23,7 +23,7 @@ internal class OpenAiCompatibleRequestHandler(HttpClient httpClient)
             .AddMessage(chatCompletion.Message)
             .Build();
 
-        return new OpenAiCompatibleResponse(prompt);
+        return new OpenAiCompatibleResponse(prompt, chatCompletion);
     }
 
     public IChatClient CreateChatClient(Uri BaseAddress, string modelId, string apiKey)

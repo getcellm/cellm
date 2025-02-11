@@ -50,4 +50,6 @@
     </Content>
   </ItemGroup>
 
+  <Import Project="..\Cellm.Models\Cellm.Models.projitems" Label="Shared" />
+
 </Project>

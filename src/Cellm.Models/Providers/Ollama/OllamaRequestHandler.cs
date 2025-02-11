@@ -37,6 +37,6 @@ internal class OllamaRequestHandler(
             .AddMessage(chatCompletion.Message)
             .Build();
 
-        return new OllamaResponse(prompt);
+        return new OllamaResponse(prompt, chatCompletion);
     }
 }
