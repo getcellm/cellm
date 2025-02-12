@@ -31,7 +31,7 @@ In this example, we copy the papers' titles and abstracts into Excel and write t
 
 We then use autofill to apply the prompt to many papers. Simple and powerful.
 
-Green cells denote correct classifications and red cells denote and incorrect classifications. The models _will_ make mistakes at times and it is your responsibility to cross-validate if a model is accurate enough for your use case and upgrade model or use another approach if not.
+Green cells denote correct classifications and red cells denote incorrect classifications. The models _will_ make mistakes at times and it is your responsibility to cross-validate if a model is accurate enough for your use case and upgrade model or use another approach if not.
 
 ## Getting Started
 
@@ -43,38 +43,55 @@ Green cells denote correct classifications and red cells denote and incorrect cl
 
 ### Install
 
-1. Go to the [Release page](https://github.com/getcellm/cellm/releases) and download `Cellm-AddIn64.xll` and `appsettings.json`. Put them in the _same_ folder.
+1. Go to the [Release page](https://github.com/getcellm/cellm/releases) and download `Cellm-AddIn64-packed.xll` and `appsettings.json`. Put them in the _same_ folder.
 
-2. Double-click on `Cellm-AddIn64-packed.xll`. Excel will open and install Cellm.
+2. In Excel, go to File > Options > Trust Center > Trust Center Settings > Trusted Locations.
 
-3. Download and install [Ollama](https://ollama.com/). Cellm uses Ollama and the Gemma 2 2B model by default. Gemma 2 2B will be downloaded automatically the first time you call `=PROMPT()`. To call other models, see the [Models](#models) section below. 
+3. Click on `Add new location...`, then `Browse...`, and navigate to the folder with `Cellm-AddIn64-packed.xll` in it. Click `OK`.
+
+4. Now go to File > Options > Add-Ins.
+
+5. In the `Manage` drop-down menu, select `Excel Add-ins` and click `Go...`.
+
+6. Click `Browse...` and navigate to the folder with `Cellm-AddIn64-packed.xll`. Select it and click `OK`
+
+7. Download and install [Ollama](https://ollama.com/). Cellm uses Ollama and the Gemma 2 2B model by default. Ollama will start automatically after the install and Cellm will automatatically instruct Ollama to download Gemma 2 2B the first time you call `=PROMPT()`. To call other models, see the [Usage](#usage) section below. 
 
 ### Uninstall
 
 1. In Excel, go to File > Options > Add-Ins.
 2. In the `Manage` drop-down menu, select `Excel Add-ins` and click `Go...`.
 3. Uncheck `Cellm-AddIn64-packed.xll` and click `OK`.
+4. Now to go to File > Options > Trust Center > Trust Center Settings > Trusted Locations and remove the folder with `Cellm-AddIn64-packed.xll`.
+
+Cellm is now uninstalled and will not load next time you start Excel. 
+
+To also remove the unchecked `Cellm-AddIn64-packed.xll` entry from the Add-Ins list, follow these steps:
+
+1. Delete the file from your disk. 
+2. Restart Excel and go File > Options > Add-Ins. Excel will ask you if it should remove the entry from the list.
+3. Click `Yes`.
 
 ## Usage
 
-Just like Excel's built-in functions, you can start typing `=PROMPT(` in any cell to use AI in your spreadsheet. For example:
+Select a cell and type e.g. `=PROMPT("What model are you and who made you?")`. The default model will tell you that is called "Gemma" and made by Google DeepMind.
+
+You can also use cell references to dynamically change your prompts based on other data in your spreadsheet. For example, try to copy a news article into cell A1 and type in the formula of cell B1 `=PROMPT(A1, "Extract all person names mentioned in the text")`. 
+
+You can also use the built-in tools to analyse files on your disk:
 
 <img src="https://github.com/user-attachments/assets/4a044178-bc30-4253-9c97-9c9321800725" width=100%>
 
-In this example we use openai/gpt-4o-mini to list PDF files in a local folder.
+Fill out a folder path in cell A1 and type in cell A2 ` =PROMPT(A1, "Which pdf files do I have in my downloads folder?")`. In this example, we use OpenAI's GPT-4o-mini model, because Gemma 2 2B does not support tool calling.
 
-```
-=PROMPT(A1, "Which pdf files do I have in my downloads folder?")
-```
+Use the Cellm tab in Excel's ribbon menu to configure which AI model to use:
 
-To configure which AI model you call, use the Cellm tab in Excel's ribbon menu:
-
-- **Model**: Select which AI model to use (e.g., "openai/gpt-4o-mini")
+- **Model**: Select which AI model to use (e.g., "openai/gpt-4o-mini"). The dropdown gives a couple of preset options and you can also type the model name directly in the drop-down text field to select another model.
 - **Address**: The API endpoint for your chosen provider (e.g., "https://api.openai.com/v1")
 - **API Key**: Your authentication key for the selected provider
 
 The other options in the Cellm tab are:
-- **Cache**: Enable/disable local caching of model responses. Useful when Excel triggers recalculation of many cells.
+- **Cache**: Enable/disable local caching of model responses to a fixed input. Useful when Excel triggers recalculation of many cells.
 - **Functions**: Enable/disable tools (not to be confused with Excel _formula_ functions below).
 
 ### Functions
@@ -120,31 +137,16 @@ Example usage:
 
 ## Models
 
-Cellm supports hosted models from Anthropic, DeepSeek, Google, OpenAI, Mistral, and any OpenAI-compatible provider.
+Cellm supports hosted models from Anthropic, DeepSeek, OpenAI, Mistral, and any OpenAI-compatible cloud provider as well as local models via Ollama, vLLM, Llamafiles, or any OpenAI-compatible program. You can select these models via Cellm's ribbon menu. The [Usage](#usage) section shows you how.
 
-You can use `appsettings.Local.OpenAiCompatible.json` as a starting point for configuring any model provider that is compatible with OpenAI's API. Just rename it to `appsettings.Local.json` and edit the values. In general, you should leave `appsettings.json` alone and add your own configuration to `appsettings.Local.json` only. Any settings in this file will override the default settings in `appsettings.json`.
+### Add other OpenAI-compatible providers
+You can add support for model providers that are not shipped with Cellm as long as they are compatible with OpenAI's API e.g. OpenRouter or LiteLLM.
 
-The following sections shows you how to configure `appsettings.Local.json` for commonly used hosted and local models.
+In Cellm's ribbon menu, type `openaicompatible/modelid` in the drop-down menu's text field. Point the address to the OpenAI-compatible endpoint and set the API key if needed.
 
-### Hosted LLMs
+You can also add models to the preset drop-down list via the `appsettings.*.json` files in the `src/Cellm` folder. Use `appsettings.Local.OpenAiCompatible.json` as a starting point, edit the values, and put it next to `Cellm-AddIn64-packed.xll` as `appsettings.Local.json`. 
 
-Cellm supports hosted models from Anthropic, DeepSeek, Google, OpenAI, Mistral, and any OpenAI-compatible provider. To use e.g. Claude 3.5 Sonnet from Anthropic:
-
-1. Rename `src/Cellm/appsettings.Anthropic.json` to `src/Cellm/appsettings.Local.json`.
- 
-2. Add your Anthropic API key to `src/Cellm/appsettings.Local.json`:
-    ```json
-    {
-        "AnthropicConfiguration": {
-            "ApiKey": "ADD_YOUR_ANTHROPIC_API_KEY_HERE"
-        },
-        "ProviderConfiguration": {
-            "DefaultProvider": "Anthropic"
-        }
-    }
-    ```
-
-See the `appsettings.Local.*.json` files for examples on other providers.
+In general, you should leave `appsettings.json` alone and add your own configuration to `appsettings.Local.json` only. Any settings in `appsettings.Local.json` will override the default settings in `appsettings.json`.
 
 ### Local LLMs
 
@@ -152,13 +154,7 @@ Cellm supports local models that run on your computer via Llamafiles, Ollama, or
 
 #### Ollama 
 
-Cellm uses Ollama Gemma 2 2B model by default. This clever little model runs fine on a CPU. For any model larger than 3B you will need a GPU. Ollama will automatically use your GPU if you have one. To get started:
-
-1. Download and install Ollama from [https://ollama.com/](https://ollama.com/).
-2. Download the model by running the following command in your Windows terminal:
-   ```cmd
-   ollama pull gemma2:2b
-   ```
+Cellm uses Ollama Gemma 2 2B model by default. This clever little model runs fine on a CPU. For any model larger than 3B you will need a GPU. Ollama will automatically use your GPU if you have one. To get started, download and install Ollama from [https://ollama.com/](https://ollama.com/). Ollama will automatically start after install and Cellm will automatically instruct Ollama to download the model for you.
 
 See [https://ollama.com/search](https://ollama.com/search) for a complete list of supported models.
 
@@ -178,8 +174,7 @@ Llamafile is a stand-alone executable that is very easy to setup. To get started
     .\gemma-2-2b-it.Q6_K.llamafile.exe --server --v2 -ngl 999
     ```
 
-3. Rename `appsettings.Llamafile.json` to `appsettings.Local.json`.
-4. Build and install Cellm.
+3. Start Excel and select the `Llamafile` provider from the model drop-down on Cellm's ribbon menu. 
 
 #### Dockerized Ollama and vLLM
 
@@ -201,7 +196,7 @@ To use other Ollama models, pull another of the [supported models](https://ollam
 docker compose -f docker-compose.Ollama.yml -f docker-compose.Ollama.GPU.yml up --detach
 ```
 
-If you want to further speed up running many requests in parallel, you can use vLLM instead of Ollama. You must supply the docker compose file with a Huggingface API key either via an environment variable or editing the docker compose file directy. Look at the vLLM docker compose file for details. If you don't know what a Huggingface API key is, just use Ollama. 
+If you want to further speed up running many requests in parallel, you can use vLLM instead of Ollama. You must supply the docker compose file with a Hugging Face API key either via an environment variable or editing the docker compose file directy. Look at the vLLM docker compose file for details. If you don't know what a Hugging Face API key is, just use Ollama. 
 
 To start vLLM:
 
@@ -209,7 +204,7 @@ To start vLLM:
 docker compose -f docker-compose.vLLM.GPU.yml up --detach
 ```
 
-To use other vLLM models, change the "--model" argument in the docker compose file to another Huggingface model.
+To use other vLLM models, change the "--model" argument in the docker compose file to another Hugging Face model.
 
 ## Dos and Don'ts
 
@@ -240,7 +235,7 @@ Cellm is useful for repetitive tasks on both structured and unstructured data. H
 2. **Model Comparison**
     
     Make a sheet with user queries in the first column and provider/model pairs in the first row. Write this prompt in the cell B2:
-    ```excell
+    ```excel
     =PROMPTWITH(B$1,$A2,"Answer the question in column A")
     ```
     Drag the cell across the entire table to apply all models to all queries.
@@ -304,7 +299,7 @@ These use cases are starting points. Experiment with different instructions to f
    ```
 
 ## Why did you make Cellm?
-My girlfriend was writing a systematic review paper. She had to compare 7.500 papers against inclusion and exclusion criterias. I told her this was a great use case for LLMs but quickly realized that individually copying 7.500 papers in and out of chat windows was a total pain. This sparked the idea to make an AI tool to automate repetitive tasks for people like her who would rather avoid programming. 
+My girlfriend was writing a systematic review paper. She had to compare 7,500 papers against inclusion and exclusion criterias. I told her this was a great use case for LLMs but quickly realized that individually copying 7,500 papers in and out of chat windows was a total pain. This sparked the idea to make an AI tool to automate repetitive tasks for people like her who would rather avoid programming. 
 
 I think Cellm is really cool because it enables everyone to automate repetitive tasks with AI to a level that was previously available only to programmers.
 
