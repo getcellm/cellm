@@ -1,0 +1,20 @@
+---
+title: 'Prompting'
+description: 'Use LLMs in Excel formulas'
+---
+
+## Dos And Don'ts
+Do:
+
+- Experiment with different prompts to find the most effective instructions for your data.
+- Use cell references to dynamically change your prompts based on other data in your spreadsheet.
+- Use local models for sensitive and confidential data.
+- Refer to the cell data as "context" in your instructions.
+- Verify at least a subset of a model's responses. Models will make errors and rely entirely on your input, which may also contain errors.
+
+Don't:
+
+- Don't use Cellm to compute sums, averages, and other numerical calculations. The current generation of LLMs are not designed for mathematical operations. Use Excel's existing functions instead.
+- Don't use cloud model providers to process sensitive or confidential data.
+- Don't use extremely long prompts or give Cellm complex tasks. A normal chat UI lets you have a back and forth conversation which is better for exploring complex topics.
+- Don't use Cellm for tasks that require up-to-date information beyond the AI model's knowledge cutoff date _unless_ you provide the information as context.

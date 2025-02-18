@@ -1,0 +1,36 @@
+---
+title: 'Development'
+description: 'Preview changes locally to update your docs'
+---
+
+## Setup your development environment
+
+### Build with Visual Studio
+
+1. In Visual Studio, go to File > Clone Repository.
+ 
+2. Set the Repository Location to `https://github.com/getcellm/cellm`, the Path to a directory of your choice, and click Clone.
+
+3. Run the "Excel" configuration. Visual Studio will build Cellm and open Excel. Click on "Enable this add-in for this session only" to load the build.
+ 
+### Build with command line
+
+1. Clone this repository:
+   ```cmd
+   git clone https://github.com/getcellm/cellm.git
+   ```
+
+2. In your terminal, go into the root of the project directory:
+   ```cmd
+   cd cellm
+   ```
+
+3. Install dependencies:
+   ```cmd
+   dotnet restore
+   ```
+
+4. Build the project:
+   ```cmd
+   dotnet build --configuration Debug
+   ```

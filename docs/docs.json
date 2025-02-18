@@ -1,11 +1,11 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "Cellm",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#107C42",
+    "light": "#33C480",
+    "dark": "#185C37"
   },
   "favicon": "/favicon.svg",
   "navigation": {
@@ -16,20 +16,24 @@
           {
             "group": "Get Started",
             "pages": [
-              "introduction",
-              "quickstart",
-              "development"
+              "get-started/overview",
+              "get-started/quickstart",
+              "get-started/install",
+              "get-started/development"
             ]
           },
           {
-            "group": "Essentials",
+            "group": "Usage",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/settings",
-              "essentials/navigation",
-              "essentials/reusable-snippets"
+              "usage/prompting",
+              "usage/function-calling"
+            ]
+          },
+          {
+            "group": "Models",
+            "pages": [
+              "models/local-models",
+              "models/hosted-models"
             ]
           }
         ]
@@ -81,21 +85,19 @@
   "navbar": {
     "links": [
       {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "label": "Github",
+        "href": "https://getcellm.com/getcellm/cellm"
       }
     ],
     "primary": {
       "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "label": "Cellm",
+      "href": "https://getcellm.com"
     }
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "github": "https://github.com/getcellm/cellm"
     }
   }
 }
