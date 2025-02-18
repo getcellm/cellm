@@ -104,15 +104,8 @@ internal static class ServiceLocator
         // Add providers
         services
             .AddAnthropicChatClient(configuration)
-            .AddOllamaChatClient(configuration);
-
-        services
-            .AddHttpClient<IModelRequestHandler<OpenAiCompatibleRequest, OpenAiCompatibleResponse>>(openAiCompatibleHttpClient =>
-            {
-                openAiCompatibleHttpClient.Timeout = TimeSpan.FromSeconds(configuration
-                    .GetSection(nameof(ProviderConfiguration))
-                    .GetValue<int>(nameof(ProviderConfiguration.HttpTimeoutInSeconds)));
-            });
+            .AddOllamaChatClient(configuration)
+            .AddResilientHttpClient(configuration);
 
         // Add provider middleware
         services
@@ -124,7 +117,6 @@ internal static class ServiceLocator
             .AddSingleton<FileReaderFactory>()
             .AddSingleton<IFileReader, PdfReader>()
             .AddSingleton<IFileReader, TextReader>()
-            .AddSingleton<Functions>()
             .AddTools(
                 serviceProvider => AIFunctionFactory.Create(serviceProvider.GetRequiredService<Functions>().GlobRequest),
                 serviceProvider => AIFunctionFactory.Create(serviceProvider.GetRequiredService<Functions>().FileReaderRequest));

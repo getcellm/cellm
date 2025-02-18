@@ -25,9 +25,11 @@ public static class ServiceCollectionExtensions
             {
                 anthropicHttpClient.BaseAddress = anthropicConfiguration.BaseAddress;
                 anthropicHttpClient.DefaultRequestHeaders.Add("anthropic-version", anthropicConfiguration.Version);
-                anthropicHttpClient.Timeout = TimeSpan.FromHours(1);
+                anthropicHttpClient.Timeout = TimeSpan.FromSeconds(configuration
+                    .GetSection(nameof(ProviderConfiguration))
+                    .GetValue<int>(nameof(ProviderConfiguration.HttpTimeoutInSeconds)));
             })
-            .AddResilienceHandler($"{nameof(AnthropicRequestHandler)}", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
+            .AddResilienceHandler($"{nameof(AnthropicRequestHandler)}{nameof(ResiliencePipelineConfigurator)}", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
 
         // TODO: Add IChatClient-compatible Anthropic client
 
@@ -36,16 +38,32 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddOllamaChatClient(this IServiceCollection services, IConfiguration configuration)
     {
-        var resiliencePipelineConfigurator = new ResiliencePipelineConfigurator(configuration);
-
         var ollamaConfiguration = configuration.GetRequiredSection(nameof(OllamaConfiguration)).Get<OllamaConfiguration>()
             ?? throw new NullReferenceException(nameof(OllamaConfiguration));
 
         services
             .AddKeyedChatClient(Provider.Ollama, serviceProvider => new OllamaChatClient(
                 ollamaConfiguration.BaseAddress,
-                ollamaConfiguration.DefaultModel))
+                ollamaConfiguration.DefaultModel,
+                serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient")))
             .UseFunctionInvocation();
+
+        return services;
+    }
+
+    public static IServiceCollection AddResilientHttpClient(this IServiceCollection services, IConfiguration configuration)
+    {
+        var resiliencePipelineConfigurator = new ResiliencePipelineConfigurator(configuration);
+
+        services
+            .AddHttpClient("ResilientHttpClient", resilientHttpClient =>
+            {
+                resilientHttpClient.Timeout = TimeSpan.FromSeconds(configuration
+                    .GetSection(nameof(ProviderConfiguration))
+                    .GetValue<int>(nameof(ProviderConfiguration.HttpTimeoutInSeconds)));
+            })
+            .AddAsKeyed()
+            .AddResilienceHandler("ResilientHttpClientHandler", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
 
         return services;
     }
@@ -85,8 +103,6 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddTools(this IServiceCollection services, params Func<IServiceProvider, AIFunction>[] toolBuilders)
     {
-
-
         foreach (var toolBuilder in toolBuilders)
         {
             services.AddSingleton((serviceProvider) => toolBuilder(serviceProvider));
