@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Cellm.Models.Providers.OpenAi;
 
-internal class OpenAiRequestHandler([FromKeyedServices(Provider.OpenAi)] IChatClient chatClient) 
+internal class OpenAiRequestHandler([FromKeyedServices(Provider.OpenAi)] IChatClient chatClient)
     : IModelRequestHandler<OpenAiRequest, OpenAiResponse>
 {
 

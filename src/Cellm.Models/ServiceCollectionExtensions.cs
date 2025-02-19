@@ -1,20 +1,20 @@
-﻿using System.ClientModel.Primitives;
-using System.ClientModel;
+﻿using System.ClientModel;
+using System.ClientModel.Primitives;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
+using Cellm.Models.Providers.DeepSeek;
+using Cellm.Models.Providers.Llamafile;
+using Cellm.Models.Providers.Mistral;
 using Cellm.Models.Providers.Ollama;
+using Cellm.Models.Providers.OpenAi;
 using Cellm.Models.Providers.OpenAiCompatible;
 using Cellm.Models.Resilience;
 using MediatR;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using OpenAI;
-using Microsoft.Extensions.DependencyInjection;
-using Cellm.Models.Providers.OpenAi;
-using Cellm.Models.Providers.Mistral;
-using Cellm.Models.Providers.Llamafile;
-using Cellm.Models.Providers.DeepSeek;
 
 namespace Cellm.Models;
 
@@ -87,7 +87,8 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddOllamaChatClient(this IServiceCollection services)
     {
         services
-            .AddTransientKeyedChatClient(Provider.Ollama, serviceProvider => {
+            .AddTransientKeyedChatClient(Provider.Ollama, serviceProvider =>
+            {
                 var ollamaConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<OllamaConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
@@ -104,7 +105,8 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddDeepSeekChatClient(this IServiceCollection services)
     {
         services
-            .AddTransientKeyedChatClient(Provider.DeepSeek, serviceProvider => {
+            .AddTransientKeyedChatClient(Provider.DeepSeek, serviceProvider =>
+            {
                 var deepSeekConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<DeepSeekConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
@@ -126,7 +128,8 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddLlamafileChatClient(this IServiceCollection services)
     {
         services
-            .AddTransientKeyedChatClient(Provider.Llamafile, serviceProvider => {
+            .AddTransientKeyedChatClient(Provider.Llamafile, serviceProvider =>
+            {
                 var llamafileConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<LlamafileConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
@@ -148,7 +151,8 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddMistralChatClient(this IServiceCollection services)
     {
         services
-            .AddTransientKeyedChatClient(Provider.Mistral, serviceProvider => {
+            .AddTransientKeyedChatClient(Provider.Mistral, serviceProvider =>
+            {
                 var mistralConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<MistralConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
@@ -170,7 +174,8 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddOpenAiChatClient(this IServiceCollection services)
     {
         services
-            .AddTransientKeyedChatClient(Provider.OpenAi, serviceProvider => {
+            .AddTransientKeyedChatClient(Provider.OpenAi, serviceProvider =>
+            {
                 var openAiConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<OpenAiConfiguration>>();
 
                 return new OpenAIClient(new ApiKeyCredential(openAiConfiguration.CurrentValue.ApiKey))
@@ -184,7 +189,8 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddOpenAiCompatibleChatClient(this IServiceCollection services)
     {
         services
-            .AddTransientKeyedChatClient(Provider.OpenAiCompatible, serviceProvider => {
+            .AddTransientKeyedChatClient(Provider.OpenAiCompatible, serviceProvider =>
+            {
                 var openAiCompatibleConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<OpenAiCompatibleConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
