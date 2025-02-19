@@ -19,17 +19,36 @@ See the [Install](install.mdx) page for instructions on how install Cellm.
 </Tip>
 
 ## Usage
+
+### Sending a prompt to a model
 Select a cell and type e.g. `=PROMPT("What model are you and who made you?")`. The default model will tell you that is called "Gemma" and made by Google DeepMind.
 
-You can also use cell references to dynamically change your prompts based on other data in your spreadsheet. For example, try to copy a news article into cell A1 and type in the formula of cell B1 `=PROMPT(A1, "Extract all person names mentioned in the text")`. 
+### Processing text in cells
+You can use cell references to dynamically change your prompts based on other data in your spreadsheet. For example, try to copy a news article into cell A1 and type in the formula of cell B1 `=PROMPT(A1, "Extract all person names mentioned in the text")`. 
 
-You can also use the built-in tools to analyse files on your disk. Fill out a folder path in cell A1 and type in cell A2 `=PROMPT(A1, "Which pdf files do I have in my downloads folder?")`. Gemma 2 2B does not support tool calling, so for this task you must use another model, e.g. OpenAI's `gpt-4o-mini`.
+### Function Calling
+You can use the built-in tools to analyse files on your disk. Fill out a folder path in cell A1 and type in cell A2 `=PROMPT(A1, "Which pdf files do I have in my downloads folder?")`. Gemma 2 2B does not support tool calling, so for this task you must use another model, e.g. OpenAI's `gpt-4o-mini`.
+
+<CardGroup cols={2}>
+  <Card
+    title="Prompting"
+    icon="pen-to-square"
+    href="https://mintlify.com/docs/quickstart">
+    Use AI in Excel to automate repetitive tasks. 
+  </Card>
+  <Card
+    title="Function Calling"
+    icon="image"
+    href="https://mintlify.com/docs/development">
+    Use Excel as a low-code task orchestrator by enabling Cellm to access external tools and data.
+  </Card>
+</CardGroup>
 
 # Configuration
 Use the Cellm tab in Excel's ribbon menu to configure which AI model to use.
 
 <Frame caption="Cellm Ribbon">
-  <img src="https://github.com/user-attachments/assets/4a044178-bc30-4253-9c97-9c9321800725" />
+  <img src="https://iili.io/2yWOtna.png" />
 </Frame>
 
 - **Model**: Select which AI model to use (e.g., "openai/gpt-4o-mini"). The dropdown gives a couple of preset options. You can also type the model name directly in the drop-down text field to select another model.
