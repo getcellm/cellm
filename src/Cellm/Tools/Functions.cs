@@ -6,8 +6,8 @@ using MediatR;
 namespace Cellm.Tools;
 
 /// <summary>
-/// Provides an adapter between MediatR request handlers and Microsoft.Extensions.AI.
-/// This class wraps tools in function definitions suitable for the AIFunctionFactory.
+/// Provides an adapter between MediatR and Microsoft.Extensions.AI by wrapping 
+/// request handlers in function definitions suitable for the AIFunctionFactory.
 /// </summary>
 internal class Functions(ISender sender)
 {

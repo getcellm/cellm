@@ -1,18 +1,15 @@
 ﻿using Cellm.Models.Prompts;
 using Microsoft.Extensions.AI;
-using Microsoft.Extensions.Options;
-using OpenAI;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Cellm.Models.Providers.OpenAi;
 
-internal class OpenAiRequestHandler(
-    IOptionsMonitor<OpenAiConfiguration> openAiConfiguration) : IModelRequestHandler<OpenAiRequest, OpenAiResponse>
+internal class OpenAiRequestHandler([FromKeyedServices(Provider.OpenAi)] IChatClient chatClient) 
+    : IModelRequestHandler<OpenAiRequest, OpenAiResponse>
 {
 
     public async Task<OpenAiResponse> Handle(OpenAiRequest request, CancellationToken cancellationToken)
     {
-        var defaultModel = openAiConfiguration.CurrentValue.DefaultModel;
-        var chatClient = CreateChatClient(request.Prompt.Options.ModelId ?? defaultModel, openAiConfiguration.CurrentValue.ApiKey);
         var chatCompletion = await chatClient.CompleteAsync(request.Prompt.Messages, request.Prompt.Options, cancellationToken);
 
         var prompt = new PromptBuilder(request.Prompt)
@@ -20,12 +17,5 @@ internal class OpenAiRequestHandler(
             .Build();
 
         return new OpenAiResponse(prompt, chatCompletion);
-    }
-
-    public IChatClient CreateChatClient(string modelId, string apiKey)
-    {
-        return new ChatClientBuilder(new OpenAIClient(apiKey).AsChatClient(modelId))
-            .UseFunctionInvocation()
-            .Build();
     }
 }

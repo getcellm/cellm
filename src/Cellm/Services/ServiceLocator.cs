@@ -2,6 +2,7 @@
 using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.Models;
+using Cellm.Models.Behaviors;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
 using Cellm.Models.Providers.DeepSeek;
@@ -11,6 +12,7 @@ using Cellm.Models.Providers.Ollama;
 using Cellm.Models.Providers.OpenAi;
 using Cellm.Models.Providers.OpenAiCompatible;
 using Cellm.Models.Resilience;
+using Cellm.Models.Tools;
 using Cellm.Services.Configuration;
 using Cellm.Tools;
 using Cellm.Tools.FileReader;
@@ -30,11 +32,6 @@ internal static class ServiceLocator
     internal static string ConfigurationPath { get; set; } = ExcelDnaUtil.XllPathInfo?.Directory?.FullName ?? throw new NullReferenceException("Could not get Cellm path");
 
     public static IServiceProvider ServiceProvider => _serviceProvider.Value;
-
-    public static T Get<T>() where T : notnull
-    {
-        return ServiceProvider.GetRequiredService<T>();
-    }
 
     private static IServiceCollection ConfigureServices(IServiceCollection services)
     {
@@ -95,28 +92,40 @@ internal static class ServiceLocator
 
         // Internals
         services
-            .AddMediatR(mediatrConfiguration => mediatrConfiguration.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()))
+            .AddMediatR(cfg =>
+            {
+                cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+                cfg.AddOpenBehavior(typeof(SentryBehavior<,>));
+                cfg.AddOpenBehavior(typeof(CacheBehavior<,>));
+                cfg.AddOpenBehavior(typeof(ToolBehavior<,>));
+            })
             .AddSingleton(configuration)
             .AddTransient<ArgumentParser>()
             .AddSingleton<Client>()
             .AddSingleton<Serde>();
 
+#pragma warning disable EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates.
+        services
+            .AddHybridCache();
+#pragma warning restore EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates.
+
         // Add providers
         services
             .AddAnthropicChatClient(configuration)
-            .AddOllamaChatClient(configuration)
+            .AddDeepSeekChatClient()
+            .AddLlamafileChatClient()
+            .AddMistralChatClient()
+            .AddOllamaChatClient()
+            .AddOpenAiChatClient()
+            .AddOpenAiCompatibleChatClient()
             .AddResilientHttpClient(configuration);
-
-        // Add provider middleware
-        services
-            .AddSentryBehavior()
-            .AddCachingBehavior();
 
         // Add tools
         services
             .AddSingleton<FileReaderFactory>()
             .AddSingleton<IFileReader, PdfReader>()
             .AddSingleton<IFileReader, TextReader>()
+            .AddSingleton<Functions>()
             .AddTools(
                 serviceProvider => AIFunctionFactory.Create(serviceProvider.GetRequiredService<Functions>().GlobRequest),
                 serviceProvider => AIFunctionFactory.Create(serviceProvider.GetRequiredService<Functions>().FileReaderRequest));

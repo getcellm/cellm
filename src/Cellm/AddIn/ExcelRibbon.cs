@@ -15,6 +15,7 @@ using Cellm.Models.Providers.OpenAiCompatible;
 using Cellm.Services;
 using ExcelDna.Integration.CustomUI;
 using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace Cellm.AddIn.RibbonController;
@@ -107,13 +108,13 @@ public class ExcelRibbon : ExcelDna.Integration.CustomUI.ExcelRibbon
     {
         var providerAndModels = new List<string>();
 
-        var anthropicConfiguration = ServiceLocator.Get<IOptionsMonitor<AnthropicConfiguration>>().CurrentValue;
-        var deepSeekConfiguration = ServiceLocator.Get<IOptionsMonitor<DeepSeekConfiguration>>().CurrentValue;
-        var llamafileConfiguration = ServiceLocator.Get<IOptionsMonitor<LlamafileConfiguration>>().CurrentValue;
-        var mistralConfiguration = ServiceLocator.Get<IOptionsMonitor<MistralConfiguration>>().CurrentValue;
-        var ollamaConfiguration = ServiceLocator.Get<IOptionsMonitor<OllamaConfiguration>>().CurrentValue;
-        var openAiConfiguration = ServiceLocator.Get<IOptionsMonitor<OpenAiConfiguration>>().CurrentValue;
-        var openAiCompatibleConfiguration = ServiceLocator.Get<IOptionsMonitor<OpenAiCompatibleConfiguration>>().CurrentValue;
+        var anthropicConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<AnthropicConfiguration>>().CurrentValue;
+        var deepSeekConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<DeepSeekConfiguration>>().CurrentValue;
+        var llamafileConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<LlamafileConfiguration>>().CurrentValue;
+        var mistralConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<MistralConfiguration>>().CurrentValue;
+        var ollamaConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<OllamaConfiguration>>().CurrentValue;
+        var openAiConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<OpenAiConfiguration>>().CurrentValue;
+        var openAiCompatibleConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<OpenAiCompatibleConfiguration>>().CurrentValue;
 
         providerAndModels.AddRange(anthropicConfiguration.Models.Select(m => $"{nameof(Provider.Anthropic)}/{m}"));
         providerAndModels.AddRange(deepSeekConfiguration.Models.Select(m => $"{nameof(Provider.DeepSeek)}/{m}"));
@@ -215,7 +216,7 @@ public class ExcelRibbon : ExcelDna.Integration.CustomUI.ExcelRibbon
     {
         if (!enabled)
         {
-            var cache = ServiceLocator.Get<HybridCache>();
+            var cache = ServiceLocator.ServiceProvider.GetRequiredService<HybridCache>();
             await cache.RemoveByTagAsync(nameof(IModelResponse));
 
         }

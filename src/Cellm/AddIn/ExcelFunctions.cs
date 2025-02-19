@@ -7,6 +7,7 @@ using Cellm.Models.Providers;
 using Cellm.Services;
 using ExcelDna.Integration;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Cellm.AddIn;
 
@@ -33,7 +34,7 @@ public static class ExcelFunctions
     [ExcelArgument(Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
     [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
     {
-        var configuration = ServiceLocator.Get<IConfiguration>();
+        var configuration = ServiceLocator.ServiceProvider.GetRequiredService<IConfiguration>();
 
         var provider = configuration.GetSection(nameof(ProviderConfiguration)).GetValue<string>(nameof(ProviderConfiguration.DefaultProvider))
             ?? throw new ArgumentException(nameof(ProviderConfiguration.DefaultProvider));
@@ -73,7 +74,7 @@ public static class ExcelFunctions
     {
         try
         {
-            var arguments = ServiceLocator.Get<ArgumentParser>()
+            var arguments = ServiceLocator.ServiceProvider.GetRequiredService<ArgumentParser>()
                 .AddProvider(providerAndModel)
                 .AddModel(providerAndModel)
                 .AddInstructionsOrContext(instructionsOrContext)
@@ -117,7 +118,7 @@ public static class ExcelFunctions
 
     internal static async Task<string> CompleteAsync(Prompt prompt, Provider provider)
     {
-        var client = ServiceLocator.Get<Client>();
+        var client = ServiceLocator.ServiceProvider.GetRequiredService<Client>();
         var response = await client.Send(prompt, provider, CancellationToken.None);
         return response.Messages.Last().Text ?? throw new NullReferenceException("No text response");
     }
