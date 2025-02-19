@@ -1,22 +1,17 @@
-using System.ClientModel;
-using System.ClientModel.Primitives;
 using Cellm.Models.Prompts;
+using Cellm.Services;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
-using OpenAI;
 
 namespace Cellm.Models.Providers.OpenAiCompatible;
 
-internal class OpenAiCompatibleRequestHandler([FromKeyedServices("ResilientHttpClient")] HttpClient httpClient)
+internal class OpenAiCompatibleRequestHandler()
     : IModelRequestHandler<OpenAiCompatibleRequest, OpenAiCompatibleResponse>
 {
 
     public async Task<OpenAiCompatibleResponse> Handle(OpenAiCompatibleRequest request, CancellationToken cancellationToken)
     {
-        var chatClient = CreateChatClient(
-            request.BaseAddress,
-            request.Prompt.Options.ModelId ?? string.Empty,
-            request.ApiKey);
+        var chatClient = ServiceLocator.ServiceProvider.GetRequiredKeyedService<IChatClient>(request.Provider);
 
         var chatCompletion = await chatClient.CompleteAsync(request.Prompt.Messages, request.Prompt.Options, cancellationToken);
 
@@ -25,20 +20,5 @@ internal class OpenAiCompatibleRequestHandler([FromKeyedServices("ResilientHttpC
             .Build();
 
         return new OpenAiCompatibleResponse(prompt, chatCompletion);
-    }
-
-    public IChatClient CreateChatClient(Uri BaseAddress, string modelId, string apiKey)
-    {
-        var openAiClient = new OpenAIClient(
-            new ApiKeyCredential(apiKey),
-            new OpenAIClientOptions
-            {
-                Transport = new HttpClientPipelineTransport(httpClient),
-                Endpoint = BaseAddress
-            });
-
-        return new ChatClientBuilder(openAiClient.AsChatClient(modelId))
-            .UseFunctionInvocation()
-            .Build();
     }
 }
