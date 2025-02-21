@@ -32,7 +32,6 @@
           {
             "group": "Models",
             "pages": [
-              "models/overview",
               "models/local-models",
               "models/hosted-models"
             ]
