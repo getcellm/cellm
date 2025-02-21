@@ -32,6 +32,7 @@
           {
             "group": "Models",
             "pages": [
+              "models/overview",
               "models/local-models",
               "models/hosted-models"
             ]
@@ -61,19 +62,19 @@
     "global": {
       "anchors": [
         {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
+          "anchor": "Homepage",
+          "href": "https://getcellm.com",
+          "icon": "house"
         },
         {
-          "anchor": "Community",
-          "href": "https://mintlify.com/community",
-          "icon": "slack"
+          "anchor": "Github",
+          "href": "https://getcellm.com/getcellm/cellm",
+          "icon": "github"
         },
         {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
+          "anchor": "Discord",
+          "href": "https://discord.gg/zApxYpe2ZW",
+          "icon": "discord"
         }
       ]
     }
@@ -91,13 +92,14 @@
     ],
     "primary": {
       "type": "button",
-      "label": "Cellm",
+      "label": "Sign up",
       "href": "https://getcellm.com"
     }
   },
   "footer": {
     "socials": {
-      "github": "https://github.com/getcellm/cellm"
+      "github": "https://github.com/getcellm/cellm",
+      "discord": "https://discord.gg/zApxYpe2ZW"
     }
   }
 }

@@ -1,6 +1,105 @@
 ---
 title: 'Local Models'
-description: 'How to use Cellm'
+description: 'How to use local models'
+icon: 'server'
 ---
 
-## Setup your development
+Cellm supports local models that run on your computer via Llamafiles, Ollama, or vLLM. This ensures none of your data ever leaves your machine. And it's free. 
+
+On this page you will learn what to consider when choosing a model and how to run a model locally.
+
+## Choosing a model
+We split local models into three tiers based on their size and capabilities, balancing speed, intelligence, and world knowledge:
+
+|              | Small (0.5-3B) | Medium (4B-9B) | Large (10B-32B) |
+| ------------ | -------------- | -------------- | --------------- |
+| Speed        | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" />  | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" />             | <Icon icon="star" iconType="solid" /> | 
+| Intelligence  | <Icon icon="star" iconType="solid" /> | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /> | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" />  | 
+| World Knowledge | <Icon icon="star" iconType="regular" /> | <Icon icon="star" iconType="solid" /> | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /> |
+| Recommended model | Gemma 2 2B | Qwen 2.5 7B | Mistral Small 3 |
+
+<Tip>
+You need a GPU for any of the medium or large models to be useful in practice. If you don't have a GPU, you can use [Hosted Models](/models/hosted-models.mdx) if small ones are insufficient.
+</Tip>
+
+
+In general, smaller models are faster and less intelligent, larger models are slower and more intelligent. When using local models, it's important to find the right balance for your task, because speed impact your productivity and intelligence impact your results. You should try out different models and choose the smallest model that gives you good results. 
+
+Small model are sufficient for many common tasks such as categorizing text or extracting person names from news articles. Medium models are appropriate for more complex tasks such as document review, survery analysis, or tasks involving function calling. Large models are useful for creative writing, tasks requiring nuanced language understanding such as spam detection, or tasks requiring world knowledge. 
+
+Models larger than 32B require significant hardware investment to run locally and you are better off using [Hosted Models](/models/hosted-models.mdx) if you need this kind of intelligence and don't have the hardware already.
+
+## Run models locally
+You need to run a program on your computer that servers models to Cellm. We call these programs "providers". Cellm supports Ollama, Llamafiles, and vLLM, as well as any OpenAI-compatible provider. If you don't know any of these names, just use Ollama.
+
+### Ollama 
+
+To get started with Ollama, we recommend you try out the Gemma 2 2B model, which is Cellm's default local model. 
+
+1. Download and install [Ollama](https://ollama.com/). Ollama will start after the install and automatically run whenever you start up your computer.
+2. In Excel, select a cell and type out the formulas `=PROMPT("Which model are you and who made you?")`. The model will tell you that is called "Gemma" and made by Google DeepMind.
+
+Cellm will automatically instruct Ollama to download a model for you for first time you prompt it. The first prompt will therefore take a while.
+
+<Info>
+See [https://ollama.com/search](https://ollama.com/search) for a complete list of Ollama models.
+</Info>
+
+### LLamafile
+
+Llamafile is project by Mozilla that combines llama.cpp with Cosmopolitan Libc, enabling you to download and run a single-file executable (called a "llamafile") that runs locally on most computers, with no installation. To get started:
+
+1. Download a llamafile from https://github.com/Mozilla-Ocho/llamafile (e.g. [Gemma 2 2B](https://huggingface.co/Mozilla/gemma-2-2b-it-llamafile/blob/main/gemma-2-2b-it.Q6_K.llamafile?download=true)).
+2. Run the following command in your Windows terminal:
+    ```cmd
+    .\gemma-2-2b-it.Q6_K.llamafile.exe --server --v2
+    ```
+
+    To offload inference to your NVIDIA or AMD GPU, run:
+
+    ```cmd
+    .\gemma-2-2b-it.Q6_K.llamafile.exe --server --v2 -ngl 999
+    ```
+
+3. Start Excel and select the `Llamafile` provider from the model drop-down on Cellm's ribbon menu. Llamafiles ignore a model's name because a particular Llamafile serves only one model anyway. The names is required though, and the default name is simply "default".
+
+<Tip>
+Llamafiles are especially useful if you don't have the necessary permissions to install programs on your computer.
+</Tip>
+
+### Dockerized Ollama and vLLM
+
+If you prefer to run models via docker, both Ollama and vLLM are packaged up with docker compose files in the `docker/` folder. vLLM is designed to run many requests in parallel and particularly useful if you need to process a lot of data with Cellm.
+
+To get started, we recommend using Ollama with the Gemma 2 2B model:
+
+1. Clone the source code:
+   ```cmd
+   git clone https://github.com/getcellm/cellm
+   ```
+
+2. Run the following command in the `docker/` directory:   
+   ```cmd
+   docker compose -f docker-compose.Ollama.yml up --detach
+   docker compose -f docker-compose.Ollama.yml down  // When you want to shut it down
+   ```
+
+To use other Ollama models, pull another of the [supported models](https://ollama.com/search). If you want to speed up inference, you can use your GPU as well:
+
+```cmd
+docker compose -f docker-compose.Ollama.yml -f docker-compose.Ollama.GPU.yml up --detach
+```
+
+If you want to further speed up running many requests in parallel, you can use vLLM instead of Ollama. You must supply the docker compose file with a Hugging Face API key either via an environment variable or editing the docker compose file directy. Look at the vLLM docker compose file for details. If you don't know what a Hugging Face API key is, just use Ollama. 
+
+To start vLLM:
+
+```cmd
+docker compose -f docker-compose.vLLM.GPU.yml up --detach
+```
+
+To use other vLLM models, change the "--model" argument in the docker compose file to another Hugging Face model.
+
+<Tip>
+Open WebUI is included in both Ollama and vLLM docker compose files so you can test the local model outside of Cellm. It is available at `http://localhost:3000`.
+</Tip>

@@ -1,6 +1,16 @@
 ---
 title: 'Hosted Models'
-description: 'How to use Cellm'
+description: 'How to use hosted models'
+icon: 'network-wired'
 ---
 
-## Setup your development
+Cellm supports hosted models from Anthropic, DeepSeek, OpenAI, Mistral, and any OpenAI-compatible cloud provider. These models are more powerful than anything you can run on your own computer.
+
+### Add other OpenAI-compatible providers
+You can add support for model providers that are not shipped with Cellm as long as they are compatible with OpenAI's API e.g. OpenRouter or LiteLLM.
+
+In Cellm's ribbon menu, type `openaicompatible/modelid` in the drop-down menu's text field. Point the address to the OpenAI-compatible endpoint and set the API key if needed.
+
+You can also add models to the preset drop-down list via the `appsettings.*.json` files in the `src/Cellm` folder. Use `appsettings.Local.OpenAiCompatible.json` as a starting point, edit the values, and put it next to `Cellm-AddIn64-packed.xll` as `appsettings.Local.json`. 
+
+In general, you should leave `appsettings.json` alone and add your own configuration to `appsettings.Local.json` only. Any settings in `appsettings.Local.json` will override the default settings in `appsettings.json`.
