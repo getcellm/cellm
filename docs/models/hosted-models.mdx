@@ -20,11 +20,7 @@ We split hosted models into three tiers based on their size and capabilities, ba
 
 ## Using a hosted model
 
-To use hosted models you need an API key. In this example, we will show you how to use the Mistral API in Cellm. Mistral has a generous free tier that let's you use 1000,000,000 tokens per month at a rate of 1 request per second.
-
-<Warning>
-Mistral explicitly states that they are allowed to train future AI models on the data you send them under the free tier. That is why it is free. At least they are honest about it.
-</Warning>
+To use hosted models you need an API key. In this example, we will show you how to use the Mistral API in Cellm. Mistral has a generous free tier that let's you use 1000,000,000 tokens per month at a maximum rate of 1 request per second and 500,000 tokens per minute.
 
 1. Create a Mistral account at [https://auth.mistral.ai/ui/](https://auth.mistral.ai/ui/).
 
@@ -37,6 +33,10 @@ Mistral explicitly states that they are allowed to train future AI models on the
 4. Select e.g. `mistral/mistral-small-latest` and go nuts.
 
 The process for getting an API key is more or less the same for Anthropic, DeepSeek, and OpenAI except that they require a paid subscription.
+
+<Warning>
+Mistral explicitly states that they are allowed to train future AI models on the data you send them under the free tier. That is why it is free. At least they are honest about it.
+</Warning>
 
 ### Add other OpenAI-compatible providers
 You can call models that are not preconfigured in Cellm as long as they are compatible with OpenAI's API. This means you can also use OpenRouter or LiteLLM.
