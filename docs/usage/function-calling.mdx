@@ -1,5 +1,57 @@
 ---
 title: 'Function Calling'
-description: 'Use LLMs in Excel formulas'
+description: 'Enable Cellm models to call external functions'
 icon: 'function'
 ---
+
+Function Calling allows Cellm to interact with external tools and data, like searching files on your disk and reading their contents. When enabled, the model can dynamically call functions to retrieve relevant data before responding. Combined with Excels other functions, function calling makes Cellm a powerful low-code automation tool.
+
+## Enabling function calling
+To allow models to call external functions, open the **Cellm** ribbon in Excel and check the functions you want to enable:
+
+- **File Search**: Searches your local disk using glob patterns.
+- **File Reader**: Reads file contents, such as extracting text from PDFs.
+
+<Frame>
+  <img src="/images/usage/functions.png" />
+</Frame>
+
+## Calling a function
+When function calling is enabled, you can write prompts that leverage these functions. The the model will decide when to call them based on context.
+
+### Example 1: Searching for Files
+
+```excel
+=PROMPT("Which PDF files do I have in the folder C:\Users\<username>\Downloads?")
+```
+If **File Search** is enabled, the AI can automatically retrieve the list of PDF files in the specified directory.
+
+### Example 2: Extracting Text from a File
+```excel
+=PROMPT("Read the contents of 'C:\Users\<username>\Downloads\report.pdf' and summarize it.")
+```
+If **File Reader** is enabled, the AI will extract text from the file and generate a summary.
+
+### Example 3: Advanced Usage with Cell References
+You can reference cells to dynamically change function inputs. Imagine you have many folders with sales data in CSV files. Each folder contains files for a specific month. How can you quickly get an overview of sales trends? You write this in B1 and drag the prompt across 
+```excel
+=PROMPT(A1, "Find all CSV files in the folder, extract the revenue column, and and summarize trends.")
+```
+If `A1` contains `"*.csv"`, Cellm will search for all CSV files.
+
+### Dos and Don'ts
+#### Do:
+- Enable function calling only when needed.
+- Use cell references for dynamic queries.
+- Ensure file paths are correct and accessible.
+
+#### Don't:
+- Don't enable functions if you don’t want the model to access files.
+- Don't expect AI to perform complex file manipulations beyond reading content.
+- Don't use function calling for sensitive or confidential data unless running models locally.
+
+---
+Learn more about how to use AI models effectively in Excel.
+
+
+

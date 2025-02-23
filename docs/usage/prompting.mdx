@@ -13,13 +13,11 @@ For example, you can write `=PROMPT("Hello, what model are you and who made you?
   <img src="/images/usage/first-prompt.png" />
 </Frame>
 
-## Referecing data in other cells
+## Referencing data in other cells
 
-Cellm becomes really powerful when you reference other cells and drag a prompt formula across many rows with data in them. This allows to dynamically modify the context for your prompts based on data elsewhere in your spreadsheet.
+Cellm becomes powerful when you reference other cells and drag a prompt formula across many rows with data in them. This allows you to dynamically modify the context for your prompts based on data elsewhere in your spreadsheet.
 
-For example, you can import a CSV with a million news articles, write in a cell e.g. `=PROMPT(A1, "Extract all person names mentioned in the text.")` in a cell's formula and drag the the cell down across all rows, then watch it happily chugging along until all rows are processed. Oddly satis fying. Cellm is useful when you want to use AI for repetitive tasks that would normally require copy-pasting data in and out of a chat window many times.
-
-
+For example, you can import a CSV with a million news articles, write in a cell e.g. `=PROMPT(A1, "Extract all person names mentioned in the text.")` in a cell's formula and drag the the cell down across all rows, then watch it happily chugging along until all rows are processed. Oddly satisfying. Cellm is useful when you want to use AI for repetitive tasks that would normally require copy-pasting data in and out of a chat window many times.
 
 
 ## Selecting a model
@@ -31,20 +29,9 @@ A model is denoted by its provider and name seperated by a forward slash (`/`). 
 
 The drop-down contains a list of preset models that offers a variety of speed and intelligence trade-offs.
 
-<CardGroup cols={2}>
-  <Card
-    title="Local Models"
-    icon="server"
-    href="/models/local-models">
-    Learn how to run models on your own computer. No data ever leaves your machine. And it's free.
-  </Card>
-  <Card
-    title="Hosted Models"
-    icon="network-wired"
-    href="/models/hosted-models">
-    Learn how to bring your own API key (BOYK) and use models from Anthropic, OpenAI, and others. 
-  </Card>
-</CardGroup>
+<Tip>
+You can use a speficic model in a single cell with the `=PROMPTWITH()` function. This function takes the model name as its first argument but is otherwise identical to `=PROMPT()`. For example: `=PROMPTWITH("openai/gpt4o", A1, "Extract all person names mentioned in the text.").
+</Tip>
 
 ## Dos And Don'ts
 Do:
@@ -61,3 +48,18 @@ Don't:
 - Don't use cloud model providers to process sensitive or confidential data.
 - Don't use extremely long prompts or give Cellm complex tasks. A normal chat UI lets you have a back and forth conversation which is better for exploring complex topics.
 - Don't use Cellm for tasks that require up-to-date information beyond the AI model's knowledge cutoff date _unless_ you provide the information as context.
+
+<CardGroup cols={2}>
+  <Card
+    title="Local Models"
+    icon="server"
+    href="/models/local-models">
+    Learn how to run models on your own computer. No data ever leaves your machine. And it's free.
+  </Card>
+  <Card
+    title="Hosted Models"
+    icon="network-wired"
+    href="/models/hosted-models">
+    Learn how to bring your own API key (BOYK) and use models from Anthropic, OpenAI, and others. 
+  </Card>
+</CardGroup>
