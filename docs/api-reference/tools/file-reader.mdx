@@ -1,0 +1,17 @@
+---
+title: 'File Reader'
+---
+
+Reads a file and returns its content as plain text.
+
+```csharp
+FileReader(filePath: string)
+```
+
+- **filePath (Required):** A path to a file on your disk.
+  - Supports extensions c, cpp, cs, csv, cxx, h, hxx, html, java, json, jsonl, md, pdf, php, py, rb, txt, and xml.
+- **Returns:** The content of the file as plain text.
+
+<Warning>
+You cannot call this function yourself, but you can instruct the model to call it for you.
+</Warning>

@@ -42,17 +42,17 @@
         "tab": "API Reference",
         "groups": [
           {
-            "group": "API Documentation",
+            "group": "Functions",
             "pages": [
-              "api-reference/introduction"
+              "api-reference/functions/prompt",
+              "api-reference/functions/prompt-with"
             ]
           },
           {
-            "group": "Endpoint Examples",
+            "group": "Tools",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete"
+              "api-reference/tools/file-search",
+              "api-reference/tools/file-reader"
             ]
           }
         ]
