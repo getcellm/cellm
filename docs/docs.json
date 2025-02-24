@@ -91,8 +91,8 @@
     ],
     "primary": {
       "type": "button",
-      "label": "Sign up",
-      "href": "https://getcellm.com"
+      "label": "Support",
+      "href": "https://github.com/getcellm/cellm/issues"
     }
   },
   "footer": {
