@@ -1,7 +1,6 @@
 <svg fill="none" height="48" viewBox="0 0 177 24" xmlns="http://www.w3.org/2000/svg">
-	<path d="M22 4V19H2L2 4L22 4Z" stroke="#33c480" stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" />
-	<line x1="22" x2="2" y1="9" y2="9" stroke="#33c480" stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" />
-	<line x1="22" x2="2" y1="14" y2="14" stroke="#33c480" stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" />
-	<path d="M12 19L12 4" stroke="#33c480" stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" />
-	<text x="32" y="20" font-family="Inter, sans-serif" font-weight="bold" font-size="24" fill="#fff">Cellm</text>
+  <g>
+    <path d="M17 20.5H20.5V13.5L3.5 13.5L3.5 20.5H12M6 3.5L3.5 3.5L3.5 10.5L20.5 10.5V3.5L11 3.5" stroke="#33c480" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> 
+  </g>
+  <text x="32" y="20" font-family="Inter, sans-serif" font-weight="bold" font-size="24" fill="#fff">Cellm</text>
 </svg>
