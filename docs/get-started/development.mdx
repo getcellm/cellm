@@ -1,0 +1,72 @@
+---
+title: 'Development'
+description: 'Get started with Cellm development and contributions'
+icon: 'code'
+---
+
+## Build with command line
+
+1. Clone this repository:
+   ```cmd
+   git clone https://github.com/getcellm/cellm.git
+   ```
+
+2. In your terminal, go into the root of the project directory:
+   ```cmd
+   cd cellm
+   ```
+
+3. Install dependencies:
+   ```cmd
+   dotnet restore
+   ```
+
+4. Build the project:
+   ```cmd
+   dotnet build --configuration Debug
+   ```
+
+## Build with Visual Studio
+
+1. In Visual Studio, go to File > Clone Repository.
+ 
+2. Set the Repository Location to `https://github.com/getcellm/cellm`, the Path to a directory of your choice, and click Clone.
+
+3. Run the "Excel" configuration. Visual Studio will build Cellm and open Excel. Click on "Enable this add-in for this session only" to load the build into Excel.
+
+## Debug with Visual Studio
+
+All Visual Studio's usual debugging tools works when you run the "Excel" configuration. You can set breakpoints, inspect runtime variables, and view log messages in the Output window. To exercise code, type e.g. `=PROMPT("Hello World")` in a cell's formula and run it. 
+
+## Contributing
+
+We welcome contributions to Cellm! This section will guide you through the process.
+
+1. Fork the repository on GitHub
+2. Create a new branch from `main` for your feature or bug fix:
+   ```cmd
+   git checkout -b your-feature-name
+   ```
+3. Make your changes.
+4. Commit your changes with clear, descriptive commit messages with [Conventional Commits](https://gist.github.com/qoomon/5dfcdf8eec66a051ecd85625518cfd13) prefixes (fix, feat, docs, refactor):
+   ```cmd
+   git commit -m "feat: descriptive message"
+   ```
+5. Push your branch to your fork:
+   ```cmd
+   git push origin your-feature-name
+   ```
+6. Open a Pull Request (PR) against our `main` branch
+
+### Contributor License Agreement (CLA)
+
+You must sign our [Contributor License Agreement (CLA)](https://github.com/getcellm/cellm/blob/main/CLA.md). This is a one-time requirement that grants us the necessary rights to use your contributions. The CLA signing process will be automatically initiated when you submit your first PR. Our bot will guide you through the process.
+
+### Getting Help
+
+If you have questions about contributing:
+- Open a GitHub issue for bug reports or feature discussions
+- Check existing issues and PRs to avoid duplicates
+- Join our community discussions in [Discord](https://discord.gg/zApxYpe2ZW) for general questions
+
+We review all PRs.

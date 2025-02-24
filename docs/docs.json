@@ -1,0 +1,104 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Cellm",
+  "colors": {
+    "primary": "#107C42",
+    "light": "#33C480",
+    "dark": "#185C37"
+  },
+  "favicon": "/favicon.svg",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Guides",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "get-started/overview",
+              "get-started/quickstart",
+              "get-started/install",
+              "get-started/development"
+            ]
+          },
+          {
+            "group": "Usage",
+            "pages": [
+              "usage/prompting",
+              "usage/function-calling"
+            ]
+          },
+          {
+            "group": "Models",
+            "pages": [
+              "models/local-models",
+              "models/hosted-models"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Functions",
+            "pages": [
+              "api-reference/functions/prompt",
+              "api-reference/functions/prompt-with"
+            ]
+          },
+          {
+            "group": "Tools",
+            "pages": [
+              "api-reference/tools/file-search",
+              "api-reference/tools/file-reader"
+            ]
+          }
+        ]
+      }
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Homepage",
+          "href": "https://docs.getcellm.com",
+          "icon": "house"
+        },
+        {
+          "anchor": "Github",
+          "href": "https://getcellm.com/getcellm/cellm",
+          "icon": "github"
+        },
+        {
+          "anchor": "Discord",
+          "href": "https://discord.gg/zApxYpe2ZW",
+          "icon": "discord"
+        }
+      ]
+    }
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Github",
+        "href": "https://getcellm.com/getcellm/cellm"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Support",
+      "href": "https://github.com/getcellm/cellm/issues"
+    }
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/getcellm/cellm",
+      "discord": "https://discord.gg/zApxYpe2ZW"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+---
+title: 'PROMPT'
+---
+
+```excel
+PROMPT(cells: range | instruction: string, [instruction: range or string | temperature: double], [temperature: double]): string
+```
+
+Allows you to call a model from a cell formula.
+
+- **cells (Required):** A cell or a range of cells.
+  - The model will use the cells as context and follow any instructions as long as they are present _somewhere_ in the cells. If you provide an instruction as second argument, the second argument instructions takes precedence.
+- **instructions (Optional):** A cell, a range of cells, or a string.
+  - The model will follow these instructions and ignore instructions in the cells of the first argument.
+  - Default: Empty. 
+- **temperature (Optional):** double. 
+    - A value between 0 and 1 that controls the balance between deterministic outputs and creative exploration. Lower values make the output more deterministic, higher values make it more random.
+  - Default: 0. The model will almost always give you the same result.
+- **Returns:** string.
+  - The AI model's response.
+
+Example usage:
+
+- `=PROMPT(A1:D10, "Extract keywords")` will use the selected range of cells as context and follow the instruction to extract keywords.
+- `=PROMPT(A1:D10, "Extract keywords", 0.7)` will use the selected range of cells as context, follow the instruction to extract keywords, and use a temperature of 0.7.
+- `=PROMPT(A1:D10)` will use the range of cells as context and follow instructions as long as they present _somewhere_ in the cells.
+- `=PROMPT(A1:D10, 0.7)` will use the selected range of cells as context, follow any instruction within the cells, and use a temperature of 0.7.

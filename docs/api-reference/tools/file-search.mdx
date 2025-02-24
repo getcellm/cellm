@@ -1,0 +1,21 @@
+---
+title: 'File Search'
+---
+
+Uses glob patterns to search for files on the your disk and returns matching file paths.
+
+```csharp
+FileReader(rootPath: string, includePatterns: [string], [excludePatterns: [string]])
+```
+
+- **rootPath (Required):** A string.
+  - The root directory to start the glob search from.
+- **includePatterns (Required):** List of strings.
+  - The list of glob patterns whose matches will be included in the result.
+- **excludePatterns (Optional):** List of strings. 
+  - A list of glob patterns whose matches will be excluded from the result.
+  - Default: Empty.
+
+<Warning>
+You cannot call this function yourself, but you can instruct the model to call it for you.
+</Warning>

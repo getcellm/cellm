@@ -1,0 +1,93 @@
+---
+title: 'Overview'
+description: 'Use LLMs in Excel formulas'
+icon: 'circle-info'
+---
+
+## What is Cellm?
+
+Cellm is an Excel extension that lets you use Large Language Models (LLMs) in cell formulas. Cellm is useful when you want to use AI for repetitive tasks that would normally require copy-pasting data in and out of a chat window many times. 
+
+For example, you can write `=PROMPT(A1, "Extract all person names mentioned in the text.")` in a cell's formula and drag the cell to apply the prompt to many rows. Cellm's `=PROMPT()` function will output the AI response to a range of text, similar to how Excel's =SUM() function will output the sum of a range of numbers. 
+
+## Get Started
+
+If you're new to Cellm, you can get started using the guides below.
+
+<CardGroup cols={2}>
+  <Card
+    title="Install"
+    icon="download"
+    href="/get-started/install">
+    Get started with Cellm in minutes, by downloading and adding it to Excel.
+  </Card>
+  <Card
+    title="Quickstart"
+    icon="rocket"
+    href="/get-started/quickstart">
+    Learn how to use AI in Excel and quickly apply prompts to thousands of rows. 
+  </Card>
+</CardGroup>
+
+## Usage
+
+Cellm has a small set of core features that seamlessly integrates with Excel workflows. Use the links below to learn more about what Cellm can do. 
+
+<CardGroup cols={2}>
+  <Card
+    title="Prompting"
+    icon="text"
+    href="/usage/prompting">
+    Learn how to use Cellm to automate repetitive tasks in Excel.
+  </Card>
+  <Card
+    title="Function Calling"
+    icon="function"
+    href="/usage/function-calling">
+    Learn how to use Excel as a low-code task orchestrator by enabling Cellm to access external tools and data.
+  </Card>
+  <Card
+    title="Local Models"
+    icon="server"
+    href="/models/local-models">
+    Learn how to run models on your own computer. No data ever leaves your machine. And it's free.
+  </Card>
+  <Card
+    title="Hosted Models"
+    icon="network-wired"
+    href="/models/hosted-models">
+    Learn how to bring your own API key (BOYK) and use models from Anthropic, OpenAI, and others.
+  </Card>
+</CardGroup>
+
+## Where did Cellm come from?
+
+A friend of ours was writing a systematic review paper. She had to compare 7,500 papers against inclusion and exclusion criterias. We figured this was a great use case for LLMs but quickly realized that individually copying 7,500 papers in and out of chat windows was a total pain. This sparked the idea to make an AI tool to automate repetitive tasks for people like her who would rather avoid programming.
+
+We think Cellm is really cool because it enables everyone to automate repetitive tasks with AI to a level that was previously available only to programmers.
+
+## How does it work?
+Cellm adds a few fundamental features to Excel that are only made possible by the development of AI:
+
+
+- Calls AI models via the `=PROMPT()` function and returns short answers suitable for cells.
+- Supports models from Anthropic, Mistral, OpenAI, and others as well as local models via Llamafiles, Ollama, or vLLM.
+
+
+## How do I get started?
+You download Cellm from the Github Releases page and add it to Excel. Being an Excel add-in, its extremely easy to get started. If you know how to use Excel's `=SUM()` function, you will quickly get the hang of Cellm's `=PROMPT()` function.
+
+<CardGroup cols={2}>
+  <Card
+    title="Quickstart"
+    icon="rocket"
+    href="/get-started/quickstart">
+    Get started with Cellm in minutes, by downloading and adding it to Excel.
+  </Card>
+  <Card
+    title="Prompting"
+    icon="text"
+    href="/usage/prompting">
+    Learn how to use AI in Excel and quickly apply prompts to thousands of rows. 
+  </Card>
+</CardGroup>

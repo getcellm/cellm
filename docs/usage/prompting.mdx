@@ -1,0 +1,65 @@
+---
+title: 'Prompting'
+description: 'Use LLMs in Excel formulas'
+icon: 'text'
+---
+
+## Writing your first prompt in Excel
+Cellm's `=PROMPT()` function outputs the AI response to a range of text, similar to how Excel's `=SUM()` function that outputs the sum of a range of numbers.  
+
+For example, you can write `=PROMPT("Hello, what model are you and who made you?")` in a cell's formula. The default model will tell you that is called "Gemma" and made by Google DeepMind.
+
+<Frame>
+  <img src="https://getcellm.com/docs/images/usage/first-prompt.png" />
+</Frame>
+
+## Referencing data in other cells
+
+Cellm becomes powerful when you reference other cells and drag a prompt formula across many rows with data in them. This allows you to dynamically modify the context for your prompts based on data elsewhere in your spreadsheet.
+
+For example, you can import a CSV with a million news articles, write in a cell e.g. `=PROMPT(A1, "Extract all person names mentioned in the text.")` in a cell's formula and drag the the cell down across all rows, then watch it happily chugging along until all rows are processed. Oddly satisfying. Cellm is useful when you want to use AI for repetitive tasks that would normally require copy-pasting data in and out of a chat window many times.
+
+
+## Selecting a model
+A model is denoted by its provider and name seperated by a forward slash (`/`). The default model is Gemma 2 2B served via Ollama. This is denoted by `ollama/gemme2:2b`. Gemma 2 2B is a clever little model thats runs fine on a normal computer without GPU off-loading. Expand the drop-down list in Cellm's ribbon menu select another model: 
+
+<Frame caption="Select a model via the drop-down list.">
+	<img src="https://getcellm.com/docs/images/usage/select-model.png" />
+</Frame>
+
+The drop-down contains a list of preset models that offers a variety of speed and intelligence trade-offs.
+
+<Tip>
+You can use a speficic model in a single cell with the `=PROMPTWITH()` function. This function takes the model name as its first argument but is otherwise identical to `=PROMPT()`. For example: `=PROMPTWITH("openai/gpt4o", A1, "Extract all person names mentioned in the text.").
+</Tip>
+
+## Dos And Don'ts
+Do:
+
+- Experiment with different prompts to find the most effective instructions for your data.
+- Use cell references to dynamically change your prompts based on other data in your spreadsheet.
+- Use local models for sensitive and confidential data.
+- Refer to the cell data as "context" in your instructions.
+- Verify at least a subset of a model's responses. Models will make errors and rely entirely on your input, which may also contain errors.
+
+Don't:
+
+- Don't use Cellm to compute sums, averages, and other numerical calculations. The current generation of LLMs are not designed for mathematical operations. Use Excel's existing functions instead.
+- Don't use cloud model providers to process sensitive or confidential data.
+- Don't use extremely long prompts or give Cellm complex tasks. A normal chat UI lets you have a back and forth conversation which is better for exploring complex topics.
+- Don't use Cellm for tasks that require up-to-date information beyond the AI model's knowledge cutoff date _unless_ you provide the information as context.
+
+<CardGroup cols={2}>
+  <Card
+    title="Local Models"
+    icon="server"
+    href="/models/local-models">
+    Learn how to run models on your own computer. No data ever leaves your machine. And it's free.
+  </Card>
+  <Card
+    title="Hosted Models"
+    icon="network-wired"
+    href="/models/hosted-models">
+    Learn how to bring your own API key (BOYK) and use models from Anthropic, OpenAI, and others. 
+  </Card>
+</CardGroup>

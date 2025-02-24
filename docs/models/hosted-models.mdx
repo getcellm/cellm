@@ -1,0 +1,48 @@
+---
+title: 'Hosted Models'
+description: 'How to use hosted models'
+icon: 'network-wired'
+---
+
+Cellm supports hosted models from Anthropic, DeepSeek, OpenAI, Mistral, and any OpenAI-compatible cloud provider. These models are more powerful than anything you can run on your own computer.
+
+On this page you will learn what to consider when choosing a hosted model.
+
+## Choosing a model
+We split hosted models into three tiers based on their size and capabilities, balancing speed, intelligence, and problem-solving skills:
+
+|              | Small | Large | Thinking |
+| ------------ | -------------- | -------------- | --------------- |
+| Speed        | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" />  | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" />             | <Icon icon="star" iconType="solid" /> | 
+| Intelligence  | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /> | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /> | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" />  | 
+| Problem-solving | <Icon icon="star" iconType="solid" /> | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /> | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /> |
+| Recommended model | Mistral Small 3 | Claude 3.5 Sonnet | DeepSeek R1 |
+
+## Using a hosted model
+
+To use hosted models you need an API key. In this example, we will show you how to use the Mistral API in Cellm. Mistral has a generous free tier that let's you use 1000,000,000 tokens per month at a maximum rate of 1 request per second and 500,000 tokens per minute.
+
+1. Create a Mistral account at [https://auth.mistral.ai/ui/](https://auth.mistral.ai/ui/).
+
+2. Under the `Le Platforme` tab, go to `API Keys` > `Create new key`. Give your key a name and an expiration date and click on `Create new key`. 
+
+3. Copy the key. Optionally, you can store it in a password manager so you don't have to create a new one if it gets deleted from Cellm.
+
+3. In Excel, go to Cellm's ribbon menu and paste the API key into the API Key text field in Cellm.
+
+4. Select e.g. `mistral/mistral-small-latest` and go nuts.
+
+The process for getting an API key is more or less the same for Anthropic, DeepSeek, and OpenAI except that they require a paid subscription.
+
+<Warning>
+Mistral explicitly states that they are allowed to train future AI models on the data you send them under the free tier. That is why it is free. At least they are honest about it.
+</Warning>
+
+### Add other OpenAI-compatible providers
+You can call models that are not preconfigured in Cellm as long as they are compatible with OpenAI's API. This means you can also use OpenRouter or LiteLLM.
+
+In Cellm's ribbon menu, type `openaicompatible/modelid` in the drop-down menu's text field. Point the address to the OpenAI-compatible endpoint and set your API key.
+
+You can also add models to the preset drop-down list via the `appsettings.*.json` files in the `src/Cellm` folder. Use `appsettings.Local.OpenAiCompatible.json` as a starting point, edit the values, and put it next to `Cellm-AddIn64-packed.xll` as `appsettings.Local.json`. 
+
+In general, you should leave `appsettings.json` alone and add your own configuration to `appsettings.Local.json` only. Any settings in `appsettings.Local.json` will override the default settings in `appsettings.json`.
