@@ -11,7 +11,7 @@ namespace Cellm.Tools;
 /// </summary>
 internal class Functions(ISender sender)
 {
-    [Description("Uses glob patterns to searches for files on the user's disk and returns matching file paths.")]
+    [Description("Uses glob patterns to search for files on the user's disk and returns matching file paths.")]
     [return: Description($"The list of file paths that matches {nameof(includePatterns)} and do not match {nameof(excludePatterns)}")]
     public async Task<GlobResponse> GlobRequest(
     [Description("The root directory to start the glob search from")] string rootPath,
