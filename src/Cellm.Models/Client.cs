@@ -15,8 +15,8 @@ internal class Client(ISender sender, ResiliencePipelineProvider<string> resilie
     {
         var retryPipeline = resiliencePipelineProvider.GetPipeline("RateLimiter");
 
-        return await retryPipeline.Execute(async () => 
-        { 
+        return await retryPipeline.Execute(async () =>
+        {
             IModelResponse response = provider switch
             {
                 Provider.Anthropic => await sender.Send(new AnthropicRequest(prompt), cancellationToken),

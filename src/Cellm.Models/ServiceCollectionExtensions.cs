@@ -68,7 +68,7 @@ public static class ServiceCollectionExtensions
                 {
                     QueueLimit = resilienceConfiguration.RateLimiterConfiguration.QueueLimit,
                     PermitLimit = resilienceConfiguration.RateLimiterConfiguration.ConcurrencyLimit,
-                    
+
                 })
                 .Build();
         });
