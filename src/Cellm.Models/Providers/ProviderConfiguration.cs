@@ -14,7 +14,5 @@ public class ProviderConfiguration : IProviderConfiguration
 
     public int CacheTimeoutInSeconds { get; init; } = 3600;
 
-    public int HttpTimeoutInSeconds { get; init; } = 600;
-
     public List<string> Models { get; init; } = [];
 }

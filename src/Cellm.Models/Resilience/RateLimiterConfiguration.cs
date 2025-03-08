@@ -1,6 +1,6 @@
 ﻿namespace Cellm.Models.Resilience;
 
-public class RateLimiterConfiguration
+internal class RateLimiterConfiguration
 {
     public int TokenLimit { get; init; }
 

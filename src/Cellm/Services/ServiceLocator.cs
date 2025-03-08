@@ -57,9 +57,7 @@ internal static class ServiceLocator
             .Configure<OpenAiConfiguration>(configuration.GetRequiredSection(nameof(OpenAiConfiguration)))
             .Configure<OpenAiCompatibleConfiguration>(configuration.GetRequiredSection(nameof(OpenAiCompatibleConfiguration)))
             .Configure<MistralConfiguration>(configuration.GetRequiredSection(nameof(MistralConfiguration)))
-            .Configure<RateLimiterConfiguration>(configuration.GetRequiredSection(nameof(RateLimiterConfiguration)))
-            .Configure<CircuitBreakerConfiguration>(configuration.GetRequiredSection(nameof(CircuitBreakerConfiguration)))
-            .Configure<RetryConfiguration>(configuration.GetRequiredSection(nameof(RetryConfiguration)))
+            .Configure<ResilienceConfiguration>(configuration.GetRequiredSection(nameof(ResilienceConfiguration)))
             .Configure<SentryConfiguration>(configuration.GetRequiredSection(nameof(SentryConfiguration)));
 
         // Logging
@@ -102,7 +100,9 @@ internal static class ServiceLocator
             .AddSingleton(configuration)
             .AddTransient<ArgumentParser>()
             .AddSingleton<Client>()
-            .AddSingleton<Serde>();
+            .AddSingleton<Serde>()
+            .AddRateLimiter(configuration)
+            .AddRetryHttpClient(configuration);
 
 #pragma warning disable EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates.
         services
@@ -117,8 +117,7 @@ internal static class ServiceLocator
             .AddMistralChatClient()
             .AddOllamaChatClient()
             .AddOpenAiChatClient()
-            .AddOpenAiCompatibleChatClient()
-            .AddResilientHttpClient(configuration);
+            .AddOpenAiCompatibleChatClient();
 
         // Add tools
         services

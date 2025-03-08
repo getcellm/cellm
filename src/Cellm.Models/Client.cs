@@ -1,20 +1,21 @@
-﻿using Cellm.Models.Exceptions;
-using Cellm.Models.Prompts;
+﻿using Cellm.Models.Prompts;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
 using Cellm.Models.Providers.Ollama;
 using Cellm.Models.Providers.OpenAi;
 using Cellm.Models.Providers.OpenAiCompatible;
 using MediatR;
-using Polly.Timeout;
+using Polly.Registry;
 
 namespace Cellm.Models;
 
-internal class Client(ISender sender)
+internal class Client(ISender sender, ResiliencePipelineProvider<string> resiliencePipelineProvider)
 {
     public async Task<Prompt> Send(Prompt prompt, Provider provider, CancellationToken cancellationToken)
     {
-        try
+        var retryPipeline = resiliencePipelineProvider.GetPipeline("RateLimiter");
+
+        return await retryPipeline.Execute(async () =>
         {
             IModelResponse response = provider switch
             {
@@ -29,23 +30,6 @@ internal class Client(ISender sender)
             };
 
             return response.Prompt;
-        }
-        catch (HttpRequestException ex)
-        {
-            throw new CellmModelException($"HTTP request failed: {ex.Message}", ex);
-        }
-        catch (NullReferenceException ex)
-        {
-            throw new CellmModelException($"Null reference exception: {ex.Message}", ex);
-        }
-        catch (TimeoutRejectedException ex)
-        {
-            throw new CellmModelException($"Request timed out: {ex.Message}", ex);
-        }
-        catch (Exception ex) when (ex is not CellmModelException)
-        {
-            // Handle any other unexpected exceptions
-            throw new CellmModelException($"An unexpected error occurred: {ex.Message}", ex);
-        }
+        });
     }
 }

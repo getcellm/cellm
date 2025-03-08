@@ -1,5 +1,6 @@
 ﻿using System.ClientModel;
 using System.ClientModel.Primitives;
+using System.Threading.RateLimiting;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
 using Cellm.Models.Providers.DeepSeek;
@@ -15,6 +16,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using OpenAI;
+using Polly;
+using Polly.CircuitBreaker;
+using Polly.Retry;
 
 namespace Cellm.Models;
 
@@ -43,41 +47,116 @@ public static class ServiceCollectionExtensions
         return builder;
     }
 
-    public static IServiceCollection AddResilientHttpClient(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddRateLimiter(this IServiceCollection services, IConfiguration configuration)
     {
-        var resiliencePipelineConfigurator = new ResiliencePipelineConfigurator(configuration);
+        var resilienceConfiguration = configuration
+            .GetSection(nameof(ResilienceConfiguration))
+            .Get<ResilienceConfiguration>()
+            ?? throw new ArgumentException(nameof(ResilienceConfiguration));
+
+        services.AddResiliencePipeline("RateLimiter", builder =>
+        {
+            builder
+                .AddRateLimiter(new TokenBucketRateLimiter(new TokenBucketRateLimiterOptions
+                {
+                    QueueLimit = resilienceConfiguration.RateLimiterConfiguration.QueueLimit,
+                    TokenLimit = resilienceConfiguration.RateLimiterConfiguration.TokenLimit,
+                    ReplenishmentPeriod = TimeSpan.FromSeconds(resilienceConfiguration.RateLimiterConfiguration.ReplenishmentPeriodInSeconds),
+                    TokensPerPeriod = resilienceConfiguration.RateLimiterConfiguration.TokensPerPeriod,
+                }))
+                .AddConcurrencyLimiter(new ConcurrencyLimiterOptions
+                {
+                    QueueLimit = resilienceConfiguration.RateLimiterConfiguration.QueueLimit,
+                    PermitLimit = resilienceConfiguration.RateLimiterConfiguration.ConcurrencyLimit,
+
+                })
+                .Build();
+        });
+
+        return services;
+    }
+
+    public static IServiceCollection AddRetryHttpClient(this IServiceCollection services, IConfiguration configuration)
+    {
+        var resilienceConfiguration = configuration
+            .GetSection(nameof(ResilienceConfiguration))
+            .Get<ResilienceConfiguration>()
+            ?? throw new ArgumentException(nameof(ResilienceConfiguration));
 
         services
             .AddHttpClient("ResilientHttpClient", resilientHttpClient =>
             {
-                resilientHttpClient.Timeout = TimeSpan.FromSeconds(configuration
-                    .GetSection(nameof(ProviderConfiguration))
-                    .GetValue<int>(nameof(ProviderConfiguration.HttpTimeoutInSeconds)));
+                // Delegate timeout to resilience pipeline
+                resilientHttpClient.Timeout = Timeout.InfiniteTimeSpan;
             })
             .AddAsKeyed()
-            .AddResilienceHandler("ResilientHttpClientHandler", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
+            .AddResilienceHandler("RetryHttpClientHandler", builder =>
+            {
+                _ = builder
+                    .AddRetry(new RetryStrategyOptions<HttpResponseMessage>
+                    {
+                        ShouldHandle = args => ValueTask.FromResult(RetryHttpClientHelpers.ShouldRetry(args.Outcome)),
+                        BackoffType = DelayBackoffType.Exponential,
+                        UseJitter = true,
+                        MaxRetryAttempts = resilienceConfiguration.RetryConfiguration.MaxRetryAttempts,
+                        Delay = TimeSpan.FromSeconds(resilienceConfiguration.RetryConfiguration.DelayInSeconds),
+                    })
+                    .AddCircuitBreaker(new CircuitBreakerStrategyOptions<HttpResponseMessage>
+                    {
+                        ShouldHandle = args => ValueTask.FromResult(RetryHttpClientHelpers.ShouldBreakCircuit(args.Outcome)),
+                        FailureRatio = resilienceConfiguration.CircuitBreakerConfiguration.FailureRatio,
+                        SamplingDuration = TimeSpan.FromSeconds(resilienceConfiguration.CircuitBreakerConfiguration.SamplingDurationInSeconds),
+                        MinimumThroughput = resilienceConfiguration.CircuitBreakerConfiguration.MinimumThroughput,
+                        BreakDuration = TimeSpan.FromSeconds(resilienceConfiguration.CircuitBreakerConfiguration.BreakDurationInSeconds),
+                    })
+                    .AddTimeout(TimeSpan.FromSeconds(resilienceConfiguration.RetryConfiguration.HttpTimeoutInSeconds))
+                    .Build();
+            });
 
         return services;
     }
 
     public static IServiceCollection AddAnthropicChatClient(this IServiceCollection services, IConfiguration configuration)
     {
+        var anthropicConfiguration = configuration
+            .GetSection(nameof(AnthropicConfiguration))
+            .Get<AnthropicConfiguration>()
+            ?? throw new ArgumentException(nameof(AnthropicConfiguration));
 
-        var resiliencePipelineConfigurator = new ResiliencePipelineConfigurator(configuration);
-
-        var anthropicConfiguration = configuration.GetRequiredSection(nameof(AnthropicConfiguration)).Get<AnthropicConfiguration>()
-            ?? throw new NullReferenceException(nameof(AnthropicConfiguration));
+        var resilienceConfiguration = configuration
+            .GetSection(nameof(ResilienceConfiguration))
+            .Get<ResilienceConfiguration>()
+            ?? throw new ArgumentException(nameof(ResilienceConfiguration));
 
         services
             .AddHttpClient<IRequestHandler<AnthropicRequest, AnthropicResponse>, AnthropicRequestHandler>(anthropicHttpClient =>
             {
                 anthropicHttpClient.BaseAddress = anthropicConfiguration.BaseAddress;
                 anthropicHttpClient.DefaultRequestHeaders.Add("anthropic-version", anthropicConfiguration.Version);
-                anthropicHttpClient.Timeout = TimeSpan.FromSeconds(configuration
-                    .GetSection(nameof(ProviderConfiguration))
-                    .GetValue<int>(nameof(ProviderConfiguration.HttpTimeoutInSeconds)));
+                anthropicHttpClient.Timeout = TimeSpan.FromSeconds(resilienceConfiguration.RetryConfiguration.HttpTimeoutInSeconds);
             })
-            .AddResilienceHandler($"{nameof(AnthropicRequestHandler)}{nameof(ResiliencePipelineConfigurator)}", resiliencePipelineConfigurator.ConfigureResiliencePipeline);
+            .AddResilienceHandler($"{nameof(AnthropicRequestHandler)}RetryHttpClientHandler", builder =>
+            {
+                _ = builder
+                    .AddRetry(new RetryStrategyOptions<HttpResponseMessage>
+                    {
+                        ShouldHandle = args => ValueTask.FromResult(RetryHttpClientHelpers.ShouldRetry(args.Outcome)),
+                        BackoffType = DelayBackoffType.Exponential,
+                        UseJitter = true,
+                        MaxRetryAttempts = resilienceConfiguration.RetryConfiguration.MaxRetryAttempts,
+                        Delay = TimeSpan.FromSeconds(resilienceConfiguration.RetryConfiguration.DelayInSeconds),
+                    })
+                    .AddCircuitBreaker(new CircuitBreakerStrategyOptions<HttpResponseMessage>
+                    {
+                        ShouldHandle = args => ValueTask.FromResult(RetryHttpClientHelpers.ShouldBreakCircuit(args.Outcome)),
+                        FailureRatio = resilienceConfiguration.CircuitBreakerConfiguration.FailureRatio,
+                        SamplingDuration = TimeSpan.FromSeconds(resilienceConfiguration.CircuitBreakerConfiguration.SamplingDurationInSeconds),
+                        MinimumThroughput = resilienceConfiguration.CircuitBreakerConfiguration.MinimumThroughput,
+                        BreakDuration = TimeSpan.FromSeconds(resilienceConfiguration.CircuitBreakerConfiguration.BreakDurationInSeconds),
+                    })
+                    .AddTimeout(TimeSpan.FromSeconds(resilienceConfiguration.RetryConfiguration.HttpTimeoutInSeconds))
+                    .Build();
+            });
 
         // TODO: Add IChatClient-compatible Anthropic client
 
