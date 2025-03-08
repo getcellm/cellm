@@ -1,6 +1,6 @@
 ﻿namespace Cellm.Models.Resilience;
 
-public class CircuitBreakerConfiguration
+internal class CircuitBreakerConfiguration
 {
     public int SamplingDurationInSeconds { get; init; }
 

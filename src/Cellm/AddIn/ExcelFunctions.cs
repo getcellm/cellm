@@ -94,7 +94,7 @@ public static class ExcelFunctions
                 .AddUserMessage(userMessage)
                 .Build();
 
-            // ExcelAsyncUtil yields Excel's main thread, Task.Run enables async/await in inner code
+            // ExcelAsyncUtil.Run yields Excel's UI thread, Task.Run enables async/await in inner code
             return ExcelAsyncUtil.Run(nameof(PromptWith), new object[] { providerAndModel, instructionsOrContext, instructionsOrTemperature, temperature }, () =>
             {
                 return Task.Run(async () => await CompleteAsync(prompt, arguments.Provider)).GetAwaiter().GetResult();
