@@ -94,10 +94,12 @@ public static class ExcelFunctions
                 .AddUserMessage(userMessage)
                 .Build();
 
-            return ExcelAsyncUtil.RunTask(
-                nameof(PromptWith),
-                new object[] { providerAndModel, instructionsOrContext, instructionsOrTemperature, temperature },
-                () => CompleteAsync(prompt, arguments.Provider));
+            // ExcelAsyncUtil yields Excel's main thread, Task.Run enables async/await in inner code
+            return ExcelAsyncUtil.Run(nameof(PromptWith), new object[] { providerAndModel, instructionsOrContext, instructionsOrTemperature, temperature }, () =>
+            {
+                return Task.Run(async () => await CompleteAsync(prompt, arguments.Provider)).GetAwaiter().GetResult();
+            });
+
         }
         catch (CellmException ex)
         {
