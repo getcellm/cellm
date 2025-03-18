@@ -98,6 +98,13 @@ public class ExcelRibbon : ExcelDna.Integration.CustomUI.ExcelRibbon
                  screentip="Lets a model specify a file path and get back its content as plain text. Supports PDF, Markdown, and common text formats."
                  onAction="OnFileReaderToggled"
                  getPressed="OnGetFileReaderPressed" />
+        <checkBox id="websearch" label="Web Search" 
+            screentip="Lets the model search the web."
+            enabled="false" />
+        <checkBox id="webreader" label="Web Reader" 
+                 screentip="Lets the model get the contents of a web page url."
+                 onAction="OnWebReaderToggled"
+                 getPressed="OnGetWebReaderPressed" />
          </menu>
     </splitButton>
 </group>

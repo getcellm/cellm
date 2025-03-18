@@ -127,7 +127,8 @@ internal static class ServiceLocator
             .AddSingleton<Functions>()
             .AddTools(
                 serviceProvider => AIFunctionFactory.Create(serviceProvider.GetRequiredService<Functions>().GlobRequest),
-                serviceProvider => AIFunctionFactory.Create(serviceProvider.GetRequiredService<Functions>().FileReaderRequest));
+                serviceProvider => AIFunctionFactory.Create(serviceProvider.GetRequiredService<Functions>().FileReaderRequest),
+                serviceProvider => AIFunctionFactory.Create(serviceProvider.GetRequiredService<Functions>().WebReaderRequest));
 
         return services;
     }
