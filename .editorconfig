@@ -82,3 +82,7 @@ dotnet_style_null_propagation = true:suggestion
 
 [*.{cs,vb}]
 dotnet_sort_system_directives_first = true
+
+[*.cs]
+# Some ExcelDna calls are not supported on all platforms: "This call site is reachable on all platforms. '...' is only supported on: 'Windows' 7.0 and later.
+dotnet_diagnostic.CA1416.severity = none

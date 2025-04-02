@@ -5,6 +5,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
+    
+    <!-- Required for GitVersion.MsBuild -->
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -20,6 +23,10 @@
   <ItemGroup>
     <PackageReference Include="ExcelDna.Addin" Version="1.9.0-alpha3" />
     <PackageReference Include="ExcelDna.Interop" Version="15.0.1" />
+    <PackageReference Include="GitVersion.MsBuild" Version="6.2.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="MediatR" Version="12.4.1" />
     <PackageReference Include="Microsoft.Extensions.AI" Version="9.1.0-preview.1.25064.3" />
     <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="9.1.0-preview.1.25064.3" />
