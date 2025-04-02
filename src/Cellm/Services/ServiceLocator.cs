@@ -70,12 +70,17 @@ internal static class ServiceLocator
         services
           .AddLogging(loggingBuilder =>
           {
+              var assembly = Assembly.GetExecutingAssembly();
+              var gitVersionInformationType = assembly.GetType("GitVersionInformation");
+              var assemblyInformationalVersion = gitVersionInformationType?.GetField("AssemblyInformationalVersion");
+
               loggingBuilder
                   .AddConsole()
                   .AddDebug()
                   .AddSentry(sentryLoggingOptions =>
                   {
                       sentryLoggingOptions.InitializeSdk = sentryConfiguration.IsEnabled;
+                      sentryLoggingOptions.Release = GetReleaseVersion();
                       sentryLoggingOptions.Dsn = sentryConfiguration.Dsn;
                       sentryLoggingOptions.Debug = cellmConfiguration.Debug;
                       sentryLoggingOptions.DiagnosticLevel = SentryLevel.Debug;
@@ -130,6 +135,24 @@ internal static class ServiceLocator
                 serviceProvider => AIFunctionFactory.Create(serviceProvider.GetRequiredService<Functions>().FileReaderRequest));
 
         return services;
+    }
+
+    public static string GetReleaseVersion()
+    {
+        var releaseVersion = "unknown";
+
+        var value = Assembly
+            .GetExecutingAssembly()
+            .GetType("GitVersionInformation")?
+            .GetField("AssemblyInformationalVersion")?
+            .GetValue(null);
+
+        if (value is string valueAsString)
+        {
+            releaseVersion = valueAsString;
+        }
+
+        return releaseVersion;
     }
 
     public static void Dispose()
