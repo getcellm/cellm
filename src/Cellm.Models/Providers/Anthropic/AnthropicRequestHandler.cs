@@ -82,8 +82,8 @@ internal class AnthropicRequestHandler : IModelRequestHandler<AnthropicRequest, 
             .AddAssistantMessage(assistantMessage)
             .Build();
 
-        var chatCompletion = new ChatCompletion(new ChatMessage(ChatRole.Assistant, assistantMessage));
+        var chatResponse = new ChatResponse(new ChatMessage(ChatRole.Assistant, assistantMessage));
 
-        return new AnthropicResponse(prompt, chatCompletion);
+        return new AnthropicResponse(prompt, chatResponse);
     }
 }

@@ -13,12 +13,12 @@ internal class OpenAiCompatibleRequestHandler()
     {
         var chatClient = ServiceLocator.ServiceProvider.GetRequiredKeyedService<IChatClient>(request.Provider);
 
-        var chatCompletion = await chatClient.CompleteAsync(request.Prompt.Messages, request.Prompt.Options, cancellationToken);
+        var chatResponse = await chatClient.GetResponseAsync(request.Prompt.Messages, request.Prompt.Options, cancellationToken);
 
         var prompt = new PromptBuilder(request.Prompt)
-            .AddMessage(chatCompletion.Message)
+            .AddMessage(chatResponse.Messages.First())
             .Build();
 
-        return new OpenAiCompatibleResponse(prompt, chatCompletion);
+        return new OpenAiCompatibleResponse(prompt, chatResponse);
     }
 }

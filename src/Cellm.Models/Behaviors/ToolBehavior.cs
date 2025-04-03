@@ -13,7 +13,7 @@ internal class ToolBehavior<TRequest, TResponse>(IOptionsMonitor<ProviderConfigu
         if (providerConfiguration.CurrentValue.EnableTools.Any(t => t.Value))
         {
             request.Prompt.Options.Tools = functions
-                .Where(f => providerConfiguration.CurrentValue.EnableTools[f.Metadata.Name])
+                .Where(f => providerConfiguration.CurrentValue.EnableTools[f.Name])
                 .ToList<AITool>();
         }
 
