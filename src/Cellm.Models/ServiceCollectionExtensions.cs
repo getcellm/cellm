@@ -1,6 +1,7 @@
 ﻿using System.ClientModel;
 using System.ClientModel.Primitives;
 using System.Threading.RateLimiting;
+using Anthropic.SDK;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
 using Cellm.Models.Providers.DeepSeek;
@@ -10,7 +11,6 @@ using Cellm.Models.Providers.Ollama;
 using Cellm.Models.Providers.OpenAi;
 using Cellm.Models.Providers.OpenAiCompatible;
 using Cellm.Models.Resilience;
-using MediatR;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -118,47 +118,18 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddAnthropicChatClient(this IServiceCollection services, IConfiguration configuration)
     {
-        var anthropicConfiguration = configuration
-            .GetSection(nameof(AnthropicConfiguration))
-            .Get<AnthropicConfiguration>()
-            ?? throw new ArgumentException(nameof(AnthropicConfiguration));
-
-        var resilienceConfiguration = configuration
-            .GetSection(nameof(ResilienceConfiguration))
-            .Get<ResilienceConfiguration>()
-            ?? throw new ArgumentException(nameof(ResilienceConfiguration));
-
         services
-            .AddHttpClient<IRequestHandler<AnthropicRequest, AnthropicResponse>, AnthropicRequestHandler>(anthropicHttpClient =>
+            .AddTransientKeyedChatClient(Provider.Anthropic, serviceProvider =>
             {
-                anthropicHttpClient.BaseAddress = anthropicConfiguration.BaseAddress;
-                anthropicHttpClient.DefaultRequestHeaders.Add("anthropic-version", anthropicConfiguration.Version);
-                anthropicHttpClient.Timeout = TimeSpan.FromSeconds(resilienceConfiguration.RetryConfiguration.HttpTimeoutInSeconds);
-            })
-            .AddResilienceHandler($"{nameof(AnthropicRequestHandler)}RetryHttpClientHandler", builder =>
-            {
-                _ = builder
-                    .AddRetry(new RetryStrategyOptions<HttpResponseMessage>
-                    {
-                        ShouldHandle = args => ValueTask.FromResult(RetryHttpClientHelpers.ShouldRetry(args.Outcome)),
-                        BackoffType = DelayBackoffType.Exponential,
-                        UseJitter = true,
-                        MaxRetryAttempts = resilienceConfiguration.RetryConfiguration.MaxRetryAttempts,
-                        Delay = TimeSpan.FromSeconds(resilienceConfiguration.RetryConfiguration.DelayInSeconds),
-                    })
-                    .AddCircuitBreaker(new CircuitBreakerStrategyOptions<HttpResponseMessage>
-                    {
-                        ShouldHandle = args => ValueTask.FromResult(RetryHttpClientHelpers.ShouldBreakCircuit(args.Outcome)),
-                        FailureRatio = resilienceConfiguration.CircuitBreakerConfiguration.FailureRatio,
-                        SamplingDuration = TimeSpan.FromSeconds(resilienceConfiguration.CircuitBreakerConfiguration.SamplingDurationInSeconds),
-                        MinimumThroughput = resilienceConfiguration.CircuitBreakerConfiguration.MinimumThroughput,
-                        BreakDuration = TimeSpan.FromSeconds(resilienceConfiguration.CircuitBreakerConfiguration.BreakDurationInSeconds),
-                    })
-                    .AddTimeout(TimeSpan.FromSeconds(resilienceConfiguration.RetryConfiguration.HttpTimeoutInSeconds))
-                    .Build();
-            });
+                var anthropicConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<AnthropicConfiguration>>();
+                var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
-        // TODO: Add IChatClient-compatible Anthropic client
+                return new AnthropicClient(anthropicConfiguration.CurrentValue.ApiKey, resilientHttpClient)
+                        .Messages
+                        .AsBuilder()
+                        .Build();
+            })
+            .UseFunctionInvocation();
 
         return services;
     }
