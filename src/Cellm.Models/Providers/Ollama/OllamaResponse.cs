@@ -3,4 +3,4 @@ using Microsoft.Extensions.AI;
 
 namespace Cellm.Models.Providers.Ollama;
 
-internal record OllamaResponse(Prompt Prompt, ChatCompletion ChatCompletion) : IModelResponse;
+internal record OllamaResponse(Prompt Prompt, ChatResponse ChatResponse) : IModelResponse;

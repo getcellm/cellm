@@ -7,5 +7,5 @@ public interface IModelResponse
 {
     Prompt Prompt { get; }
 
-    ChatCompletion ChatCompletion { get; }
+    ChatResponse ChatResponse { get; }
 }
