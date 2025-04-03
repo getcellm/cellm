@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Anthropic.SDK" Version="5.1.1" />
     <PackageReference Include="ExcelDna.Addin" Version="1.9.0-alpha3" />
     <PackageReference Include="ExcelDna.Interop" Version="15.0.1" />
     <PackageReference Include="GitVersion.MsBuild" Version="6.2.0">

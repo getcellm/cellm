@@ -2,6 +2,16 @@
   "version": 1,
   "dependencies": {
     "net9.0-windows7.0": {
+      "Anthropic.SDK": {
+        "type": "Direct",
+        "requested": "[5.1.1, )",
+        "resolved": "5.1.1",
+        "contentHash": "+OHZUBpcYfVoBMUn7aBZ99ziAV/qGbe1fVUq+fpBPoOwk7dPevyFtPFx1t0sIajD/2Fq8TEDX1XEmhPpnrEpiw==",
+        "dependencies": {
+          "Microsoft.Bcl.AsyncInterfaces": "8.0.0",
+          "Microsoft.Extensions.AI.Abstractions": "9.3.0-preview.1.25161.3"
+        }
+      },
       "ExcelDna.AddIn": {
         "type": "Direct",
         "requested": "[1.9.0-alpha3, )",
@@ -265,6 +275,11 @@
         "type": "Transitive",
         "resolved": "2.0.1",
         "contentHash": "FYv95bNT4UwcNA+G/J1oX5OpRiSUxteXaUt2BJbRSdRNiIUNbggJF69wy6mnk2wYToaanpdXZdCwVylt96MpwQ=="
+      },
+      "Microsoft.Bcl.AsyncInterfaces": {
+        "type": "Transitive",
+        "resolved": "8.0.0",
+        "contentHash": "3WA9q9yVqJp222P3x1wYIGDAkpjAku0TMUaaQV22g6L67AI0LdOIrVS7Ht2vJfLHGSPVuqN94vIr15qn+HEkHw=="
       },
       "Microsoft.Diagnostics.NETCore.Client": {
         "type": "Transitive",

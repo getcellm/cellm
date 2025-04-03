@@ -8,6 +8,8 @@ public class ProviderConfiguration : IProviderConfiguration
 
     public double DefaultTemperature { get; init; }
 
+    public int MaxOutputTokens { get; init; } = 8192;
+
     public Dictionary<string, bool> EnableTools { get; init; } = [];
 
     public bool EnableCache { get; init; } = true;
