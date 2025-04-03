@@ -134,6 +134,15 @@ internal static class ServiceLocator
                 serviceProvider => AIFunctionFactory.Create(serviceProvider.GetRequiredService<Functions>().GlobRequest),
                 serviceProvider => AIFunctionFactory.Create(serviceProvider.GetRequiredService<Functions>().FileReaderRequest));
 
+        // https://github.com/openai/openai-dotnet/issues/297
+        var metricsFilterDescriptor = services.FirstOrDefault(descriptor =>
+            descriptor.ImplementationType?.ToString() == $"Microsoft.Extensions.Http.MetricsFactoryHttpMessageHandlerFilter");
+
+        if (metricsFilterDescriptor is not null)
+        {
+            services.Remove(metricsFilterDescriptor);
+        }
+
         return services;
     }
 

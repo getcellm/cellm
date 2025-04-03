@@ -28,15 +28,15 @@ internal class OllamaRequestHandler(
             response.EnsureSuccessStatusCode();
         }
 
-        var chatCompletion = await chatClient.CompleteAsync(
+        var chatResponse = await chatClient.GetResponseAsync(
             request.Prompt.Messages,
             request.Prompt.Options,
             cancellationToken);
 
         var prompt = new PromptBuilder(request.Prompt)
-            .AddMessage(chatCompletion.Message)
+            .AddMessage(chatResponse.Messages.First())
             .Build();
 
-        return new OllamaResponse(prompt, chatCompletion);
+        return new OllamaResponse(prompt, chatResponse);
     }
 }
