@@ -20,7 +20,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Providers\Anthropic\AnthropicRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\Anthropic\AnthropicRequestHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\Anthropic\AnthropicResponse.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Providers\Anthropic\Models.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\DeepSeek\DeepSeekConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\IModelRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\IModelRequestHandler.cs" />
