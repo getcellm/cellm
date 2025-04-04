@@ -168,7 +168,7 @@ public static class ServiceCollectionExtensions
                         Endpoint = deepSeekConfiguration.CurrentValue.BaseAddress
                     });
 
-                return openAiClient.AsChatClient(deepSeekConfiguration.CurrentValue.DefaultModel);
+                return openAiClient.GetChatClient(deepSeekConfiguration.CurrentValue.DefaultModel).AsIChatClient();
             })
             .UseFunctionInvocation();
 
@@ -191,7 +191,7 @@ public static class ServiceCollectionExtensions
                         Endpoint = llamafileConfiguration.CurrentValue.BaseAddress
                     });
 
-                return openAiClient.AsChatClient(llamafileConfiguration.CurrentValue.DefaultModel);
+                return openAiClient.GetChatClient(llamafileConfiguration.CurrentValue.DefaultModel).AsIChatClient();
             })
             .UseFunctionInvocation();
 
@@ -214,7 +214,7 @@ public static class ServiceCollectionExtensions
                         Endpoint = mistralConfiguration.CurrentValue.BaseAddress
                     });
 
-                return openAiClient.AsChatClient(mistralConfiguration.CurrentValue.DefaultModel);
+                return openAiClient.GetChatClient(mistralConfiguration.CurrentValue.DefaultModel).AsIChatClient();
             })
             .UseFunctionInvocation();
 
@@ -229,7 +229,7 @@ public static class ServiceCollectionExtensions
                 var openAiConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<OpenAiConfiguration>>();
 
                 return new OpenAIClient(new ApiKeyCredential(openAiConfiguration.CurrentValue.ApiKey))
-                    .AsChatClient(openAiConfiguration.CurrentValue.DefaultModel);
+                    .GetChatClient(openAiConfiguration.CurrentValue.DefaultModel).AsIChatClient();
             })
             .UseFunctionInvocation();
 
@@ -252,7 +252,7 @@ public static class ServiceCollectionExtensions
                         Endpoint = openAiCompatibleConfiguration.CurrentValue.BaseAddress
                     });
 
-                return openAiClient.AsChatClient(openAiCompatibleConfiguration.CurrentValue.DefaultModel);
+                return openAiClient.GetChatClient(openAiCompatibleConfiguration.CurrentValue.DefaultModel).AsIChatClient();
             })
             .UseFunctionInvocation();
 
