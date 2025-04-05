@@ -15,10 +15,13 @@ internal class AnthropicRequestHandler(
         // Required by Anthropic API
         request.Prompt.Options.MaxOutputTokens ??= providerConfiguration.CurrentValue.MaxOutputTokens;
 
-        var chatResponse = await chatClient.GetResponseAsync(request.Prompt.Messages, request.Prompt.Options, cancellationToken);
+        var chatResponse = await chatClient.GetResponseAsync(
+            request.Prompt.Messages, 
+            request.Prompt.Options, 
+            cancellationToken);
 
         var prompt = new PromptBuilder(request.Prompt)
-            .AddMessage(chatResponse.Messages.First())
+            .AddMessages(chatResponse.Messages)
             .Build();
 
         return new AnthropicResponse(prompt, chatResponse);

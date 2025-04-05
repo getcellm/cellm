@@ -34,7 +34,7 @@ internal class OllamaRequestHandler(
             cancellationToken);
 
         var prompt = new PromptBuilder(request.Prompt)
-            .AddMessage(chatResponse.Messages.First())
+            .AddMessages(chatResponse.Messages)
             .Build();
 
         return new OllamaResponse(prompt, chatResponse);
