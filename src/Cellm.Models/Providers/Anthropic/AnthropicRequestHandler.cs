@@ -16,8 +16,8 @@ internal class AnthropicRequestHandler(
         request.Prompt.Options.MaxOutputTokens ??= providerConfiguration.CurrentValue.MaxOutputTokens;
 
         var chatResponse = await chatClient.GetResponseAsync(
-            request.Prompt.Messages, 
-            request.Prompt.Options, 
+            request.Prompt.Messages,
+            request.Prompt.Options,
             cancellationToken);
 
         var prompt = new PromptBuilder(request.Prompt)

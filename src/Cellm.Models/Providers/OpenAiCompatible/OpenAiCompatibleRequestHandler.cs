@@ -14,8 +14,8 @@ internal class OpenAiCompatibleRequestHandler()
         var chatClient = ServiceLocator.ServiceProvider.GetRequiredKeyedService<IChatClient>(request.Provider);
 
         var chatResponse = await chatClient.GetResponseAsync(
-            request.Prompt.Messages, 
-            request.Prompt.Options, 
+            request.Prompt.Messages,
+            request.Prompt.Options,
             cancellationToken);
 
         var prompt = new PromptBuilder(request.Prompt)

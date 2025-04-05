@@ -11,8 +11,8 @@ internal class OpenAiRequestHandler([FromKeyedServices(Provider.OpenAi)] IChatCl
     public async Task<OpenAiResponse> Handle(OpenAiRequest request, CancellationToken cancellationToken)
     {
         var chatResponse = await chatClient.GetResponseAsync(
-            request.Prompt.Messages, 
-            request.Prompt.Options, 
+            request.Prompt.Messages,
+            request.Prompt.Options,
             cancellationToken);
 
         var prompt = new PromptBuilder(request.Prompt)
