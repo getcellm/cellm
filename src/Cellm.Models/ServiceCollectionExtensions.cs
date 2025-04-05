@@ -24,29 +24,6 @@ namespace Cellm.Models;
 
 public static class ServiceCollectionExtensions
 {
-    /// <summary>
-    /// Registers a factory for creating IChatClient instances with transient lifetime.
-    /// Identical to AddKeyedChatClient from Microsft.Extensions.AI except this method 
-    /// creates a new instance for each dependency injection request.
-    /// 
-    /// IChatClients are usually registered as singletons, but transient lifetimes are necessary 
-    /// here because the user can change base address or api key at runtime and these settings  
-    /// can only be passed via constructors.
-    /// 
-    /// The performance overhead of creating new instances is negligible, however, because
-    /// execution time is completely dominated by model response time. 
-    /// </summary>
-    /// <param name="serviceCollection"></param>
-    /// <param name="serviceKey"></param>
-    /// <param name="innerClientFactory"></param>
-    /// <returns>A ChatClientBuilder that can be further configured.</returns>
-    public static ChatClientBuilder AddTransientKeyedChatClient(this IServiceCollection serviceCollection, object serviceKey, Func<IServiceProvider, IChatClient> innerClientFactory)
-    {
-        var builder = new ChatClientBuilder(innerClientFactory);
-        serviceCollection.AddKeyedTransient(serviceKey, (IServiceProvider services, object? _) => builder.Build(services));
-        return builder;
-    }
-
     public static IServiceCollection AddRateLimiter(this IServiceCollection services, IConfiguration configuration)
     {
         var resilienceConfiguration = configuration
@@ -54,7 +31,7 @@ public static class ServiceCollectionExtensions
             .Get<ResilienceConfiguration>()
             ?? throw new ArgumentException(nameof(ResilienceConfiguration));
 
-        services.AddResiliencePipeline("RateLimiter", builder =>
+        return services.AddResiliencePipeline("RateLimiter", builder =>
         {
             builder
                 .AddRateLimiter(new TokenBucketRateLimiter(new TokenBucketRateLimiterOptions
@@ -72,8 +49,6 @@ public static class ServiceCollectionExtensions
                 })
                 .Build();
         });
-
-        return services;
     }
 
     public static IServiceCollection AddRetryHttpClient(this IServiceCollection services, IConfiguration configuration)
@@ -119,7 +94,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddAnthropicChatClient(this IServiceCollection services, IConfiguration configuration)
     {
         services
-            .AddTransientKeyedChatClient(Provider.Anthropic, serviceProvider =>
+            .AddKeyedChatClient(Provider.Anthropic, serviceProvider =>
             {
                 var anthropicConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<AnthropicConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
@@ -128,7 +103,7 @@ public static class ServiceCollectionExtensions
                         .Messages
                         .AsBuilder()
                         .Build();
-            })
+            }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 
         return services;
@@ -137,7 +112,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddOllamaChatClient(this IServiceCollection services)
     {
         services
-            .AddTransientKeyedChatClient(Provider.Ollama, serviceProvider =>
+            .AddKeyedChatClient(Provider.Ollama, serviceProvider =>
             {
                 var ollamaConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<OllamaConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
@@ -146,7 +121,7 @@ public static class ServiceCollectionExtensions
                     ollamaConfiguration.CurrentValue.BaseAddress,
                     ollamaConfiguration.CurrentValue.DefaultModel,
                     resilientHttpClient);
-            })
+            }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 
         return services;
@@ -155,7 +130,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddDeepSeekChatClient(this IServiceCollection services)
     {
         services
-            .AddTransientKeyedChatClient(Provider.DeepSeek, serviceProvider =>
+            .AddKeyedChatClient(Provider.DeepSeek, serviceProvider =>
             {
                 var deepSeekConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<DeepSeekConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
@@ -169,7 +144,7 @@ public static class ServiceCollectionExtensions
                     });
 
                 return openAiClient.AsChatClient(deepSeekConfiguration.CurrentValue.DefaultModel);
-            })
+            }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 
         return services;
@@ -178,7 +153,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddLlamafileChatClient(this IServiceCollection services)
     {
         services
-            .AddTransientKeyedChatClient(Provider.Llamafile, serviceProvider =>
+            .AddKeyedChatClient(Provider.Llamafile, serviceProvider =>
             {
                 var llamafileConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<LlamafileConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
@@ -192,7 +167,7 @@ public static class ServiceCollectionExtensions
                     });
 
                 return openAiClient.AsChatClient(llamafileConfiguration.CurrentValue.DefaultModel);
-            })
+            }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 
         return services;
@@ -201,7 +176,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddMistralChatClient(this IServiceCollection services)
     {
         services
-            .AddTransientKeyedChatClient(Provider.Mistral, serviceProvider =>
+            .AddKeyedChatClient(Provider.Mistral, serviceProvider =>
             {
                 var mistralConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<MistralConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
@@ -215,7 +190,7 @@ public static class ServiceCollectionExtensions
                     });
 
                 return openAiClient.AsChatClient(mistralConfiguration.CurrentValue.DefaultModel);
-            })
+            }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 
         return services;
@@ -224,13 +199,13 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddOpenAiChatClient(this IServiceCollection services)
     {
         services
-            .AddTransientKeyedChatClient(Provider.OpenAi, serviceProvider =>
+            .AddKeyedChatClient(Provider.OpenAi, serviceProvider =>
             {
                 var openAiConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<OpenAiConfiguration>>();
 
                 return new OpenAIClient(new ApiKeyCredential(openAiConfiguration.CurrentValue.ApiKey))
                     .AsChatClient(openAiConfiguration.CurrentValue.DefaultModel);
-            })
+            }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 
         return services;
@@ -239,7 +214,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddOpenAiCompatibleChatClient(this IServiceCollection services)
     {
         services
-            .AddTransientKeyedChatClient(Provider.OpenAiCompatible, serviceProvider =>
+            .AddKeyedChatClient(Provider.OpenAiCompatible, serviceProvider =>
             {
                 var openAiCompatibleConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<OpenAiCompatibleConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
@@ -252,8 +227,9 @@ public static class ServiceCollectionExtensions
                         Endpoint = openAiCompatibleConfiguration.CurrentValue.BaseAddress
                     });
 
-                return openAiClient.AsChatClient(openAiCompatibleConfiguration.CurrentValue.DefaultModel);
-            })
+                return openAiClient
+                    .AsChatClient(openAiCompatibleConfiguration.CurrentValue.DefaultModel);
+            }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 
         return services;
