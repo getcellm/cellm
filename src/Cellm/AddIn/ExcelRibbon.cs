@@ -231,12 +231,12 @@ public class ExcelRibbon : ExcelDna.Integration.CustomUI.ExcelRibbon
 
     public void OnFileSearchToggled(IRibbonControl control, bool pressed)
     {
-        SetValue("ProviderConfiguration:EnableTools:GlobRequest", pressed.ToString());
+        SetValue("ProviderConfiguration:EnableTools:FileSearchRequest", pressed.ToString());
     }
 
     public bool OnGetFileSearchPressed(IRibbonControl control)
     {
-        var value = GetValue("ProviderConfiguration:EnableTools:GlobRequest");
+        var value = GetValue("ProviderConfiguration:EnableTools:FileSearchRequest");
         return bool.Parse(value);
     }
 

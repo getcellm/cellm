@@ -16,6 +16,7 @@ using Cellm.Models.Tools;
 using Cellm.Services.Configuration;
 using Cellm.Tools;
 using Cellm.Tools.FileReader;
+using Cellm.Tools.ModelContextProtocol;
 using ExcelDna.Integration;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Caching.Memory;
@@ -48,8 +49,9 @@ internal static class ServiceLocator
             .Build();
 
         services
-            .Configure<CellmConfiguration>(configuration.GetRequiredSection(nameof(CellmConfiguration)))
             .Configure<ProviderConfiguration>(configuration.GetRequiredSection(nameof(ProviderConfiguration)))
+            .Configure<ModelContextProtocolConfiguration>(configuration.GetRequiredSection(nameof(ModelContextProtocolConfiguration)))
+            .Configure<CellmConfiguration>(configuration.GetRequiredSection(nameof(CellmConfiguration)))
             .Configure<AnthropicConfiguration>(configuration.GetRequiredSection(nameof(AnthropicConfiguration)))
             .Configure<DeepSeekConfiguration>(configuration.GetRequiredSection(nameof(DeepSeekConfiguration)))
             .Configure<LlamafileConfiguration>(configuration.GetRequiredSection(nameof(LlamafileConfiguration)))
@@ -129,10 +131,12 @@ internal static class ServiceLocator
             .AddSingleton<FileReaderFactory>()
             .AddSingleton<IFileReader, PdfReader>()
             .AddSingleton<IFileReader, TextReader>()
-            .AddSingleton<Functions>()
+            .AddSingleton<NativeTools>()
             .AddTools(
-                serviceProvider => AIFunctionFactory.Create(serviceProvider.GetRequiredService<Functions>().GlobRequest),
-                serviceProvider => AIFunctionFactory.Create(serviceProvider.GetRequiredService<Functions>().FileReaderRequest));
+                serviceProvider => AIFunctionFactory.Create(serviceProvider.GetRequiredService<NativeTools>().FileSearchRequest),
+                serviceProvider => AIFunctionFactory.Create(serviceProvider.GetRequiredService<NativeTools>().FileReaderRequest));
+
+        // Workarounds
 
         // https://github.com/openai/openai-dotnet/issues/297
         var metricsFilterDescriptor = services.FirstOrDefault(descriptor =>
