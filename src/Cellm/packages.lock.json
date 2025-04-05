@@ -232,6 +232,18 @@
           "Microsoft.Extensions.Primitives": "9.0.3"
         }
       },
+      "ModelContextProtocol": {
+        "type": "Direct",
+        "requested": "[0.1.0-preview.6, )",
+        "resolved": "0.1.0-preview.6",
+        "contentHash": "gq6mQYvtaGC8lhWHBS4X5Ck53+HNWZPiqO7hOEOFRRLO30OlrXX9I+Uz9ShvfTAnjwvugV3TfMH2UbpBXusBtw==",
+        "dependencies": {
+          "Microsoft.Extensions.AI.Abstractions": "9.3.0-preview.1.25161.3",
+          "Microsoft.Extensions.Hosting.Abstractions": "9.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "9.0.0",
+          "System.Net.ServerSentEvents": "10.0.0-preview.2.25163.2"
+        }
+      },
       "PdfPig": {
         "type": "Direct",
         "requested": "[0.1.10, )",
@@ -565,6 +577,11 @@
         "type": "Transitive",
         "resolved": "9.0.4",
         "contentHash": "m9v4fYRP2cvatcM/WJUpqyfmQc9c1aFhDrOcJs7+nmuAG96kk9jXipDTBsS6fUYdDcy2lR4Q4QNDanSefHaUrA=="
+      },
+      "System.Net.ServerSentEvents": {
+        "type": "Transitive",
+        "resolved": "10.0.0-preview.2.25163.2",
+        "contentHash": "XHyvtQSgco0Sv0kz9yNBv93k3QOoAVzIVd5XbQoTqjV9sqkzWHsToNknyxtNjcXQwb+O9TfzSlNobsBWwnKD3Q=="
       },
       "System.Text.Json": {
         "type": "Transitive",
