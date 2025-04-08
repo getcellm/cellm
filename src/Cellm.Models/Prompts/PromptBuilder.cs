@@ -54,7 +54,7 @@ public class PromptBuilder
         return this;
     }
 
-    public PromptBuilder AddMessages(List<ChatMessage> messages)
+    public PromptBuilder AddMessages(IList<ChatMessage> messages)
     {
         _messages.AddRange(messages);
         return this;
