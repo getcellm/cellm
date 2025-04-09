@@ -5,9 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
-    
-    <!-- Required for GitVersion.MsBuild -->
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Version>0.2.0</Version>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -24,10 +22,6 @@
     <PackageReference Include="Anthropic.SDK" Version="5.1.1" />
     <PackageReference Include="ExcelDna.Addin" Version="1.9.0-alpha3" />
     <PackageReference Include="ExcelDna.Interop" Version="15.0.1" />
-    <PackageReference Include="GitVersion.MsBuild" Version="6.2.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="MediatR" Version="12.5.0" />
     <PackageReference Include="Microsoft.Extensions.AI" Version="9.3.0-preview.1.25161.3" />
     <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="9.3.0-preview.1.25161.3" />
@@ -60,5 +54,4 @@
   </ItemGroup>
 
   <Import Project="..\Cellm.Models\Cellm.Models.projitems" Label="Shared" />
-
 </Project>

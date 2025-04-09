@@ -27,15 +27,6 @@
         "resolved": "15.0.1",
         "contentHash": "CIKPXlw+6C6v2Em8DVFgkTsrMZoz978CtSG722+dwHi3Tt7JTxQ2BmmBH4yJuzcA9EaOC5AMEmioLkLsvhESQw=="
       },
-      "GitVersion.MsBuild": {
-        "type": "Direct",
-        "requested": "[6.2.0, )",
-        "resolved": "6.2.0",
-        "contentHash": "EZoFyY1fgHkYtCz0nizYAXsfNG0OSllMuRQl4fFosDNKz6y/f2nctSCjwhTMh5GSkzRZEnyd+YA540VD7SAm+A==",
-        "dependencies": {
-          "System.Collections.Immutable": "9.0.2"
-        }
-      },
       "MediatR": {
         "type": "Direct",
         "requested": "[12.5.0, )",
@@ -557,11 +548,6 @@
           "System.Memory.Data": "6.0.0",
           "System.Text.Json": "6.0.10"
         }
-      },
-      "System.Collections.Immutable": {
-        "type": "Transitive",
-        "resolved": "9.0.2",
-        "contentHash": "QKh9+kczG7TQbQZ6tF2S6bK9B8ewHXEkYmMP2iqefzwJEfEkiflheAX6VEaPLJ6Tq9RoKuQ5R3qPYla6wJ6Opg=="
       },
       "System.Diagnostics.DiagnosticSource": {
         "type": "Transitive",

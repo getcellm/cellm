@@ -23,6 +23,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Sentry.Infrastructure;
 
 namespace Cellm.Services;
 
@@ -72,25 +73,23 @@ internal static class ServiceLocator
         services
           .AddLogging(loggingBuilder =>
           {
-              var assembly = Assembly.GetExecutingAssembly();
-              var gitVersionInformationType = assembly.GetType("GitVersionInformation");
-              var assemblyInformationalVersion = gitVersionInformationType?.GetField("AssemblyInformationalVersion");
-
               loggingBuilder
+                  .AddConfiguration(configuration.GetSection("Logging"))          
                   .AddConsole()
                   .AddDebug()
                   .AddSentry(sentryLoggingOptions =>
                   {
                       sentryLoggingOptions.InitializeSdk = sentryConfiguration.IsEnabled;
                       sentryLoggingOptions.Release = GetReleaseVersion();
+                      sentryLoggingOptions.Environment = sentryConfiguration.Environment;
                       sentryLoggingOptions.Dsn = sentryConfiguration.Dsn;
-                      sentryLoggingOptions.Debug = cellmConfiguration.Debug;
+                      sentryLoggingOptions.Debug = sentryConfiguration.Debug;
                       sentryLoggingOptions.DiagnosticLevel = SentryLevel.Debug;
+                      sentryLoggingOptions.DiagnosticLogger = new TraceDiagnosticLogger(SentryLevel.Debug);
                       sentryLoggingOptions.TracesSampleRate = sentryConfiguration.TracesSampleRate;
                       sentryLoggingOptions.ProfilesSampleRate = sentryConfiguration.ProfilesSampleRate;
                       sentryLoggingOptions.Environment = sentryConfiguration.Environment;
                       sentryLoggingOptions.AutoSessionTracking = true;
-                      sentryLoggingOptions.IsGlobalModeEnabled = true;
                       sentryLoggingOptions.AddIntegration(new ProfilingIntegration());
                   });
           });
@@ -100,9 +99,9 @@ internal static class ServiceLocator
             .AddMediatR(cfg =>
             {
                 cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
-                cfg.AddOpenBehavior(typeof(SentryBehavior<,>));
-                cfg.AddOpenBehavior(typeof(CacheBehavior<,>));
-                cfg.AddOpenBehavior(typeof(ToolBehavior<,>));
+                cfg.AddOpenBehavior(typeof(SentryBehavior<,>), ServiceLifetime.Singleton);
+                cfg.AddOpenBehavior(typeof(ToolBehavior<,>), ServiceLifetime.Singleton);
+                cfg.AddOpenBehavior(typeof(CacheBehavior<,>), ServiceLifetime.Singleton);
             })
             .AddSingleton(configuration)
             .AddTransient<ArgumentParser>()
@@ -152,20 +151,9 @@ internal static class ServiceLocator
 
     public static string GetReleaseVersion()
     {
-        var releaseVersion = "unknown";
-
-        var value = Assembly
-            .GetExecutingAssembly()
-            .GetType("GitVersionInformation")?
-            .GetField("AssemblyInformationalVersion")?
-            .GetValue(null);
-
-        if (value is string valueAsString)
-        {
-            releaseVersion = valueAsString;
-        }
-
-        return releaseVersion;
+        return Assembly.GetExecutingAssembly()?
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+            .InformationalVersion ?? "unknown";
     }
 
     public static void Dispose()

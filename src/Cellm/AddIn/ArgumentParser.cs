@@ -16,6 +16,11 @@ public class ArgumentParser
     private object? _instructionsOrTemperature;
     private object? _temperature;
 
+    public static readonly string ContextStartTag = "<context>";
+    public static readonly string ContextEndTag = "</context>";
+    public static readonly string InstructionsStartTag = "<instructions>";
+    public static readonly string InstructionsEndTag = "<instructions>";
+
     private readonly IConfiguration _configuration;
 
     public ArgumentParser(IConfiguration configuration)
@@ -211,18 +216,18 @@ public class ArgumentParser
     private static string RenderCells(string context)
     {
         return new StringBuilder()
-            .AppendLine("<context>")
+            .AppendLine(ContextStartTag)
             .AppendLine(context)
-            .AppendLine("</context>")
+            .AppendLine(ContextEndTag)
             .ToString();
     }
 
     private static string RenderInstructions(string instructions)
     {
         return new StringBuilder()
-            .AppendLine("<instructions>")
+            .AppendLine(InstructionsStartTag)
             .AppendLine(instructions)
-            .AppendLine("</instructions>")
+            .AppendLine(InstructionsEndTag)
             .ToString();
     }
 
