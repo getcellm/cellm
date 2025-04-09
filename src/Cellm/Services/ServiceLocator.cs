@@ -74,7 +74,7 @@ internal static class ServiceLocator
           .AddLogging(loggingBuilder =>
           {
               loggingBuilder
-                  .AddConfiguration(configuration.GetSection("Logging"))          
+                  .AddConfiguration(configuration.GetSection("Logging"))
                   .AddConsole()
                   .AddDebug()
                   .AddSentry(sentryLoggingOptions =>

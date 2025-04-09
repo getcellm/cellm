@@ -29,7 +29,7 @@ internal class SentryBehavior<TRequest, TResponse>(ILogger<SentryBehavior<TReque
             return await next();
         }
         finally
-        {            
+        {
             transaction.Finish();
         }
     }

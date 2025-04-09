@@ -10,7 +10,7 @@ using Microsoft.Extensions.Options;
 namespace Cellm.Models.Behaviors;
 
 internal class CacheBehavior<TRequest, TResponse>(
-    HybridCache cache, 
+    HybridCache cache,
     IOptionsMonitor<ProviderConfiguration> providerConfiguration,
     ILogger<CacheBehavior<TRequest, TResponse>> logger) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IModelRequest<TResponse>
