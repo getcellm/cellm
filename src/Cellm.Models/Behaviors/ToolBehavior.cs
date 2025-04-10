@@ -17,7 +17,7 @@ internal class ToolBehavior<TRequest, TResponse>(
     ILoggerFactory loggerFactory)
     : IPipelineBehavior<TRequest, TResponse> where TRequest : IModelRequest<TResponse>
 {
-    // TODO: Use HybridCache
+    // TODO: Use HybridCache (await fix that McpLcientTool can't be serialized/deserialized)
     private Dictionary<string, IList<McpClientTool>> _poorMansCache = [];
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
@@ -65,6 +65,7 @@ internal class ToolBehavior<TRequest, TResponse>(
     }
 
     // TODO: Query servers in parallel
+
     private async IAsyncEnumerable<AITool> GetModelContextProtocolTools([EnumeratorCancellation] CancellationToken cancellationToken)
     {
         foreach (var server in modelContextProtocolConfiguration.CurrentValue.Servers)
