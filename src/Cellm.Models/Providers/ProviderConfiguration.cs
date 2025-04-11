@@ -1,4 +1,4 @@
-﻿using ModelContextProtocol;
+﻿using ModelContextProtocol.Protocol.Transport;
 
 namespace Cellm.Models.Providers;
 
@@ -15,8 +15,6 @@ public class ProviderConfiguration : IProviderConfiguration
     public Dictionary<string, bool> EnableTools { get; init; } = [];
 
     public Dictionary<string, bool> EnableModelContextProtocolServers { get; init; } = [];
-
-    public Dictionary<string, McpServerConfig> ModelContextProtocolServers { get; init; } = [];
 
     public bool EnableCache { get; init; } = true;
 
