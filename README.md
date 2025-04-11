@@ -86,9 +86,9 @@ To help us improve Cellm, we collect limited, anonymous telemetry data:
 - **Crash reports:** To help us fix bugs.
 - **Prompts:** To help us understand usage patterns. For example, if you use `=PROMPT(A1:B2, "Extract person names")`, we capture the text "Extract person names" and prompt options. The prompt options are things like the model you use and the temperature setting. We do not capture the data in cells A1:B2. 
 
-We do not collect any data from your spreadsheet and we have no way of associating your prompts with you. You can see for yourself at (Cellm.Models/Behaviors/SentryBehavior.cs)[Cellm.Models/Behaviors/SentryBehavior.cs].
+We do not collect any data from your spreadsheet and we have no way of associating your prompts with you. You can see for yourself at [Cellm.Models/Behaviors/SentryBehavior.cs](Cellm.Models/Behaviors/SentryBehavior.cs).
 
-You can disable telemetry by adding a `appsettings.json` file to the same folder as the `Cellm-AddIn64-packed.xll` file with the following contents:
+You can disable telemetry at any time by creating an `appsettings.json` file in the same folder as `Cellm-AddIn64-packed.xll` with the following contents:
 
 ```json
 {
