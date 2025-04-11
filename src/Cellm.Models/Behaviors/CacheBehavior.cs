@@ -1,4 +1,4 @@
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Cellm.Models.Providers;
@@ -25,7 +25,7 @@ internal class CacheBehavior<TRequest, TResponse>(
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
-        if (providerConfiguration.CurrentValue.EnableCache)
+        if (!providerConfiguration.CurrentValue.EnableCache)
         {
             logger.LogDebug("Prompt caching disabled");
             return await next();
