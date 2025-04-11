@@ -63,11 +63,11 @@ For detailed information about configuring different models, see our documentati
 
 Cellm is useful for repetitive tasks on both structured and unstructured data:
 
-1. **Text classification** - Categorize survey responses, support tickets, etc.
-2. **Model comparison** - Compare results from different LLMs side by side
-3. **Data cleaning** - Standardize names, fix formatting issues
-4. **Content summarization** - Condense articles, papers, or reports
-5. **Entity extraction** - Pull out names, locations, dates from text
+1. **Text classification:** Categorize survey responses, support tickets, etc.
+2. **Model comparison:** Compare results from different LLMs side by side
+3. **Data cleaning:** Standardize names, fix formatting issues
+4. **Content summarization:** Condense articles, papers, or reports
+5. **Entity recognition:** Pull out names, locations, dates from text
 
 For more use cases and examples, see our [Prompting Guide](https://docs.getcellm.com/usage/prompting).
 
@@ -79,6 +79,24 @@ For build instructions with Visual Studio or command line, see our [Development 
 A friend was writing a systematic review paper and had to compare 7,500 papers against inclusion/exclusion criteria. We thought this was a great use case for LLMs but quickly realized that individually copying papers in and out of chat windows was a total pain. This sparked the idea to make an AI tool to automate repetitive tasks for people who would rather avoid programming.
 
 Cellm enables everyone to automate repetitive tasks with AI to a level that was previously available only to programmers.
+
+## Telemetry
+To help us improve Cellm, we collect limited, anonymous telemetry data:
+
+- **Crash reports:** To help us fix bugs.
+- **Prompts:** To help us understand usage patterns. For example, if you use `=PROMPT(A1:B2, "Extract person names")`, we capture the text "Extract person names" and prompt options. The prompt options are things like the model you use and the temperature setting. We do not capture the data in cells A1:B2. 
+
+We do not collect any data from your spreadsheet and we have no way of associating your prompts with you. You can see for yourself at [Cellm.Models/Behaviors/SentryBehavior.cs](Cellm.Models/Behaviors/SentryBehavior.cs).
+
+You can disable telemetry at any time by creating an `appsettings.json` file in the same folder as `Cellm-AddIn64-packed.xll` with the following contents:
+
+```json
+{
+    "SentryConfiguration": {
+        "IsEnabled": false
+    }
+}
+```
 
 ## License
 

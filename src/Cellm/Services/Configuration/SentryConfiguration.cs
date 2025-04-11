@@ -11,4 +11,6 @@ internal class SentryConfiguration
     public float ProfilesSampleRate { get; init; }
 
     public string Environment { get; init; } = string.Empty;
+
+    public bool Debug { get; init; }
 }
