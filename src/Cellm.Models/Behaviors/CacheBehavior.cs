@@ -1,4 +1,4 @@
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Cellm.Models.Providers;
@@ -33,7 +33,12 @@ internal class CacheBehavior<TRequest, TResponse>(
 
         logger.LogDebug("Prompt caching enabled");
 
-        byte[] hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(request.Prompt)));
+        var promptAsJson = JsonSerializer.Serialize(request.Prompt);
+
+        // Tools are explicitly [JsonIgnore]'ed, but we want to send prompt if user added/removed tools
+        var toolsAsJson = JsonSerializer.Serialize(request.Prompt.Options.Tools);
+
+        byte[] hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(promptAsJson + toolsAsJson));
         var key = Convert.ToBase64String(hashBytes);
 
         return await cache.GetOrCreateAsync(
