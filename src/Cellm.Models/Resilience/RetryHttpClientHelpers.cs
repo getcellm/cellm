@@ -1,5 +1,7 @@
 ﻿using System.Net;
+using Anthropic.SDK;
 using Polly;
+using Polly.CircuitBreaker;
 using Polly.Timeout;
 
 namespace Cellm.Models.Resilience;
@@ -40,6 +42,6 @@ internal static class RetryHttpClientHelpers
 
 
     private static bool IsRetryableException(Exception exception) =>
-        exception is HttpRequestException or TimeoutRejectedException;
+        exception is HttpRequestException or TimeoutRejectedException or BrokenCircuitException or RateLimitsExceeded;
 }
 

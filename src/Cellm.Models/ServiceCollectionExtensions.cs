@@ -100,9 +100,9 @@ public static class ServiceCollectionExtensions
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
                 return new AnthropicClient(anthropicConfiguration.CurrentValue.ApiKey, resilientHttpClient)
-                        .Messages
-                        .AsBuilder()
-                        .Build();
+                    .Messages
+                    .AsBuilder()
+                    .Build();
             }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 
