@@ -35,7 +35,7 @@ internal class CacheBehavior<TRequest, TResponse>(
 
         var promptAsJson = JsonSerializer.Serialize(request.Prompt);
 
-        // Tools are explicitly [JsonIgnore]'ed, but we want to send prompt if user added/removed tools
+        // Tools are explicitly [JsonIgnore]'d, but we want to send prompt if user added/removed tools
         var toolsAsJson = JsonSerializer.Serialize(request.Prompt.Options.Tools);
 
         byte[] hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(promptAsJson + toolsAsJson));
