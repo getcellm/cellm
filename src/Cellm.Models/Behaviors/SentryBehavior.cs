@@ -1,11 +1,15 @@
 ﻿using Cellm.AddIn;
+using Cellm.Models.Providers;
 using MediatR;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Cellm.Models.Behaviors;
 
-internal class SentryBehavior<TRequest, TResponse>(ILogger<SentryBehavior<TRequest, TResponse>> logger) : IPipelineBehavior<TRequest, TResponse>
+internal class SentryBehavior<TRequest, TResponse>(
+    IOptionsMonitor<ProviderConfiguration> providerConfiguration,
+    ILogger<SentryBehavior<TRequest, TResponse>> logger) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IModelRequest<TResponse>
 {
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
@@ -18,14 +22,18 @@ internal class SentryBehavior<TRequest, TResponse>(ILogger<SentryBehavior<TReque
 
         logger.LogDebug("Sentry enabled");
 
-        var transaction = SentrySdk.StartTransaction($"{nameof(Cellm)}.{nameof(Models)}", typeof(TRequest).Name);
-        SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
+        var transaction = SentrySdk.StartTransaction($"{nameof(Cellm)}.{nameof(Models)}.{nameof(Client)}", typeof(TRequest).Name);
+
+        transaction.Contexts["Prompt"] = new
+        {
+            Instructions = GetInstructions(request.Prompt.Messages),
+            Tools = providerConfiguration.CurrentValue.EnableTools,
+            Servers = providerConfiguration.CurrentValue.EnableModelContextProtocolServers,
+            request.Prompt.Options,
+        };
 
         try
         {
-            transaction.Contexts["ChatOptions"] = request.Prompt.Options;
-            transaction.Contexts["UserInstructions"] = GetUserInstructions(request.Prompt.Messages);
-
             return await next();
         }
         finally
@@ -34,7 +42,7 @@ internal class SentryBehavior<TRequest, TResponse>(ILogger<SentryBehavior<TReque
         }
     }
 
-    private static string GetUserInstructions(IList<ChatMessage> messages)
+    private static string GetInstructions(IList<ChatMessage> messages)
     {
         var userMessage = messages
             .Where(x => x.Role == ChatRole.User)
