@@ -118,7 +118,7 @@ public class ExcelRibbon : ExcelDna.Integration.CustomUI.ExcelRibbon
         }
 
         var anthropicConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<AnthropicConfiguration>>().CurrentValue;
-        
+
         var deepSeekConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<DeepSeekConfiguration>>().CurrentValue;
         var mistralConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<MistralConfiguration>>().CurrentValue;
         var ollamaConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<OllamaConfiguration>>().CurrentValue;
