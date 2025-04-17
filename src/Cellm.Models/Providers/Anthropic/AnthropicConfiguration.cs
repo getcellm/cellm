@@ -2,8 +2,6 @@
 
 internal class AnthropicConfiguration : IProviderConfiguration
 {
-    public Uri BaseAddress { get; init; }
-
     public string DefaultModel { get; init; }
 
     public string Version { get; init; }
@@ -14,7 +12,6 @@ internal class AnthropicConfiguration : IProviderConfiguration
 
     public AnthropicConfiguration()
     {
-        BaseAddress = default!;
         DefaultModel = default!;
         Version = default!;
         ApiKey = default!;

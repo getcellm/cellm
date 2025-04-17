@@ -5,6 +5,7 @@ using Cellm.Models;
 using Cellm.Models.Behaviors;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
+using Cellm.Models.Providers.Cellm;
 using Cellm.Models.Providers.DeepSeek;
 using Cellm.Models.Providers.Llamafile;
 using Cellm.Models.Providers.Mistral;
@@ -17,6 +18,7 @@ using Cellm.Services.Configuration;
 using Cellm.Tools;
 using Cellm.Tools.FileReader;
 using Cellm.Tools.ModelContextProtocol;
+using Cellm.User;
 using ExcelDna.Integration;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Caching.Memory;
@@ -50,23 +52,21 @@ internal static class ServiceLocator
             .Build();
 
         services
-            .Configure<ProviderConfiguration>(configuration.GetRequiredSection(nameof(ProviderConfiguration)))
-            .Configure<ModelContextProtocolConfiguration>(configuration.GetRequiredSection(nameof(ModelContextProtocolConfiguration)))
-            .Configure<CellmConfiguration>(configuration.GetRequiredSection(nameof(CellmConfiguration)))
+            .Configure<AccountConfiguration>(configuration.GetRequiredSection(nameof(AccountConfiguration)))
             .Configure<AnthropicConfiguration>(configuration.GetRequiredSection(nameof(AnthropicConfiguration)))
+            .Configure<CellmConfiguration>(configuration.GetRequiredSection(nameof(CellmConfiguration)))
             .Configure<DeepSeekConfiguration>(configuration.GetRequiredSection(nameof(DeepSeekConfiguration)))
+            .Configure<ProviderConfiguration>(configuration.GetRequiredSection(nameof(ProviderConfiguration)))
             .Configure<LlamafileConfiguration>(configuration.GetRequiredSection(nameof(LlamafileConfiguration)))
+            .Configure<MistralConfiguration>(configuration.GetRequiredSection(nameof(MistralConfiguration)))
+            .Configure<ModelContextProtocolConfiguration>(configuration.GetRequiredSection(nameof(ModelContextProtocolConfiguration)))
             .Configure<OllamaConfiguration>(configuration.GetRequiredSection(nameof(OllamaConfiguration)))
             .Configure<OpenAiConfiguration>(configuration.GetRequiredSection(nameof(OpenAiConfiguration)))
             .Configure<OpenAiCompatibleConfiguration>(configuration.GetRequiredSection(nameof(OpenAiCompatibleConfiguration)))
-            .Configure<MistralConfiguration>(configuration.GetRequiredSection(nameof(MistralConfiguration)))
             .Configure<ResilienceConfiguration>(configuration.GetRequiredSection(nameof(ResilienceConfiguration)))
             .Configure<SentryConfiguration>(configuration.GetRequiredSection(nameof(SentryConfiguration)));
 
         // Logging
-        var cellmConfiguration = configuration.GetRequiredSection(nameof(CellmConfiguration)).Get<CellmConfiguration>()
-            ?? throw new NullReferenceException(nameof(CellmConfiguration));
-
         var sentryConfiguration = configuration.GetRequiredSection(nameof(SentryConfiguration)).Get<SentryConfiguration>()
             ?? throw new NullReferenceException(nameof(SentryConfiguration));
 
@@ -105,6 +105,7 @@ internal static class ServiceLocator
             })
             .AddSingleton(configuration)
             .AddTransient<ArgumentParser>()
+            .AddSingleton<Account>()
             .AddSingleton<Client>()
             .AddSingleton<Serde>()
             .AddRateLimiter(configuration)
@@ -117,7 +118,8 @@ internal static class ServiceLocator
 
         // Add providers
         services
-            .AddAnthropicChatClient(configuration)
+            .AddAnthropicChatClient()
+            .AddCellmChatClient()
             .AddDeepSeekChatClient()
             .AddLlamafileChatClient()
             .AddMistralChatClient()

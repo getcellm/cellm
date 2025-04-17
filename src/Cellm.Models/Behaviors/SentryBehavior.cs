@@ -1,5 +1,6 @@
 ﻿using Cellm.AddIn;
 using Cellm.Models.Providers;
+using Cellm.User;
 using MediatR;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
@@ -9,18 +10,21 @@ namespace Cellm.Models.Behaviors;
 
 internal class SentryBehavior<TRequest, TResponse>(
     IOptionsMonitor<ProviderConfiguration> providerConfiguration,
+    Account account,
     ILogger<SentryBehavior<TRequest, TResponse>> logger) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IModelRequest<TResponse>
 {
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
-        if (!SentrySdk.IsEnabled)
+        var disableTelemetry = await account.HasEntitlementAsync(Entitlement.DisableTelemetry);
+
+        if (!SentrySdk.IsEnabled || disableTelemetry)
         {
-            logger.LogDebug("Sentry disabled");
+            logger.LogDebug("Telemetry disabled");
             return await next();
         }
 
-        logger.LogDebug("Sentry enabled");
+        logger.LogDebug("Telemetry enabled");
 
         var transaction = SentrySdk.StartTransaction($"{nameof(Cellm)}.{nameof(Models)}.{nameof(Client)}", typeof(TRequest).Name);
 
