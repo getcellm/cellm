@@ -31,7 +31,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Providers\IProviderConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\IProviderRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\IProviderRequestHandler.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Providers\Llamafile\LlamafileConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\Mistral\MistralConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\Ollama\OllamaConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\Ollama\OllamaRequest.cs" />
@@ -50,7 +49,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Resilience\CircuitBreakerConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Resilience\RateLimiterConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Resilience\ResilienceConfiguration.cs" />
-    <Compile Include="..\Cellm.Models\Resilience\RetryHttpClientHelpers.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Resilience\RetryHttpClientHelpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Resilience\RetryConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ServiceCollectionExtensions.cs" />
   </ItemGroup>

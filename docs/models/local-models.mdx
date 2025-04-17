@@ -61,7 +61,7 @@ Llamafile is project by Mozilla that combines llama.cpp with Cosmopolitan Libc, 
     .\gemma-2-2b-it.Q6_K.llamafile.exe --server --v2 -ngl 999
     ```
 
-3. Start Excel and select the `Llamafile` provider from the model drop-down on Cellm's ribbon menu. Llamafiles ignore a model's name because a particular Llamafile serves only one model anyway. The names is required though, and the default name is simply "default".
+3. Start Excel and select the `openaicompatible` provider from the model drop-down on Cellm's ribbon menu. Llamafiles ignore a model's name because a particular Llamafile serves one model only, so it doesn't matter what you write after the slash (/) in the model textbox. A name is required though, because the OpenAI API expects it. You can put in `openaicompatible/llamafile`, for example.
 
 <Tip>
 Llamafiles are especially useful if you don't have the necessary permissions to install programs on your computer.

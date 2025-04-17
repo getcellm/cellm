@@ -21,7 +21,6 @@ internal class Client(ISender sender, ResiliencePipelineProvider<string> resilie
             {
                 Provider.Anthropic => await sender.Send(new AnthropicRequest(prompt), cancellationToken),
                 Provider.DeepSeek => await sender.Send(new OpenAiCompatibleRequest(prompt, Provider.DeepSeek), cancellationToken),
-                Provider.Llamafile => await sender.Send(new OpenAiCompatibleRequest(prompt, Provider.Llamafile), cancellationToken),
                 Provider.Mistral => await sender.Send(new OpenAiCompatibleRequest(prompt, Provider.Mistral), cancellationToken),
                 Provider.Ollama => await sender.Send(new OllamaRequest(prompt), cancellationToken),
                 Provider.OpenAi => await sender.Send(new OpenAiRequest(prompt), cancellationToken),

@@ -1,24 +1,21 @@
-﻿using System.Reflection.Metadata.Ecma335;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using Cellm.AddIn.Exceptions;
 using Cellm.Models;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
 using Cellm.Models.Providers.Cellm;
 using Cellm.Models.Providers.DeepSeek;
-using Cellm.Models.Providers.Llamafile;
 using Cellm.Models.Providers.Mistral;
 using Cellm.Models.Providers.Ollama;
 using Cellm.Models.Providers.OpenAi;
 using Cellm.Models.Providers.OpenAiCompatible;
 using Cellm.Services;
+using Cellm.User;
 using ExcelDna.Integration.CustomUI;
 using Microsoft.Extensions.Caching.Hybrid;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -112,19 +109,24 @@ public class ExcelRibbon : ExcelDna.Integration.CustomUI.ExcelRibbon
     {
         var providerAndModels = new List<string>();
 
+        var accountConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<AccountConfiguration>>().CurrentValue;
+
+        if (accountConfiguration.IsEnabled)
+        {
+            var cellmConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<CellmConfiguration>>().CurrentValue;
+            providerAndModels.AddRange(cellmConfiguration.Models.Select(m => $"{nameof(Provider.Cellm)}/{m}"));
+        }
+
         var anthropicConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<AnthropicConfiguration>>().CurrentValue;
-        var cellmConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<CellmConfiguration>>().CurrentValue;
+
         var deepSeekConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<DeepSeekConfiguration>>().CurrentValue;
-        var llamafileConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<LlamafileConfiguration>>().CurrentValue;
         var mistralConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<MistralConfiguration>>().CurrentValue;
         var ollamaConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<OllamaConfiguration>>().CurrentValue;
         var openAiConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<OpenAiConfiguration>>().CurrentValue;
         var openAiCompatibleConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<OpenAiCompatibleConfiguration>>().CurrentValue;
 
         providerAndModels.AddRange(anthropicConfiguration.Models.Select(m => $"{nameof(Provider.Anthropic)}/{m}"));
-        providerAndModels.AddRange(cellmConfiguration.Models.Select(m => $"{nameof(Provider.Cellm)}/{m}"));
         providerAndModels.AddRange(deepSeekConfiguration.Models.Select(m => $"{nameof(Provider.DeepSeek)}/{m}"));
-        providerAndModels.AddRange(llamafileConfiguration.Models.Select(m => $"{nameof(Provider.Llamafile)}/{m}"));
         providerAndModels.AddRange(mistralConfiguration.Models.Select(m => $"{nameof(Provider.Mistral)}/{m}"));
         providerAndModels.AddRange(ollamaConfiguration.Models.Select(m => $"{nameof(Provider.Ollama)}/{m}"));
         providerAndModels.AddRange(openAiConfiguration.Models.Select(m => $"{nameof(Provider.OpenAi)}/{m}"));
@@ -169,7 +171,6 @@ public class ExcelRibbon : ExcelDna.Integration.CustomUI.ExcelRibbon
         return provider switch
         {
             Provider.DeepSeek => GetProviderConfiguration<DeepSeekConfiguration>().BaseAddress.ToString(),
-            Provider.Llamafile => GetProviderConfiguration<LlamafileConfiguration>().BaseAddress.ToString(),
             Provider.Mistral => GetProviderConfiguration<MistralConfiguration>().BaseAddress.ToString(),
             Provider.Ollama => GetProviderConfiguration<OllamaConfiguration>().BaseAddress.ToString(),
             Provider.OpenAiCompatible => GetProviderConfiguration<OpenAiCompatibleConfiguration>().BaseAddress.ToString(),
@@ -211,7 +212,7 @@ public class ExcelRibbon : ExcelDna.Integration.CustomUI.ExcelRibbon
         var provider = GetCurrentProvider();
         return provider switch
         {
-            Provider.OpenAiCompatible or Provider.Ollama or Provider.Llamafile => true,
+            Provider.OpenAiCompatible or Provider.Ollama => true,
             _ => false
         };
     }
