@@ -4,8 +4,8 @@ namespace Cellm.Models.Prompts;
 
 public class PromptBuilder
 {
-    private List<ChatMessage> _messages = new();
-    private ChatOptions _options = new();
+    private readonly List<ChatMessage> _messages = [];
+    private readonly ChatOptions _options = new();
 
     public PromptBuilder()
     {
@@ -27,6 +27,12 @@ public class PromptBuilder
     public PromptBuilder SetTemperature(double temperature)
     {
         _options.Temperature = (float)temperature;
+        return this;
+    }
+
+    public PromptBuilder SetMaxOutputTokens(int maxOutputTokens)
+    {
+        _options.MaxOutputTokens = maxOutputTokens;
         return this;
     }
 

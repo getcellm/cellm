@@ -41,6 +41,7 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Mistral.SDK;
 using OpenAI;
 using Polly;
 using Polly.CircuitBreaker;
@@ -164,27 +165,6 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddOllamaChatClient(this IServiceCollection services)
-    {
-        services
-            .AddKeyedChatClient(Provider.Ollama, serviceProvider =>
-            {
-                var account = ServiceLocator.ServiceProvider.GetRequiredService<Account>();
-                account.RequireEntitlement(Entitlement.EnableOllamaProvider);
-
-                var ollamaConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<OllamaConfiguration>>();
-                var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
-
-                return new OllamaChatClient(
-                    ollamaConfiguration.CurrentValue.BaseAddress,
-                    ollamaConfiguration.CurrentValue.DefaultModel,
-                    resilientHttpClient);
-            }, ServiceLifetime.Transient)
-            .UseFunctionInvocation();
-
-        return services;
-    }
-
     public static IServiceCollection AddDeepSeekChatClient(this IServiceCollection services)
     {
         services
@@ -222,15 +202,31 @@ public static class ServiceCollectionExtensions
                 var mistralConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<MistralConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
-                var openAiClient = new OpenAIClient(
-                    new ApiKeyCredential(mistralConfiguration.CurrentValue.ApiKey),
-                    new OpenAIClientOptions
-                    {
-                        Transport = new HttpClientPipelineTransport(resilientHttpClient),
-                        Endpoint = mistralConfiguration.CurrentValue.BaseAddress
-                    });
+                return new MistralClient(mistralConfiguration.CurrentValue.ApiKey, resilientHttpClient)
+                    .Completions
+                    .AsBuilder()
+                    .Build();
+            }, ServiceLifetime.Transient)
+            .UseFunctionInvocation();
 
-                return openAiClient.GetChatClient(mistralConfiguration.CurrentValue.DefaultModel).AsIChatClient();
+        return services;
+    }
+
+    public static IServiceCollection AddOllamaChatClient(this IServiceCollection services)
+    {
+        services
+            .AddKeyedChatClient(Provider.Ollama, serviceProvider =>
+            {
+                var account = ServiceLocator.ServiceProvider.GetRequiredService<Account>();
+                account.RequireEntitlement(Entitlement.EnableOllamaProvider);
+
+                var ollamaConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<OllamaConfiguration>>();
+                var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
+
+                return new OllamaChatClient(
+                    ollamaConfiguration.CurrentValue.BaseAddress,
+                    ollamaConfiguration.CurrentValue.DefaultModel,
+                    resilientHttpClient);
             }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 

@@ -9,9 +9,9 @@ public class ExcelAddIn : IExcelAddIn
     {
         ExcelIntegration.RegisterUnhandledExceptionHandler(obj =>
         {
-            var ex = (Exception)obj;
-            SentrySdk.CaptureException(ex);
-            return ex.Message;
+            var e = (Exception)obj;
+            SentrySdk.CaptureException(e);
+            return e.Message;
         });
 
         _ = ServiceLocator.ServiceProvider;

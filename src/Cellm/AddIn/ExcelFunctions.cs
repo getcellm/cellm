@@ -8,6 +8,7 @@ using Cellm.Services;
 using ExcelDna.Integration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Cellm.AddIn;
 
@@ -74,7 +75,10 @@ public static class ExcelFunctions
     {
         try
         {
-            var arguments = ServiceLocator.ServiceProvider.GetRequiredService<ArgumentParser>()
+            var argumentParser = ServiceLocator.ServiceProvider.GetRequiredService<ArgumentParser>();
+            var providerConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<ProviderConfiguration>>();
+
+            var arguments = argumentParser
                 .AddProvider(providerAndModel)
                 .AddModel(providerAndModel)
                 .AddInstructionsOrContext(instructionsOrContext)
@@ -90,6 +94,7 @@ public static class ExcelFunctions
             var prompt = new PromptBuilder()
                 .SetModel(arguments.Model)
                 .SetTemperature(arguments.Temperature)
+                .SetMaxOutputTokens(providerConfiguration.CurrentValue.MaxOutputTokens)
                 .AddSystemMessage(SystemMessages.SystemMessage)
                 .AddUserMessage(userMessage)
                 .Build();
@@ -101,11 +106,11 @@ public static class ExcelFunctions
             });
 
         }
-        catch (CellmException ex)
+        catch (CellmException e)
         {
-            SentrySdk.CaptureException(ex);
-            Debug.WriteLine(ex);
-            return ex.Message;
+            SentrySdk.CaptureException(e);
+            Debug.WriteLine(e);
+            return e.Message;
         }
     }
 
