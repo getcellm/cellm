@@ -17,7 +17,6 @@ internal class PermissionDeniedException : CellmException
             Entitlement.EnableAnthropicProvider => $"You do not have permission to use models hosted by Anthropic.",
             Entitlement.EnableCellmProvider => $"You do not have permission to use models hosted by Cellm.",
             Entitlement.EnableDeepSeekProvider => $"You do not have permission to use models hosted by DeepSeek.",
-            Entitlement.EnableLlamafileProvider => $"You do not have permission to use models served by Llamafiles.",
             Entitlement.EnableMistralProvider => $"You do not have permission to use models hosted by Mistral.",
             Entitlement.EnableOllamaProvider => $"You do not have permission to use models served by Ollama.",
             Entitlement.EnableOpenAiProvider => $"You do not have permission to use models hosted by OpenAi.",

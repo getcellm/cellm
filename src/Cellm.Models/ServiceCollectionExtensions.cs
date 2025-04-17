@@ -30,7 +30,6 @@ using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
 using Cellm.Models.Providers.Cellm;
 using Cellm.Models.Providers.DeepSeek;
-using Cellm.Models.Providers.Llamafile;
 using Cellm.Models.Providers.Mistral;
 using Cellm.Models.Providers.Ollama;
 using Cellm.Models.Providers.OpenAi;
@@ -206,32 +205,6 @@ public static class ServiceCollectionExtensions
                     });
 
                 return openAiClient.GetChatClient(deepSeekConfiguration.CurrentValue.DefaultModel).AsIChatClient();
-            }, ServiceLifetime.Transient)
-            .UseFunctionInvocation();
-
-        return services;
-    }
-
-    public static IServiceCollection AddLlamafileChatClient(this IServiceCollection services)
-    {
-        services
-            .AddKeyedChatClient(Provider.Llamafile, serviceProvider =>
-            {
-                var account = ServiceLocator.ServiceProvider.GetRequiredService<Account>();
-                account.RequireEntitlement(Entitlement.EnableLlamafileProvider);
-
-                var llamafileConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<LlamafileConfiguration>>();
-                var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
-
-                var openAiClient = new OpenAIClient(
-                    new ApiKeyCredential(llamafileConfiguration.CurrentValue.ApiKey),
-                    new OpenAIClientOptions
-                    {
-                        Transport = new HttpClientPipelineTransport(resilientHttpClient),
-                        Endpoint = llamafileConfiguration.CurrentValue.BaseAddress
-                    });
-
-                return openAiClient.GetChatClient(llamafileConfiguration.CurrentValue.DefaultModel).AsIChatClient();
             }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 

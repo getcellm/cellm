@@ -7,7 +7,6 @@ using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
 using Cellm.Models.Providers.Cellm;
 using Cellm.Models.Providers.DeepSeek;
-using Cellm.Models.Providers.Llamafile;
 using Cellm.Models.Providers.Mistral;
 using Cellm.Models.Providers.Ollama;
 using Cellm.Models.Providers.OpenAi;
@@ -57,7 +56,6 @@ internal static class ServiceLocator
             .Configure<CellmConfiguration>(configuration.GetRequiredSection(nameof(CellmConfiguration)))
             .Configure<DeepSeekConfiguration>(configuration.GetRequiredSection(nameof(DeepSeekConfiguration)))
             .Configure<ProviderConfiguration>(configuration.GetRequiredSection(nameof(ProviderConfiguration)))
-            .Configure<LlamafileConfiguration>(configuration.GetRequiredSection(nameof(LlamafileConfiguration)))
             .Configure<MistralConfiguration>(configuration.GetRequiredSection(nameof(MistralConfiguration)))
             .Configure<ModelContextProtocolConfiguration>(configuration.GetRequiredSection(nameof(ModelContextProtocolConfiguration)))
             .Configure<OllamaConfiguration>(configuration.GetRequiredSection(nameof(OllamaConfiguration)))
@@ -120,7 +118,6 @@ internal static class ServiceLocator
             .AddAnthropicChatClient()
             .AddCellmChatClient()
             .AddDeepSeekChatClient()
-            .AddLlamafileChatClient()
             .AddMistralChatClient()
             .AddOllamaChatClient()
             .AddOpenAiChatClient()
