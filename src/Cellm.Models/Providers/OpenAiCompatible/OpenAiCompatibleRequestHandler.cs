@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Cellm.Models.Providers.OpenAiCompatible;
 
-internal class OpenAiCompatibleRequestHandler()
+internal class OpenAiCompatibleRequestHandler
     : IModelRequestHandler<OpenAiCompatibleRequest, OpenAiCompatibleResponse>
 {
 

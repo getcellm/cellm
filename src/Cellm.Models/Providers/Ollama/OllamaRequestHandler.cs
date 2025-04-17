@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
 using Cellm.Models.Prompts;
+using Cellm.User;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -8,8 +9,8 @@ using Microsoft.Extensions.Options;
 namespace Cellm.Models.Providers.Ollama;
 
 internal class OllamaRequestHandler(
-    IOptionsMonitor<OllamaConfiguration> ollamaConfiguration,
     [FromKeyedServices(Provider.Ollama)] IChatClient chatClient,
+    IOptionsMonitor<OllamaConfiguration> ollamaConfiguration,
     HttpClient httpClient) : IModelRequestHandler<OllamaRequest, OllamaResponse>
 {
     public async Task<OllamaResponse> Handle(OllamaRequest request, CancellationToken cancellationToken)
@@ -27,6 +28,16 @@ internal class OllamaRequestHandler(
             var response = await httpClient.PostAsync(new Uri(ollamaConfiguration.CurrentValue.BaseAddress, "api/pull"), body, cancellationToken);
             response.EnsureSuccessStatusCode();
         }
+
+        var metadata = request.Prompt.Options.AdditionalProperties;
+
+        if (request.Prompt.Options.AdditionalProperties is null)
+        {
+            request.Prompt.Options.AdditionalProperties = [];
+        }
+
+        request.Prompt.Options.AdditionalProperties["num_ctx"] = 8192;
+
 
         var chatResponse = await chatClient.GetResponseAsync(
             request.Prompt.Messages,

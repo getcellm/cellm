@@ -1,9 +1,34 @@
-﻿using System.ClientModel;
+﻿// Circumventing limitations anywhere in the codebase is a direct violation of the
+// Fair Core License, Version 1.0 until a commit transitions to the Apache 2.0 Future License.
+// Once a commit transitions to the Apache 2.0 Future License, you can checkout out
+// that commit and use the code under the Apache 2.0 License. A commit transitions to
+// the Apache 2.0 Future License on the second anniversary of the date the git commit
+// became available. 
+//
+// The relevant section of the Fair Core License, Version 1.0 is:
+//
+// > ### Limitations
+// > You must not move, change, disable, or circumvent the license key functionality
+// > in the Software; or modify any portion of the Software protected by the license
+// > key to:
+//
+// > 1. enable access to the protected functionality without a valid license key; or
+//
+// > 2. remove the protected functionality.
+//
+// You can checkout the latest commit licensed under the Apache 2.0 License like this:
+// 
+// $ git checkout $(git rev-list -n 1 --before="2 years ago" HEAD)
+//
+// For more details, go to https://github.com/getcellm/cellm/blob/main/LICENSE.
+
+using System.ClientModel;
 using System.ClientModel.Primitives;
 using System.Threading.RateLimiting;
 using Anthropic.SDK;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
+using Cellm.Models.Providers.Cellm;
 using Cellm.Models.Providers.DeepSeek;
 using Cellm.Models.Providers.Llamafile;
 using Cellm.Models.Providers.Mistral;
@@ -11,6 +36,8 @@ using Cellm.Models.Providers.Ollama;
 using Cellm.Models.Providers.OpenAi;
 using Cellm.Models.Providers.OpenAiCompatible;
 using Cellm.Models.Resilience;
+using Cellm.Services;
+using Cellm.User;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -91,11 +118,14 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddAnthropicChatClient(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddAnthropicChatClient(this IServiceCollection services)
     {
         services
             .AddKeyedChatClient(Provider.Anthropic, serviceProvider =>
             {
+                var account = ServiceLocator.ServiceProvider.GetRequiredService<Account>();
+                account.RequireEntitlement(Entitlement.EnableAnthropicProvider);
+
                 var anthropicConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<AnthropicConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
@@ -109,11 +139,40 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
+    public static IServiceCollection AddCellmChatClient(this IServiceCollection services)
+    {
+        services
+            .AddKeyedChatClient(Provider.Cellm, serviceProvider =>
+            {
+                var account = ServiceLocator.ServiceProvider.GetRequiredService<Account>();
+                account.RequireEntitlement(Entitlement.EnableCellmProvider);
+
+                var cellmConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<CellmConfiguration>>();
+                var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
+
+                var openAiClient = new OpenAIClient(
+                    new ApiKeyCredential(string.Empty),
+                    new OpenAIClientOptions
+                    {
+                        Transport = new HttpClientPipelineTransport(resilientHttpClient),
+                        Endpoint = cellmConfiguration.CurrentValue.BaseAddress
+                    });
+
+                return openAiClient.GetChatClient(cellmConfiguration.CurrentValue.DefaultModel).AsIChatClient();
+            }, ServiceLifetime.Transient)
+            .UseFunctionInvocation();
+
+        return services;
+    }
+
     public static IServiceCollection AddOllamaChatClient(this IServiceCollection services)
     {
         services
             .AddKeyedChatClient(Provider.Ollama, serviceProvider =>
             {
+                var account = ServiceLocator.ServiceProvider.GetRequiredService<Account>();
+                account.RequireEntitlement(Entitlement.EnableOllamaProvider);
+
                 var ollamaConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<OllamaConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
@@ -132,6 +191,9 @@ public static class ServiceCollectionExtensions
         services
             .AddKeyedChatClient(Provider.DeepSeek, serviceProvider =>
             {
+                var account = ServiceLocator.ServiceProvider.GetRequiredService<Account>();
+                account.RequireEntitlement(Entitlement.EnableDeepSeekProvider);
+
                 var deepSeekConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<DeepSeekConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
@@ -155,6 +217,9 @@ public static class ServiceCollectionExtensions
         services
             .AddKeyedChatClient(Provider.Llamafile, serviceProvider =>
             {
+                var account = ServiceLocator.ServiceProvider.GetRequiredService<Account>();
+                account.RequireEntitlement(Entitlement.EnableLlamafileProvider);
+
                 var llamafileConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<LlamafileConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
@@ -178,6 +243,9 @@ public static class ServiceCollectionExtensions
         services
             .AddKeyedChatClient(Provider.Mistral, serviceProvider =>
             {
+                var account = ServiceLocator.ServiceProvider.GetRequiredService<Account>();
+                account.RequireEntitlement(Entitlement.EnableMistralProvider);
+
                 var mistralConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<MistralConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
@@ -201,6 +269,9 @@ public static class ServiceCollectionExtensions
         services
             .AddKeyedChatClient(Provider.OpenAi, serviceProvider =>
             {
+                var account = ServiceLocator.ServiceProvider.GetRequiredService<Account>();
+                account.RequireEntitlement(Entitlement.EnableOpenAiProvider);
+
                 var openAiConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<OpenAiConfiguration>>();
 
                 return new OpenAIClient(new ApiKeyCredential(openAiConfiguration.CurrentValue.ApiKey))
@@ -217,6 +288,9 @@ public static class ServiceCollectionExtensions
         services
             .AddKeyedChatClient(Provider.OpenAiCompatible, serviceProvider =>
             {
+                var account = ServiceLocator.ServiceProvider.GetRequiredService<Account>();
+                account.RequireEntitlement(Entitlement.EnableOpenAiCompatibleProvider);
+
                 var openAiCompatibleConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<OpenAiCompatibleConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 

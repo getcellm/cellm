@@ -3,6 +3,7 @@
 public enum Provider
 {
     Anthropic,
+    Cellm,
     DeepSeek,
     Llamafile,
     Mistral,

@@ -20,6 +20,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)Providers\Anthropic\AnthropicRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\Anthropic\AnthropicRequestHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\Anthropic\AnthropicResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\Cellm\CellmConfiguration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\Cellm\CellmRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\Cellm\CellmRequestHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\Cellm\CellmResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\DeepSeek\DeepSeekConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\IModelRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\IModelRequestHandler.cs" />

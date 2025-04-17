@@ -3,7 +3,7 @@ namespace Cellm.Models.Providers.Mistral;
 
 internal class MistralConfiguration : IProviderConfiguration
 {
-    public Uri BaseAddress { get; init; } = default!;
+    public Uri BaseAddress => new("https://api.mistral.ai/v1/");
 
     public string DefaultModel { get; init; } = string.Empty;
 

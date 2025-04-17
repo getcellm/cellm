@@ -97,7 +97,7 @@ public static class ExcelFunctions
             // ExcelAsyncUtil.Run yields Excel's UI thread, Task.Run enables async/await in inner code
             return ExcelAsyncUtil.Run(nameof(PromptWith), new object[] { providerAndModel, instructionsOrContext, instructionsOrTemperature, temperature }, () =>
             {
-                return Task.Run(async () => await CompleteAsync(prompt, arguments.Provider)).GetAwaiter().GetResult();
+                return Task.Run(async () => await GetResponseAsync(prompt, arguments.Provider)).GetAwaiter().GetResult();
             });
 
         }
@@ -118,7 +118,7 @@ public static class ExcelFunctions
     /// <returns>A task that represents the asynchronous operation. The task result contains the model's response as a string.</returns>
     /// <exception cref="CellmException">Thrown when an unexpected error occurs during the operation.</exception>
 
-    internal static async Task<string> CompleteAsync(Prompt prompt, Provider provider)
+    internal static async Task<string> GetResponseAsync(Prompt prompt, Provider provider)
     {
         var client = ServiceLocator.ServiceProvider.GetRequiredService<Client>();
         var response = await client.Send(prompt, provider, CancellationToken.None);

@@ -1,11 +1,14 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Reflection.Metadata.Ecma335;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Cellm.AddIn.Exceptions;
 using Cellm.Models;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
+using Cellm.Models.Providers.Cellm;
 using Cellm.Models.Providers.DeepSeek;
 using Cellm.Models.Providers.Llamafile;
 using Cellm.Models.Providers.Mistral;
@@ -15,6 +18,7 @@ using Cellm.Models.Providers.OpenAiCompatible;
 using Cellm.Services;
 using ExcelDna.Integration.CustomUI;
 using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -109,6 +113,7 @@ public class ExcelRibbon : ExcelDna.Integration.CustomUI.ExcelRibbon
         var providerAndModels = new List<string>();
 
         var anthropicConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<AnthropicConfiguration>>().CurrentValue;
+        var cellmConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<CellmConfiguration>>().CurrentValue;
         var deepSeekConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<DeepSeekConfiguration>>().CurrentValue;
         var llamafileConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<LlamafileConfiguration>>().CurrentValue;
         var mistralConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<MistralConfiguration>>().CurrentValue;
@@ -117,6 +122,7 @@ public class ExcelRibbon : ExcelDna.Integration.CustomUI.ExcelRibbon
         var openAiCompatibleConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<OpenAiCompatibleConfiguration>>().CurrentValue;
 
         providerAndModels.AddRange(anthropicConfiguration.Models.Select(m => $"{nameof(Provider.Anthropic)}/{m}"));
+        providerAndModels.AddRange(cellmConfiguration.Models.Select(m => $"{nameof(Provider.Cellm)}/{m}"));
         providerAndModels.AddRange(deepSeekConfiguration.Models.Select(m => $"{nameof(Provider.DeepSeek)}/{m}"));
         providerAndModels.AddRange(llamafileConfiguration.Models.Select(m => $"{nameof(Provider.Llamafile)}/{m}"));
         providerAndModels.AddRange(mistralConfiguration.Models.Select(m => $"{nameof(Provider.Mistral)}/{m}"));
@@ -159,7 +165,16 @@ public class ExcelRibbon : ExcelDna.Integration.CustomUI.ExcelRibbon
     public string OnGetBaseAddress(IRibbonControl control)
     {
         var provider = GetCurrentProvider();
-        return GetValue($"{provider}Configuration:{nameof(OpenAiConfiguration.BaseAddress)}");
+
+        return provider switch
+        {
+            Provider.DeepSeek => GetProviderConfiguration<DeepSeekConfiguration>().BaseAddress.ToString(),
+            Provider.Llamafile => GetProviderConfiguration<LlamafileConfiguration>().BaseAddress.ToString(),
+            Provider.Mistral => GetProviderConfiguration<MistralConfiguration>().BaseAddress.ToString(),
+            Provider.Ollama => GetProviderConfiguration<OllamaConfiguration>().BaseAddress.ToString(),
+            Provider.OpenAiCompatible => GetProviderConfiguration<OpenAiCompatibleConfiguration>().BaseAddress.ToString(),
+            _ => "Built-in"
+        };
     }
 
     public string OnGetApiKey(IRibbonControl control)
@@ -182,7 +197,7 @@ public class ExcelRibbon : ExcelDna.Integration.CustomUI.ExcelRibbon
     public void OnBaseAddressChanged(IRibbonControl control, string text)
     {
         var provider = GetCurrentProvider();
-        SetValue($"{provider}Configuration:{nameof(OpenAiConfiguration.BaseAddress)}", text);
+        SetValue($"{provider}Configuration:{nameof(DeepSeekConfiguration.BaseAddress)}", text);
     }
 
     public void OnApiKeyChanged(IRibbonControl control, string text)
@@ -254,6 +269,11 @@ public class ExcelRibbon : ExcelDna.Integration.CustomUI.ExcelRibbon
     private Provider GetCurrentProvider()
     {
         return Enum.Parse<Provider>(GetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultProvider)}"), true);
+    }
+
+    private static T GetProviderConfiguration<T>()
+    {
+        return ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<T>>().CurrentValue;
     }
 
     private static Provider GetProvider(string providerAndModel)
