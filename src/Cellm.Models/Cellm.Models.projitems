@@ -52,7 +52,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Resilience\ResilienceConfiguration.cs" />
     <Compile Include="..\Cellm.Models\Resilience\RetryHttpClientHelpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Resilience\RetryConfiguration.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Serde.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ServiceCollectionExtensions.cs" />
   </ItemGroup>
 </Project>

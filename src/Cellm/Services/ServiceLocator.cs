@@ -107,7 +107,6 @@ internal static class ServiceLocator
             .AddTransient<ArgumentParser>()
             .AddSingleton<Account>()
             .AddSingleton<Client>()
-            .AddSingleton<Serde>()
             .AddRateLimiter(configuration)
             .AddRetryHttpClient(configuration);
 
