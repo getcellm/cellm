@@ -6,8 +6,6 @@ using Microsoft.Extensions.Configuration;
 
 namespace Cellm.AddIn;
 
-public record Arguments(Provider Provider, string Model, string Context, string Instructions, double Temperature);
-
 public class ArgumentParser
 {
     private string? _provider;
@@ -231,7 +229,7 @@ public class ArgumentParser
             .ToString();
     }
 
-    private double ParseTemperature(double temperature)
+    private static double ParseTemperature(double temperature)
     {
         if (temperature < 0 || temperature > 1)
         {

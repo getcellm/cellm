@@ -223,6 +223,16 @@
           "Microsoft.Extensions.Primitives": "9.0.4"
         }
       },
+      "Mistral.SDK": {
+        "type": "Direct",
+        "requested": "[2.1.1, )",
+        "resolved": "2.1.1",
+        "contentHash": "dBTLqmtfj7C62meCEB9l7VKDtRDDFQgYbx8a5+8uTLtU9bUmw9xYMmyTixHcfOGAQ8LlrXOWNOS6dEFMEgFHhQ==",
+        "dependencies": {
+          "Microsoft.Bcl.AsyncInterfaces": "8.0.0",
+          "Microsoft.Extensions.AI.Abstractions": "9.3.0-preview.1.25161.3"
+        }
+      },
       "ModelContextProtocol": {
         "type": "Direct",
         "requested": "[0.1.0-preview.7, )",
