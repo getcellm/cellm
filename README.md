@@ -39,15 +39,17 @@ Green cells denote correct classifications and red cells denote incorrect classi
 
 2. Double-click on `Cellm-AddIn64-packed.xll` and click on "Enable this add-in for this session only" when Excel opens.
 
-3. Download and install [Ollama](https://ollama.com/). Cellm uses Ollama and the Gemma 2 2B model by default.
+3. Download and install [Ollama](https://ollama.com/).
+
+4. Download a model, e.g. Gemma 2 2B: Open Windows Terminal (open start menu, type `Windows Terminal`, and click `OK`), type `ollama pull gemma2:2b`, and wait for the download to finish.
 
 For permanent installation and more options, see our [Installation Guide](https://docs.getcellm.com/get-started/install).
 
 ## Basic usage
 
-Select a cell and type `=PROMPT("What model are you and who made you?")`. The default model will tell you that it's called "Gemma" and made by Google DeepMind.
+Select a cell and type `=PROMPT("What model are you and who made you?")`. For Gemma 2 2B, it will tell you that it's called "Gemma" and made by Google DeepMind.
 
-You can also use cell references. For example, copy a news article into cell A1 and type in cell B1: `=PROMPT(A1, "Extract all person names mentioned in the text")`.
+You can also use cell references. For example, copy a news article into cell A1 and type in cell B1: `=PROMPT(A1, "Extract all person names mentioned in the text")`. You can reference many cells using standard Excel notation, e.g. `=PROMPT(A1:F10, "Extract all person names in the cells")`
 
 For more advanced usage, including function calling and configuration, see our [Documentation](https://docs.getcellm.com).
 
