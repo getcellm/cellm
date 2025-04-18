@@ -26,8 +26,6 @@ jobs:
         dotnet-version: 9.0.x
     - name: Restore dependencies
       run: dotnet restore --locked-mode
-    - name: Add appsettings.Local.json
-      run: cp src/Cellm/appsettings.Local.Ollama.json src/Cellm/appsettings.Local.json
     - name: Build
       run: dotnet build --no-restore
     - name: Test
