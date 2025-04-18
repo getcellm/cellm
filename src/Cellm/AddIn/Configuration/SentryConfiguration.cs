@@ -1,4 +1,4 @@
-﻿namespace Cellm.Services.Configuration;
+﻿namespace Cellm.AddIn.Configuration;
 
 internal class SentryConfiguration
 {

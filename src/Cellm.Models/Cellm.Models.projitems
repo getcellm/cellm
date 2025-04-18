@@ -36,6 +36,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Providers\Ollama\OllamaRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\Ollama\OllamaRequestHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\Ollama\OllamaResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\ChatClientFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\IChatClientFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\OpenAiCompatible\OpenAiCompatibleConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\OpenAiCompatible\OpenAiCompatibleRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\OpenAiCompatible\OpenAiCompatibleRequestHandler.cs" />

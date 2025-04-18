@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using Cellm.AddIn;
+using Cellm.AddIn.Configuration;
 using Cellm.AddIn.Exceptions;
 using Cellm.Models;
 using Cellm.Models.Behaviors;
@@ -13,28 +13,42 @@ using Cellm.Models.Providers.OpenAi;
 using Cellm.Models.Providers.OpenAiCompatible;
 using Cellm.Models.Resilience;
 using Cellm.Models.Tools;
-using Cellm.Services.Configuration;
 using Cellm.Tools;
 using Cellm.Tools.FileReader;
 using Cellm.Tools.ModelContextProtocol;
 using Cellm.User;
 using ExcelDna.Integration;
 using Microsoft.Extensions.AI;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sentry.Infrastructure;
 
-namespace Cellm.Services;
+namespace Cellm.AddIn;
 
-internal static class ServiceLocator
+public class CellmAddIn : IExcelAddIn
 {
-    private static readonly Lazy<IServiceProvider> _serviceProvider = new(() => ConfigureServices(new ServiceCollection()).BuildServiceProvider());
-
     internal static string ConfigurationPath { get; set; } = ExcelDnaUtil.XllPathInfo?.Directory?.FullName ?? throw new NullReferenceException("Could not get Cellm path");
 
-    public static IServiceProvider ServiceProvider => _serviceProvider.Value;
+    private static readonly Lazy<IServiceProvider> _serviceProvider = new(() => ConfigureServices(new ServiceCollection()).BuildServiceProvider());
+    public static IServiceProvider Services => _serviceProvider.Value;
+
+
+    public void AutoOpen()
+    {
+        ExcelIntegration.RegisterUnhandledExceptionHandler(obj =>
+        {
+            var e = (Exception)obj;
+            SentrySdk.CaptureException(e);
+            return e.Message;
+        });
+    }
+
+    public void AutoClose()
+    {
+        DisposeServices();
+        SentrySdk.Flush();
+    }
 
     private static IServiceCollection ConfigureServices(IServiceCollection services)
     {
@@ -115,6 +129,7 @@ internal static class ServiceLocator
 
         // Add providers
         services
+            .AddSingleton<IChatClientFactory, ChatClientFactory>()
             .AddAnthropicChatClient()
             .AddCellmChatClient()
             .AddDeepSeekChatClient()
@@ -154,11 +169,12 @@ internal static class ServiceLocator
             .InformationalVersion ?? "unknown";
     }
 
-    public static void Dispose()
+    public static void DisposeServices()
     {
         if (_serviceProvider.IsValueCreated)
         {
             (_serviceProvider.Value as IDisposable)?.Dispose();
         }
     }
+
 }

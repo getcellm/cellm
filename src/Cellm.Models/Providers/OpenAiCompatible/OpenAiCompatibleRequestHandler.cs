@@ -1,17 +1,14 @@
 using Cellm.Models.Prompts;
-using Cellm.Services;
-using Microsoft.Extensions.AI;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Cellm.Models.Providers.OpenAiCompatible;
 
-internal class OpenAiCompatibleRequestHandler
+internal class OpenAiCompatibleRequestHandler(IChatClientFactory chatClientFactory)
     : IModelRequestHandler<OpenAiCompatibleRequest, OpenAiCompatibleResponse>
 {
 
     public async Task<OpenAiCompatibleResponse> Handle(OpenAiCompatibleRequest request, CancellationToken cancellationToken)
     {
-        var chatClient = ServiceLocator.ServiceProvider.GetRequiredKeyedService<IChatClient>(request.Provider);
+        var chatClient = chatClientFactory.GetClient(request.Provider);
 
         var chatResponse = await chatClient.GetResponseAsync(
             request.Prompt.Messages,

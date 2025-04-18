@@ -4,7 +4,6 @@ using Cellm.AddIn.Exceptions;
 using Cellm.Models;
 using Cellm.Models.Prompts;
 using Cellm.Models.Providers;
-using Cellm.Services;
 using ExcelDna.Integration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,7 +11,7 @@ using Microsoft.Extensions.Options;
 
 namespace Cellm.AddIn;
 
-public static class ExcelFunctions
+public static class Functions
 {
     /// <summary>
     /// Sends a prompt to the default model configured in CellmConfiguration.
@@ -35,7 +34,7 @@ public static class ExcelFunctions
     [ExcelArgument(Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
     [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
     {
-        var configuration = ServiceLocator.ServiceProvider.GetRequiredService<IConfiguration>();
+        var configuration = CellmAddIn.Services.GetRequiredService<IConfiguration>();
 
         var provider = configuration.GetSection(nameof(ProviderConfiguration)).GetValue<string>(nameof(ProviderConfiguration.DefaultProvider))
             ?? throw new ArgumentException(nameof(ProviderConfiguration.DefaultProvider));
@@ -75,8 +74,8 @@ public static class ExcelFunctions
     {
         try
         {
-            var argumentParser = ServiceLocator.ServiceProvider.GetRequiredService<ArgumentParser>();
-            var providerConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<ProviderConfiguration>>();
+            var argumentParser = CellmAddIn.Services.GetRequiredService<ArgumentParser>();
+            var providerConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<ProviderConfiguration>>();
 
             var arguments = argumentParser
                 .AddProvider(providerAndModel)
@@ -125,7 +124,7 @@ public static class ExcelFunctions
 
     internal static async Task<string> GetResponseAsync(Prompt prompt, Provider provider)
     {
-        var client = ServiceLocator.ServiceProvider.GetRequiredService<Client>();
+        var client = CellmAddIn.Services.GetRequiredService<Client>();
         var response = await client.Send(prompt, provider, CancellationToken.None);
         return response.Messages.Last().Text ?? throw new NullReferenceException("No text response");
     }
