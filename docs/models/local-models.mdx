@@ -16,18 +16,18 @@ We can split local models into three tiers based on their size and capabilities,
 | Speed        | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" />  | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" />             | <Icon icon="star" iconType="solid" /> | 
 | Intelligence  | <Icon icon="star" iconType="solid" /> | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /> | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" />  | 
 | World Knowledge | <Icon icon="star" iconType="regular" /> | <Icon icon="star" iconType="solid" /> | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /> |
-| Recommended model | Gemma 2 2B | Qwen 2.5 7B | Mistral Small 3 |
+| Recommended model | Gemma 2 2B | Qwen 2.5 7B | Mistral Small 3.1 |
 
 <Tip>
 You need a GPU for any of the medium or large models to be useful in practice. If you don't have a GPU, you can use [Hosted Models](/models/hosted-models.mdx) if small ones are insufficient.
 </Tip>
 
 
-In general, smaller models are faster and less intelligent, larger models are slower and more intelligent. When using local models, it's important to find the right balance for your task, because speed impact your productivity and intelligence impact your results. You should try out different models and choose the smallest model that gives you good results. 
+In general, smaller models are faster and less intelligent, while larger models are slower and more intelligent. When using local models, it's important to find the right balance for your task, because speed impacts your productivity and intelligence impacts your results. You should try out different models and choose the smallest one that gives you good results
 
-Small model are sufficient for many common tasks such as categorizing text or extracting person names from news articles. Medium models are appropriate for more complex tasks such as document review, survery analysis, or tasks involving function calling. Large models are useful for creative writing, tasks requiring nuanced language understanding such as spam detection, or tasks requiring world knowledge. 
+Small models are sufficient for many common tasks such as categorizing text or extracting person names from news articles. Medium models are appropriate for more complex tasks such as document review, survey analysis, or tasks involving function calling. Large models are useful for creative writing, tasks requiring nuanced language understanding such as spam detection, or tasks requiring world knowledge. 
 
-Models larger than 32B require significant hardware investment to run locally and you are better off using [Hosted Models](/models/hosted-models.mdx) if you need this kind of intelligence and don't have the hardware already.
+Models larger than 32B require significant hardware investment to run locally, and you are better off using [Hosted Models](/models/hosted-models.mdx) if you need this kind of intelligence and don't have the hardware already.
 
 ## Run models locally
 You need to run a program on your computer that servers models to Cellm. We call these programs "providers". Cellm supports Ollama, Llamafiles, and vLLM, as well as any OpenAI-compatible provider. If you don't know any of these names, just use Ollama.
@@ -37,12 +37,11 @@ You need to run a program on your computer that servers models to Cellm. We call
 To get started with Ollama, we recommend you try out the Gemma 2 2B model, which is Cellm's default local model. 
 
 1. Download and install [Ollama](https://ollama.com/). Ollama will start after the install and automatically run whenever you start up your computer.
-2. In Excel, select a cell and type out the formulas `=PROMPT("Which model are you and who made you?")`. The model will tell you that is called "Gemma" and made by Google DeepMind.
-
-Cellm will automatically instruct Ollama to download a model for you for first time you prompt it. The first prompt will therefore take a while.
+2. Download Gemma 2 2B model: Open Windows Terminal (open start menu, type `Windows Terminal`, and click `OK`), type `ollama pull gemma2:2b`, and wait for the download to finish.  
+3. In Excel, select the `ollama/gemma2:2b` from the model dropdown menu, and type out the formula `=PROMPT("Which model are you and who made you?")`. The model will tell you that is called "Gemma" and made by Google DeepMind.
 
 <Info>
-See [https://ollama.com/search](https://ollama.com/search) for a complete list of Ollama models.
+You can use any model that Ollama supports. See [https://ollama.com/search](https://ollama.com/search) for a complete list.
 </Info>
 
 ### LLamafile
@@ -50,7 +49,8 @@ See [https://ollama.com/search](https://ollama.com/search) for a complete list o
 Llamafile is project by Mozilla that combines llama.cpp with Cosmopolitan Libc, enabling you to download and run a single-file executable (called a "llamafile") that runs locally on most computers, with no installation. To get started:
 
 1. Download a llamafile from https://github.com/Mozilla-Ocho/llamafile (e.g. [Gemma 2 2B](https://huggingface.co/Mozilla/gemma-2-2b-it-llamafile/blob/main/gemma-2-2b-it.Q6_K.llamafile?download=true)).
-2. Run the following command in your Windows terminal:
+2. Append `.exe` to the filename. For example, `gemma-2-2b-it.Q6_K.llamafile` should be renamed to `gemma-2-2b-it.Q6_K.llamafile.exe`.
+3. Run the following command in your Windows terminal (open start menu, type `Windows Terminal`, and click `OK`):
     ```cmd
     .\gemma-2-2b-it.Q6_K.llamafile.exe --server --v2
     ```
@@ -60,8 +60,8 @@ Llamafile is project by Mozilla that combines llama.cpp with Cosmopolitan Libc, 
     ```cmd
     .\gemma-2-2b-it.Q6_K.llamafile.exe --server --v2 -ngl 999
     ```
-
-3. Start Excel and select the `openaicompatible` provider from the model drop-down on Cellm's ribbon menu. Llamafiles ignore a model's name because a particular Llamafile serves one model only, so it doesn't matter what you write after the slash (/) in the model textbox. A name is required though, because the OpenAI API expects it. You can put in `openaicompatible/llamafile`, for example.
+4. Start Excel and select the `openaicompatible` provider from the model drop-down on Cellm's ribbon menu. It doesn't matter what model name you choose, as Llamafiles ignore a model's name because a particular Llamafile serves one model only. A name is required though, because the OpenAI API expects it.
+5. Set the Base Address textbox to http://localhost:8080.
 
 <Tip>
 Llamafiles are especially useful if you don't have the necessary permissions to install programs on your computer.
@@ -84,13 +84,19 @@ To get started, we recommend using Ollama with the Gemma 2 2B model:
    docker compose -f docker-compose.Ollama.yml down  // When you want to shut it down
    ```
 
-To use other Ollama models, pull another of the [supported models](https://ollama.com/search). If you want to speed up inference, you can use your GPU as well:
+3. Start Excel and select the `openaicompatible` provider from the model drop-down on Cellm's ribbon menu. Replace the model name with the name of the model you want to use. For Gemma 2 2B, the textbox should read "openaicompatible/gemma2:2b".
+
+4. Set the Base Address textbox to `http://localhost:11434`.
+
+To use other Ollama models, pull another of the [supported models](https://ollama.com/search) by running e.g. `ollama run mistral-small3.1:24b` in the container. 
+
+If you want to speed up inference, you can use your GPU as well:
 
 ```cmd
 docker compose -f docker-compose.Ollama.yml -f docker-compose.Ollama.GPU.yml up --detach
 ```
 
-If you want to further speed up running many requests in parallel, you can use vLLM instead of Ollama. You must supply the docker compose file with a Hugging Face API key either via an environment variable or editing the docker compose file directy. Look at the vLLM docker compose file for details. If you don't know what a Hugging Face API key is, just use Ollama. 
+If you want to speed up running many requests in parallel, you can use vLLM instead of Ollama. You must supply the docker compose file with a Hugging Face API key either via an environment variable or editing the docker compose file directy. Look at the vLLM docker compose file for details. If you don't know what a Hugging Face API key is, just use Ollama. 
 
 To start vLLM:
 
@@ -101,5 +107,5 @@ docker compose -f docker-compose.vLLM.GPU.yml up --detach
 To use other vLLM models, change the "--model" argument in the docker compose file to another Hugging Face model.
 
 <Tip>
-Open WebUI is included in both Ollama and vLLM docker compose files so you can test the local model outside of Cellm. It is available at `http://localhost:3000`.
+Open WebUI is included in both Ollama and vLLM docker compose files so you can test the local model outside of Cellm. Open WebUI is available at `http://localhost:3000`.
 </Tip>
