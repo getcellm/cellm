@@ -35,7 +35,6 @@ using Cellm.Models.Providers.Ollama;
 using Cellm.Models.Providers.OpenAi;
 using Cellm.Models.Providers.OpenAiCompatible;
 using Cellm.Models.Resilience;
-using Cellm.Services;
 using Cellm.User;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
@@ -123,7 +122,7 @@ public static class ServiceCollectionExtensions
         services
             .AddKeyedChatClient(Provider.Anthropic, serviceProvider =>
             {
-                var account = ServiceLocator.ServiceProvider.GetRequiredService<Account>();
+                var account = serviceProvider.GetRequiredService<Account>();
                 account.RequireEntitlement(Entitlement.EnableAnthropicProvider);
 
                 var anthropicConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<AnthropicConfiguration>>();
@@ -144,7 +143,7 @@ public static class ServiceCollectionExtensions
         services
             .AddKeyedChatClient(Provider.Cellm, serviceProvider =>
             {
-                var account = ServiceLocator.ServiceProvider.GetRequiredService<Account>();
+                var account = serviceProvider.GetRequiredService<Account>();
                 account.RequireEntitlement(Entitlement.EnableCellmProvider);
 
                 var cellmConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<CellmConfiguration>>();
@@ -170,7 +169,7 @@ public static class ServiceCollectionExtensions
         services
             .AddKeyedChatClient(Provider.DeepSeek, serviceProvider =>
             {
-                var account = ServiceLocator.ServiceProvider.GetRequiredService<Account>();
+                var account = serviceProvider.GetRequiredService<Account>();
                 account.RequireEntitlement(Entitlement.EnableDeepSeekProvider);
 
                 var deepSeekConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<DeepSeekConfiguration>>();
@@ -196,7 +195,7 @@ public static class ServiceCollectionExtensions
         services
             .AddKeyedChatClient(Provider.Mistral, serviceProvider =>
             {
-                var account = ServiceLocator.ServiceProvider.GetRequiredService<Account>();
+                var account = serviceProvider.GetRequiredService<Account>();
                 account.RequireEntitlement(Entitlement.EnableMistralProvider);
 
                 var mistralConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<MistralConfiguration>>();
@@ -217,7 +216,7 @@ public static class ServiceCollectionExtensions
         services
             .AddKeyedChatClient(Provider.Ollama, serviceProvider =>
             {
-                var account = ServiceLocator.ServiceProvider.GetRequiredService<Account>();
+                var account = serviceProvider.GetRequiredService<Account>();
                 account.RequireEntitlement(Entitlement.EnableOllamaProvider);
 
                 var ollamaConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<OllamaConfiguration>>();
@@ -238,7 +237,7 @@ public static class ServiceCollectionExtensions
         services
             .AddKeyedChatClient(Provider.OpenAi, serviceProvider =>
             {
-                var account = ServiceLocator.ServiceProvider.GetRequiredService<Account>();
+                var account = serviceProvider.GetRequiredService<Account>();
                 account.RequireEntitlement(Entitlement.EnableOpenAiProvider);
 
                 var openAiConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<OpenAiConfiguration>>();
@@ -257,7 +256,7 @@ public static class ServiceCollectionExtensions
         services
             .AddKeyedChatClient(Provider.OpenAiCompatible, serviceProvider =>
             {
-                var account = ServiceLocator.ServiceProvider.GetRequiredService<Account>();
+                var account = serviceProvider.GetRequiredService<Account>();
                 account.RequireEntitlement(Entitlement.EnableOpenAiCompatibleProvider);
 
                 var openAiCompatibleConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<OpenAiCompatibleConfiguration>>();

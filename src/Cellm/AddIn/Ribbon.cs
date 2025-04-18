@@ -12,7 +12,6 @@ using Cellm.Models.Providers.Mistral;
 using Cellm.Models.Providers.Ollama;
 using Cellm.Models.Providers.OpenAi;
 using Cellm.Models.Providers.OpenAiCompatible;
-using Cellm.Services;
 using Cellm.User;
 using ExcelDna.Integration.CustomUI;
 using Microsoft.Extensions.Caching.Hybrid;
@@ -22,14 +21,14 @@ using Microsoft.Extensions.Options;
 namespace Cellm.AddIn.RibbonController;
 
 [ComVisible(true)]
-public class ExcelRibbon : ExcelDna.Integration.CustomUI.ExcelRibbon
+public class Ribbon : ExcelRibbon
 {
     private IRibbonUI? _ribbonUi;
 
-    private static readonly string _appSettingsPath = Path.Combine(ServiceLocator.ConfigurationPath, "appsettings.json");
-    private static readonly string _appsettingsLocalPath = Path.Combine(ServiceLocator.ConfigurationPath, "appsettings.Local.json");
+    private static readonly string _appSettingsPath = Path.Combine(CellmAddIn.ConfigurationPath, "appsettings.json");
+    private static readonly string _appsettingsLocalPath = Path.Combine(CellmAddIn.ConfigurationPath, "appsettings.Local.json");
 
-    public ExcelRibbon()
+    public Ribbon()
     {
         EnsureDefaultProvider();
         EnsureDefaultCache();
@@ -109,21 +108,21 @@ public class ExcelRibbon : ExcelDna.Integration.CustomUI.ExcelRibbon
     {
         var providerAndModels = new List<string>();
 
-        var accountConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<AccountConfiguration>>().CurrentValue;
+        var accountConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<AccountConfiguration>>().CurrentValue;
 
         if (accountConfiguration.IsEnabled)
         {
-            var cellmConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<CellmConfiguration>>().CurrentValue;
+            var cellmConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<CellmConfiguration>>().CurrentValue;
             providerAndModels.AddRange(cellmConfiguration.Models.Select(m => $"{nameof(Provider.Cellm)}/{m}"));
         }
 
-        var anthropicConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<AnthropicConfiguration>>().CurrentValue;
+        var anthropicConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<AnthropicConfiguration>>().CurrentValue;
 
-        var deepSeekConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<DeepSeekConfiguration>>().CurrentValue;
-        var mistralConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<MistralConfiguration>>().CurrentValue;
-        var ollamaConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<OllamaConfiguration>>().CurrentValue;
-        var openAiConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<OpenAiConfiguration>>().CurrentValue;
-        var openAiCompatibleConfiguration = ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<OpenAiCompatibleConfiguration>>().CurrentValue;
+        var deepSeekConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<DeepSeekConfiguration>>().CurrentValue;
+        var mistralConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<MistralConfiguration>>().CurrentValue;
+        var ollamaConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<OllamaConfiguration>>().CurrentValue;
+        var openAiConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<OpenAiConfiguration>>().CurrentValue;
+        var openAiCompatibleConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<OpenAiCompatibleConfiguration>>().CurrentValue;
 
         providerAndModels.AddRange(anthropicConfiguration.Models.Select(m => $"{nameof(Provider.Anthropic)}/{m}"));
         providerAndModels.AddRange(deepSeekConfiguration.Models.Select(m => $"{nameof(Provider.DeepSeek)}/{m}"));
@@ -232,7 +231,7 @@ public class ExcelRibbon : ExcelDna.Integration.CustomUI.ExcelRibbon
     {
         if (!enabled)
         {
-            var cache = ServiceLocator.ServiceProvider.GetRequiredService<HybridCache>();
+            var cache = CellmAddIn.Services.GetRequiredService<HybridCache>();
             await cache.RemoveByTagAsync(nameof(IModelResponse));
 
         }
@@ -274,7 +273,7 @@ public class ExcelRibbon : ExcelDna.Integration.CustomUI.ExcelRibbon
 
     private static T GetProviderConfiguration<T>()
     {
-        return ServiceLocator.ServiceProvider.GetRequiredService<IOptionsMonitor<T>>().CurrentValue;
+        return CellmAddIn.Services.GetRequiredService<IOptionsMonitor<T>>().CurrentValue;
     }
 
     private static Provider GetProvider(string providerAndModel)
