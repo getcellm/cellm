@@ -56,7 +56,7 @@ internal class Account(
         }
 
         var entitlements = await cache.GetOrCreateAsync(
-            nameof(GetEntitlements) + GetCredentials(),
+            nameof(GetEntitlements) + GetBasicAuthCredentials(),
             async innerCancellationToken => await GetEntitlements(innerCancellationToken),
             options: _cacheEntryOptions,
             Tags,
@@ -81,11 +81,12 @@ internal class Account(
         Task.Run(async () => await RequireEntitlementAsync(entitlement)).GetAwaiter().GetResult();
     }
 
-    public string GetCredentials()
+    public string GetBasicAuthCredentials()
     {
         var credentials = $"{accountConfiguration.CurrentValue.Username}:{accountConfiguration.CurrentValue.Password}";
         var credentialsBytes = Encoding.UTF8.GetBytes(credentials);
         var credentialsAsBase64 = Convert.ToBase64String(credentialsBytes);
+
         return credentialsAsBase64;
     }
 
@@ -93,7 +94,7 @@ internal class Account(
     {
 
         var request = new HttpRequestMessage(HttpMethod.Get, new Uri(accountConfiguration.CurrentValue.BaseAddress, "user/permissions"));
-        request.Headers.Add("Authorization", $"Basic {GetCredentials()}");
+        request.Headers.Add("Authorization", $"Basic {GetBasicAuthCredentials()}");
 
         try
         {
