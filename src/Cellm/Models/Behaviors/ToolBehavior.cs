@@ -41,7 +41,7 @@ internal class ToolBehavior<TRequest, TResponse>(
 
             request.Prompt.Options.Tools ??= [];
 
-            await foreach (var tool in GetModelContextProtocolTools(cancellationToken))
+            await foreach (var tool in GetModelContextProtocolToolsAsync(cancellationToken))
             {
                 request.Prompt.Options.Tools.Add(tool);
             }
@@ -67,7 +67,7 @@ internal class ToolBehavior<TRequest, TResponse>(
     }
 
     // TODO: Query servers in parallel
-    private async IAsyncEnumerable<AITool> GetModelContextProtocolTools([EnumeratorCancellation] CancellationToken cancellationToken)
+    private async IAsyncEnumerable<AITool> GetModelContextProtocolToolsAsync([EnumeratorCancellation] CancellationToken cancellationToken)
     {
         foreach (var server in modelContextProtocolConfiguration.CurrentValue.Servers)
         {

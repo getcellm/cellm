@@ -125,7 +125,7 @@ public static class Functions
     internal static async Task<string> GetResponseAsync(Prompt prompt, Provider provider)
     {
         var client = CellmAddIn.Services.GetRequiredService<Client>();
-        var response = await client.Send(prompt, provider, CancellationToken.None);
+        var response = await client.GetResponseAsync(prompt, provider, CancellationToken.None);
         return response.Messages.Last().Text ?? throw new NullReferenceException("No text response");
     }
 }

@@ -7,7 +7,7 @@ namespace Cellm.Models;
 
 internal class Client(ISender sender, ResiliencePipelineProvider<string> resiliencePipelineProvider)
 {
-    public async Task<Prompt> Send(Prompt prompt, Provider provider, CancellationToken cancellationToken)
+    public async Task<Prompt> GetResponseAsync(Prompt prompt, Provider provider, CancellationToken cancellationToken)
     {
         var retryPipeline = resiliencePipelineProvider.GetPipeline("RateLimiter");
 

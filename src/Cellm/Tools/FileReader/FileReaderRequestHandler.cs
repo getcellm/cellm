@@ -9,7 +9,7 @@ internal class FileReaderRequestHandler(FileReaderFactory fileReaderFactory) : I
         try
         {
             var reader = fileReaderFactory.GetFileReader(request.FilePath);
-            var content = await reader.ReadFile(request.FilePath, cancellationToken);
+            var content = await reader.ReadFileAsync(request.FilePath, cancellationToken);
             return new FileReaderResponse(content);
         }
         catch (ArgumentException ex)

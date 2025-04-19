@@ -6,7 +6,7 @@ internal class TextReader : IFileReader
 
     public TextReader()
     {
-        _extensions = new List<string> { ".c", ".cpp", ".cs", ".csv", ".cxx", ".h", ".hxx", ".html", ".java", ".json", ".jsonl", ".md", ".php", ".py", ".rb", ".txt", ".xml" };
+        _extensions = [".c", ".cpp", ".cs", ".csv", ".cxx", ".h", ".hxx", ".html", ".java", ".json", ".jsonl", ".md", ".php", ".py", ".rb", ".txt", ".xml"];
     }
 
     public bool CanRead(string filePath)
@@ -24,7 +24,7 @@ internal class TextReader : IFileReader
         return _extensions.Contains(Path.GetExtension(filePath).ToLowerInvariant());
     }
 
-    public async Task<string> ReadFile(string filePath, CancellationToken cancellationToken)
+    public async Task<string> ReadFileAsync(string filePath, CancellationToken cancellationToken)
     {
         using (var stream = File.OpenRead(filePath))
         using (var reader = new StreamReader(stream, Encoding.UTF8, true))
