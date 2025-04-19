@@ -1,4 +1,4 @@
-﻿namespace Cellm.User;
+﻿namespace Cellm.Users;
 
 internal class AccountConfiguration
 {

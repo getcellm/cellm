@@ -1,7 +1,7 @@
 ﻿using Cellm.AddIn;
 using Cellm.Models.Prompts;
 using Cellm.Models.Providers;
-using Cellm.User;
+using Cellm.Users;
 using MediatR;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;

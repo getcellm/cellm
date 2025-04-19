@@ -2,15 +2,17 @@
 using Cellm.Models.Prompts;
 using Cellm.Models.Providers;
 using Cellm.Tools.ModelContextProtocol;
+using Cellm.Users;
 using MediatR;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ModelContextProtocol.Client;
 
-namespace Cellm.Models.Tools;
+namespace Cellm.Models.Behaviors;
 
 internal class ToolBehavior<TRequest, TResponse>(
+    Account account,
     IOptionsMonitor<ProviderConfiguration> providerConfiguration,
     IOptionsMonitor<ModelContextProtocolConfiguration> modelContextProtocolConfiguration,
     IEnumerable<AIFunction> functions,
@@ -35,7 +37,9 @@ internal class ToolBehavior<TRequest, TResponse>(
             logger.LogDebug("Native tools disabled");
         }
 
-        if (providerConfiguration.CurrentValue.EnableModelContextProtocolServers.Any(t => t.Value))
+        var enableModelContextProtocol = await account.HasEntitlementAsync(Entitlement.EnableModelContextProtocol);
+
+        if (providerConfiguration.CurrentValue.EnableModelContextProtocolServers.Any(t => t.Value) && enableModelContextProtocol)
         {
             logger.LogDebug("MCP tools enabled");
 

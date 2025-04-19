@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Cellm.User.Models;
+namespace Cellm.Users.Models;
 
 internal class ActiveEntitlements()
 {
@@ -16,6 +16,7 @@ internal class ActiveEntitlements()
     [JsonIgnore]
     private readonly List<Entitlement> AnonymousEntitlements = [
         Entitlement.EnableAnthropicProvider,
+        Entitlement.EnableModelContextProtocol,
         Entitlement.EnableOllamaProvider,
         Entitlement.EnableOpenAiProvider
     ];

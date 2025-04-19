@@ -1,4 +1,4 @@
-﻿namespace Cellm.User;
+﻿namespace Cellm.Users;
 
 public enum Entitlement
 {
@@ -9,6 +9,7 @@ public enum Entitlement
     EnableOllamaProvider,
     EnableOpenAiProvider,
     EnableOpenAiCompatibleProvider,
+    EnableModelContextProtocol,
     DisableTelemetry
 }
 
