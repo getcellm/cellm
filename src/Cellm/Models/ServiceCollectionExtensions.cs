@@ -148,9 +148,10 @@ public static class ServiceCollectionExtensions
 
                 var cellmConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<CellmConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
+                resilientHttpClient.DefaultRequestHeaders.Add("Authorization", $"Basic {account.GetBasicAuthCredentials()}");
 
                 var openAiClient = new OpenAIClient(
-                    new ApiKeyCredential(account.GetCredentials()),
+                    new ApiKeyCredential(string.Empty),
                     new OpenAIClientOptions
                     {
                         Transport = new HttpClientPipelineTransport(resilientHttpClient),
