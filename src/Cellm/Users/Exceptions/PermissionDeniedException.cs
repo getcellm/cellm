@@ -1,6 +1,6 @@
 ﻿using Cellm.AddIn.Exceptions;
 
-namespace Cellm.User.Exceptions;
+namespace Cellm.Users.Exceptions;
 
 internal class PermissionDeniedException : CellmException
 {

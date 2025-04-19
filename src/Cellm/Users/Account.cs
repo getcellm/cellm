@@ -24,14 +24,14 @@
 
 using System.Text;
 using System.Text.Json;
-using Cellm.User.Exceptions;
-using Cellm.User.Models;
+using Cellm.Users.Exceptions;
+using Cellm.Users.Models;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Cellm.User;
+namespace Cellm.Users;
 
 internal class Account(
     IOptionsMonitor<AccountConfiguration> accountConfiguration,
