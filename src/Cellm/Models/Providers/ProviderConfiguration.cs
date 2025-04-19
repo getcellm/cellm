@@ -1,6 +1,4 @@
-﻿using ModelContextProtocol.Protocol.Transport;
-
-namespace Cellm.Models.Providers;
+﻿namespace Cellm.Models.Providers;
 
 public class ProviderConfiguration : IProviderConfiguration
 {
