@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using Cellm.Models.Prompts;
 using Cellm.Models.Providers;
 using Cellm.Tools.ModelContextProtocol;
 using MediatR;
@@ -15,9 +16,10 @@ internal class ToolBehavior<TRequest, TResponse>(
     IEnumerable<AIFunction> functions,
     ILogger<ToolBehavior<TRequest, TResponse>> logger,
     ILoggerFactory loggerFactory)
-    : IPipelineBehavior<TRequest, TResponse> where TRequest : IModelRequest<TResponse>
+    : IPipelineBehavior<TRequest, TResponse>
+    where TRequest : IPrompt
 {
-    // TODO: Use HybridCache (await fix that McpLcientTool can't be serialized/deserialized)
+    // TODO: Use HybridCache
     private Dictionary<string, IList<McpClientTool>> _poorMansCache = [];
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
@@ -65,7 +67,6 @@ internal class ToolBehavior<TRequest, TResponse>(
     }
 
     // TODO: Query servers in parallel
-
     private async IAsyncEnumerable<AITool> GetModelContextProtocolTools([EnumeratorCancellation] CancellationToken cancellationToken)
     {
         foreach (var server in modelContextProtocolConfiguration.CurrentValue.Servers)

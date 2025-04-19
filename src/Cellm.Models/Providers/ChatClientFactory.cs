@@ -2,7 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 
 
-namespace Cellm.Models.Providers.OpenAiCompatible;
+namespace Cellm.Models.Providers;
 
 public class ChatClientFactory(IServiceProvider serviceProvider) : IChatClientFactory
 {

@@ -1,4 +1,5 @@
 ﻿using Cellm.AddIn;
+using Cellm.Models.Prompts;
 using Cellm.Models.Providers;
 using Cellm.User;
 using MediatR;
@@ -12,7 +13,7 @@ internal class SentryBehavior<TRequest, TResponse>(
     IOptionsMonitor<ProviderConfiguration> providerConfiguration,
     Account account,
     ILogger<SentryBehavior<TRequest, TResponse>> logger) : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : IModelRequest<TResponse>
+    where TRequest : IPrompt
 {
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {

@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using Cellm.Models.Prompts;
 using Cellm.Models.Providers;
 using MediatR;
 using Microsoft.Extensions.Caching.Hybrid;
@@ -13,15 +14,15 @@ internal class CacheBehavior<TRequest, TResponse>(
     HybridCache cache,
     IOptionsMonitor<ProviderConfiguration> providerConfiguration,
     ILogger<CacheBehavior<TRequest, TResponse>> logger) : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : IModelRequest<TResponse>
-    where TResponse : IModelResponse
+    where TRequest : IPrompt
+    where TResponse : IPrompt
 {
     private readonly HybridCacheEntryOptions _cacheEntryOptions = new()
     {
         Expiration = TimeSpan.FromSeconds(providerConfiguration.CurrentValue.CacheTimeoutInSeconds)
     };
 
-    private static readonly List<string> Tags = [nameof(IModelResponse)];
+    private static readonly List<string> Tags = [nameof(ProviderResponse)];
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
