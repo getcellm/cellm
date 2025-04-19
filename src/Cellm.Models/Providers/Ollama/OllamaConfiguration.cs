@@ -1,4 +1,6 @@
-﻿namespace Cellm.Models.Providers.Ollama;
+﻿using Microsoft.Extensions.AI;
+
+namespace Cellm.Models.Providers.Ollama;
 
 internal class OllamaConfiguration : IProviderConfiguration
 {
@@ -9,4 +11,6 @@ internal class OllamaConfiguration : IProviderConfiguration
     public List<string> Models { get; init; } = [];
 
     public int MaxInputTokens { get; init; } = 16364;
+
+    public AdditionalPropertiesDictionary AdditionalProperties { get; init; } = [];
 }

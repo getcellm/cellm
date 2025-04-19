@@ -150,7 +150,7 @@ public static class ServiceCollectionExtensions
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
                 var openAiClient = new OpenAIClient(
-                    new ApiKeyCredential(string.Empty),
+                    new ApiKeyCredential(account.GetCredentials()),
                     new OpenAIClientOptions
                     {
                         Transport = new HttpClientPipelineTransport(resilientHttpClient),

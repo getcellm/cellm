@@ -3,7 +3,6 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using Cellm.Models;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
 using Cellm.Models.Providers.Cellm;
@@ -232,7 +231,7 @@ public class Ribbon : ExcelRibbon
         if (!enabled)
         {
             var cache = CellmAddIn.Services.GetRequiredService<HybridCache>();
-            await cache.RemoveByTagAsync(nameof(IModelResponse));
+            await cache.RemoveByTagAsync(nameof(ProviderResponse));
 
         }
 

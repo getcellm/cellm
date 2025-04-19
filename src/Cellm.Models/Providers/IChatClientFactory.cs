@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.AI;
 
-namespace Cellm.Models.Providers.OpenAiCompatible;
+namespace Cellm.Models.Providers;
 
 public interface IChatClientFactory
 {
