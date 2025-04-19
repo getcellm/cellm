@@ -3,7 +3,6 @@ using UglyToad.PdfPig;
 using UglyToad.PdfPig.Content;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.PageSegmenter;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.ReadingOrderDetector;
-using UglyToad.PdfPig.DocumentLayoutAnalysis.WordExtractor;
 
 internal class PdfReader : IFileReader
 {
@@ -22,7 +21,7 @@ internal class PdfReader : IFileReader
         return Path.GetExtension(filePath).ToLower() is ".pdf";
     }
 
-    public Task<string> ReadFile(string filePath, CancellationToken cancellationToken)
+    public Task<string> ReadFileAsync(string filePath, CancellationToken cancellationToken)
     {
         var stringBuilder = new StringBuilder();
 
