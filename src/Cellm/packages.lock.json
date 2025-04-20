@@ -274,6 +274,16 @@
           "Sentry": "5.5.1"
         }
       },
+      "Svg": {
+        "type": "Direct",
+        "requested": "[3.4.7, )",
+        "resolved": "3.4.7",
+        "contentHash": "Omez7ly5BGhg3OzdV+LHZ5sI0+JQ6hF7WVKUeyHw4jRvcEWNCPCf1MWMBaf+R0DRBSZHx5EUHwBTEF+2oYtsAw==",
+        "dependencies": {
+          "ExCSS": "4.2.3",
+          "System.Drawing.Common": "5.0.3"
+        }
+      },
       "System.Net.Http.Json": {
         "type": "Direct",
         "requested": "[9.0.4, )",
@@ -284,6 +294,11 @@
         "type": "Transitive",
         "resolved": "1.9.0-alpha3",
         "contentHash": "vQZP+bXCXkiIx4bkntd2iWnMDS57ECcul2XFQvMSvgcTy6+2q81xI2Sp6FGXr9tU/t7eHfpG7vVv/7TZKOLnxA=="
+      },
+      "ExCSS": {
+        "type": "Transitive",
+        "resolved": "4.2.3",
+        "contentHash": "SyeAfu2wL5247sipJoPUzQfjiwQtfSd8hN4IbgoyVcDx4PP6Dud4znwPRibWQzLtTlUxYYcbf5f4p+EfFC7KtQ=="
       },
       "MediatR.Contracts": {
         "type": "Transitive",
@@ -513,6 +528,19 @@
           "Microsoft.Extensions.Options": "9.0.4"
         }
       },
+      "Microsoft.NETCore.Platforms": {
+        "type": "Transitive",
+        "resolved": "5.0.0",
+        "contentHash": "VyPlqzH2wavqquTcYpkIIAQ6WdenuKoFN0BdYBbCWsclXacSOHNQn66Gt4z5NBqEYW0FAPm5rlvki9ZiCij5xQ=="
+      },
+      "Microsoft.Win32.SystemEvents": {
+        "type": "Transitive",
+        "resolved": "5.0.0",
+        "contentHash": "Bh6blKG8VAKvXiLe2L+sEsn62nc1Ij34MrNxepD2OCrS5cpCwQa9MeLyhVQPQ/R4Wlzwuy6wMK8hLb11QPDRsQ==",
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "5.0.0"
+        }
+      },
       "OpenAI": {
         "type": "Transitive",
         "resolved": "2.2.0-beta.4",
@@ -564,6 +592,14 @@
         "type": "Transitive",
         "resolved": "9.0.4",
         "contentHash": "Be0emq8bRmcK4eeJIFUt9+vYPf7kzuQrFs8Ef1CdGvXpq/uSve22PTSkRF09bF/J7wmYJ2DHf2v7GaT3vMXnwQ=="
+      },
+      "System.Drawing.Common": {
+        "type": "Transitive",
+        "resolved": "5.0.3",
+        "contentHash": "rEQZuslijqdsO0pkJn7LtGBaMc//YVA8de0meGihkg9oLPaN+w+/Pb5d71lgp0YjPoKgBKNMvdq0IPnoW4PEng==",
+        "dependencies": {
+          "Microsoft.Win32.SystemEvents": "5.0.0"
+        }
       },
       "System.IO.Pipelines": {
         "type": "Transitive",

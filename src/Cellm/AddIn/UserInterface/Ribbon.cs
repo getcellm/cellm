@@ -18,12 +18,14 @@ using ExcelDna.Integration.CustomUI;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using System.Diagnostics;
 
-namespace Cellm.AddIn.RibbonController;
+namespace Cellm.AddIn.UserInterface;
 
 [ComVisible(true)]
 public class Ribbon : ExcelRibbon
 {
+    // Icons: https://developer.microsoft.com/en-us/fluentui#/styles/web/icons
     private IRibbonUI? _ribbonUi;
 
     private static readonly string _appSettingsPath = Path.Combine(CellmAddIn.ConfigurationPath, "appsettings.json");
@@ -33,7 +35,9 @@ public class Ribbon : ExcelRibbon
     private static DateTime _cacheExpiry = DateTime.MinValue;
     private static readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(5);
     private static volatile bool _isLoginCheckRunning = false;
-    private const string AuthCheckUrl = "https://dev.getcellm.com/v1/up/auth";
+    private const string AuthCheckUrl = "https://dev.getcellm.com/v1/up";
+    private const string SignUpUrl = "https://dev.getcellm.com/signup";
+    private const string ManageAccountUrl = "https://dev.getcellm.com/account";
 
     public Ribbon()
     {
@@ -72,7 +76,7 @@ public class Ribbon : ExcelRibbon
     public override string GetCustomUI(string RibbonID)
     {
         return $"""
-<customUI xmlns="http://schemas.microsoft.com/office/2006/01/customui" onLoad="OnLoad">
+<customUI xmlns="http://schemas.microsoft.com/office/2006/01/customui" onLoad="OnLoad" loadImage="GetEmbeddedImage">
     <ribbon>
         <tabs>
             <tab id="cellm" label="Cellm">
@@ -94,25 +98,38 @@ public class Ribbon : ExcelRibbon
     // --- MODIFIED: User Group XML ---
     public string UserGroup()
     {
+        var accountConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<AccountConfiguration>>();
+
+        if (!accountConfiguration.CurrentValue.IsEnabled)
+        {
+            return string.Empty;
+        }
+
         // Removed editBoxes, added Login button to menu
-        return $"""
-<group id="userGroup" label="Account">
+        return $$"""
+<group id="userGroup" label="Cellm">
     <splitButton id="userAccountSplitButton" size="large">
         <button id="userAccountButton"
                 label="Account"
-                imageMso="GroupBlogProofing"
+                getImage="GetUserAccountImage"
                 getScreentip="GetUserScreentip" />
         <menu id="userAccountMenu">
              <button id="loginButton" label="Login..."
                  onAction="OnLoginClicked"
                  getEnabled="IsLoggedOut"
-                 imageMso="GroupBlogProofing"
+                 getImage="GetUserLoginImage"
                  screentip="Log in to your Cellm account." />
              <button id="logoutButton" label="Logout"
                  onAction="OnLogoutClicked"
                  getEnabled="IsLoggedIn"
-                 imageMso="GroupBlogProofing"
+                 getImage="GetUserLogoutImage"
                  screentip="Log out and clear saved credentials." />
+        <menuSeparator id="accountActionSeparator" />
+        <button id="accountActionButton"
+            getLabel="GetAccountActionLabel"
+            onAction="OnAccountActionClicked"
+            getImage="GetAccountActionImage"
+            getScreentip="GetAccountActionScreentip" />
          </menu>
     </splitButton>
 </group>
@@ -171,7 +188,7 @@ public class Ribbon : ExcelRibbon
 
         foreach (var providerAndModel in providerAndModels)
         {
-            stringBuilder.AppendLine($"<item label=\"{providerAndModel.ToLower()}\" id=\"{new String(providerAndModel.Where(Char.IsLetterOrDigit).ToArray())}\" />");
+            stringBuilder.AppendLine($"<item label=\"{providerAndModel.ToLower()}\" id=\"{new string(providerAndModel.Where(char.IsLetterOrDigit).ToArray())}\" />");
         }
 
         return $"""
@@ -269,10 +286,22 @@ public class Ribbon : ExcelRibbon
     }
 
 
-    public string GetUserIconImageMso(IRibbonControl control)
+    public Bitmap? GetUserAccountImage(IRibbonControl control)
     {
         // Use cached state directly
-        return (_cachedLoginState ?? false) ? "SecurityTrusted" : "SecurityWarning";
+        var svgPath = _cachedLoginState ?? false ? "AddIn/UserInterface/Resources/logged-in.svg" : "AddIn/UserInterface/Resources/logged-out.svg";
+
+        return ImageLoader.LoadEmbeddedSvgResized(svgPath, 128, 128);
+    }
+
+    public Bitmap? GetUserLoginImage(IRibbonControl control)
+    {
+        return ImageLoader.LoadEmbeddedSvgResized("AddIn/UserInterface/Resources/login.svg", 64, 64);
+    }
+
+    public Bitmap? GetUserLogoutImage(IRibbonControl control)
+    {
+        return ImageLoader.LoadEmbeddedSvgResized("AddIn/UserInterface/Resources/logout.svg", 64, 64);
     }
 
     public string GetUserScreentip(IRibbonControl control)
@@ -297,7 +326,8 @@ public class Ribbon : ExcelRibbon
     // --- Background Check Trigger (Used mainly for OnLoad now) ---
     private void TriggerBackgroundLoginCheck(bool forceCheck = false)
     {
-        if (_isLoginCheckRunning) {
+        if (_isLoginCheckRunning)
+        {
             return;
         };
 
@@ -316,15 +346,19 @@ public class Ribbon : ExcelRibbon
                 _cacheExpiry = DateTime.UtcNow.Add(_cacheDuration);
                 if (stateChanged && _ribbonUi != null) InvalidateUserControls();
             }
-            catch (Exception ex) { 
-                /* ... error handling ... */ 
-                _cachedLoginState = false; 
-                _cacheExpiry = DateTime.UtcNow.Add(_cacheDuration); 
-                if (_ribbonUi != null) {
+            catch (Exception)
+            {
+                /* ... error handling ... */
+                _cachedLoginState = false;
+                _cacheExpiry = DateTime.UtcNow.Add(_cacheDuration);
+                if (_ribbonUi != null)
+                {
                     InvalidateUserControls();
-                } 
+                }
             }
-            finally { _isLoginCheckRunning = false; }
+            finally { 
+                _isLoginCheckRunning = false; 
+            }
         });
     }
 
@@ -381,9 +415,55 @@ public class Ribbon : ExcelRibbon
     // Helper to invalidate user-related controls
     private void InvalidateUserControls()
     {
-        _ribbonUi?.InvalidateControl("userAccountSplitButton"); // Icon/Tooltip
-        _ribbonUi?.InvalidateControl("loginButton");          // Enabled state
-        _ribbonUi?.InvalidateControl("logoutButton");         // Enabled state
+        _ribbonUi?.InvalidateControl("userAccountSplitButton");  // Tooltip (depends on GetUserScreentip)
+        _ribbonUi?.InvalidateControl("userAccountButton");       // Icon (depends on GetUserAccountImage)
+        _ribbonUi?.InvalidateControl("loginButton");             // Enabled state (depends on IsLoggedOut)
+        _ribbonUi?.InvalidateControl("logoutButton");            // Enabled state (depends on IsLoggedIn)
+        _ribbonUi?.InvalidateControl("accountActionButton");     // Label, Screentip, Icon (depends on GetAccountAction* callbacks)
+    }
+
+    public string GetAccountActionLabel(IRibbonControl control)
+    {
+        return IsLoggedIn(control) ? "Manage Account..." : "Sign up...";
+    }
+
+    public string GetAccountActionScreentip(IRibbonControl control)
+    {
+        return IsLoggedIn(control)
+            ? "Open your Cellm account settings in your browser."
+            : "Open the Cellm sign-up page in your browser.";
+    }
+
+    public Bitmap? GetAccountActionImage(IRibbonControl control)
+    {
+        // Using a generic 'link' or 'external' icon is appropriate here.
+        // Make sure you have an icon like 'external-link.svg' in your resources.
+        // If not, replace with an available icon or add one.
+        return ImageLoader.LoadEmbeddedSvgResized("AddIn/UserInterface/Resources/external-link.svg", 64, 64);
+        // Or use a built-in MSO image if preferred: return GetImageMso("HyperlinkInsert"); (though custom looks better)
+    }
+
+    public void OnAccountActionClicked(IRibbonControl control)
+    {
+        string url = IsLoggedIn(control) ? ManageAccountUrl : SignUpUrl;
+
+        try
+        {
+            // UseShellExecute = true is important for opening URLs in the default browser on Windows.
+            // On other platforms, Process.Start might behave differently, but this is common practice.
+            ProcessStartInfo psi = new ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            };
+            Process.Start(psi);
+        }
+        catch (Exception ex)
+        {
+            // Log the error for diagnostics
+            Debug.WriteLine($"Error opening URL '{url}': {ex.Message}");
+            MessageBox.Show($"Could not open the link: {url}\n\nError: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
     }
 
     public string OnGetSelectedModel(IRibbonControl control)
