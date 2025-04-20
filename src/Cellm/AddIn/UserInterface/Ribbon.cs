@@ -331,9 +331,9 @@ public class Ribbon : ExcelRibbon
             return;
         }
 
-        if (!forceCheck && _cachedLoginState.HasValue && DateTime.UtcNow < _cacheExpiry) 
-        { 
-            return; 
+        if (!forceCheck && _cachedLoginState.HasValue && DateTime.UtcNow < _cacheExpiry)
+        {
+            return;
         }
 
         _isLoginCheckRunning = true;
