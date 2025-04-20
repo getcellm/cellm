@@ -329,9 +329,12 @@ public class Ribbon : ExcelRibbon
         if (_isLoginCheckRunning)
         {
             return;
-        };
+        }
 
-        if (!forceCheck && _cachedLoginState.HasValue && DateTime.UtcNow < _cacheExpiry) return;
+        if (!forceCheck && _cachedLoginState.HasValue && DateTime.UtcNow < _cacheExpiry) 
+        { 
+            return; 
+        }
 
         _isLoginCheckRunning = true;
 
@@ -437,11 +440,7 @@ public class Ribbon : ExcelRibbon
 
     public Bitmap? GetAccountActionImage(IRibbonControl control)
     {
-        // Using a generic 'link' or 'external' icon is appropriate here.
-        // Make sure you have an icon like 'external-link.svg' in your resources.
-        // If not, replace with an available icon or add one.
         return ImageLoader.LoadEmbeddedSvgResized("AddIn/UserInterface/Resources/external-link.svg", 64, 64);
-        // Or use a built-in MSO image if preferred: return GetImageMso("HyperlinkInsert"); (though custom looks better)
     }
 
     public void OnAccountActionClicked(IRibbonControl control)
@@ -450,8 +449,6 @@ public class Ribbon : ExcelRibbon
 
         try
         {
-            // UseShellExecute = true is important for opening URLs in the default browser on Windows.
-            // On other platforms, Process.Start might behave differently, but this is common practice.
             ProcessStartInfo psi = new ProcessStartInfo
             {
                 FileName = url,
