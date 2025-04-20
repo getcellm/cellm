@@ -1,5 +1,6 @@
-﻿using System.Net.Http.Headers;
+﻿using System.Diagnostics;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -18,7 +19,6 @@ using ExcelDna.Integration.CustomUI;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using System.Diagnostics;
 
 namespace Cellm.AddIn.UserInterface;
 
@@ -356,8 +356,9 @@ public class Ribbon : ExcelRibbon
                     InvalidateUserControls();
                 }
             }
-            finally { 
-                _isLoginCheckRunning = false; 
+            finally
+            {
+                _isLoginCheckRunning = false;
             }
         });
     }
