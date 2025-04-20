@@ -14,6 +14,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="AddIn\UserInterface\Resources\external-link.svg" />
+    <None Remove="AddIn\UserInterface\Resources\logged-in.svg" />
+    <None Remove="AddIn\UserInterface\Resources\logged-out.svg" />
+    <None Remove="AddIn\UserInterface\Resources\login.svg" />
+    <None Remove="AddIn\UserInterface\Resources\logout.svg" />
     <None Remove="appsettings.json" />
     <None Remove="appsettings.Local.json" />
   </ItemGroup>
@@ -45,6 +50,7 @@
     <PackageReference Include="PdfPig" Version="0.1.10" />
     <PackageReference Include="Sentry.Extensions.Logging" Version="5.5.1" />
     <PackageReference Include="Sentry.Profiling" Version="5.5.1" />
+    <PackageReference Include="Svg" Version="3.4.7" />
     <PackageReference Include="System.Net.Http.Json" Version="9.0.4" />
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -52,5 +58,13 @@
     <Content Include="appsettings.Local.json" Condition="Exists('appsettings.Local.json')">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="AddIn\UserInterface\Resources\external-link.svg" />
+    <EmbeddedResource Include="AddIn\UserInterface\Resources\logged-in.svg" />
+    <EmbeddedResource Include="AddIn\UserInterface\Resources\logged-out.svg" />
+    <EmbeddedResource Include="AddIn\UserInterface\Resources\login.svg" />
+    <EmbeddedResource Include="AddIn\UserInterface\Resources\logout.svg" />
   </ItemGroup>
 </Project>

@@ -1,4 +1,7 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Diagnostics;
+using System.Net;
+using System.Net.Http.Headers;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
@@ -17,15 +20,24 @@ using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace Cellm.AddIn.RibbonController;
+namespace Cellm.AddIn.UserInterface;
 
 [ComVisible(true)]
 public class Ribbon : ExcelRibbon
 {
+    // Icons: https://developer.microsoft.com/en-us/fluentui#/styles/web/icons
     private IRibbonUI? _ribbonUi;
 
     private static readonly string _appSettingsPath = Path.Combine(CellmAddIn.ConfigurationPath, "appsettings.json");
     private static readonly string _appsettingsLocalPath = Path.Combine(CellmAddIn.ConfigurationPath, "appsettings.Local.json");
+
+    private static bool? _cachedLoginState = null;
+    private static DateTime _cacheExpiry = DateTime.MinValue;
+    private static readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(5);
+    private static volatile bool _isLoginCheckRunning = false;
+    private const string AuthCheckUrl = "https://dev.getcellm.com/v1/up";
+    private const string SignUpUrl = "https://dev.getcellm.com/signup";
+    private const string ManageAccountUrl = "https://dev.getcellm.com/account";
 
     public Ribbon()
     {
@@ -64,10 +76,11 @@ public class Ribbon : ExcelRibbon
     public override string GetCustomUI(string RibbonID)
     {
         return $"""
-<customUI xmlns="http://schemas.microsoft.com/office/2006/01/customui" onLoad="OnLoad">
+<customUI xmlns="http://schemas.microsoft.com/office/2006/01/customui" onLoad="OnLoad" loadImage="GetEmbeddedImage">
     <ribbon>
         <tabs>
             <tab id="cellm" label="Cellm">
+                {UserGroup()}
                 {ModelGroup()}
                 {BehaviorGroup()}
             </tab>
@@ -80,6 +93,47 @@ public class Ribbon : ExcelRibbon
     public void OnLoad(IRibbonUI ribbonUi)
     {
         _ribbonUi = ribbonUi;
+    }
+
+    // --- MODIFIED: User Group XML ---
+    public string UserGroup()
+    {
+        var accountConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<AccountConfiguration>>();
+
+        if (!accountConfiguration.CurrentValue.IsEnabled)
+        {
+            return string.Empty;
+        }
+
+        // Removed editBoxes, added Login button to menu
+        return $$"""
+<group id="userGroup" label="Cellm">
+    <splitButton id="userAccountSplitButton" size="large">
+        <button id="userAccountButton"
+                label="Account"
+                getImage="GetUserAccountImage"
+                getScreentip="GetUserScreentip" />
+        <menu id="userAccountMenu">
+             <button id="loginButton" label="Login..."
+                 onAction="OnLoginClicked"
+                 getEnabled="IsLoggedOut"
+                 getImage="GetUserLoginImage"
+                 screentip="Log in to your Cellm account." />
+             <button id="logoutButton" label="Logout"
+                 onAction="OnLogoutClicked"
+                 getEnabled="IsLoggedIn"
+                 getImage="GetUserLogoutImage"
+                 screentip="Log out and clear saved credentials." />
+        <menuSeparator id="accountActionSeparator" />
+        <button id="accountActionButton"
+            getLabel="GetAccountActionLabel"
+            onAction="OnAccountActionClicked"
+            getImage="GetAccountActionImage"
+            getScreentip="GetAccountActionScreentip" />
+         </menu>
+    </splitButton>
+</group>
+""";
     }
 
     public string BehaviorGroup()
@@ -134,7 +188,7 @@ public class Ribbon : ExcelRibbon
 
         foreach (var providerAndModel in providerAndModels)
         {
-            stringBuilder.AppendLine($"<item label=\"{providerAndModel.ToLower()}\" id=\"{new String(providerAndModel.Where(Char.IsLetterOrDigit).ToArray())}\" />");
+            stringBuilder.AppendLine($"<item label=\"{providerAndModel.ToLower()}\" id=\"{new string(providerAndModel.Where(char.IsLetterOrDigit).ToArray())}\" />");
         }
 
         return $"""
@@ -153,6 +207,261 @@ public class Ribbon : ExcelRibbon
         onAction="OnCacheToggled" getPressed="OnGetCachePressed" />
 </group>
 """;
+    }
+
+    // *** NEW Login Click Handler ***
+    public void OnLoginClicked(IRibbonControl control)
+    {
+        using var loginForm = new LoginForm();
+
+        // Show the form modally
+        // Note: ShowDialog() blocks until the form is closed.
+        if (loginForm.ShowDialog() == DialogResult.OK)
+        {
+            string username = loginForm.Username;
+            string password = loginForm.Password;
+
+            // Perform the check immediately with the entered credentials
+            // Running synchronously for simplicity after modal dialog closes.
+            // For very slow networks, consider a brief "Checking..." UI feedback.
+            Task<bool> checkTask = PerformServerLoginCheckAsync(username, password);
+
+            // Block and wait for the result (acceptable after modal dialog)
+            bool loginSuccess = checkTask.Result; // Use .Result here as we need the outcome now
+
+            if (loginSuccess)
+            {
+                System.Diagnostics.Debug.WriteLine($"Login successful for {username}. Saving credentials.");
+                // Save credentials ONLY if server check passed
+                SetValue("AccountConfiguration:Username", username);
+                SetValue("AccountConfiguration:Password", password);
+
+                // Update cache immediately
+                _cachedLoginState = true;
+                _cacheExpiry = DateTime.UtcNow.Add(_cacheDuration);
+
+                // Invalidate UI to reflect logged-in state
+                InvalidateUserControls();
+                MessageBox.Show("Login successful!", "Cellm", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"Login failed for {username}. Not saving credentials.");
+                // Show error message
+                MessageBox.Show("Login failed. Please check your username and password.", "Login Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // DO NOT save credentials
+                // DO NOT update cache (or explicitly set to false if previous state might have been true)
+                _cachedLoginState = false; // Ensure state reflects failure
+                _cacheExpiry = DateTime.UtcNow.Add(_cacheDuration);
+                InvalidateUserControls(); // Update UI to show logged-out state
+            }
+        }
+        // else: User cancelled, do nothing.
+    }
+
+
+    public void OnLogoutClicked(IRibbonControl control)
+    {
+        SetValue("AccountConfiguration:Username", "");
+        SetValue("AccountConfiguration:Password", "");
+        _cachedLoginState = false;
+        _cacheExpiry = DateTime.UtcNow.Add(_cacheDuration);
+        InvalidateUserControls();
+    }
+
+    // Use cached state for enabling/disabling menu items
+    public bool IsLoggedIn(IRibbonControl control)
+    {
+        if (!_cachedLoginState.HasValue && DateTime.UtcNow > _cacheExpiry)
+        {
+            // If state is unknown and cache expired, trigger check but return last known state
+            TriggerBackgroundLoginCheck();
+        }
+        return _cachedLoginState ?? false;
+    }
+
+    public bool IsLoggedOut(IRibbonControl control)
+    {
+        return !IsLoggedIn(control); // Simply the inverse
+    }
+
+
+    public Bitmap? GetUserAccountImage(IRibbonControl control)
+    {
+        // Use cached state directly
+        var svgPath = _cachedLoginState ?? false ? "AddIn/UserInterface/Resources/logged-in.svg" : "AddIn/UserInterface/Resources/logged-out.svg";
+
+        return ImageLoader.LoadEmbeddedSvgResized(svgPath, 128, 128);
+    }
+
+    public Bitmap? GetUserLoginImage(IRibbonControl control)
+    {
+        return ImageLoader.LoadEmbeddedSvgResized("AddIn/UserInterface/Resources/login.svg", 64, 64);
+    }
+
+    public Bitmap? GetUserLogoutImage(IRibbonControl control)
+    {
+        return ImageLoader.LoadEmbeddedSvgResized("AddIn/UserInterface/Resources/logout.svg", 64, 64);
+    }
+
+    public string GetUserScreentip(IRibbonControl control)
+    {
+        bool isLoggedIn = _cachedLoginState ?? false;
+
+        if (isLoggedIn)
+        {
+            try
+            {
+                var username = GetValue("AccountConfiguration:Username");
+                return $"Account: {username}\nStatus: Logged In";
+            }
+            catch { return "Account: Unknown\nStatus: Logged In"; }
+        }
+        else
+        {
+            return "Status: Logged Out";
+        }
+    }
+
+    // --- Background Check Trigger (Used mainly for OnLoad now) ---
+    private void TriggerBackgroundLoginCheck(bool forceCheck = false)
+    {
+        if (_isLoginCheckRunning)
+        {
+            return;
+        }
+
+        if (!forceCheck && _cachedLoginState.HasValue && DateTime.UtcNow < _cacheExpiry)
+        {
+            return;
+        }
+
+        _isLoginCheckRunning = true;
+
+        Task.Run(async () =>
+        {
+            try
+            {
+                // Perform check using SAVED credentials (no args passed)
+                bool actualLoginState = await PerformServerLoginCheckAsync();
+                bool stateChanged = !_cachedLoginState.HasValue || _cachedLoginState.Value != actualLoginState;
+                _cachedLoginState = actualLoginState;
+                _cacheExpiry = DateTime.UtcNow.Add(_cacheDuration);
+                if (stateChanged && _ribbonUi != null) InvalidateUserControls();
+            }
+            catch (Exception)
+            {
+                /* ... error handling ... */
+                _cachedLoginState = false;
+                _cacheExpiry = DateTime.UtcNow.Add(_cacheDuration);
+                if (_ribbonUi != null)
+                {
+                    InvalidateUserControls();
+                }
+            }
+            finally
+            {
+                _isLoginCheckRunning = false;
+            }
+        });
+    }
+
+    // --- MODIFIED Async HTTP Check Implementation ---
+    private async Task<bool> PerformServerLoginCheckAsync(string? usernameToCheck = null, string? passwordToCheck = null)
+    {
+        string? effectiveUsername = usernameToCheck;
+        string? effectivePassword = passwordToCheck;
+
+        System.Diagnostics.Debug.WriteLine($"Performing server login check for user: {(string.IsNullOrWhiteSpace(effectiveUsername) ? "(Saved User)" : effectiveUsername)}");
+
+        // If no credentials passed, try reading saved ones
+        if (string.IsNullOrWhiteSpace(effectiveUsername) || string.IsNullOrWhiteSpace(effectivePassword))
+        {
+            try
+            {
+                effectiveUsername = GetValue("AccountConfiguration:Username");
+                effectivePassword = GetValue("AccountConfiguration:Password");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error reading saved credentials for login check: {ex.Message}");
+                return false; // Cannot check without credentials
+            }
+        }
+
+        // If still no credentials (neither passed nor saved), definitely not logged in
+        if (string.IsNullOrWhiteSpace(effectiveUsername) || string.IsNullOrWhiteSpace(effectivePassword))
+        {
+            System.Diagnostics.Debug.WriteLine("No valid credentials found (passed or saved). Assuming logged out.");
+            return false;
+        }
+
+        using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(20) };
+        try
+        {
+            var plainTextBytes = Encoding.UTF8.GetBytes($"{effectiveUsername}:{effectivePassword}");
+            var base64Credentials = Convert.ToBase64String(plainTextBytes);
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", base64Credentials);
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("CellmExcelAddIn/1.0 (AuthCheck)");
+
+            HttpResponseMessage response = await client.GetAsync(AuthCheckUrl);
+            System.Diagnostics.Debug.WriteLine($"Auth check response: {response.StatusCode}");
+            return response.StatusCode == HttpStatusCode.OK;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error during login check HTTP request: {ex.Message}");
+            return false;
+        }
+    }
+
+
+    // Helper to invalidate user-related controls
+    private void InvalidateUserControls()
+    {
+        _ribbonUi?.InvalidateControl("userAccountSplitButton");  // Tooltip (depends on GetUserScreentip)
+        _ribbonUi?.InvalidateControl("userAccountButton");       // Icon (depends on GetUserAccountImage)
+        _ribbonUi?.InvalidateControl("loginButton");             // Enabled state (depends on IsLoggedOut)
+        _ribbonUi?.InvalidateControl("logoutButton");            // Enabled state (depends on IsLoggedIn)
+        _ribbonUi?.InvalidateControl("accountActionButton");     // Label, Screentip, Icon (depends on GetAccountAction* callbacks)
+    }
+
+    public string GetAccountActionLabel(IRibbonControl control)
+    {
+        return IsLoggedIn(control) ? "Manage Account..." : "Sign up...";
+    }
+
+    public string GetAccountActionScreentip(IRibbonControl control)
+    {
+        return IsLoggedIn(control)
+            ? "Open your Cellm account settings in your browser."
+            : "Open the Cellm sign-up page in your browser.";
+    }
+
+    public Bitmap? GetAccountActionImage(IRibbonControl control)
+    {
+        return ImageLoader.LoadEmbeddedSvgResized("AddIn/UserInterface/Resources/external-link.svg", 64, 64);
+    }
+
+    public void OnAccountActionClicked(IRibbonControl control)
+    {
+        string url = IsLoggedIn(control) ? ManageAccountUrl : SignUpUrl;
+
+        try
+        {
+            ProcessStartInfo psi = new ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            };
+            Process.Start(psi);
+        }
+        catch (Exception ex)
+        {
+            // Log the error for diagnostics
+            Debug.WriteLine($"Error opening URL '{url}': {ex.Message}");
+            MessageBox.Show($"Could not open the link: {url}\n\nError: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
     }
 
     public string OnGetSelectedModel(IRibbonControl control)
