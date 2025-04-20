@@ -24,6 +24,7 @@
 
 using System.ClientModel;
 using System.ClientModel.Primitives;
+using System.Net.Http.Headers;
 using System.Threading.RateLimiting;
 using Anthropic.SDK;
 using Cellm.Models.Providers;
@@ -148,7 +149,7 @@ public static class ServiceCollectionExtensions
 
                 var cellmConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<CellmConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
-                resilientHttpClient.DefaultRequestHeaders.Add("Authorization", $"Basic {account.GetBasicAuthCredentials()}");
+                resilientHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", account.GetBasicAuthCredentials());
 
                 var openAiClient = new OpenAIClient(
                     new ApiKeyCredential(string.Empty),
