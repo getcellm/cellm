@@ -1,6 +1,6 @@
 ﻿namespace Cellm.Models.Providers.OpenAiCompatible;
 
-internal class OpenAiCompatibleConfiguration
+internal class OpenAiCompatibleConfiguration : IProviderConfiguration
 {
     public Uri BaseAddress { get; set; } = default!;
 
@@ -10,5 +10,9 @@ internal class OpenAiCompatibleConfiguration
 
     public int HttpTimeoutInSeconds = 3600;
 
-    public List<string> Models { get; init; } = [];
+    public string SmallModel { get; init; } = string.Empty;
+
+    public string BigModel { get; init; } = string.Empty;
+
+    public string ThinkingModel { get; init; } = string.Empty;
 }

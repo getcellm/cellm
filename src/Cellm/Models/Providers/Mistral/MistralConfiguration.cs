@@ -9,5 +9,9 @@ internal class MistralConfiguration : IProviderConfiguration
 
     public string ApiKey { get; init; } = string.Empty;
 
-    public List<string> Models { get; init; } = [];
+    public string SmallModel { get; init; } = string.Empty;
+
+    public string BigModel { get; init; } = string.Empty;
+
+    public string ThinkingModel { get; init; } = string.Empty;
 }

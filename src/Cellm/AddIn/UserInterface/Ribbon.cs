@@ -114,7 +114,6 @@ public class Ribbon : ExcelRibbon
             <tab id="cellm" label="Cellm">
                 {UserGroup()}
                 {NewModelGroup()}
-                {ModelGroup()}
                 {BehaviorGroup()}
             </tab>
         </tabs>
@@ -309,7 +308,9 @@ public class Ribbon : ExcelRibbon
         if (accountConfiguration.IsEnabled)
         {
             var cellmConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<CellmConfiguration>>().CurrentValue;
-            providerAndModels.AddRange(cellmConfiguration.Models.Select(m => $"{nameof(Provider.Cellm)}/{m}"));
+            providerAndModels.Add($"{nameof(Provider.Cellm)}/{cellmConfiguration.SmallModel}");
+            providerAndModels.Add($"{nameof(Provider.Cellm)}/{cellmConfiguration.BigModel}");
+            providerAndModels.Add($"{nameof(Provider.Cellm)}/{cellmConfiguration.ThinkingModel}");
         }
 
         var anthropicConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<AnthropicConfiguration>>().CurrentValue;
@@ -320,13 +321,29 @@ public class Ribbon : ExcelRibbon
         var openAiConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<OpenAiConfiguration>>().CurrentValue;
         var openAiCompatibleConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<OpenAiCompatibleConfiguration>>().CurrentValue;
 
-        providerAndModels.AddRange(anthropicConfiguration.Models.Select(m => $"{nameof(Provider.Anthropic)}/{m}"));
-        providerAndModels.AddRange(deepSeekConfiguration.Models.Select(m => $"{nameof(Provider.DeepSeek)}/{m}"));
-        providerAndModels.AddRange(mistralConfiguration.Models.Select(m => $"{nameof(Provider.Mistral)}/{m}"));
-        providerAndModels.AddRange(ollamaConfiguration.Models.Select(m => $"{nameof(Provider.Ollama)}/{m}"));
-        providerAndModels.AddRange(openAiConfiguration.Models.Select(m => $"{nameof(Provider.OpenAi)}/{m}"));
-        providerAndModels.AddRange(openAiCompatibleConfiguration.Models.Select(m => $"{nameof(Provider.OpenAiCompatible)}/{m}"));
+        providerAndModels.Add($"{nameof(Provider.Anthropic)}/{anthropicConfiguration.SmallModel}");
+        providerAndModels.Add($"{nameof(Provider.Anthropic)}/{anthropicConfiguration.BigModel}");
+        providerAndModels.Add($"{nameof(Provider.Anthropic)}/{anthropicConfiguration.ThinkingModel}");
 
+        providerAndModels.Add($"{nameof(Provider.DeepSeek)}/{deepSeekConfiguration.SmallModel}");
+        providerAndModels.Add($"{nameof(Provider.DeepSeek)}/{deepSeekConfiguration.BigModel}");
+        providerAndModels.Add($"{nameof(Provider.DeepSeek)}/{deepSeekConfiguration.ThinkingModel}");
+
+        providerAndModels.Add($"{nameof(Provider.Mistral)}/{mistralConfiguration.SmallModel}");
+        providerAndModels.Add($"{nameof(Provider.Mistral)}/{mistralConfiguration.BigModel}");
+        providerAndModels.Add($"{nameof(Provider.Mistral)}/{mistralConfiguration.ThinkingModel}");
+
+        providerAndModels.Add($"{nameof(Provider.Ollama)}/{ollamaConfiguration.SmallModel}");
+        providerAndModels.Add($"{nameof(Provider.Ollama)}/{ollamaConfiguration.BigModel}");
+        providerAndModels.Add($"{nameof(Provider.Ollama)}/{ollamaConfiguration.ThinkingModel}");
+
+        providerAndModels.Add($"{nameof(Provider.OpenAi)}/{openAiConfiguration.SmallModel}");
+        providerAndModels.Add($"{nameof(Provider.OpenAi)}/{openAiConfiguration.BigModel}");
+        providerAndModels.Add($"{nameof(Provider.OpenAi)}/{openAiConfiguration.ThinkingModel}");
+
+        providerAndModels.Add($"{nameof(Provider.OpenAiCompatible)}/{openAiCompatibleConfiguration.SmallModel}");
+        providerAndModels.Add($"{nameof(Provider.OpenAiCompatible)}/{openAiCompatibleConfiguration.BigModel}");
+        providerAndModels.Add($"{nameof(Provider.OpenAiCompatible)}/{openAiCompatibleConfiguration.ThinkingModel}");
         var stringBuilder = new StringBuilder();
 
         foreach (var providerAndModel in providerAndModels)

@@ -4,5 +4,9 @@ public interface IProviderConfiguration
 {
     string DefaultModel { get; init; }
 
-    List<string> Models { get; init; }
+    string SmallModel { get; init; }
+
+    string BigModel { get; init; }
+
+    string ThinkingModel { get; init; }
 }
