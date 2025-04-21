@@ -14,11 +14,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="AddIn\UserInterface\Resources\anthropic.png" />
+    <None Remove="AddIn\UserInterface\Resources\deepseek.png" />
     <None Remove="AddIn\UserInterface\Resources\external-link.svg" />
+    <None Remove="AddIn\UserInterface\Resources\google.png" />
     <None Remove="AddIn\UserInterface\Resources\logged-in.svg" />
     <None Remove="AddIn\UserInterface\Resources\logged-out.svg" />
     <None Remove="AddIn\UserInterface\Resources\login.svg" />
     <None Remove="AddIn\UserInterface\Resources\logout.svg" />
+    <None Remove="AddIn\UserInterface\Resources\mistral.png" />
+    <None Remove="AddIn\UserInterface\Resources\ollama.png" />
+    <None Remove="AddIn\UserInterface\Resources\openai.png" />
     <None Remove="appsettings.json" />
     <None Remove="appsettings.Local.json" />
   </ItemGroup>
@@ -61,10 +67,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="AddIn\UserInterface\Resources\anthropic.png" />
+    <EmbeddedResource Include="AddIn\UserInterface\Resources\deepseek.png" />
     <EmbeddedResource Include="AddIn\UserInterface\Resources\external-link.svg" />
+    <EmbeddedResource Include="AddIn\UserInterface\Resources\google.png" />
     <EmbeddedResource Include="AddIn\UserInterface\Resources\logged-in.svg" />
     <EmbeddedResource Include="AddIn\UserInterface\Resources\logged-out.svg" />
     <EmbeddedResource Include="AddIn\UserInterface\Resources\login.svg" />
     <EmbeddedResource Include="AddIn\UserInterface\Resources\logout.svg" />
+    <EmbeddedResource Include="AddIn\UserInterface\Resources\mistral.png" />
+    <EmbeddedResource Include="AddIn\UserInterface\Resources\ollama.png" />
+    <EmbeddedResource Include="AddIn\UserInterface\Resources\openai.png" />
   </ItemGroup>
 </Project>

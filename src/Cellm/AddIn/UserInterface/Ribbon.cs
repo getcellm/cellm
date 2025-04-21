@@ -39,6 +39,38 @@ public class Ribbon : ExcelRibbon
     private const string SignUpUrl = "https://dev.getcellm.com/signup";
     private const string ManageAccountUrl = "https://dev.getcellm.com/account";
 
+    private class ProviderItem
+    {
+        public string Id { get; set; } = string.Empty;
+
+        public string Label {  get; set; } = string.Empty;
+
+        public string Image { get; set; } = string.Empty;
+
+        public string SmallModel { get; set; } = string.Empty;
+
+        public string LargeModel { get; set; } = string.Empty;
+
+        public string ThinkingModel { get; set; } = string.Empty;
+    }
+
+    // TODO: Just finished putting in these data. Now:
+    //  - Resolve errors (add property Models = [SmallModel, LargeModel, ThinkingModel] to all configurations
+    //  - Use this data in NewModelGroup() (copy confgurations)
+    //  - Resolve error of gallery image not updating when changing provider
+    //  - Can we get _two_ rows in the ribbon instead of three???
+    private readonly Dictionary<int, ProviderItem> _galleryItems = new Dictionary<int, ProviderItem>
+    {
+        [0] = new ProviderItem { Id = "providerGalleryItemAnthropic", Image = "AddIn/UserInterface/Resources/anthropic.png", Label = "Anthropic" },
+        [1] = new ProviderItem { Id = "providerGalleryItemDeepSeek", Image = "AddIn/UserInterface/Resources/deepseek.png", Label = "DeepSeek" },
+        [2] = new ProviderItem { Id = "providerGalleryItemMistral", Image = "AddIn/UserInterface/Resources/mistral.png", Label = "Mistral" },
+        [3] = new ProviderItem { Id = "providerGalleryItemOllama", Image = "AddIn/UserInterface/Resources/ollama.png", Label = "Ollama" },
+        [4] = new ProviderItem { Id = "providerGalleryItemOpenAi", Image = "AddIn/UserInterface/Resources/openai.png", Label = "OpenAI" },
+        [5] = new ProviderItem { Id = "providerGalleryItemOpenAiCompatible", Image = "AddIn/UserInterface/Resources/openai.png", Label = "OpenAI-compatible" }
+    };
+
+    private int _selectedGalleryIndex = 0; // Default to the first item (Red)
+
     public Ribbon()
     {
         EnsureDefaultProvider();
@@ -81,6 +113,7 @@ public class Ribbon : ExcelRibbon
         <tabs>
             <tab id="cellm" label="Cellm">
                 {UserGroup()}
+                {NewModelGroup()}
                 {ModelGroup()}
                 {BehaviorGroup()}
             </tab>
@@ -155,6 +188,116 @@ public class Ribbon : ExcelRibbon
     </splitButton>
 </group>
 """;
+    }
+
+    public string NewModelGroup()
+    {
+        return $"""
+        <group id="newmodels" label="Model">
+          <gallery id="providerGallery"
+                   label="Select Provider"
+                   screentip="Select Provider"
+                   supertip="Select Provider"
+                   showImage="true"
+                   showLabel="false"
+                   getImage="GetProviderGalleryCollapsedImage"
+                   columns="1"
+                   showItemLabel="true"
+                   showItemImage="true"
+                   onAction="HandleProviderSelection"
+                   getItemCount="GetGalleryItemCount"
+                   getItemLabel="GetGalleryItemLabel"
+                   getItemImage="GetProviderGalleryImage">
+               <!-- No <button> elements here when using getItem* callbacks -->
+          </gallery>
+        </group>
+        """;
+    }
+
+    public int GetGalleryItemCount(IRibbonControl control)
+    {
+        Debug.WriteLine($"GetGalleryItemCount called. Returning: {_galleryItems.Count}"); // DEBUG
+        return _galleryItems.Count;
+    }
+
+    public string GetGalleryItemLabel(IRibbonControl control, int index)
+    {
+        Debug.WriteLine($"GetGalleryItemLabel called for index: {index}"); // DEBUG
+        if (index >= 0 && index < _galleryItems.Count)
+        {
+            return _galleryItems[index].Label;
+        }
+        return string.Empty;
+    }
+
+
+    /// <summary>
+    /// Returns the placeholder image for the gallery control itself when collapsed.
+    /// Based on the currently selected item's color.
+    /// </summary>
+    public Bitmap? GetProviderGalleryCollapsedImage(IRibbonControl control)
+    {
+        Debug.WriteLine($"GetProviderGalleryCollapsedImage called. Current _selectedGalleryIndex: {_selectedGalleryIndex}"); // DEBUG
+        // Keep your existing switch statement here
+        return _selectedGalleryIndex switch
+        {
+            0 => ImageLoader.LoadEmbeddedPngResized("AddIn/UserInterface/Resources/anthropic.png"),
+            1 => ImageLoader.LoadEmbeddedPngResized("AddIn/UserInterface/Resources/deepseek.png"),
+            2 => ImageLoader.LoadEmbeddedPngResized("AddIn/UserInterface/Resources/mistral.png"),
+            3 => ImageLoader.LoadEmbeddedPngResized("AddIn/UserInterface/Resources/ollama.png"),
+            4 => ImageLoader.LoadEmbeddedPngResized("AddIn/UserInterface/Resources/openai.png"),
+            5 => ImageLoader.LoadEmbeddedPngResized("AddIn/UserInterface/Resources/openai.png"),
+            _ => throw new Exception() // Or return a default/null image
+        };
+    }
+
+    /// <summary>
+    /// Returns the placeholder image (as Bitmap) for the item at the specified index.
+    /// </summary>
+    public Bitmap? GetProviderGalleryImage(IRibbonControl control, int index)
+    {
+        Debug.WriteLine($"GetProviderGalleryImage called for index: {index}"); // DEBUG
+        return index switch
+        {
+            // ... (rest of your switch statement)
+            0 => ImageLoader.LoadEmbeddedPngResized("AddIn/UserInterface/Resources/anthropic.png"),
+            1 => ImageLoader.LoadEmbeddedPngResized("AddIn/UserInterface/Resources/deepseek.png"),
+            2 => ImageLoader.LoadEmbeddedPngResized("AddIn/UserInterface/Resources/mistral.png"),
+            3 => ImageLoader.LoadEmbeddedPngResized("AddIn/UserInterface/Resources/ollama.png"),
+            4 => ImageLoader.LoadEmbeddedPngResized("AddIn/UserInterface/Resources/openai.png"),
+            5 => ImageLoader.LoadEmbeddedPngResized("AddIn/UserInterface/Resources/openai.png"),
+            _ => throw new Exception() // Or return null
+        };
+    }
+
+    public Bitmap? GetEmbeddedImage(string relativePath)
+    {
+        return ImageLoader.LoadEmbeddedPngResized(relativePath);
+    }
+
+    /// <summary>
+    /// Called when an item within the gallery is clicked.
+    /// (Logic remains the same - updates index, invalidates)
+    /// </summary>
+    public void HandleProviderSelection(IRibbonControl control, string id, int index)
+    {
+        Debug.WriteLine($"HandleGallerySelection called. ID: {id}, Index: {index}"); // DEBUG
+        if (index >= 0 && index < _galleryItems.Count)
+        {
+            _selectedGalleryIndex = index;
+            Debug.WriteLine($"_selectedGalleryIndex updated to: {_selectedGalleryIndex}"); // DEBUG
+
+            if (_ribbonUi == null)
+            {
+                Debug.WriteLine("ERROR: _ribbonUi is null in HandleGallerySelection!"); // DEBUG
+            }
+            else
+            {
+                Debug.WriteLine("Calling InvalidateControl('providerGallery')"); // DEBUG
+                _ribbonUi?.InvalidateControl("providerGallery");
+            }
+        }
+        Debug.WriteLine("HandleGallerySelection finished."); // DEBUG
     }
 
     public string ModelGroup()
