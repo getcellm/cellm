@@ -3,14 +3,14 @@ using System.Diagnostics;
 using System.Reflection;
 using Svg;
 
-namespace Cellm.AddIn.UserInterface;
+namespace Cellm.AddIn.UserInterface.Ribbon;
 
 public static class ImageLoader
 {
     private static readonly ConcurrentDictionary<string, Bitmap> _imageCache =
         new ConcurrentDictionary<string, Bitmap>();
 
-    public static Bitmap? LoadEmbeddedPngResized(string relativePath)
+    public static Bitmap? LoadEmbeddedPngResized(string relativePath, int width = 16, int height = 16)
     {
         if (string.IsNullOrWhiteSpace(relativePath))
         {
@@ -63,7 +63,7 @@ public static class ImageLoader
             using var originalBitmap = new Bitmap(stream);
 
             // Create the resized bitmap
-            var resizedBitmap = new Bitmap(originalBitmap, new Size(16, 16));
+            var resizedBitmap = new Bitmap(originalBitmap, new Size(width, height));
 
             // Add to cache. Use AddOrUpdate for slightly more robust caching logic.
             // The factory function ensures the bitmap is created only if needed.

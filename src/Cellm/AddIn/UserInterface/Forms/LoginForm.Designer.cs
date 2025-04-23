@@ -1,4 +1,5 @@
-﻿namespace Cellm.AddIn;
+﻿
+namespace Cellm.AddIn;
 
 partial class LoginForm
 {
@@ -29,79 +30,103 @@ partial class LoginForm
         btnLogin = new Button();
         btnCancel = new Button();
         lnkForgotPassword = new LinkLabel();
+        lnkCreateAccount = new LinkLabel();
         SuspendLayout();
-
+        // 
         // LabelUsername
+        // 
         LabelUsername.AutoSize = true;
-        LabelUsername.Location = new Point(12, 15);
+        LabelUsername.Location = new Point(14, 17);
+        LabelUsername.Margin = new Padding(4, 0, 4, 0);
         LabelUsername.Name = "LabelUsername";
-        LabelUsername.Size = new Size(58, 13);
+        LabelUsername.Size = new Size(63, 15);
         LabelUsername.TabIndex = 0;
         LabelUsername.Text = "Username:";
-
+        // 
         // TextBoxUsername
-        TextBoxUsername.Location = new Point(76, 12);
+        // 
+        TextBoxUsername.Location = new Point(89, 14);
+        TextBoxUsername.Margin = new Padding(4, 3, 4, 3);
         TextBoxUsername.Name = "TextBoxUsername";
-        TextBoxUsername.Size = new Size(196, 20);
+        TextBoxUsername.Size = new Size(228, 23);
         TextBoxUsername.TabIndex = 1;
-
+        // 
         // LabelPassword
+        // 
         LabelPassword.AutoSize = true;
-        LabelPassword.Location = new Point(12, 41);
+        LabelPassword.Location = new Point(14, 47);
+        LabelPassword.Margin = new Padding(4, 0, 4, 0);
         LabelPassword.Name = "LabelPassword";
-        LabelPassword.Size = new Size(56, 13);
+        LabelPassword.Size = new Size(60, 15);
         LabelPassword.TabIndex = 2;
         LabelPassword.Text = "Password:";
-
+        // 
         // TextBoxPassword
-        TextBoxPassword.Location = new Point(76, 38);
+        // 
+        TextBoxPassword.Location = new Point(89, 44);
+        TextBoxPassword.Margin = new Padding(4, 3, 4, 3);
         TextBoxPassword.Name = "TextBoxPassword";
-        TextBoxPassword.Size = new Size(196, 20);
+        TextBoxPassword.Size = new Size(228, 23);
         TextBoxPassword.TabIndex = 3;
         TextBoxPassword.UseSystemPasswordChar = true;
-
-
-        // --- ADDED: Initialize LinkLabel ---
-        lnkForgotPassword.AutoSize = true; // Auto-size based on text
-        lnkForgotPassword.Location = new Point(73, 61); // Position below password box, align left with textboxes
-        lnkForgotPassword.Name = "lnkForgotPassword";
-        lnkForgotPassword.Size = new Size(86, 13); // Approx size, AutoSize will adjust
-        lnkForgotPassword.TabIndex = 4;           // Tab order after password box
-        lnkForgotPassword.TabStop = true;         // Allow tabbing to it
-        lnkForgotPassword.Text = "Forgot password?";
-
-        // Wire up the LinkClicked event handler (defined in LoginForm.cs)
-        lnkForgotPassword.LinkClicked += new LinkLabelLinkClickedEventHandler(ForgotPassword_LinkClicked);
-
+        // 
         // btnLogin
+        // 
         btnLogin.DialogResult = DialogResult.OK;
-        btnLogin.Location = new Point(116, 88);
+        btnLogin.Location = new Point(135, 102);
+        btnLogin.Margin = new Padding(4, 3, 4, 3);
         btnLogin.Name = "btnLogin";
-        btnLogin.Size = new Size(75, 23);
-        btnLogin.TabIndex = 5;
+        btnLogin.Size = new Size(88, 27);
+        btnLogin.TabIndex = 6;
         btnLogin.Text = "Login";
         btnLogin.UseVisualStyleBackColor = true;
-        btnLogin.Click += new System.EventHandler(btnLogin_Click);
-
+        btnLogin.Click += btnLogin_Click;
+        // 
         // btnCancel
+        // 
         btnCancel.DialogResult = DialogResult.Cancel;
-        btnCancel.Location = new Point(197, 88);
+        btnCancel.Location = new Point(230, 102);
+        btnCancel.Margin = new Padding(4, 3, 4, 3);
         btnCancel.Name = "btnCancel";
-        btnCancel.Size = new Size(75, 23);
-        btnCancel.TabIndex = 6;
+        btnCancel.Size = new Size(88, 27);
+        btnCancel.TabIndex = 7;
         btnCancel.Text = "Cancel";
         btnCancel.UseVisualStyleBackColor = true;
-        btnCancel.Click += new System.EventHandler(btnCancel_Click);
-
-        // Form Settings
-        AcceptButton = this.btnLogin;
-        AutoScaleDimensions = new SizeF(6F, 13F);
+        btnCancel.Click += btnCancel_Click;
+        // 
+        // lnkForgotPassword
+        // 
+        lnkForgotPassword.AutoSize = true;
+        lnkForgotPassword.Location = new Point(173, 70);
+        lnkForgotPassword.Margin = new Padding(4, 0, 4, 0);
+        lnkForgotPassword.Name = "lnkForgotPassword";
+        lnkForgotPassword.Size = new Size(100, 15);
+        lnkForgotPassword.TabIndex = 5;
+        lnkForgotPassword.TabStop = true;
+        lnkForgotPassword.Text = "Forgot password?";
+        lnkForgotPassword.LinkClicked += ForgotPassword_LinkClicked;
+        // 
+        // lnkCreateAccount
+        // 
+        lnkCreateAccount.AutoSize = true;
+        lnkCreateAccount.Location = new Point(85, 70);
+        lnkCreateAccount.Margin = new Padding(4, 0, 4, 0);
+        lnkCreateAccount.Name = "lnkCreateAccount";
+        lnkCreateAccount.Size = new Size(89, 15);
+        lnkCreateAccount.TabIndex = 4;
+        lnkCreateAccount.TabStop = true;
+        lnkCreateAccount.Text = "Create Account";
+        lnkCreateAccount.LinkClicked += CreateAccount_LinkClicked;
+        // 
+        // LoginForm
+        // 
+        AcceptButton = btnLogin;
+        AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        CancelButton = this.btnCancel;
-        ClientSize = new Size(284, 123);
-
-        // Add Controls to Form
+        CancelButton = btnCancel;
+        ClientSize = new Size(331, 142);
         Controls.Add(lnkForgotPassword);
+        Controls.Add(lnkCreateAccount);
         Controls.Add(btnCancel);
         Controls.Add(btnLogin);
         Controls.Add(TextBoxPassword);
@@ -109,6 +134,7 @@ partial class LoginForm
         Controls.Add(TextBoxUsername);
         Controls.Add(LabelUsername);
         FormBorderStyle = FormBorderStyle.FixedDialog;
+        Margin = new Padding(4, 3, 4, 3);
         MaximizeBox = false;
         MinimizeBox = false;
         Name = "LoginForm";
@@ -127,6 +153,6 @@ partial class LoginForm
     private TextBox TextBoxPassword;
     private Button btnLogin;
     private Button btnCancel;
-    // --- ADDED: LinkLabel Declaration ---
     private LinkLabel lnkForgotPassword;
+    private LinkLabel lnkCreateAccount;
 }

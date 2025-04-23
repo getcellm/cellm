@@ -81,9 +81,12 @@ internal class Account(
         Task.Run(async () => await RequireEntitlementAsync(entitlement)).GetAwaiter().GetResult();
     }
 
-    public string GetBasicAuthCredentials()
+    public string GetBasicAuthCredentials(string? username = null, string? password = null)
     {
-        var credentials = $"{accountConfiguration.CurrentValue.Username}:{accountConfiguration.CurrentValue.Password}";
+        username ??= accountConfiguration.CurrentValue.Username;
+        password ??= accountConfiguration.CurrentValue.Password;
+
+        var credentials = $"{username}:{password}";
         var credentialsBytes = Encoding.UTF8.GetBytes(credentials);
         var credentialsAsBase64 = Convert.ToBase64String(credentialsBytes);
 
