@@ -6,7 +6,7 @@ public interface IProviderConfiguration
 
     string SmallModel { get; init; }
 
-    string BigModel { get; init; }
+    string MediumModel { get; init; }
 
-    string ThinkingModel { get; init; }
+    string LargeModel { get; init; }
 }

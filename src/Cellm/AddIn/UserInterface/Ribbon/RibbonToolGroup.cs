@@ -14,8 +14,7 @@ public partial class RibbonMain
         FunctionsButton,
         FunctionsMenu,
         FileSearchCheckBox,
-        FileReaderCheckBox,
-        CacheToggleButton
+        FileReaderCheckBox
     }
 
     public string ToolGroup()
@@ -35,9 +34,6 @@ public partial class RibbonMain
                          getPressed="{nameof(OnGetFileReaderPressed)}" />
                  </menu>
             </splitButton>
-            <toggleButton id="{nameof(ToolsGroupControlIds.CacheToggleButton)}" label="Cache" size="large" imageMso="SourceControlRefreshStatus"
-                screentip="Enable/disable local caching of model responses. Disabling cache will clear all cached responses."
-                onAction="{nameof(OnCacheToggled)}" getPressed="{nameof(OnGetCachePressed)}" />
         </group>
         """;
     }

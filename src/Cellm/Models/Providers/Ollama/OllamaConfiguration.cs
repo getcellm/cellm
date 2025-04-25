@@ -10,9 +10,9 @@ internal class OllamaConfiguration : IProviderConfiguration
 
     public string SmallModel { get; init; } = string.Empty;
 
-    public string BigModel { get; init; } = string.Empty;
+    public string MediumModel { get; init; } = string.Empty;
 
-    public string ThinkingModel { get; init; } = string.Empty;
+    public string LargeModel { get; init; } = string.Empty;
 
     public int MaxInputTokens { get; init; } = 16364;
 

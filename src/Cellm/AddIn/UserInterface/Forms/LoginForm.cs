@@ -1,15 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
-
-// using System.Collections.Generic; // Not needed for this simple form
-// using System.ComponentModel; // Not needed
-// using System.Data; // Not needed
-// using System.Drawing; // Might be needed if you handle graphics, but not here
-// using System.Linq; // Not needed
 using System.Windows.Forms;
 
 
-namespace Cellm.AddIn;
+namespace Cellm.AddIn.UserInterface.Forms;
 
 public partial class LoginForm : Form
 {

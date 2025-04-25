@@ -9,6 +9,7 @@ using Cellm.Models.Providers;
 using System.Diagnostics;
 using System.Text;
 using ExcelDna.Integration.CustomUI;
+using Cellm.AddIn.UserInterface.Forms;
 
 namespace Cellm.AddIn.UserInterface.Ribbon;
 
@@ -16,22 +17,18 @@ public partial class RibbonMain
 {
     private enum ModelGroupControlIds
     {
+        VerticalContainer,
+
         ModelProviderGroup,
         ProviderModelBox,
         ProviderSplitButton,
         ProviderDisplayButton,
         ProviderSelectionMenu,
 
-        ModelSplitButton,
-        ModelDisplayButton,
-        ModelSelectionMenu,
-        ModelMenuItemSmall,
-        ModelMenuItemBig,
-        ModelMenuItemThinking,
+        ModelComboBox,
+        CacheToggleButton,
 
-        ProviderSettingsBox,
-        ApiKeyEditBox,
-        BaseAddressEditBox
+        ProviderSettingsButton
     }
 
     private class ProviderItem
@@ -44,24 +41,26 @@ public partial class RibbonMain
 
         public string SmallModel { get; set; } = string.Empty;
 
-        public string LargeModel { get; set; } = string.Empty;
+        public string MediumModel { get; set; } = string.Empty;
 
-        public string ThinkingModel { get; set; } = string.Empty;
+        public string LargeModel { get; set; } = string.Empty;
     }
 
+    private const string NoPresetsPlaceholder = "-- (No presets configured) --";
+
     // TODO: Just finished putting in these data. Now:
-    //  - Resolve errors (add property Models = [SmallModel, LargeModel, ThinkingModel] to all configurations
+    //  - Resolve errors (add property Models = [SmallModel, MediumModel, LargeModel] to all configurations
     //  - Use this data in NewModelGroup() (copy confgurations)
     //  - Resolve error of gallery image not updating when changing provider
     //  - Can we get _two_ rows in the ribbon instead of three???
     private readonly Dictionary<int, ProviderItem> _providerItems = new Dictionary<int, ProviderItem>
     {
-        [0] = new ProviderItem { Id = "providerAnthropic", Image = "AddIn/UserInterface/Resources/anthropic.png", Label = "Anthropic" },
-        [1] = new ProviderItem { Id = "providerDeepSeek", Image = "AddIn/UserInterface/Resources/deepseek.png", Label = "DeepSeek" },
-        [2] = new ProviderItem { Id = "providerMistral", Image = "AddIn/UserInterface/Resources/mistral.png", Label = "Mistral" },
-        [3] = new ProviderItem { Id = "providerOllama", Image = "AddIn/UserInterface/Resources/ollama.png", Label = "Ollama" },
-        [4] = new ProviderItem { Id = "providerOpenAi", Image = "AddIn/UserInterface/Resources/openai.png", Label = "OpenAI" },
-        [5] = new ProviderItem { Id = "providerOpenAiCompatible", Image = "AddIn/UserInterface/Resources/openai.png", Label = "OpenAI-compatible" }
+        [0] = new ProviderItem { Id = "providerAnthropic", Image = $"{ResourcesBasePath}/anthropic.png", Label = nameof(Provider.Anthropic) },
+        [1] = new ProviderItem { Id = "providerDeepSeek", Image = $"{ResourcesBasePath}/deepseek.png", Label = nameof(Provider.DeepSeek) },
+        [2] = new ProviderItem { Id = "providerMistral", Image = $"{ResourcesBasePath}/mistral.png", Label = nameof(Provider.Mistral) },
+        [3] = new ProviderItem { Id = "providerOllama", Image = $"{ResourcesBasePath}/ollama.png", Label = nameof(Provider.Ollama) },
+        [4] = new ProviderItem { Id = "providerOpenAi", Image = $"{ResourcesBasePath}/openai.png", Label = nameof(Provider.OpenAi) },
+        [5] = new ProviderItem { Id = "providerOpenAiCompatible", Image = $"{ResourcesBasePath}/openai.png", Label = nameof(Provider.OpenAiCompatible) }
     };
 
     internal int _selectedProviderIndex = 0; // Default to the first item (Red)
@@ -105,58 +104,51 @@ public partial class RibbonMain
             string menuItemId = $"providerMenuItem_{index}"; // Dynamic ID
             providerMenuItemsXml.AppendLine(
                 $@"<button id=""{menuItemId}""
-                         label=""{System.Security.SecurityElement.Escape(item.Label)}""
-                         getImage=""{nameof(GetProviderMenuItemImage)}""
-                         tag=""{index}""
-                         onAction=""{nameof(HandleProviderMenuSelection)}"" />");
+                     label=""{System.Security.SecurityElement.Escape(item.Label)}""
+                     getImage=""{nameof(GetProviderMenuItemImage)}""
+                     tag=""{index}""
+                     onAction=""{nameof(HandleProviderMenuSelection)}"" />");
         }
 
-        return $"""
-        <group id="{nameof(ModelGroupControlIds.ModelProviderGroup)}" label="Model">
-            <box id="{nameof(ModelGroupControlIds.ProviderModelBox)}" boxStyle="horizontal">
-                <splitButton id="{nameof(ModelGroupControlIds.ProviderSplitButton)}" size="normal" showLabel="false">
-                    <button id="{nameof(ModelGroupControlIds.ProviderDisplayButton)}"
-                            getLabel="{nameof(GetSelectedProviderLabel)}"
-                            getImage="{nameof(GetSelectedProviderImage)}"
-                            showImage="true"
-                            showLabel="true"
-                            />
-                    <menu id="{nameof(ModelGroupControlIds.ProviderSelectionMenu)}" itemSize="normal">
-                        {providerMenuItemsXml}
-                    </menu>
-                </splitButton>
+        // Add Separator and Settings Button
+        providerMenuItemsXml.AppendLine($@"<menuSeparator id=""providerMenuSeparator"" />");
+        providerMenuItemsXml.AppendLine(
+            $@"<button id=""{nameof(ModelGroupControlIds.ProviderSettingsButton)}""
+                 getLabel=""{nameof(GetProviderSettingsButtonLabel)}""
+                 onAction=""{nameof(ShowProviderSettingsForm)}"" />");
 
-        <splitButton id="{nameof(ModelGroupControlIds.ModelSplitButton)}" size="normal" showLabel="false">
-            <button id="{nameof(ModelGroupControlIds.ModelDisplayButton)}"
-                    getLabel="{nameof(GetSelectedModelLabel)}"
-                    showImage="false"
-                    showLabel="true"
-                   />
-            <menu id="{nameof(ModelGroupControlIds.ModelSelectionMenu)}" itemSize="normal">
-                <button id="{nameof(ModelGroupControlIds.ModelMenuItemSmall)}"
-                        tag="Small"
-                        getLabel="{nameof(GetModelMenuItemLabel)}"
-                        getVisible="{nameof(GetModelMenuItemVisible)}"
-                        onAction="{nameof(HandleModelMenuSelection)}" />
-                <button id="{nameof(ModelGroupControlIds.ModelMenuItemBig)}"
-                        tag="Big"
-                        getLabel="{nameof(GetModelMenuItemLabel)}"
-                        getVisible="{nameof(GetModelMenuItemVisible)}"
-                        onAction="{nameof(HandleModelMenuSelection)}" />
-                <button id="{nameof(ModelGroupControlIds.ModelMenuItemThinking)}"
-                        tag="Thinking"
-                        getLabel="{nameof(GetModelMenuItemLabel)}"
-                        getVisible="{nameof(GetModelMenuItemVisible)}"
-                        onAction="{nameof(HandleModelMenuSelection)}" />
-            </menu>
-        </splitButton>
-            </box>
-            <box id="{nameof(ModelGroupControlIds.ProviderSettingsBox)}" boxStyle="horizontal">
-                 <editBox id="{nameof(ModelGroupControlIds.ApiKeyEditBox)}" label="API Key" sizeString="WWWWWWWWWWWW" getEnabled="{nameof(OnGetApiKeyEnabled)}" getText="{nameof(OnGetApiKey)}" onChange="{nameof(OnApiKeyChanged)}" />
-                 <editBox id="{nameof(ModelGroupControlIds.BaseAddressEditBox)}" label="Address" sizeString="WWWWWWWWWWWW" getEnabled="{nameof(OnGetBaseAddressEnabled)}" getText="{nameof(OnGetBaseAddress)}" onChange="{nameof(OnBaseAddressChanged)}" />
-            </box>
-        </group>
-        """;
+        return $"""
+            <group id="{nameof(ModelGroupControlIds.ModelProviderGroup)}" label="Model">
+                <box id="{nameof(ModelGroupControlIds.VerticalContainer)}" boxStyle="vertical">
+                    <box id="{nameof(ModelGroupControlIds.ProviderModelBox)}" boxStyle="horizontal">
+                        <splitButton id="{nameof(ModelGroupControlIds.ProviderSplitButton)}" size="normal" showLabel="false">
+                            <button id="{nameof(ModelGroupControlIds.ProviderDisplayButton)}"
+                                    getLabel="{nameof(GetSelectedProviderLabel)}"
+                                    getImage="{nameof(GetSelectedProviderImage)}"
+                                    showImage="true"
+                                    showLabel="true"
+                                    onAction="{nameof(ShowProviderSettingsForm)}"
+                                    />
+                            <menu id="{nameof(ModelGroupControlIds.ProviderSelectionMenu)}" itemSize="normal">
+                                {providerMenuItemsXml}
+                            </menu>
+                        </splitButton>
+                        <comboBox id="{nameof(ModelGroupControlIds.ModelComboBox)}"
+                                  label="Model"
+                                  showLabel="false"
+                                  sizeString="WWWWWWWWWWWWW"
+                                  getText="{nameof(GetSelectedModelText)}"
+                                  onChange="{nameof(OnModelComboBoxChange)}"
+                                  getItemCount="{nameof(GetModelComboBoxItemCount)}"
+                                  getItemLabel="{nameof(GetModelComboBoxItemLabel)}"
+                                  />
+                    </box>
+                </box>
+                <toggleButton id="{nameof(ModelGroupControlIds.CacheToggleButton)}" label="Cache" size="large" imageMso="SourceControlRefreshStatus"
+                    screentip="Enable/disable local caching of model responses. Disabling cache will clear all cached responses."
+                    onAction="{nameof(OnCacheToggled)}" getPressed="{nameof(OnGetCachePressed)}" />
+            </group>
+            """;
     }
 
     /// <summary>
@@ -201,10 +193,10 @@ public partial class RibbonMain
         if (_providerItems.TryGetValue(_selectedProviderIndex, out var item) && !string.IsNullOrEmpty(item.Image))
         {
             // Use appropriate size for the main split button display (e.g., 32x32 or 24x24)
-            return ImageLoader.LoadEmbeddedPngResized(item.Image, 32, 32); // Adjust size as needed
+            return ImageLoader.LoadEmbeddedPngResized(item.Image, 64, 64); // Adjust size as needed
         }
         Debug.WriteLine($"WARNING: Could not get image for index {_selectedProviderIndex}.");
-        return null; // Or a default placeholder image
+        return null;
     }
 
     // --- NEW: Callback for Menu Item Images ---
@@ -228,135 +220,231 @@ public partial class RibbonMain
         return null; // Or a default placeholder image
     }
 
-    public string GetModelMenuItemLabel(IRibbonControl control)
+    /// <summary>
+    /// Gets the currently selected/configured default model name for the ComboBox text.
+    /// </summary>
+    /// <summary>
+    /// Gets the text for the ComboBox. Shows the current default model,
+    /// or a placeholder prompting the user based on whether presets are available.
+    /// </summary>
+    public string? GetSelectedModelText(IRibbonControl control)
     {
-        string modelType = control.Tag; // "Small", "Big", or "Thinking"
-        if (string.IsNullOrEmpty(modelType)) return string.Empty; // Should not happen with static tags
-
         var provider = GetCurrentProvider();
-        string modelName = GetModelNameForProvider(provider, modelType);
-
-        // Return the actual model name or a placeholder if not configured
-        return !string.IsNullOrEmpty(modelName) ? modelName : $"({modelType} N/A)";
-    }
-
-    // --- NEW: Callback for Static Model Menu Item Visibility ---
-    public bool GetModelMenuItemVisible(IRibbonControl control)
-    {
-        string modelType = control.Tag;
-        if (string.IsNullOrEmpty(modelType)) return false;
-
-        var provider = GetCurrentProvider();
-        string modelName = GetModelNameForProvider(provider, modelType);
-
-        // Only show the button if a model name is configured for this type
-        return !string.IsNullOrEmpty(modelName);
-    }
-
-    // --- MODIFIED: Callback for Model Menu Item Selection ---
-    public void HandleModelMenuSelection(IRibbonControl control)
-    {
-        string selectedModelType = control.Tag; // "Small", "Big", or "Thinking"
-        if (string.IsNullOrEmpty(selectedModelType))
-        {
-            Debug.WriteLine($"HandleModelMenuSelection: Tag is empty for control '{control.Id}'. Cannot determine model type.");
-            return;
-        }
-
-        var provider = GetCurrentProvider();
-        // Get the ACTUAL model name corresponding to the selected type (Small/Big/Thinking)
-        string selectedModelName = GetModelNameForProvider(provider, selectedModelType);
-
-        if (string.IsNullOrEmpty(selectedModelName))
-        {
-            Debug.WriteLine($"HandleModelMenuSelection: No actual model name found for type '{selectedModelType}' and provider '{provider}'. Cannot set default.");
-            return; // Don't proceed if the model name is missing (button should have been hidden anyway)
-        }
-
-        string configKey = $"{provider}Configuration:{nameof(OpenAiConfiguration.DefaultModel)}"; // Config key for the *default* model
-
-        Debug.WriteLine($"HandleModelMenuSelection called. Type: '{selectedModelType}', Resolved Model: '{selectedModelName}', Provider: {provider}");
+        string configKey = $"{provider}Configuration:{nameof(OpenAiConfiguration.DefaultModel)}"; // Using OpenAI as template name
+        string currentModel = string.Empty;
+        bool presetsAvailable = false;
 
         try
         {
-            // Save the selected model name as the default for this provider
-            SetValue(configKey, selectedModelName);
-            Debug.WriteLine($"DefaultModel set to '{selectedModelName}' for provider {provider}.");
-
-            // Invalidate the model splitButton's display button to update its label
-            if (_ribbonUi != null)
-            {
-                Debug.WriteLine("Invalidating modelDisplayButton");
-                _ribbonUi.InvalidateControl("modelDisplayButton");
-                // Optional: Invalidate splitButton itself if needed for other reasons
-                // _ribbonUi.InvalidateControl("modelSplitButton");
-            }
-            else
-            {
-                Debug.WriteLine("ERROR: _ribbonUi is null in HandleModelMenuSelection!");
-            }
+            // Check if a default model is already set
+            currentModel = GetValue(configKey); // Might throw KeyNotFoundException if never set
+        }
+        catch (KeyNotFoundException)
+        {
+            Debug.WriteLine($"DefaultModel key '{configKey}' not found for provider {provider}.");
+            currentModel = string.Empty; // Explicitly null
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"ERROR updating DefaultModel setting '{configKey}' to '{selectedModelName}': {ex.Message}");
+            Debug.WriteLine($"Error reading model config '{configKey}': {ex.Message}");
+            return "Error"; // Fallback on error
         }
-        Debug.WriteLine("HandleModelMenuSelection finished.");
+
+        // Check if preset models (Small/Medium/Large) are configured
+        presetsAvailable = GetAvailableModelNamesForProvider(provider).Count > 0;
+
+        Debug.WriteLine($"GetSelectedModelText for {provider}: CurrentModel='{currentModel ?? "null"}', PresetsAvailable={presetsAvailable}");
+
+        // Determine the text to display
+        if (!string.IsNullOrEmpty(currentModel))
+        {
+            // If a model is already configured (preset or custom), display it
+            return currentModel;
+        }
+        else
+        {
+            // No model is currently configured
+            if (presetsAvailable)
+            {
+                // Presets exist, prompt user to select from dropdown
+                return "Select Model";
+            }
+            else
+            {
+                // No presets exist (dropdown will be empty), prompt user to type
+                return "[Type model]"; // Short placeholder
+            }
+        }
     }
 
-    // --- NEW: Helper method to get specific model name ---
+    public void OnModelComboBoxChange(IRibbonControl control, string text)
+    {
+        var provider = GetCurrentProvider();
+        string configKey = $"{provider}Configuration:{nameof(OpenAiConfiguration.DefaultModel)}"; // Using OpenAI as template name
+
+        Debug.WriteLine($"OnModelComboBoxChange for {provider}. Received text: '{text}'");
+
+        // *** THIS IS THE CRITICAL PART ***
+        if (text == NoPresetsPlaceholder)
+        {
+            Debug.WriteLine("Ignoring change event because placeholder text was selected/entered. Invalidating control.");
+            // Force the UI to re-query the text for the box using GetSelectedModelText
+            _ribbonUi?.InvalidateControl(control.Id);
+            return; // IMPORTANT: Exit before saving or processing further
+        }
+        // *********************************
+
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            Debug.WriteLine("Warning: Model name cannot be empty. Change ignored.");
+            _ribbonUi?.InvalidateControl(control.Id);
+            return;
+        }
+
+        try
+        {
+            // Only save if it wasn't the placeholder or whitespace
+            SetValue(configKey, text);
+            Debug.WriteLine($"DefaultModel set to '{text}' for provider {provider}.");
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"ERROR updating DefaultModel setting '{configKey}' to '{text}': {ex.Message}");
+        }
+        Debug.WriteLine("OnModelComboBoxChange finished.");
+    }
+
+    /// <summary>
+    /// Gets the number of items for the ComboBox dropdown.
+    /// Returns 1 for a placeholder message if no real presets are configured.
+    /// </summary>
+    public int GetModelComboBoxItemCount(IRibbonControl control)
+    {
+        var provider = GetCurrentProvider();
+        int actualCount = GetAvailableModelNamesForProvider(provider).Count;
+
+        if (actualCount == 0)
+        {
+            Debug.WriteLine($"GetModelComboBoxItemCount for {provider}: No actual presets, returning 1 (for placeholder).");
+            return 1; // Return 1 to show our placeholder message
+        }
+        else
+        {
+            Debug.WriteLine($"GetModelComboBoxItemCount for {provider}: Returning actual count {actualCount}.");
+            return actualCount; // Return the real count of presets
+        }
+    }
+
+    /// <summary>
+    /// Gets the label for a specific item in the ComboBox dropdown list by index.
+    /// Shows a placeholder message if no real presets are available.
+    /// </summary>
+    public string GetModelComboBoxItemLabel(IRibbonControl control, int index)
+    {
+        var provider = GetCurrentProvider();
+        var availableModels = GetAvailableModelNamesForProvider(provider);
+
+        if (availableModels.Count == 0) // Check if we are in the placeholder scenario
+        {
+            if (index == 0)
+            {
+                Debug.WriteLine($"GetModelComboBoxItemLabel for {provider}, index {index}: Returning placeholder '{NoPresetsPlaceholder}'.");
+                return NoPresetsPlaceholder; // Return the placeholder message
+            }
+            else
+            {
+                // This case should technically not happen if GetItemCount returns 1
+                Debug.WriteLine($"Warning: Invalid index {index} requested for GetModelComboBoxItemLabel when showing placeholder.");
+                return string.Empty;
+            }
+        }
+        else // We have actual presets
+        {
+            if (index >= 0 && index < availableModels.Count)
+            {
+                string label = availableModels[index];
+                Debug.WriteLine($"GetModelComboBoxItemLabel for {provider}, index {index}: Returning actual model '{label}'.");
+                return label;
+            }
+            else
+            {
+                Debug.WriteLine($"Warning: Invalid index {index} requested for GetModelComboBoxItemLabel (Provider: {provider}, Count: {availableModels.Count})");
+                return string.Empty;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Helper method to get a list of *configured* Small, Big, Thinking model names for the current provider.
+    /// </summary>
+    private List<string> GetAvailableModelNamesForProvider(Provider provider)
+    {
+        var modelNames = new List<string>();
+        string small = GetModelNameForProvider(provider, "Small");
+        string big = GetModelNameForProvider(provider, "Big");
+        string thinking = GetModelNameForProvider(provider, "Thinking");
+
+        if (!string.IsNullOrEmpty(small) && !small.StartsWith("No ")) modelNames.Add(small);
+        if (!string.IsNullOrEmpty(big) && !big.StartsWith("No ")) modelNames.Add(big);
+        if (!string.IsNullOrEmpty(thinking) && !thinking.StartsWith("No ")) modelNames.Add(thinking);
+
+        // Optional: Remove duplicates if Small/Big/Thinking might be configured to the same model
+        return modelNames.Distinct().ToList();
+    }
+
     private string GetModelNameForProvider(Provider provider, string modelType)
     {
         try
         {
-            return provider switch // Using C# 8.0 switch expression
+            return provider switch
             {
                 Provider.Cellm => modelType switch
                 {
                     "Small" => GetProviderConfiguration<CellmConfiguration>()?.SmallModel ?? "No small model",
-                    "Big" => GetProviderConfiguration<CellmConfiguration>()?.BigModel ?? "No big model",
-                    "Thinking" => GetProviderConfiguration<CellmConfiguration>()?.ThinkingModel ?? "No thinking model",
+                    "Big" => GetProviderConfiguration<CellmConfiguration>()?.MediumModel ?? "No big model",
+                    "Thinking" => GetProviderConfiguration<CellmConfiguration>()?.LargeModel ?? "No thinking model",
                     _ => "N/A"
                 },
                 Provider.Anthropic => modelType switch
                 {
                     "Small" => GetProviderConfiguration<AnthropicConfiguration>()?.SmallModel ?? "No small model",
-                    "Big" => GetProviderConfiguration<AnthropicConfiguration>()?.BigModel ?? "No big model",
-                    "Thinking" => GetProviderConfiguration<AnthropicConfiguration>()?.ThinkingModel ?? "No thinking model",
+                    "Big" => GetProviderConfiguration<AnthropicConfiguration>()?.MediumModel ?? "No big model",
+                    "Thinking" => GetProviderConfiguration<AnthropicConfiguration>()?.LargeModel ?? "No thinking model",
                     _ => "N/A"
                 },
                 Provider.DeepSeek => modelType switch
                 {
                     "Small" => GetProviderConfiguration<DeepSeekConfiguration>()?.SmallModel ?? "No small model",
-                    "Big" => GetProviderConfiguration<DeepSeekConfiguration>()?.BigModel ?? "No big model",
-                    "Thinking" => GetProviderConfiguration<DeepSeekConfiguration>()?.ThinkingModel ?? "No thinking model",
+                    "Big" => GetProviderConfiguration<DeepSeekConfiguration>()?.MediumModel ?? "No big model",
+                    "Thinking" => GetProviderConfiguration<DeepSeekConfiguration>()?.LargeModel ?? "No thinking model",
                     _ => "N/A"
                 },
                 Provider.Mistral => modelType switch
                 {
                     "Small" => GetProviderConfiguration<MistralConfiguration>()?.SmallModel ?? "No small model",
-                    "Big" => GetProviderConfiguration<MistralConfiguration>()?.BigModel ?? "No big model",
-                    "Thinking" => GetProviderConfiguration<MistralConfiguration>()?.ThinkingModel ?? "No thinking model",
+                    "Big" => GetProviderConfiguration<MistralConfiguration>()?.MediumModel ?? "No big model",
+                    "Thinking" => GetProviderConfiguration<MistralConfiguration>()?.LargeModel ?? "No thinking model",
                     _ => "N/A"
                 },
                 Provider.Ollama => modelType switch
                 {
                     "Small" => GetProviderConfiguration<OllamaConfiguration>()?.SmallModel ?? "No small model",
-                    "Big" => GetProviderConfiguration<OllamaConfiguration>()?.BigModel ?? "No big model",
-                    "Thinking" => GetProviderConfiguration<OllamaConfiguration>()?.ThinkingModel ?? "No thinking model",
+                    "Big" => GetProviderConfiguration<OllamaConfiguration>()?.MediumModel ?? "No big model",
+                    "Thinking" => GetProviderConfiguration<OllamaConfiguration>()?.LargeModel ?? "No thinking model",
                     _ => "N/A"
                 },
                 Provider.OpenAi => modelType switch
                 {
                     "Small" => GetProviderConfiguration<OpenAiConfiguration>()?.SmallModel ?? "No small model",
-                    "Big" => GetProviderConfiguration<OpenAiConfiguration>()?.BigModel ?? "No big model",
-                    "Thinking" => GetProviderConfiguration<OpenAiConfiguration>()?.ThinkingModel ?? "No thinking model",
+                    "Big" => GetProviderConfiguration<OpenAiConfiguration>()?.MediumModel ?? "No big model",
+                    "Thinking" => GetProviderConfiguration<OpenAiConfiguration>()?.LargeModel ?? "No thinking model",
                     _ => "N/A"
                 },
                 Provider.OpenAiCompatible => modelType switch
                 {
                     "Small" => GetProviderConfiguration<OpenAiCompatibleConfiguration>()?.SmallModel ?? "No small model",
-                    "Big" => GetProviderConfiguration<OpenAiCompatibleConfiguration>()?.BigModel ?? "No big model",
-                    "Thinking" => GetProviderConfiguration<OpenAiCompatibleConfiguration>()?.ThinkingModel ?? "No thinking model",
+                    "Big" => GetProviderConfiguration<OpenAiCompatibleConfiguration>()?.MediumModel ?? "No big model",
+                    "Thinking" => GetProviderConfiguration<OpenAiCompatibleConfiguration>()?.LargeModel ?? "No thinking model",
                     _ => "N/A"
                 },
                 _ => "N/A" // Default case for unhandled providers
@@ -365,15 +453,14 @@ public partial class RibbonMain
         catch (Exception ex)
         {
             Debug.WriteLine($"Error retrieving model name for {provider}/{modelType}: {ex.Message}");
-            return null;
+            return string.Empty;
         }
     }
 
 
-    // --- NEW: Callback for Menu Item Selection ---
     public void HandleProviderMenuSelection(IRibbonControl control)
     {
-        // The 'tag' property of the menu button holds the index we stored.
+        // ... (parsing index and getting selectedProviderItem logic remains the same) ...
         if (int.TryParse(control.Tag, out int index))
         {
             Debug.WriteLine($"HandleProviderMenuSelection called. Tag (Index): {index}, Control ID: {control.Id}");
@@ -386,7 +473,7 @@ public partial class RibbonMain
                     _selectedProviderIndex = index;
                     Debug.WriteLine($"_selectedProviderIndex updated to: {_selectedProviderIndex} ({selectedProviderItem.Label})");
 
-                    // Update the DefaultProvider setting in config
+                    // ... (Update DefaultProvider setting logic remains the same) ...
                     try
                     {
                         if (Enum.TryParse<Provider>(selectedProviderItem.Label, true, out var selectedProviderEnum))
@@ -404,33 +491,13 @@ public partial class RibbonMain
                         Debug.WriteLine($"ERROR updating DefaultProvider setting: {ex.Message}");
                     }
 
-                    // Invalidate the splitButton to update its appearance
+                    // Invalidate controls that need updating
                     if (_ribbonUi != null)
                     {
-                        if (_ribbonUi != null)
-                        {
-                            Debug.WriteLine($"Invalidating {nameof(ModelGroupControlIds.ProviderSplitButton)}");
-                            _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ProviderSplitButton));
-                            Debug.WriteLine($"Invalidating {nameof(ModelGroupControlIds.ProviderDisplayButton)}");
-                            _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ProviderDisplayButton));
-
-                            Debug.WriteLine($"Invalidating {nameof(ModelGroupControlIds.ModelSplitButton)}");
-                            _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ModelSplitButton));
-                            Debug.WriteLine($"Invalidating {nameof(ModelGroupControlIds.ModelDisplayButton)}");
-                            _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ModelDisplayButton));
-
-                            Debug.WriteLine($"Invalidating {nameof(ModelGroupControlIds.ModelMenuItemSmall)}");
-                            _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ModelMenuItemSmall));
-                            Debug.WriteLine($"Invalidating {nameof(ModelGroupControlIds.ModelMenuItemBig)}");
-                            _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ModelMenuItemBig));
-                            Debug.WriteLine($"Invalidating {nameof(ModelGroupControlIds.ModelMenuItemThinking)}");
-                            _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ModelMenuItemThinking));
-
-                            Debug.WriteLine($"Invalidating {nameof(ModelGroupControlIds.BaseAddressEditBox)}");
-                            _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.BaseAddressEditBox));
-                            Debug.WriteLine($"Invalidating {nameof(ModelGroupControlIds.ApiKeyEditBox)}");
-                            _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ApiKeyEditBox));
-                        }
+                        _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ProviderSplitButton));
+                        _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ProviderDisplayButton));
+                        _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ModelComboBox));
+                        _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ProviderSettingsButton));
                     }
                     else
                     {
@@ -479,8 +546,6 @@ public partial class RibbonMain
         }
     }
 
-
-
     public string OnGetSelectedModel(IRibbonControl control)
     {
         var provider = GetCurrentProvider();
@@ -519,35 +584,125 @@ public partial class RibbonMain
         _ribbonUi?.Invalidate();
     }
 
-    public void OnBaseAddressChanged(IRibbonControl control, string text)
+    /// <summary>
+    /// Gets the label for the settings button in the provider dropdown menu.
+    /// </summary>
+    public string GetProviderSettingsButtonLabel(IRibbonControl control)
     {
-        var provider = GetCurrentProvider();
-        SetValue($"{provider}Configuration:{nameof(DeepSeekConfiguration.BaseAddress)}", text);
+        var providerName = "Unknown";
+        if (_providerItems.TryGetValue(_selectedProviderIndex, out var item))
+        {
+            providerName = item.Label;
+        }
+        return $"{providerName} Settings...";
     }
 
-    public void OnApiKeyChanged(IRibbonControl control, string text)
+    /// <summary>
+    /// Handles the click event for the settings button. Opens the Provider Settings Form.
+    /// </summary>
+    public void ShowProviderSettingsForm(IRibbonControl control)
     {
         var provider = GetCurrentProvider();
-        SetValue($"{provider}Configuration:{nameof(OpenAiConfiguration.ApiKey)}", text);
-    }
+        string currentApiKey = "";
+        string currentBaseAddress = "";
 
-    public bool OnGetBaseAddressEnabled(IRibbonControl control)
+        // Safely get current values
+        try
+        {
+            currentApiKey = GetValue($"{provider}Configuration:ApiKey");
+        }
+        catch (KeyNotFoundException) { /* Ignore, leave empty */ }
+        catch (Exception ex) { Debug.WriteLine($"Error getting ApiKey for {provider}: {ex.Message}"); }
+
+        try
+        {
+            // Determine if BaseAddress is relevant and get its value if so
+            switch (provider)
+            {
+                case Provider.DeepSeek:
+                    currentBaseAddress = GetProviderConfiguration<DeepSeekConfiguration>()?.BaseAddress?.ToString() ?? "";
+                    break;
+                case Provider.Mistral:
+                    currentBaseAddress = GetProviderConfiguration<MistralConfiguration>()?.BaseAddress?.ToString() ?? "";
+                    break;
+                case Provider.Anthropic:
+                    currentBaseAddress = GetProviderConfiguration<AnthropicConfiguration>()?.BaseAddress?.ToString() ?? "";
+                    break;
+                case Provider.OpenAi:
+                    currentBaseAddress = GetProviderConfiguration<OpenAiConfiguration>()?.BaseAddress?.ToString() ?? "";
+                    break;
+                case Provider.Ollama:
+                    currentBaseAddress = GetProviderConfiguration<OllamaConfiguration>()?.BaseAddress?.ToString() ?? "";
+                    break;
+                case Provider.OpenAiCompatible:
+                    currentBaseAddress = GetProviderConfiguration<OpenAiCompatibleConfiguration>()?.BaseAddress?.ToString() ?? "";
+                    break;
+                // Add other providers if they have a BaseAddress property, even if fixed
+                case Provider.Cellm: // Assuming Cellm doesn't have a user-settable BaseAddress
+                    currentBaseAddress = GetProviderConfiguration<CellmConfiguration>()?.BaseAddress?.ToString() ?? "";
+                    break;
+                default:
+                    break;
+            }
+        }
+        catch (Exception ex) { Debug.WriteLine($"Error getting BaseAddress for {provider}: {ex.Message}"); }
+
+        // Instantiate and show the form
+        using (var settingsForm = new ProviderSettingsForm(provider, currentApiKey, currentBaseAddress))
+        {
+            var result = settingsForm.ShowDialog(); // Show modally
+
+            if (result == DialogResult.OK)
+            {
+                // User clicked OK, save the potentially updated values
+                string newApiKey = settingsForm.ApiKey;
+                string newBaseAddress = settingsForm.BaseAddress;
+
+                try
+                {
+                    // Save ApiKey (always relevant unless provider has no key concept)
+                    if (IsApiKeyEditable(provider)) // Helper function to check if provider uses API Key
+                    {
+                        SetValue($"{provider}Configuration:ApiKey", newApiKey);
+                        Debug.WriteLine($"Saved ApiKey for {provider}");
+                    }
+
+                    // Save BaseAddress only if it's relevant AND editable for this provider
+                    if (IsBaseAddressEditable(provider))
+                    {
+                        // The key name might differ slightly, adjust if needed
+                        SetValue($"{provider}Configuration:BaseAddress", newBaseAddress);
+                        Debug.WriteLine($"Saved BaseAddress for {provider}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"ERROR saving settings for {provider}: {ex.Message}");
+                    // Consider showing an error message to the user
+                    MessageBox.Show($"Error saving settings: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            else
+            {
+                // User clicked Cancel or closed the form, do nothing
+                Debug.WriteLine($"Settings changes cancelled for {provider}");
+            }
+        }
+    }
+    static internal bool IsApiKeyEditable(Provider provider)
     {
-        var provider = GetCurrentProvider();
         return provider switch
         {
-            Provider.OpenAiCompatible or Provider.Ollama => true,
-            _ => false
+            Provider.Cellm => false,
+            _ => true
         };
     }
 
-    public bool OnGetApiKeyEnabled(IRibbonControl control)
+    static internal bool IsBaseAddressEditable(Provider provider)
     {
-        var provider = GetCurrentProvider();
         return provider switch
         {
-            Provider.OpenAiCompatible or Provider.Anthropic or Provider.DeepSeek
-                or Provider.Mistral or Provider.OpenAi => true,
+            Provider.Ollama or Provider.OpenAiCompatible => true,
             _ => false
         };
     }
