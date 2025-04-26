@@ -1,5 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Reflection;
 using Svg;
 
@@ -10,87 +12,158 @@ public static class ImageLoader
     private static readonly ConcurrentDictionary<string, Bitmap> _imageCache =
         new ConcurrentDictionary<string, Bitmap>();
 
+    /// <summary>
+    /// Loads an embedded PNG image, resizes it using high-quality settings, and caches the result.
+    /// </summary>
+    /// <param name="relativePath">The relative path to the resource within the assembly (e.g., "Images/Icons/my_icon.png").</param>
+    /// <param name="width">The desired width of the resized image.</param>
+    /// <param name="height">The desired height of the resized image.</param>
+    /// <returns>A resized Bitmap, or null if an error occurs.</returns>
     public static Bitmap? LoadEmbeddedPngResized(string relativePath, int width = 16, int height = 16)
     {
         if (string.IsNullOrWhiteSpace(relativePath))
         {
-            // Handle invalid input path early
             Debug.WriteLine("Error: Relative path cannot be null or empty.");
             return null;
         }
+        // Ensure consistent positive dimensions for resizing
+        if (width <= 0 || height <= 0)
+        {
+            Debug.WriteLine($"Error: Invalid dimensions requested ({width}x{height}). Using defaults (16x16).");
+            width = 16;
+            height = 16;
+        }
 
-        string cacheKey = relativePath.ToLowerInvariant();
 
-        // 1. Check cache (TryGetValue handles null 'out' parameter correctly via bool return)
+        string cacheKey = $"{relativePath.ToLowerInvariant()}_{width}x{height}"; // Include size in cache key
+
+        // 1. Check cache
         if (_imageCache.TryGetValue(cacheKey, out var cachedBitmap))
         {
-            // Important: Check if the cached item itself somehow became null (unlikely with TryAdd logic, but defensive)
+            // Return a clone from cache to prevent caller disposing the cached instance?
+            // For now, returning the cached instance directly as per original logic.
+            // Be mindful that multiple callers might share the same Bitmap instance.
             if (cachedBitmap != null)
             {
-                return cachedBitmap; // Return cached version
+                // Optional: Return a clone if you want callers to have independent instances
+                // return new Bitmap(cachedBitmap);
+                return cachedBitmap;
             }
             else
             {
-                // Remove the invalid null entry if it exists
-                _imageCache.TryRemove(cacheKey, out _);
+                _imageCache.TryRemove(cacheKey, out _); // Clean up bad entry
             }
         }
 
         try
         {
             Assembly assembly = Assembly.GetExecutingAssembly();
-
             string resourceName = BuildResourceName(assembly, relativePath);
 
-            // If BuildResourceName failed (e.g., due to assembly issues), it might return null or throw.
-            // Let's handle null return explicitly here. BuildResourceName should ideally throw.
             if (resourceName == null)
             {
-                // Error already logged in BuildResourceName or it threw an exception
-                return null; // Or handle exception if BuildResourceName throws
+                // Error logged in BuildResourceName or exception thrown
+                return null;
             }
 
-            // 2. Get resource stream (check for null return is already present)
+            // 2. Get resource stream
             using var stream = assembly.GetManifestResourceStream(resourceName);
 
             if (stream == null)
             {
                 Debug.WriteLine($"Error: Embedded resource not found or stream is null. Attempted Name: {resourceName}");
+                // Cache a specific marker or handle differently? For now, just return null.
                 return null;
             }
 
             // Load the original bitmap from the stream
             using var originalBitmap = new Bitmap(stream);
 
-            // Create the resized bitmap
-            var resizedBitmap = new Bitmap(originalBitmap, new Size(width, height));
+            // Create a new bitmap with the desired dimensions and original pixel format.
+            // Using original PixelFormat is crucial for transparency (alpha channel).
+            var resizedBitmap = new Bitmap(width, height, originalBitmap.PixelFormat);
 
-            // Add to cache. Use AddOrUpdate for slightly more robust caching logic.
-            // The factory function ensures the bitmap is created only if needed.
-            _imageCache.AddOrUpdate(cacheKey, resizedBitmap, (key, existing) =>
+            // Set the resolution of the new bitmap (optional but good practice)
+            resizedBitmap.SetResolution(originalBitmap.HorizontalResolution, originalBitmap.VerticalResolution);
+
+            // Get a Graphics object from the new bitmap
+            using (var graphics = Graphics.FromImage(resizedBitmap))
             {
-                existing?.Dispose(); // Dispose the old one if updating
-                return resizedBitmap;
+                // Set the quality settings for the resizing operation
+                graphics.CompositingMode = CompositingMode.SourceCopy; // Crucial for transparency
+                graphics.CompositingQuality = CompositingQuality.HighQuality;
+                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic; // Best quality interpolation
+                graphics.SmoothingMode = SmoothingMode.HighQuality;
+                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                // Use ImageAttributes to prevent potential border artifacts (optional but good)
+                using (var wrapMode = new ImageAttributes())
+                {
+                    wrapMode.SetWrapMode(WrapMode.TileFlipXY); // Prevents edge artifacts
+
+                    // Define source (entire original image) and destination rectangles
+                    var sourceRect = new Rectangle(0, 0, originalBitmap.Width, originalBitmap.Height);
+                    var destRect = new Rectangle(0, 0, width, height);
+
+                    // Draw the original image onto the new bitmap canvas using high-quality settings
+                    graphics.DrawImage(originalBitmap, destRect, sourceRect.X, sourceRect.Y, sourceRect.Width, sourceRect.Height, GraphicsUnit.Pixel, wrapMode);
+                }
+            } // Graphics object is disposed here
+
+            // --- END: High-Quality Resizing Logic ---
+
+
+            // Add the newly created resized bitmap to the cache.
+            // AddOrUpdate handles the case where another thread might have added it already.
+            var addedOrUpdatedBitmap = _imageCache.AddOrUpdate(cacheKey, resizedBitmap, (key, existing) =>
+            {
+                // This factory runs if the key exists.
+                // We created 'resizedBitmap' *before* the AddOrUpdate.
+                // If we won the race, 'resizedBitmap' is added.
+                // If another thread added one first, 'existing' will be that bitmap.
+                // We should dispose the 'resizedBitmap' we created if it wasn't added.
+                // However, AddOrUpdate returns the *actual* value in the dictionary.
+                // If it's not our instance, we need to dispose ours.
+
+                // If the existing one is different from the one we just created, dispose the one we created
+                // as it won't be used or cached. The 'existing' one is kept in the cache.
+                if (existing != resizedBitmap)
+                {
+                    resizedBitmap.Dispose(); // Dispose the bitmap we created but didn't cache
+                }
+                return existing; // Keep the existing one
             });
 
+            // If AddOrUpdate decided to keep an *existing* bitmap added by another thread
+            // just before ours, we need to return *that* one, not the one we created and potentially disposed.
+            // If AddOrUpdate *added* our bitmap, addedOrUpdatedBitmap will be == resizedBitmap.
+            if (addedOrUpdatedBitmap != resizedBitmap)
+            {
+                // This means another thread added an item between our TryGetValue and AddOrUpdate.
+                // The 'updateValueFactory' above already disposed our 'resizedBitmap'.
+                // We return the instance that is actually in the cache.
+                return addedOrUpdatedBitmap;
+            }
 
-            return resizedBitmap;
+
+            // Return the bitmap that was successfully created and cached (could be ours or one from another thread)
+            return resizedBitmap; // Return the bitmap instance that IS in the cache
         }
-        catch (ArgumentNullException argNullEx) // Catch specific exception from BuildResourceName
+        catch (ArgumentNullException argNullEx)
         {
             Debug.WriteLine($"Error preparing resource name for '{relativePath}': {argNullEx.Message}");
             return null;
         }
-        catch (InvalidOperationException invOpEx) // Catch specific exception from BuildResourceName
+        catch (InvalidOperationException invOpEx)
         {
             Debug.WriteLine($"Error accessing assembly metadata for '{relativePath}': {invOpEx.Message}");
             return null;
         }
-        catch (Exception ex)
+        catch (Exception ex) // Catch broader exceptions during Bitmap/Graphics operations too
         {
-            // Log general exceptions
-            Debug.WriteLine($"Error loading embedded image '{relativePath}': {ex.GetType().Name} - {ex.Message}");
+            Debug.WriteLine($"Error loading/resizing embedded image '{relativePath}': {ex.GetType().Name} - {ex.Message}");
             // Consider logging stack trace ex.ToString() for detailed debugging
+            _imageCache.TryRemove(cacheKey, out _); // Attempt to remove potentially corrupted cache entry on error
             return null;
         }
     }

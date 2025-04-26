@@ -10,6 +10,9 @@ using System.Diagnostics;
 using System.Text;
 using ExcelDna.Integration.CustomUI;
 using Cellm.AddIn.UserInterface.Forms;
+using Cellm.Users;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Cellm.AddIn.UserInterface.Ribbon;
 
@@ -44,23 +47,20 @@ public partial class RibbonMain
         public string MediumModel { get; set; } = string.Empty;
 
         public string LargeModel { get; set; } = string.Empty;
+
+        public Entitlement Entitlement { get; set; } = Entitlement.EnableCellmProvider;
     }
 
-    private const string NoPresetsPlaceholder = "-- (No presets configured) --";
+    private const string NoPresetsPlaceholder = "(No presets configured)";
 
-    // TODO: Just finished putting in these data. Now:
-    //  - Resolve errors (add property Models = [SmallModel, MediumModel, LargeModel] to all configurations
-    //  - Use this data in NewModelGroup() (copy confgurations)
-    //  - Resolve error of gallery image not updating when changing provider
-    //  - Can we get _two_ rows in the ribbon instead of three???
     private readonly Dictionary<int, ProviderItem> _providerItems = new Dictionary<int, ProviderItem>
     {
-        [0] = new ProviderItem { Id = "providerAnthropic", Image = $"{ResourcesBasePath}/anthropic.png", Label = nameof(Provider.Anthropic) },
-        [1] = new ProviderItem { Id = "providerDeepSeek", Image = $"{ResourcesBasePath}/deepseek.png", Label = nameof(Provider.DeepSeek) },
-        [2] = new ProviderItem { Id = "providerMistral", Image = $"{ResourcesBasePath}/mistral.png", Label = nameof(Provider.Mistral) },
-        [3] = new ProviderItem { Id = "providerOllama", Image = $"{ResourcesBasePath}/ollama.png", Label = nameof(Provider.Ollama) },
-        [4] = new ProviderItem { Id = "providerOpenAi", Image = $"{ResourcesBasePath}/openai.png", Label = nameof(Provider.OpenAi) },
-        [5] = new ProviderItem { Id = "providerOpenAiCompatible", Image = $"{ResourcesBasePath}/openai.png", Label = nameof(Provider.OpenAiCompatible) }
+        [0] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.Anthropic)}", Image = $"{ResourcesBasePath}/anthropic.png", Label = nameof(Provider.Anthropic), Entitlement = Entitlement.EnableAnthropicProvider },
+        [1] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.DeepSeek)}", Image = $"{ResourcesBasePath}/deepseek.png", Label = nameof(Provider.DeepSeek), Entitlement = Entitlement.EnableDeepSeekProvider },
+        [2] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.Mistral)}", Image = $"{ResourcesBasePath}/mistral.png", Label = nameof(Provider.Mistral), Entitlement = Entitlement.EnableMistralProvider },
+        [3] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.Ollama)}", Image = $"{ResourcesBasePath}/ollama.png", Label = nameof(Provider.Ollama), Entitlement = Entitlement.EnableOllamaProvider },
+        [4] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.OpenAi)}", Image = $"{ResourcesBasePath}/openai.png", Label = nameof(Provider.OpenAi), Entitlement = Entitlement.EnableOpenAiProvider },
+        [5] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.OpenAiCompatible)}", Image = $"{ResourcesBasePath}/openai.png", Label = nameof(Provider.OpenAiCompatible) }
     };
 
     internal int _selectedProviderIndex = 0; // Default to the first item (Red)
@@ -101,13 +101,14 @@ public partial class RibbonMain
         {
             int index = kvp.Key;
             ProviderItem item = kvp.Value;
-            string menuItemId = $"providerMenuItem_{index}"; // Dynamic ID
+            string menuItemId = item.Id; // Dynamic ID
             providerMenuItemsXml.AppendLine(
                 $@"<button id=""{menuItemId}""
                      label=""{System.Security.SecurityElement.Escape(item.Label)}""
                      getImage=""{nameof(GetProviderMenuItemImage)}""
                      tag=""{index}""
-                     onAction=""{nameof(HandleProviderMenuSelection)}"" />");
+                     onAction=""{nameof(HandleProviderMenuSelection)}"" 
+                     getEnabled=""{nameof(IsProviderEnabled)}"" />");
         }
 
         // Add Separator and Settings Button
@@ -121,9 +122,9 @@ public partial class RibbonMain
             <group id="{nameof(ModelGroupControlIds.ModelProviderGroup)}" label="Model">
                 <box id="{nameof(ModelGroupControlIds.VerticalContainer)}" boxStyle="vertical">
                     <box id="{nameof(ModelGroupControlIds.ProviderModelBox)}" boxStyle="horizontal">
-                        <splitButton id="{nameof(ModelGroupControlIds.ProviderSplitButton)}" size="normal" showLabel="false">
+                        <splitButton id="{nameof(ModelGroupControlIds.ProviderSplitButton)}" size="large" showLabel="false">
                             <button id="{nameof(ModelGroupControlIds.ProviderDisplayButton)}"
-                                    getLabel="{nameof(GetSelectedProviderLabel)}"
+                                    label="{nameof(Provider)}"
                                     getImage="{nameof(GetSelectedProviderImage)}"
                                     showImage="true"
                                     showLabel="true"
@@ -149,6 +150,35 @@ public partial class RibbonMain
                     onAction="{nameof(OnCacheToggled)}" getPressed="{nameof(OnGetCachePressed)}" />
             </group>
             """;
+    }
+
+    public bool IsProviderEnabled(IRibbonControl control)
+    {
+        var accountConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<AccountConfiguration>>();
+
+        if (!accountConfiguration.CurrentValue.IsEnabled)
+        {
+            return true;
+        }
+
+        var account = CellmAddIn.Services.GetRequiredService<Account>();
+
+        // The 'tag' property of the menu button holds the index we stored.
+        if (int.TryParse(control.Tag, out int index))
+        {
+            Debug.WriteLine($"GetProviderMenuItemImage called for index: {index} (from tag)");
+            if (_providerItems.TryGetValue(index, out var item) && !string.IsNullOrEmpty(item.Image))
+            {
+                // Use smaller size for menu items (e.g., 16x16)
+                return account.HasEntitlement(item.Entitlement); // Adjust size as needed
+            }
+            Debug.WriteLine($"WARNING: Could not get image for menu item index {index}.");
+        }
+        else
+        {
+            Debug.WriteLine($"WARNING: Could not parse index from tag '{control.Tag}' for menu item '{control.Id}'.");
+        }
+        return false; // Or a default placeholder image
     }
 
     /// <summary>
@@ -193,7 +223,7 @@ public partial class RibbonMain
         if (_providerItems.TryGetValue(_selectedProviderIndex, out var item) && !string.IsNullOrEmpty(item.Image))
         {
             // Use appropriate size for the main split button display (e.g., 32x32 or 24x24)
-            return ImageLoader.LoadEmbeddedPngResized(item.Image, 64, 64); // Adjust size as needed
+            return ImageLoader.LoadEmbeddedPngResized(item.Image, 128, 128); // Adjust size as needed
         }
         Debug.WriteLine($"WARNING: Could not get image for index {_selectedProviderIndex}.");
         return null;

@@ -66,6 +66,11 @@ internal class Account(
         return entitlements?.Entitlements.Contains(entitlement) ?? false;
     }
 
+    internal bool HasEntitlement(Entitlement entitlement)
+    {
+        return Task.Run(async () => await HasEntitlementAsync(entitlement)).GetAwaiter().GetResult();
+    }
+
     internal async Task RequireEntitlementAsync(Entitlement entitlement)
     {
         var hasEntitlement = await HasEntitlementAsync(entitlement);

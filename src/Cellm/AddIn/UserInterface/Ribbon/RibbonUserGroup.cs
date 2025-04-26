@@ -103,6 +103,7 @@ public partial class RibbonMain
 
                 // Invalidate UI to reflect logged-in state
                 InvalidateUserControls();
+                InvalidateEntitledControls();
                 MessageBox.Show("Login successful!", "Cellm", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
@@ -119,11 +120,11 @@ public partial class RibbonMain
                 _cacheExpiry = DateTime.UtcNow.Add(_cacheDuration);
 
                 InvalidateUserControls();
+                InvalidateEntitledControls();
             }
         }
         // else: User cancelled, do nothing.
     }
-
 
     public void OnLogoutClicked(IRibbonControl control)
     {
@@ -134,6 +135,7 @@ public partial class RibbonMain
         _cacheExpiry = DateTime.UtcNow.Add(_cacheDuration);
 
         InvalidateUserControls();
+        InvalidateEntitledControls();
     }
 
     // Use cached state for enabling/disabling menu items
@@ -299,6 +301,22 @@ public partial class RibbonMain
         _ribbonUi.InvalidateControl(nameof(UserGroupControlIds.LogoutButton));
         _ribbonUi.InvalidateControl(nameof(UserGroupControlIds.AccountActionButton));
     }
+
+    private void InvalidateEntitledControls()
+    {
+        if (_ribbonUi == null)
+        {
+            return;
+        };
+
+        _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ProviderSelectionMenu));
+        
+        foreach (var item in _providerItems)
+        {
+            _ribbonUi.InvalidateControl(item.Value.Id);
+        }
+    }
+
 
     public string GetAccountActionLabel(IRibbonControl control)
     {
