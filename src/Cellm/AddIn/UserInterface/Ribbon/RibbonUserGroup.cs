@@ -1,12 +1,12 @@
 ﻿using System.Diagnostics;
-using System.Net.Http.Headers;
 using System.Net;
-using Cellm.Users;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using ExcelDna.Integration.CustomUI;
-using Microsoft.Extensions.Logging;
+using System.Net.Http.Headers;
 using Cellm.AddIn.UserInterface.Forms;
+using Cellm.Users;
+using ExcelDna.Integration.CustomUI;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Cellm.AddIn.UserInterface.Ribbon;
 
@@ -45,7 +45,7 @@ public partial class RibbonMain
         <group id="{nameof(UserGroupControlIds.UserGroup)}" label="Account">
             <splitButton id="{nameof(UserGroupControlIds.UserAccountSplitButton)}" size="large">
                 <button id="{nameof(UserGroupControlIds.UserAccountButton)}"
-                        label="Account"
+                        label="User"
                         getImage="{nameof(GetUserAccountImage)}"
                         getScreentip="{nameof(GetUserScreentip)}" />
                 <menu id="{nameof(UserGroupControlIds.UserAccountMenu)}">
@@ -71,7 +71,6 @@ public partial class RibbonMain
         """;
     }
 
-    // *** NEW Login Click Handler ***
     public void OnLoginClicked(IRibbonControl control)
     {
         using var loginForm = new LoginForm();
@@ -114,7 +113,7 @@ public partial class RibbonMain
                 // Show error message
                 MessageBox.Show("Login failed. Please check your username and password.", "Login Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
-                
+
                 // Explicitly set login state to false in case previous state was true
                 _cachedLoginState = false; // Ensure state reflects failure
                 _cacheExpiry = DateTime.UtcNow.Add(_cacheDuration);
@@ -192,8 +191,9 @@ public partial class RibbonMain
                 var username = GetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.Username)}");
                 return $"Account: {username}\nStatus: Logged In";
             }
-            catch { 
-                return "Account: Unknown\nStatus: Logged In"; 
+            catch
+            {
+                return "Account: Unknown\nStatus: Logged In";
             }
         }
         else
@@ -290,7 +290,7 @@ public partial class RibbonMain
     // Helper to invalidate user-related controls
     private void InvalidateUserControls()
     {
-        if (_ribbonUi == null) 
+        if (_ribbonUi == null)
         {
             return;
         };
@@ -310,7 +310,7 @@ public partial class RibbonMain
         };
 
         _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ProviderSelectionMenu));
-        
+
         foreach (var item in _providerItems)
         {
             _ribbonUi.InvalidateControl(item.Value.Id);

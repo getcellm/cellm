@@ -9,7 +9,7 @@ public partial class RibbonMain
 {
     private enum ToolsGroupControlIds
     {
-        ToolsGroup, 
+        ToolsGroup,
         FunctionsSplitButton,
         FunctionsButton,
         FunctionsMenu,

@@ -1,16 +1,16 @@
-﻿using Cellm.Models.Providers.Anthropic;
+﻿using System.Diagnostics;
+using System.Text;
+using Cellm.AddIn.UserInterface.Forms;
+using Cellm.Models.Providers;
+using Cellm.Models.Providers.Anthropic;
 using Cellm.Models.Providers.Cellm;
 using Cellm.Models.Providers.DeepSeek;
 using Cellm.Models.Providers.Mistral;
 using Cellm.Models.Providers.Ollama;
 using Cellm.Models.Providers.OpenAi;
 using Cellm.Models.Providers.OpenAiCompatible;
-using Cellm.Models.Providers;
-using System.Diagnostics;
-using System.Text;
-using ExcelDna.Integration.CustomUI;
-using Cellm.AddIn.UserInterface.Forms;
 using Cellm.Users;
+using ExcelDna.Integration.CustomUI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -746,7 +746,7 @@ public partial class RibbonMain
             _ => false
         };
     }
-    
+
     public string GetTemperatureText(IRibbonControl control)
     {
         try
@@ -766,7 +766,7 @@ public partial class RibbonMain
             return "0.7"; // Fallback
         }
     }
-    
+
     public void OnTemperatureChange(IRibbonControl control, string text)
     {
         if (string.IsNullOrWhiteSpace(text))
@@ -775,19 +775,19 @@ public partial class RibbonMain
             _ribbonUi?.InvalidateControl(control.Id);
             return;
         }
-        
+
         // Validate that the input is a valid temperature (between 0 and 1)
         if (double.TryParse(text, out double temperature))
         {
             if (temperature < 0 || temperature > 1)
             {
                 Debug.WriteLine($"Warning: Temperature must be between 0 and 1. Got {temperature}.");
-                MessageBox.Show("Temperature must be between 0 and 1.", "Invalid Temperature", 
+                MessageBox.Show("Temperature must be between 0 and 1.", "Invalid Temperature",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 _ribbonUi?.InvalidateControl(control.Id);
                 return;
             }
-            
+
             try
             {
                 SetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultTemperature)}", text);
@@ -801,7 +801,7 @@ public partial class RibbonMain
         else
         {
             Debug.WriteLine($"Warning: Could not parse '{text}' as a number.");
-            MessageBox.Show("Please enter a valid number between 0 and 1.", "Invalid Temperature", 
+            MessageBox.Show("Please enter a valid number between 0 and 1.", "Invalid Temperature",
                 MessageBoxButtons.OK, MessageBoxIcon.Warning);
             _ribbonUi?.InvalidateControl(control.Id);
         }

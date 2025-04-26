@@ -1,7 +1,7 @@
-﻿using Cellm.AddIn.UserInterface.Ribbon;
-using Cellm.Models.Providers;
-using System;
+﻿using System;
 using System.Windows.Forms;
+using Cellm.AddIn.UserInterface.Ribbon;
+using Cellm.Models.Providers;
 
 namespace Cellm.AddIn.UserInterface.Forms;
 
@@ -20,7 +20,7 @@ public partial class ProviderSettingsForm : Form
 
         _provider = provider;
         _isApiKeyEditable = RibbonMain.IsApiKeyEditable(provider);
-        _isBaseAddressEditable = RibbonMain.IsBaseAddressEditable(provider); 
+        _isBaseAddressEditable = RibbonMain.IsBaseAddressEditable(provider);
 
 
         this.Text = $"{provider} Settings";
@@ -43,9 +43,9 @@ public partial class ProviderSettingsForm : Form
         {
             if (!Uri.TryCreate(baseAddressTextBox.Text, UriKind.Absolute, out _))
             {
-                 MessageBox.Show("Please enter a valid Base Address (e.g., http://localhost:11434).", "Invalid Address", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                 this.DialogResult = DialogResult.None; // Prevent closing
-                 return;
+                MessageBox.Show("Please enter a valid Base Address (e.g., http://localhost:11434).", "Invalid Address", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                this.DialogResult = DialogResult.None; // Prevent closing
+                return;
             }
         }
 
