@@ -29,6 +29,7 @@ public partial class RibbonMain
         ProviderSelectionMenu,
 
         ModelComboBox,
+        TemperatureEditBox,
         CacheToggleButton,
 
         ProviderSettingsButton
@@ -120,20 +121,20 @@ public partial class RibbonMain
 
         return $"""
             <group id="{nameof(ModelGroupControlIds.ModelProviderGroup)}" label="Model">
+                <splitButton id="{nameof(ModelGroupControlIds.ProviderSplitButton)}" size="large" showLabel="false">
+                    <button id="{nameof(ModelGroupControlIds.ProviderDisplayButton)}"
+                            label="{nameof(Provider)}"
+                            getImage="{nameof(GetSelectedProviderImage)}"
+                            showImage="true"
+                            showLabel="true"
+                            onAction="{nameof(ShowProviderSettingsForm)}"
+                            />
+                    <menu id="{nameof(ModelGroupControlIds.ProviderSelectionMenu)}" itemSize="normal">
+                        {providerMenuItemsXml}
+                    </menu>
+                </splitButton>
                 <box id="{nameof(ModelGroupControlIds.VerticalContainer)}" boxStyle="vertical">
                     <box id="{nameof(ModelGroupControlIds.ProviderModelBox)}" boxStyle="horizontal">
-                        <splitButton id="{nameof(ModelGroupControlIds.ProviderSplitButton)}" size="large" showLabel="false">
-                            <button id="{nameof(ModelGroupControlIds.ProviderDisplayButton)}"
-                                    label="{nameof(Provider)}"
-                                    getImage="{nameof(GetSelectedProviderImage)}"
-                                    showImage="true"
-                                    showLabel="true"
-                                    onAction="{nameof(ShowProviderSettingsForm)}"
-                                    />
-                            <menu id="{nameof(ModelGroupControlIds.ProviderSelectionMenu)}" itemSize="normal">
-                                {providerMenuItemsXml}
-                            </menu>
-                        </splitButton>
                         <comboBox id="{nameof(ModelGroupControlIds.ModelComboBox)}"
                                   label="Model"
                                   showLabel="false"
@@ -143,6 +144,15 @@ public partial class RibbonMain
                                   getItemCount="{nameof(GetModelComboBoxItemCount)}"
                                   getItemLabel="{nameof(GetModelComboBoxItemLabel)}"
                                   />
+                        <editBox id="{nameof(ModelGroupControlIds.TemperatureEditBox)}"
+                                 label="Temp"
+                                 showLabel="false"
+                                 screentip="Temperature (0-1). Lower values make responses more deterministic."
+                                 sizeString="0.0"
+                                 maxLength="4"
+                                 getText="{nameof(GetTemperatureText)}"
+                                 onChange="{nameof(OnTemperatureChange)}"
+                                 />
                     </box>
                 </box>
                 <toggleButton id="{nameof(ModelGroupControlIds.CacheToggleButton)}" label="Cache" size="large" imageMso="SourceControlRefreshStatus"
@@ -735,5 +745,65 @@ public partial class RibbonMain
             Provider.Ollama or Provider.OpenAiCompatible => true,
             _ => false
         };
+    }
+    
+    public string GetTemperatureText(IRibbonControl control)
+    {
+        try
+        {
+            var temperature = GetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultTemperature)}");
+            return temperature;
+        }
+        catch (KeyNotFoundException)
+        {
+            // If not found, set a default value (0.7 is a common default temperature)
+            SetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultTemperature)}", "0.7");
+            return "0.7";
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Error reading temperature: {ex.Message}");
+            return "0.7"; // Fallback
+        }
+    }
+    
+    public void OnTemperatureChange(IRibbonControl control, string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            Debug.WriteLine("Warning: Temperature cannot be empty. Change ignored.");
+            _ribbonUi?.InvalidateControl(control.Id);
+            return;
+        }
+        
+        // Validate that the input is a valid temperature (between 0 and 1)
+        if (double.TryParse(text, out double temperature))
+        {
+            if (temperature < 0 || temperature > 1)
+            {
+                Debug.WriteLine($"Warning: Temperature must be between 0 and 1. Got {temperature}.");
+                MessageBox.Show("Temperature must be between 0 and 1.", "Invalid Temperature", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                _ribbonUi?.InvalidateControl(control.Id);
+                return;
+            }
+            
+            try
+            {
+                SetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultTemperature)}", text);
+                Debug.WriteLine($"DefaultTemperature set to '{text}'.");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"ERROR updating DefaultTemperature setting: {ex.Message}");
+            }
+        }
+        else
+        {
+            Debug.WriteLine($"Warning: Could not parse '{text}' as a number.");
+            MessageBox.Show("Please enter a valid number between 0 and 1.", "Invalid Temperature", 
+                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            _ribbonUi?.InvalidateControl(control.Id);
+        }
     }
 }
