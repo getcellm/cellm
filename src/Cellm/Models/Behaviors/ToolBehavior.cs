@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using Cellm.Models.Prompts;
 using Cellm.Models.Providers;
 using Cellm.Tools.ModelContextProtocol;
@@ -22,7 +23,7 @@ internal class ToolBehavior<TRequest, TResponse>(
     where TRequest : IPrompt
 {
     // TODO: Use HybridCache
-    private Dictionary<string, IList<McpClientTool>> _poorMansCache = [];
+    private ConcurrentDictionary<string, IList<McpClientTool>> _poorMansCache = [];
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
