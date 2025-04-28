@@ -237,7 +237,7 @@ public partial class RibbonMain
         }
 
         _logger.LogWarning("Could not get image for index {index}.", _selectedProviderIndex);
-        
+
         return null;
     }
 
@@ -627,12 +627,13 @@ public partial class RibbonMain
         {
             currentApiKey = GetValue($"{provider}Configuration:ApiKey");
         }
-        catch (KeyNotFoundException) { 
+        catch (KeyNotFoundException)
+        {
             // Ignore, leave empty 
         }
-        catch (Exception ex) 
-        { 
-            _logger.LogError("Error getting ApiKey for {provider}: {message}", provider, ex.Message); 
+        catch (Exception ex)
+        {
+            _logger.LogError("Error getting ApiKey for {provider}: {message}", provider, ex.Message);
         }
 
         try
@@ -666,9 +667,9 @@ public partial class RibbonMain
                     break;
             }
         }
-        catch (Exception ex) 
-        { 
-            _logger.LogError("Error getting BaseAddress for {provider}: {message}", provider, ex.Message); 
+        catch (Exception ex)
+        {
+            _logger.LogError("Error getting BaseAddress for {provider}: {message}", provider, ex.Message);
         }
 
         // Instantiate and show the form
@@ -729,12 +730,12 @@ public partial class RibbonMain
         try
         {
             var temperature = GetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultTemperature)}");
-            
+
             if (double.TryParse(temperature, out var tempVal))
             {
                 return tempVal.ToString("0.0");
             }
-            
+
             return "0.0";
         }
         catch (KeyNotFoundException)
@@ -788,13 +789,13 @@ public partial class RibbonMain
             _ribbonUi?.InvalidateControl(control.Id);
         }
     }
-    
+
     public int GetTemperatureItemCount(IRibbonControl control)
     {
         // Return the number of temperature options
         return TemperatureOptions.Length;
     }
-    
+
     public string GetTemperatureItemLabel(IRibbonControl control, int index)
     {
         // Return the temperature option at the specified index
@@ -802,7 +803,7 @@ public partial class RibbonMain
         {
             return TemperatureOptions[index];
         }
-        
+
         _logger.LogWarning("Invalid index {index} requested for GetTemperatureItemLabel", index);
         return string.Empty;
     }

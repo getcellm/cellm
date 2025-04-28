@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using Cellm.Models.Providers;
 using ExcelDna.Integration.CustomUI;
 using Microsoft.Extensions.DependencyInjection;
@@ -55,7 +54,7 @@ public partial class RibbonMain : ExcelRibbon
         catch (Exception ex)
         {
             _logger.LogError($"Error in EnsureDefaultProvider: {ex.Message}. Falling back to index 0.");
-            
+
             // General fallback if parsing or other issues occur
             SetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultProvider)}", _providerItems[0].Label);
             return 0;
