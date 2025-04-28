@@ -29,7 +29,6 @@ public partial class RibbonMain : ExcelRibbon
         _logger = loggerFactory.CreateLogger<RibbonMain>();
     }
 
-    // Modified EnsureDefaultProvider to return the index
     private int EnsureDefaultProvider()
     {
         try
@@ -41,12 +40,13 @@ public partial class RibbonMain : ExcelRibbon
             {
                 return item.Key;
             }
+
             // If provider exists in config but not in our _providerItems, fallback
             throw new KeyNotFoundException("Provider found in config but not in UI list.");
         }
         catch (KeyNotFoundException)
         {
-            // Set default if missing (Ollama)
+            // Set default if missing 
             var defaultProviderName = nameof(Provider.Ollama);
             SetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultProvider)}", defaultProviderName);
             var item = _providerItems.FirstOrDefault(kvp => kvp.Value.Label.Equals(defaultProviderName, StringComparison.OrdinalIgnoreCase));
@@ -54,7 +54,8 @@ public partial class RibbonMain : ExcelRibbon
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Error in EnsureDefaultProvider: {ex.Message}. Falling back to index 0.");
+            _logger.LogError($"Error in EnsureDefaultProvider: {ex.Message}. Falling back to index 0.");
+            
             // General fallback if parsing or other issues occur
             SetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultProvider)}", _providerItems[0].Label);
             return 0;
