@@ -29,7 +29,7 @@ public partial class RibbonMain
         ProviderSelectionMenu,
 
         ModelComboBox,
-        TemperatureEditBox,
+        TemperatureComboBox,
         CacheToggleButton,
 
         ProviderSettingsButton
@@ -145,17 +145,19 @@ public partial class RibbonMain
                                   getItemCount="{nameof(GetModelComboBoxItemCount)}"
                                   getItemLabel="{nameof(GetModelComboBoxItemLabel)}"
                                   />
-                        <editBox id="{nameof(ModelGroupControlIds.TemperatureEditBox)}"
+                        <comboBox id="{nameof(ModelGroupControlIds.TemperatureComboBox)}"
                                  label="Temp"
                                  showLabel="false"
-                                 screentip="Temperature (0-1). Lower values make responses more deterministic."
                                  sizeString="0.0"
-                                 maxLength="4"
+                                 screentip="Temperature (0.0-1.0). Lower values make responses more deterministic. Automatically scaled for providers with other ranges."
                                  getText="{nameof(GetTemperatureText)}"
                                  onChange="{nameof(OnTemperatureChange)}"
+                                 getItemCount="{nameof(GetTemperatureItemCount)}"
+                                 getItemLabel="{nameof(GetTemperatureItemLabel)}"
                                  />
                     </box>
                 </box>
+                <separator id="cacheSeparator" />
                 <toggleButton id="{nameof(ModelGroupControlIds.CacheToggleButton)}" label="Cache" size="large" imageMso="SourceControlRefreshStatus"
                     screentip="Enable/disable local caching of model responses. Disabling cache will clear all cached responses."
                     onAction="{nameof(OnCacheToggled)}" getPressed="{nameof(OnGetCachePressed)}" />
@@ -719,18 +721,27 @@ public partial class RibbonMain
         };
     }
 
+    // Array of temperature suggestions
+    private static readonly string[] TemperatureOptions = { "0.0", "0.3", "0.7", "1.0" };
+
     public string GetTemperatureText(IRibbonControl control)
     {
         try
         {
             var temperature = GetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultTemperature)}");
-            return temperature;
+            
+            if (double.TryParse(temperature, out var tempVal))
+            {
+                return tempVal.ToString("0.0");
+            }
+            
+            return "0.0";
         }
         catch (KeyNotFoundException)
         {
-            // If not found, set a default value (0.7 is a common default temperature)
-            SetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultTemperature)}", "0.7");
-            return "0.7";
+            // If not found, set a default value
+            SetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultTemperature)}", "0");
+            return "0.0";
         }
         catch (Exception ex)
         {
@@ -761,7 +772,9 @@ public partial class RibbonMain
 
             try
             {
-                SetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultTemperature)}", text);
+                // Format to ensure consistent display
+                string formattedTemperature = temperature.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture);
+                SetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultTemperature)}", formattedTemperature);
             }
             catch (Exception ex)
             {
@@ -770,9 +783,27 @@ public partial class RibbonMain
         }
         else
         {
-            MessageBox.Show("Please enter a valid number between 0 and 1.", "Invalid Temperature",
+            MessageBox.Show("Temperature must a number between 0 and 1.", "Invalid Temperature",
                 MessageBoxButtons.OK, MessageBoxIcon.Warning);
             _ribbonUi?.InvalidateControl(control.Id);
         }
+    }
+    
+    public int GetTemperatureItemCount(IRibbonControl control)
+    {
+        // Return the number of temperature options
+        return TemperatureOptions.Length;
+    }
+    
+    public string GetTemperatureItemLabel(IRibbonControl control, int index)
+    {
+        // Return the temperature option at the specified index
+        if (index >= 0 && index < TemperatureOptions.Length)
+        {
+            return TemperatureOptions[index];
+        }
+        
+        _logger.LogWarning("Invalid index {index} requested for GetTemperatureItemLabel", index);
+        return string.Empty;
     }
 }
