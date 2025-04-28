@@ -1,15 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
-
-// using System.Collections.Generic; // Not needed for this simple form
-// using System.ComponentModel; // Not needed
-// using System.Data; // Not needed
-// using System.Drawing; // Might be needed if you handle graphics, but not here
-// using System.Linq; // Not needed
 using System.Windows.Forms;
 
 
-namespace Cellm.AddIn;
+namespace Cellm.AddIn.UserInterface.Forms;
 
 public partial class LoginForm : Form
 {
@@ -62,6 +56,31 @@ public partial class LoginForm : Form
             // Log the error or show a message to the user
             Debug.WriteLine($"Error opening password reset link: {ex.Message}");
             MessageBox.Show($"Could not open the password reset link.\nPlease visit:\n{passwordResetUrl}\n\nError: {ex.Message}",
+                            "Error",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Error);
+        }
+    }
+
+    private void CreateAccount_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+    {
+        string signUpUrl = "https://dev.getcellm.com/signup";
+
+        try
+        {
+            // Use Process.Start to open the URL in the default browser
+            ProcessStartInfo psi = new ProcessStartInfo
+            {
+                FileName = signUpUrl,
+                UseShellExecute = true // Important for opening URLs correctly
+            };
+            Process.Start(psi);
+        }
+        catch (Exception ex)
+        {
+            // Log the error or show a message to the user
+            Debug.WriteLine($"Error opening create account link: {ex.Message}");
+            MessageBox.Show($"Could not open the create account link.\nPlease visit:\n{signUpUrl}\n\nError: {ex.Message}",
                             "Error",
                             MessageBoxButtons.OK,
                             MessageBoxIcon.Error);

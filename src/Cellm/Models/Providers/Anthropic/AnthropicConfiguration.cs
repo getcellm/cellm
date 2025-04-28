@@ -2,15 +2,15 @@
 
 internal class AnthropicConfiguration : IProviderConfiguration
 {
-    public string DefaultModel { get; init; }
+    public Uri BaseAddress => new("http://api.anthropic.com/v1");
 
-    public string ApiKey { get; init; }
+    public string DefaultModel { get; init; } = string.Empty;
 
-    public List<string> Models { get; init; } = [];
+    public string ApiKey { get; init; } = string.Empty;
 
-    public AnthropicConfiguration()
-    {
-        DefaultModel = default!;
-        ApiKey = default!;
-    }
+    public string SmallModel { get; init; } = string.Empty;
+
+    public string MediumModel { get; init; } = string.Empty;
+
+    public string LargeModel { get; init; } = string.Empty;
 }

@@ -1,6 +1,6 @@
 ﻿namespace Cellm.Models.Providers;
 
-public class ProviderConfiguration : IProviderConfiguration
+public class ProviderConfiguration
 {
     public string DefaultProvider { get; init; } = string.Empty;
 

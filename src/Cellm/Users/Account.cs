@@ -66,6 +66,11 @@ internal class Account(
         return entitlements?.Entitlements.Contains(entitlement) ?? false;
     }
 
+    internal bool HasEntitlement(Entitlement entitlement)
+    {
+        return Task.Run(async () => await HasEntitlementAsync(entitlement)).GetAwaiter().GetResult();
+    }
+
     internal async Task RequireEntitlementAsync(Entitlement entitlement)
     {
         var hasEntitlement = await HasEntitlementAsync(entitlement);
@@ -81,9 +86,12 @@ internal class Account(
         Task.Run(async () => await RequireEntitlementAsync(entitlement)).GetAwaiter().GetResult();
     }
 
-    public string GetBasicAuthCredentials()
+    public string GetBasicAuthCredentials(string? username = null, string? password = null)
     {
-        var credentials = $"{accountConfiguration.CurrentValue.Username}:{accountConfiguration.CurrentValue.Password}";
+        username ??= accountConfiguration.CurrentValue.Username;
+        password ??= accountConfiguration.CurrentValue.Password;
+
+        var credentials = $"{username}:{password}";
         var credentialsBytes = Encoding.UTF8.GetBytes(credentials);
         var credentialsAsBase64 = Convert.ToBase64String(credentialsBytes);
 
