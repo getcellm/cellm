@@ -293,7 +293,7 @@ public partial class RibbonMain
         if (_ribbonUi == null)
         {
             return;
-        };
+        }
 
         _ribbonUi.InvalidateControl(nameof(UserGroupControlIds.UserAccountSplitButton));
         _ribbonUi.InvalidateControl(nameof(UserGroupControlIds.UserAccountButton));
@@ -307,7 +307,7 @@ public partial class RibbonMain
         if (_ribbonUi == null)
         {
             return;
-        };
+        }
 
         _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ProviderSelectionMenu));
 
