@@ -39,11 +39,11 @@
       },
       "Microsoft.Extensions.AI": {
         "type": "Direct",
-        "requested": "[9.4.0-preview.1.25207.5, )",
-        "resolved": "9.4.0-preview.1.25207.5",
-        "contentHash": "O6J7OrhrrAmhIsNml/3iR2Wqg8oFvvCfEq0sECUtlzyfqUFMSKNq3gqH999n7QAi5k1KdsCm6MlNbnFnjWEgKw==",
+        "requested": "[9.4.3-preview.1.25230.7, )",
+        "resolved": "9.4.3-preview.1.25230.7",
+        "contentHash": "XPRgtofU0m8K2VTdQJ4XBZXxzPSz57ojGsiCSr9Bh7NgdrZ93DdrfTdBM/NDXFc9gFKfJkDTukMMmYTQqRuo+Q==",
         "dependencies": {
-          "Microsoft.Extensions.AI.Abstractions": "9.4.0-preview.1.25207.5",
+          "Microsoft.Extensions.AI.Abstractions": "9.4.3-preview.1.25230.7",
           "Microsoft.Extensions.Caching.Abstractions": "9.0.4",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.4",
           "Microsoft.Extensions.Logging.Abstractions": "9.0.4",
@@ -54,28 +54,28 @@
       },
       "Microsoft.Extensions.AI.Abstractions": {
         "type": "Direct",
-        "requested": "[9.4.0-preview.1.25207.5, )",
-        "resolved": "9.4.0-preview.1.25207.5",
-        "contentHash": "CptQvHk8wY+qb+AA3SoKlc5NQcXSoFNbt8Z+bAkt/tEZ61JMxFZ0dMG1AwCn14hRCUinFbxyPYXr5Zrjp99m3g=="
+        "requested": "[9.4.3-preview.1.25230.7, )",
+        "resolved": "9.4.3-preview.1.25230.7",
+        "contentHash": "iXTDPJZjJMBK+x10p32TE4WeSHjwn2spoL6c2t+MWkJiqSq2yRGQhxvnZZxlAAhA9KDRPMNvLQFrdj/KmfcgFg=="
       },
       "Microsoft.Extensions.AI.Ollama": {
         "type": "Direct",
-        "requested": "[9.4.0-preview.1.25207.5, )",
-        "resolved": "9.4.0-preview.1.25207.5",
-        "contentHash": "dFGHDn8l406uAhjCrQHso6rRCr+Y8iYcaOfORBn+Z17+CYuD3qJOueJgMzxc95pdXeRA5tiW//bvHd2TUc0xzA==",
+        "requested": "[9.4.3-preview.1.25230.7, )",
+        "resolved": "9.4.3-preview.1.25230.7",
+        "contentHash": "g7cu9UYroEC1HYPCIqLMQ1VPh8onJtFehCcVI5EIOJStsmM9PiCi+yrBRNSr7b1wOs8FVB3NqLEBXlCy7VJ1dw==",
         "dependencies": {
-          "Microsoft.Extensions.AI.Abstractions": "9.4.0-preview.1.25207.5",
+          "Microsoft.Extensions.AI.Abstractions": "9.4.3-preview.1.25230.7",
           "System.Net.Http.Json": "9.0.4",
           "System.Text.Json": "9.0.4"
         }
       },
       "Microsoft.Extensions.AI.OpenAI": {
         "type": "Direct",
-        "requested": "[9.4.0-preview.1.25207.5, )",
-        "resolved": "9.4.0-preview.1.25207.5",
-        "contentHash": "s3LCA6LG/WajzFG8XA3GxgMExVPCSSnCCqN2flFAEY9yXOeO4mCOqxszZ/zZfny9JpqG6Gk0oVaC8abi24LrEQ==",
+        "requested": "[9.4.3-preview.1.25230.7, )",
+        "resolved": "9.4.3-preview.1.25230.7",
+        "contentHash": "jodvAp8BTqLYeFXjlMsKBNvPSSHhF7I6kwlIX0+VAwQakiTvEq2/muVulh+ONjQV3avGBR3ZxXmaOhyvMIzVbQ==",
         "dependencies": {
-          "Microsoft.Extensions.AI.Abstractions": "9.4.0-preview.1.25207.5",
+          "Microsoft.Extensions.AI.Abstractions": "9.4.3-preview.1.25230.7",
           "OpenAI": "2.2.0-beta.4",
           "System.Memory.Data": "9.0.4",
           "System.Text.Json": "9.0.4"
