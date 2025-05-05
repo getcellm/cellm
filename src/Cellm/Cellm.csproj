@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net9.0-windows</TargetFramework>
@@ -22,6 +22,7 @@
     <None Remove="AddIn\UserInterface\Resources\logged-out.svg" />
     <None Remove="AddIn\UserInterface\Resources\login.svg" />
     <None Remove="AddIn\UserInterface\Resources\logout.svg" />
+    <None Remove="AddIn\UserInterface\Resources\mcp.png" />
     <None Remove="AddIn\UserInterface\Resources\mistral.png" />
     <None Remove="AddIn\UserInterface\Resources\ollama.png" />
     <None Remove="AddIn\UserInterface\Resources\openai.png" />
@@ -52,7 +53,7 @@
     <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.4" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.4" />
     <PackageReference Include="Mistral.SDK" Version="2.1.1" />
-    <PackageReference Include="ModelContextProtocol" Version="0.1.0-preview.7" />
+    <PackageReference Include="ModelContextProtocol" Version="0.1.0-preview.11" />
     <PackageReference Include="PdfPig" Version="0.1.10" />
     <PackageReference Include="Sentry.Extensions.Logging" Version="5.5.1" />
     <PackageReference Include="Sentry.Profiling" Version="5.5.1" />
@@ -75,6 +76,7 @@
     <EmbeddedResource Include="AddIn\UserInterface\Resources\logged-out.svg" />
     <EmbeddedResource Include="AddIn\UserInterface\Resources\login.svg" />
     <EmbeddedResource Include="AddIn\UserInterface\Resources\logout.svg" />
+    <EmbeddedResource Include="AddIn\UserInterface\Resources\mcp.png" />
     <EmbeddedResource Include="AddIn\UserInterface\Resources\mistral.png" />
     <EmbeddedResource Include="AddIn\UserInterface\Resources\ollama.png" />
     <EmbeddedResource Include="AddIn\UserInterface\Resources\openai.png" />
