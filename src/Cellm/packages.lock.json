@@ -235,9 +235,9 @@
       },
       "ModelContextProtocol": {
         "type": "Direct",
-        "requested": "[0.1.0-preview.7, )",
-        "resolved": "0.1.0-preview.7",
-        "contentHash": "ExBfCfjxXADAPcfakr8wJbbn3ojgutTooxiuuPYQDjq3BYa5yzZqzAcAj5RAMZ1+hP0Yn90GkVfMhzKFXB2vHw==",
+        "requested": "[0.1.0-preview.11, )",
+        "resolved": "0.1.0-preview.11",
+        "contentHash": "TWSeMx0mcdX4pZVB0gS2ii06Ll9pz+PAG8OieTI0MG9rD4YmFBrCMKoRXf381I/S0jVjktJeFHdrJVKeSiH7BA==",
         "dependencies": {
           "Microsoft.Extensions.AI": "9.4.0-preview.1.25207.5",
           "Microsoft.Extensions.AI.Abstractions": "9.4.0-preview.1.25207.5",

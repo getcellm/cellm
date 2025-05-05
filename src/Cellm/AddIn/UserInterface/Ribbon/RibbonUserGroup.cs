@@ -315,6 +315,8 @@ public partial class RibbonMain
         {
             _ribbonUi.InvalidateControl(item.Value.Id);
         }
+
+        _ribbonUi.InvalidateControl(nameof(ToolsGroupControlIds.McpSplitButton));
     }
 
 

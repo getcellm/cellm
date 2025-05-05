@@ -12,7 +12,8 @@ namespace Cellm.Models.Behaviors;
 internal class SentryBehavior<TRequest, TResponse>(
     IOptionsMonitor<ProviderConfiguration> providerConfiguration,
     Account account,
-    ILogger<SentryBehavior<TRequest, TResponse>> logger) : IPipelineBehavior<TRequest, TResponse>
+    ILogger<SentryBehavior<TRequest, TResponse>> logger)
+    : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IPrompt
 {
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)

@@ -9,6 +9,7 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ModelContextProtocol.Client;
+using ModelContextProtocol.Protocol.Transport;
 
 namespace Cellm.Models.Behaviors;
 
@@ -23,7 +24,8 @@ internal class ToolBehavior<TRequest, TResponse>(
     where TRequest : IPrompt
 {
     // TODO: Use HybridCache
-    private ConcurrentDictionary<string, IList<McpClientTool>> _poorMansCache = [];
+    private readonly ConcurrentDictionary<string, IMcpClient> _mcpClientCache = [];
+    private readonly ConcurrentDictionary<string, IList<McpClientTool>> _mcpClientToolCache = [];
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
@@ -66,33 +68,71 @@ internal class ToolBehavior<TRequest, TResponse>(
 
     private List<AITool> GetNativeTools()
     {
-        return functions
-                .Where(f => providerConfiguration.CurrentValue.EnableTools[f.Name])
-                .ToList<AITool>();
+        return [.. functions.Where(f => providerConfiguration.CurrentValue.EnableTools[f.Name])];
     }
 
     // TODO: Query servers in parallel
     private async IAsyncEnumerable<AITool> GetModelContextProtocolToolsAsync([EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        foreach (var server in modelContextProtocolConfiguration.CurrentValue.Servers)
+        foreach (var serverConfiguration in modelContextProtocolConfiguration.CurrentValue.StdioServers)
         {
-            if (!providerConfiguration.CurrentValue.EnableModelContextProtocolServers.TryGetValue(server.Name, out var isEnabled) || !isEnabled)
+            var serverName = serverConfiguration.Name ?? throw new NullReferenceException(nameof(serverConfiguration.Name));
+
+            if (!providerConfiguration.CurrentValue.EnableModelContextProtocolServers.TryGetValue(serverName, out var isEnabled) || !isEnabled)
             {
                 continue;
             }
 
-            _poorMansCache.TryGetValue(server.Name, out var tools);
+            _mcpClientToolCache.TryGetValue(serverName, out var serverTools);
 
-            if (tools is null)
+            if (serverTools is null)
             {
-                var client = await McpClientFactory.CreateAsync(server, loggerFactory: loggerFactory, cancellationToken: cancellationToken);
-                tools = await client.ListToolsAsync(cancellationToken: cancellationToken);
-                _poorMansCache[server.Name] = tools;
+                _mcpClientCache.TryGetValue(serverName, out var mcpClient);
+
+                if (mcpClient is null)
+                {
+                    var clientTransport = new StdioClientTransport(serverConfiguration);
+                    mcpClient = await McpClientFactory.CreateAsync(clientTransport, loggerFactory: loggerFactory, cancellationToken: cancellationToken);
+                }
+
+                serverTools = await mcpClient.ListToolsAsync(cancellationToken: cancellationToken);
+                _mcpClientToolCache[serverName] = serverTools;
             }
 
-            foreach (var tool in tools)
+            foreach (var serverTool in serverTools)
             {
-                yield return tool;
+                yield return serverTool;
+            }
+        }
+
+        foreach (var serverConfiguration in modelContextProtocolConfiguration.CurrentValue.SseServers)
+        {
+            var serverName = serverConfiguration.Name ?? throw new NullReferenceException(nameof(serverConfiguration.Name));
+
+            if (!providerConfiguration.CurrentValue.EnableModelContextProtocolServers.TryGetValue(serverName, out var isEnabled) || !isEnabled)
+            {
+                continue;
+            }
+
+            _mcpClientToolCache.TryGetValue(serverName, out var serverTools);
+
+            if (serverTools is null)
+            {
+                _mcpClientCache.TryGetValue(serverName, out var mcpClient);
+
+                if (mcpClient is null)
+                {
+                    var clientTransport = new SseClientTransport(serverConfiguration);
+                    mcpClient = await McpClientFactory.CreateAsync(clientTransport, loggerFactory: loggerFactory, cancellationToken: cancellationToken);
+                }
+
+                serverTools = await mcpClient.ListToolsAsync(cancellationToken: cancellationToken);
+                _mcpClientToolCache[serverName] = serverTools;
+            }
+
+            foreach (var serverTool in serverTools)
+            {
+                yield return serverTool;
             }
         }
     }
