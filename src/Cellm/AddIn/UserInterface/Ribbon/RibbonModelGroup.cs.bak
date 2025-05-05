@@ -1,3 +1,4 @@
+﻿using System.Diagnostics;
 using System.Text;
 using Cellm.AddIn.UserInterface.Forms;
 using Cellm.Models.Providers;
@@ -11,7 +12,6 @@ using Cellm.Models.Providers.OpenAiCompatible;
 using Cellm.Users;
 using ExcelDna.Integration.CustomUI;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Cellm.AddIn.UserInterface.Ribbon;
@@ -29,7 +29,7 @@ public partial class RibbonMain
         ProviderSelectionMenu,
 
         ModelComboBox,
-        TemperatureComboBox,
+        TemperatureEditBox,
         CacheToggleButton,
 
         ProviderSettingsButton
@@ -74,7 +74,6 @@ public partial class RibbonMain
             var defaultProvider = Enum.Parse<Provider>(defaultProviderName, true);
 
             _selectedProviderIndex = _providerItems.FirstOrDefault(kvp => kvp.Value.Label.Equals(defaultProvider.ToString(), StringComparison.OrdinalIgnoreCase)).Key;
-
             // Fallback to 0 if not found, though EnsureDefaultProvider should handle this case.
             if (!_providerItems.ContainsKey(_selectedProviderIndex))
             {
@@ -90,7 +89,7 @@ public partial class RibbonMain
         }
         catch (Exception ex) // Catch other potential errors during init
         {
-            _logger.LogError("Error initializing selected provider index: {message}", ex.Message);
+            _logger.LogError($"Error initializing selected provider index: {ex.Message}");
             _selectedProviderIndex = 0; // Safe default
         }
     }
@@ -98,7 +97,6 @@ public partial class RibbonMain
     public string ModelGroup()
     {
         var providerMenuItemsXml = new StringBuilder();
-
         // Dynamic provider menu items (IDs generated here, not in enum)
         foreach (var kvp in _providerItems.OrderBy(p => p.Value.Label))
         {
@@ -114,6 +112,7 @@ public partial class RibbonMain
                      getEnabled=""{nameof(IsProviderEnabled)}"" />");
         }
 
+        // Add Separator and Settings Button
         providerMenuItemsXml.AppendLine($@"<menuSeparator id=""providerMenuSeparator"" />");
         providerMenuItemsXml.AppendLine(
             $@"<button id=""{nameof(ModelGroupControlIds.ProviderSettingsButton)}""
@@ -145,21 +144,19 @@ public partial class RibbonMain
                                   getItemCount="{nameof(GetModelComboBoxItemCount)}"
                                   getItemLabel="{nameof(GetModelComboBoxItemLabel)}"
                                   />
-                        <comboBox id="{nameof(ModelGroupControlIds.TemperatureComboBox)}"
+                        <editBox id="{nameof(ModelGroupControlIds.TemperatureEditBox)}"
                                  label="Temp"
                                  showLabel="false"
+                                 screentip="Temperature (0-1). Lower values make responses more deterministic."
                                  sizeString="0.0"
-                                 screentip="Temperature (0.0-1.0). Lower values make responses more deterministic. Automatically scaled for providers with other ranges."
+                                 maxLength="4"
                                  getText="{nameof(GetTemperatureText)}"
                                  onChange="{nameof(OnTemperatureChange)}"
-                                 getItemCount="{nameof(GetTemperatureItemCount)}"
-                                 getItemLabel="{nameof(GetTemperatureItemLabel)}"
                                  />
                     </box>
                 </box>
-                <separator id="cacheSeparator" />
                 <toggleButton id="{nameof(ModelGroupControlIds.CacheToggleButton)}" label="Cache" size="large" imageMso="SourceControlRefreshStatus"
-                    screentip="Enable/disable local caching of model responses. Enabled: Return cached responses for identical prompts. Disabled: Always request new responses. Disabling cache will clear entries."
+                    screentip="Enable/disable local caching of model responses. Disabling cache will clear all cached responses."
                     onAction="{nameof(OnCacheToggled)}" getPressed="{nameof(OnGetCachePressed)}" />
             </group>
             """;
@@ -177,33 +174,33 @@ public partial class RibbonMain
         var account = CellmAddIn.Services.GetRequiredService<Account>();
 
         // The 'tag' property of the menu button holds the index we stored.
-
-        if (int.TryParse(control.Tag, out var index))
+        if (int.TryParse(control.Tag, out int index))
         {
+            _logger.LogDebug($"GetProviderMenuItemImage called for index: {index} (from tag)");
             if (_providerItems.TryGetValue(index, out var item) && !string.IsNullOrEmpty(item.Image))
             {
                 // Use smaller size for menu items (e.g., 16x16)
                 return account.HasEntitlement(item.Entitlement); // Adjust size as needed
             }
-
-            _logger.LogWarning("Could not get image for menu item index {index}.", index);
+            _logger.LogWarning($"Could not get image for menu item index {index}.");
         }
         else
         {
-            _logger.LogWarning("Could not parse index from tag '{tag}' for menu item '{id}'.", control.Tag, control.Id);
+            _logger.LogWarning($"Could not parse index from tag '{control.Tag}' for menu item '{control.Id}'.");
         }
-
         return false; // Or a default placeholder image
     }
 
     /// <summary>
-    /// Gets the image for a specific item in the dropdown list.
+    /// Gets the image for a specific item IN THE DROPDOWN LIST.
     /// </summary>
     public Bitmap? GetProviderItemImage(IRibbonControl control, int index)
     {
+        Debug.WriteLine($"GetProviderItemImage called for index: {index}");
         if (_providerItems.TryGetValue(index, out var item) && !string.IsNullOrEmpty(item.Image))
         {
-            return ImageLoader.LoadEmbeddedPngResized(item.Image, 64, 64);
+            // Assuming ImageLoader can handle embedded paths and resizing if needed
+            return ImageLoader.LoadEmbeddedPngResized(item.Image); // Use appropriate size for dropdown item
         }
         return null;
     }
@@ -213,53 +210,53 @@ public partial class RibbonMain
     /// </summary>
     public int GetSelectedProviderIndex(IRibbonControl control)
     {
+        Debug.WriteLine($"GetSelectedProviderIndex called. Returning: {_selectedProviderIndex}");
         return _selectedProviderIndex;
     }
 
     public string GetSelectedProviderLabel(IRibbonControl control)
     {
+        Debug.WriteLine($"GetSelectedProviderLabel (for splitButton) called. Index: {_selectedProviderIndex}");
         // Ensure _selectedProviderIndex is valid before accessing _providerItems
         if (_providerItems.TryGetValue(_selectedProviderIndex, out var item))
         {
             return item.Label;
         }
-
-        _logger.LogWarning("index {index} not found in _providerItems. Returning default label.", _selectedProviderIndex);
-
+        Debug.WriteLine($"WARNING: _selectedProviderIndex {_selectedProviderIndex} not found in _providerItems. Returning default label.");
         return "Select Provider"; // Fallback label
     }
 
+    // Keep this: Gets the image for the MAIN button part of the splitButton.
     public Bitmap? GetSelectedProviderImage(IRibbonControl control)
     {
+        Debug.WriteLine($"GetSelectedProviderImage (for splitButton) called. Index: {_selectedProviderIndex}");
         if (_providerItems.TryGetValue(_selectedProviderIndex, out var item) && !string.IsNullOrEmpty(item.Image))
         {
             // Use appropriate size for the main split button display (e.g., 32x32 or 24x24)
             return ImageLoader.LoadEmbeddedPngResized(item.Image, 128, 128); // Adjust size as needed
         }
-
-        _logger.LogWarning("Could not get image for index {index}.", _selectedProviderIndex);
-
+        Debug.WriteLine($"WARNING: Could not get image for index {_selectedProviderIndex}.");
         return null;
     }
 
+    // --- NEW: Callback for Menu Item Images ---
     public Bitmap? GetProviderMenuItemImage(IRibbonControl control)
     {
         // The 'tag' property of the menu button holds the index we stored.
         if (int.TryParse(control.Tag, out int index))
         {
+            _logger.LogDebug($"GetProviderMenuItemImage called for index: {index} (from tag)");
             if (_providerItems.TryGetValue(index, out var item) && !string.IsNullOrEmpty(item.Image))
             {
                 // Use smaller size for menu items (e.g., 16x16)
                 return ImageLoader.LoadEmbeddedPngResized(item.Image, 16, 16); // Adjust size as needed
             }
-
-            _logger.LogWarning("Could not get image for menu item index {index}.", index);
+            _logger.LogWarning($"Could not get image for menu item index {index}.");
         }
         else
         {
-            _logger.LogWarning("Could not parse index from tag '{tag}' for menu item '{id}'.", control.Tag, control.Id);
+            _logger.LogWarning($"Could not parse index from tag '{control.Tag}' for menu item '{control.Id}'.");
         }
-
         return null; // Or a default placeholder image
     }
 
@@ -273,9 +270,9 @@ public partial class RibbonMain
     public string? GetSelectedModelText(IRibbonControl control)
     {
         var provider = GetCurrentProvider();
-        var configKey = $"{provider}Configuration:{nameof(OpenAiConfiguration.DefaultModel)}";
-        var currentModel = string.Empty;
-        var presetsAvailable = false;
+        string configKey = $"{provider}Configuration:{nameof(OpenAiConfiguration.DefaultModel)}"; // Using OpenAI as template name
+        string currentModel = string.Empty;
+        bool presetsAvailable = false;
 
         try
         {
@@ -284,18 +281,21 @@ public partial class RibbonMain
         }
         catch (KeyNotFoundException)
         {
+            Debug.WriteLine($"DefaultModel key '{configKey}' not found for provider {provider}.");
             currentModel = string.Empty; // Explicitly null
         }
         catch (Exception ex)
         {
-            _logger.LogError("Error reading model config '{configKey}': {message}", configKey, ex.Message);
+            Debug.WriteLine($"Error reading model config '{configKey}': {ex.Message}");
             return "Error"; // Fallback on error
         }
 
         // Check if preset models (Small/Medium/Large) are configured
         presetsAvailable = GetAvailableModelNamesForProvider(provider).Count > 0;
 
+        Debug.WriteLine($"GetSelectedModelText for {provider}: CurrentModel='{currentModel ?? "null"}', PresetsAvailable={presetsAvailable}");
 
+        // Determine the text to display
         if (!string.IsNullOrEmpty(currentModel))
         {
             // If a model is already configured (preset or custom), display it
@@ -312,7 +312,7 @@ public partial class RibbonMain
             else
             {
                 // No presets exist (dropdown will be empty), prompt user to type
-                return "[Type model]";
+                return "[Type model]"; // Short placeholder
             }
         }
     }
@@ -322,19 +322,21 @@ public partial class RibbonMain
         var provider = GetCurrentProvider();
         string configKey = $"{provider}Configuration:{nameof(OpenAiConfiguration.DefaultModel)}"; // Using OpenAI as template name
 
+        Debug.WriteLine($"OnModelComboBoxChange for {provider}. Received text: '{text}'");
 
+        // *** THIS IS THE CRITICAL PART ***
         if (text == NoPresetsPlaceholder)
         {
-            _logger.LogDebug("Ignoring change event because placeholder text was selected/entered. Invalidating control.");
-
+            Debug.WriteLine("Ignoring change event because placeholder text was selected/entered. Invalidating control.");
+            // Force the UI to re-query the text for the box using GetSelectedModelText
             _ribbonUi?.InvalidateControl(control.Id);
-            return;
+            return; // IMPORTANT: Exit before saving or processing further
         }
-
+        // *********************************
 
         if (string.IsNullOrWhiteSpace(text))
         {
-            _logger.LogDebug("Warning: Model name cannot be empty. Change ignored.");
+            Debug.WriteLine("Warning: Model name cannot be empty. Change ignored.");
             _ribbonUi?.InvalidateControl(control.Id);
             return;
         }
@@ -343,11 +345,13 @@ public partial class RibbonMain
         {
             // Only save if it wasn't the placeholder or whitespace
             SetValue(configKey, text);
+            Debug.WriteLine($"DefaultModel set to '{text}' for provider {provider}.");
         }
         catch (Exception ex)
         {
-            _logger.LogError("ERROR updating DefaultModel setting '{configKey}' to '{text}': {ex.Message}", configKey, text, ex.Message);
+            Debug.WriteLine($"ERROR updating DefaultModel setting '{configKey}' to '{text}': {ex.Message}");
         }
+        Debug.WriteLine("OnModelComboBoxChange finished.");
     }
 
     /// <summary>
@@ -361,13 +365,13 @@ public partial class RibbonMain
 
         if (actualCount == 0)
         {
-            _logger.LogDebug("GetModelComboBoxItemCount for {provider}: No actual presets, returning 1 (for placeholder).", provider);
+            Debug.WriteLine($"GetModelComboBoxItemCount for {provider}: No actual presets, returning 1 (for placeholder).");
             return 1; // Return 1 to show our placeholder message
         }
         else
         {
-            _logger.LogDebug("GetModelComboBoxItemCount for {provider}: Returning actual count {actualCount}.", provider, actualCount);
-            return actualCount;
+            Debug.WriteLine($"GetModelComboBoxItemCount for {provider}: Returning actual count {actualCount}.");
+            return actualCount; // Return the real count of presets
         }
     }
 
@@ -384,13 +388,13 @@ public partial class RibbonMain
         {
             if (index == 0)
             {
-                _logger.LogDebug("GetModelComboBoxItemLabel for {provider}, index {index}: Returning placeholder.", provider, index);
+                Debug.WriteLine($"GetModelComboBoxItemLabel for {provider}, index {index}: Returning placeholder '{NoPresetsPlaceholder}'.");
                 return NoPresetsPlaceholder; // Return the placeholder message
             }
             else
             {
-                // This case should not happen if GetItemCount returns 1
-                _logger.LogDebug("Warning: Invalid index {index} requested for GetModelComboBoxItemLabel when showing placeholder.", index);
+                // This case should technically not happen if GetItemCount returns 1
+                Debug.WriteLine($"Warning: Invalid index {index} requested for GetModelComboBoxItemLabel when showing placeholder.");
                 return string.Empty;
             }
         }
@@ -398,13 +402,13 @@ public partial class RibbonMain
         {
             if (index >= 0 && index < availableModels.Count)
             {
-                var label = availableModels[index];
-                _logger.LogDebug("GetModelComboBoxItemLabel for {provider}, index {index}: Returning actual model '{label}'.", provider, index, label);
+                string label = availableModels[index];
+                Debug.WriteLine($"GetModelComboBoxItemLabel for {provider}, index {index}: Returning actual model '{label}'.");
                 return label;
             }
             else
             {
-                _logger.LogDebug("Warning: Invalid index {index} requested for GetModelComboBoxItemLabel (Provider: {provider}, Count: {availableModels.Count})", index, provider, availableModels.Count);
+                Debug.WriteLine($"Warning: Invalid index {index} requested for GetModelComboBoxItemLabel (Provider: {provider}, Count: {availableModels.Count})");
                 return string.Empty;
             }
         }
@@ -424,7 +428,7 @@ public partial class RibbonMain
         if (!string.IsNullOrEmpty(big) && !big.StartsWith("No ")) modelNames.Add(big);
         if (!string.IsNullOrEmpty(thinking) && !thinking.StartsWith("No ")) modelNames.Add(thinking);
 
-        // Remove duplicates if Small/Big/Thinking are configured to the same model
+        // Optional: Remove duplicates if Small/Big/Thinking might be configured to the same model
         return modelNames.Distinct().ToList();
     }
 
@@ -488,7 +492,7 @@ public partial class RibbonMain
         }
         catch (Exception ex)
         {
-            _logger.LogError("Error retrieving model name for {provider}/{modelType}: {ex.Message}", provider, modelType, ex.Message);
+            Debug.WriteLine($"Error retrieving model name for {provider}/{modelType}: {ex.Message}");
             return string.Empty;
         }
     }
@@ -499,27 +503,32 @@ public partial class RibbonMain
         // ... (parsing index and getting selectedProviderItem logic remains the same) ...
         if (int.TryParse(control.Tag, out int index))
         {
+            Debug.WriteLine($"HandleProviderMenuSelection called. Tag (Index): {index}, Control ID: {control.Id}");
+
             if (_providerItems.ContainsKey(index))
             {
                 var selectedProviderItem = _providerItems[index];
                 if (_selectedProviderIndex != index) // Only update if selection actually changed
                 {
                     _selectedProviderIndex = index;
+                    Debug.WriteLine($"_selectedProviderIndex updated to: {_selectedProviderIndex} ({selectedProviderItem.Label})");
 
+                    // ... (Update DefaultProvider setting logic remains the same) ...
                     try
                     {
                         if (Enum.TryParse<Provider>(selectedProviderItem.Label, true, out var selectedProviderEnum))
                         {
                             SetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultProvider)}", selectedProviderEnum.ToString());
+                            Debug.WriteLine($"DefaultProvider set to: {selectedProviderEnum}");
                         }
                         else
                         {
-                            _logger.LogWarning("Could not parse '{label}' to Provider enum.", selectedProviderItem.Label);
+                            Debug.WriteLine($"WARNING: Could not parse '{selectedProviderItem.Label}' to Provider enum.");
                         }
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogDebug("Error updating DefaultProvider setting: {message}", ex.Message);
+                        Debug.WriteLine($"ERROR updating DefaultProvider setting: {ex.Message}");
                     }
 
                     // Invalidate controls that need updating
@@ -530,35 +539,49 @@ public partial class RibbonMain
                         _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ModelComboBox));
                         _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ProviderSettingsButton));
                     }
+                    else
+                    {
+                        Debug.WriteLine("ERROR: _ribbonUi is null in HandleProviderMenuSelection!");
+                    }
+                }
+                else
+                {
+                    Debug.WriteLine("Selection hasn't changed. No update needed.");
                 }
             }
             else
             {
-                _logger.LogWarning(": Invalid index from tag: {index}", index);
+                Debug.WriteLine($"WARNING: Invalid index from tag: {index}");
             }
         }
         else
         {
-            _logger.LogWarning($": Could not parse index from tag '{control.Tag}' for selected menu item '{control.Id}'.");
+            Debug.WriteLine($"WARNING: Could not parse index from tag '{control.Tag}' for selected menu item '{control.Id}'.");
         }
+        Debug.WriteLine("HandleProviderMenuSelection finished.");
     }
 
     public string GetSelectedModelLabel(IRibbonControl control)
     {
         var provider = GetCurrentProvider();
-        var configKey = $"{provider}Configuration:{nameof(OpenAiConfiguration.DefaultModel)}"; // Using OpenAI as template name
+        string configKey = $"{provider}Configuration:{nameof(OpenAiConfiguration.DefaultModel)}"; // Using OpenAI as template name
         try
         {
-            var model = GetValue(configKey);
+            string model = GetValue(configKey);
+            // Optional: Add padding like we did for the provider label if needed for consistent width
+            // int maxModelLen = 30; // Estimate or calculate max model name length
+            // int padding = maxModelLen - model.Length;
+            // if (padding > 0) model += new string('\u00A0', padding);
             return model;
         }
         catch (KeyNotFoundException)
         {
+            Debug.WriteLine($"DefaultModel key '{configKey}' not found for provider {provider}.");
             return "Select Model"; // Fallback
         }
         catch (Exception ex)
         {
-            _logger.LogError("Error reading model config '{configKey}': {message}", configKey, ex.Message);
+            Debug.WriteLine($"Error reading model config '{configKey}': {ex.Message}");
             return "Error"; // Fallback
         }
     }
@@ -620,22 +643,16 @@ public partial class RibbonMain
     public void ShowProviderSettingsForm(IRibbonControl control)
     {
         var provider = GetCurrentProvider();
-        var currentApiKey = "";
-        var currentBaseAddress = "";
+        string currentApiKey = "";
+        string currentBaseAddress = "";
 
         // Safely get current values
         try
         {
             currentApiKey = GetValue($"{provider}Configuration:ApiKey");
         }
-        catch (KeyNotFoundException)
-        {
-            // Ignore, leave empty 
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError("Error getting ApiKey for {provider}: {message}", provider, ex.Message);
-        }
+        catch (KeyNotFoundException) { /* Ignore, leave empty */ }
+        catch (Exception ex) { Debug.WriteLine($"Error getting ApiKey for {provider}: {ex.Message}"); }
 
         try
         {
@@ -668,10 +685,7 @@ public partial class RibbonMain
                     break;
             }
         }
-        catch (Exception ex)
-        {
-            _logger.LogError("Error getting BaseAddress for {provider}: {message}", provider, ex.Message);
-        }
+        catch (Exception ex) { Debug.WriteLine($"Error getting BaseAddress for {provider}: {ex.Message}"); }
 
         // Instantiate and show the form
         using (var settingsForm = new ProviderSettingsForm(provider, currentApiKey, currentBaseAddress))
@@ -686,22 +700,32 @@ public partial class RibbonMain
 
                 try
                 {
-                    if (IsApiKeyEditable(provider))
+                    // Save ApiKey (always relevant unless provider has no key concept)
+                    if (IsApiKeyEditable(provider)) // Helper function to check if provider uses API Key
                     {
                         SetValue($"{provider}Configuration:ApiKey", newApiKey);
+                        Debug.WriteLine($"Saved ApiKey for {provider}");
                     }
 
                     // Save BaseAddress only if it's relevant AND editable for this provider
                     if (IsBaseAddressEditable(provider))
                     {
+                        // The key name might differ slightly, adjust if needed
                         SetValue($"{provider}Configuration:BaseAddress", newBaseAddress);
+                        Debug.WriteLine($"Saved BaseAddress for {provider}");
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogDebug("ERROR saving settings for {provider}: {message}", provider, ex.Message);
+                    Debug.WriteLine($"ERROR saving settings for {provider}: {ex.Message}");
+                    // Consider showing an error message to the user
                     MessageBox.Show($"Error saving settings: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+            }
+            else
+            {
+                // User clicked Cancel or closed the form, do nothing
+                Debug.WriteLine($"Settings changes cancelled for {provider}");
             }
         }
     }
@@ -723,32 +747,23 @@ public partial class RibbonMain
         };
     }
 
-    // Array of temperature suggestions
-    private static readonly string[] TemperatureOptions = { "0.0", "0.3", "0.7", "1.0" };
-
     public string GetTemperatureText(IRibbonControl control)
     {
         try
         {
             var temperature = GetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultTemperature)}");
-
-            if (double.TryParse(temperature, out var tempVal))
-            {
-                return tempVal.ToString("0.0");
-            }
-
-            return "0.0";
+            return temperature;
         }
         catch (KeyNotFoundException)
         {
-            // If not found, set a default value
-            SetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultTemperature)}", "0");
-            return "0.0";
+            // If not found, set a default value (0.7 is a common default temperature)
+            SetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultTemperature)}", "0.7");
+            return "0.7";
         }
         catch (Exception ex)
         {
-            _logger.LogError("Error reading temperature: {message}", ex.Message);
-            return "0.0"; // Fallback
+            Debug.WriteLine($"Error reading temperature: {ex.Message}");
+            return "0.7"; // Fallback
         }
     }
 
@@ -756,16 +771,17 @@ public partial class RibbonMain
     {
         if (string.IsNullOrWhiteSpace(text))
         {
-            _logger.LogDebug("Warning: Temperature cannot be empty. Change ignored.");
+            Debug.WriteLine("Warning: Temperature cannot be empty. Change ignored.");
             _ribbonUi?.InvalidateControl(control.Id);
             return;
         }
 
         // Validate that the input is a valid temperature (between 0 and 1)
-        if (double.TryParse(text, out var temperature))
+        if (double.TryParse(text, out double temperature))
         {
             if (temperature < 0 || temperature > 1)
             {
+                Debug.WriteLine($"Warning: Temperature must be between 0 and 1. Got {temperature}.");
                 MessageBox.Show("Temperature must be between 0 and 1.", "Invalid Temperature",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 _ribbonUi?.InvalidateControl(control.Id);
@@ -774,38 +790,20 @@ public partial class RibbonMain
 
             try
             {
-                // Format to ensure consistent display
-                string formattedTemperature = temperature.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture);
-                SetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultTemperature)}", formattedTemperature);
+                SetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultTemperature)}", text);
+                Debug.WriteLine($"DefaultTemperature set to '{text}'.");
             }
             catch (Exception ex)
             {
-                _logger.LogDebug("ERROR updating DefaultTemperature setting: {message}", ex.Message);
+                Debug.WriteLine($"ERROR updating DefaultTemperature setting: {ex.Message}");
             }
         }
         else
         {
-            MessageBox.Show("Temperature must a number between 0 and 1.", "Invalid Temperature",
+            Debug.WriteLine($"Warning: Could not parse '{text}' as a number.");
+            MessageBox.Show("Please enter a valid number between 0 and 1.", "Invalid Temperature",
                 MessageBoxButtons.OK, MessageBoxIcon.Warning);
             _ribbonUi?.InvalidateControl(control.Id);
         }
-    }
-
-    public int GetTemperatureItemCount(IRibbonControl control)
-    {
-        // Return the number of temperature options
-        return TemperatureOptions.Length;
-    }
-
-    public string GetTemperatureItemLabel(IRibbonControl control, int index)
-    {
-        // Return the temperature option at the specified index
-        if (index >= 0 && index < TemperatureOptions.Length)
-        {
-            return TemperatureOptions[index];
-        }
-
-        _logger.LogWarning("Invalid index {index} requested for GetTemperatureItemLabel", index);
-        return string.Empty;
     }
 }
