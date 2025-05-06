@@ -12,6 +12,7 @@ internal class GetResponse(Prompt prompt, Provider provider) : IExcelObservable
     private readonly List<IExcelObserver> _observers = [];
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private readonly ILoggerFactory _loggerFactory = CellmAddIn.Services.GetRequiredService<ILoggerFactory>();
+    private Task? _task;
 
     public IDisposable Subscribe(IExcelObserver observer)
     {
@@ -22,19 +23,12 @@ internal class GetResponse(Prompt prompt, Provider provider) : IExcelObservable
         logger.LogDebug("Adding observer");
         _observers.Add(observer);
 
-        Task.Run(async () =>
+        if (_task is null)
         {
-            try
-            {
-                await GetResponseAsync(prompt, provider, _cancellationTokenSource.Token);
-            }
-            catch (Exception ex)
-            {
-                logger.LogError("{message}", ex.Message);
-                observer.OnError(ex);
-            }
-        }, _cancellationTokenSource.Token);
-
+            logger.LogDebug("Starting task");
+            _task = Task.Run(async () => await GetResponseAsync(prompt, provider, _cancellationTokenSource.Token), _cancellationTokenSource.Token);
+        }
+        
         return new ActionDisposable(() =>
         {
             logger.LogDebug("Removing observer");
@@ -51,14 +45,24 @@ internal class GetResponse(Prompt prompt, Provider provider) : IExcelObservable
 
     private async Task GetResponseAsync(Prompt prompt, Provider provider, CancellationToken cancellationToken)
     {
-        var client = CellmAddIn.Services.GetRequiredService<Client>();
-        var response = await client.GetResponseAsync(prompt, provider, cancellationToken);
-        var assistantMessage = response.Messages.Last().Text ?? throw new NullReferenceException("No text response");
-
-        foreach (var observer in _observers)
+        try
         {
-            observer.OnNext(assistantMessage);
-            observer.OnCompleted();
+            var client = CellmAddIn.Services.GetRequiredService<Client>();
+            var response = await client.GetResponseAsync(prompt, provider, cancellationToken);
+            var assistantMessage = response.Messages.Last().Text ?? throw new NullReferenceException("No text response");
+
+            foreach (var observer in _observers)
+            {
+                observer.OnNext(assistantMessage);
+                observer.OnCompleted();
+            }
+        }
+        catch (Exception ex)
+        {
+            foreach (var observer in _observers)
+            {
+                observer.OnError(ex);
+            }
         }
     }
 

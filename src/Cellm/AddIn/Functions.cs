@@ -101,7 +101,7 @@ public static class Functions
             return ExcelAsyncUtil.Observe(
                 nameof(PromptWith),
                 new object[] { providerAndModel, instructionsOrContext, instructionsOrTemperature, temperature },
-                () => new GetResponse(prompt, arguments.Provider));
+                () => new GetStreamResponse(prompt, arguments.Provider));
         }
         catch (CellmException e)
         {

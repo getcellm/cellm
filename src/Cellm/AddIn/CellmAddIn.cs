@@ -112,6 +112,7 @@ public class CellmAddIn : IExcelAddIn
                 cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
                 cfg.AddBehavior(typeof(SentryBehavior<ProviderRequest, ProviderResponse>), ServiceLifetime.Singleton);
                 cfg.AddBehavior(typeof(ToolBehavior<ProviderRequest, ProviderResponse>), ServiceLifetime.Singleton);
+                cfg.AddBehavior(typeof(ToolBehavior<ProviderStreamRequest, ChatResponseUpdate>), ServiceLifetime.Singleton);
                 cfg.AddBehavior(typeof(CacheBehavior<ProviderRequest, ProviderResponse>), ServiceLifetime.Singleton);
             })
             .AddSingleton(configuration)
