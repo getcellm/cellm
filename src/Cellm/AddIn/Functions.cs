@@ -31,7 +31,7 @@ public static class Functions
     [ExcelFunction(Name = "PROMPT", Description = "Send a prompt to the default model")]
     public static object Prompt(
     [ExcelArgument(AllowReference = true, Name = "InstructionsOrContext", Description = "A string with instructions or a cell or range of cells with context")] object context,
-    [ExcelArgument(Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
+    [ExcelArgument(AllowReference = true, Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
     [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
     {
         var configuration = CellmAddIn.Services.GetRequiredService<IConfiguration>();
@@ -98,12 +98,10 @@ public static class Functions
                 .AddUserMessage(userMessage)
                 .Build();
 
-            // ExcelAsyncUtil.Run yields Excel's UI thread, Task.Run enables async/await in inner code
-            return ExcelAsyncUtil.Run(nameof(PromptWith), new object[] { providerAndModel, instructionsOrContext, instructionsOrTemperature, temperature }, () =>
-            {
-                return Task.Run(async () => await GetResponseAsync(prompt, arguments.Provider)).GetAwaiter().GetResult();
-            });
-
+            return ExcelAsyncUtil.Observe(
+                nameof(PromptWith),
+                new object[] { providerAndModel, instructionsOrContext, instructionsOrTemperature, temperature },
+                () => new GetResponse(prompt, arguments.Provider));
         }
         catch (CellmException e)
         {
@@ -111,21 +109,5 @@ public static class Functions
             Debug.WriteLine(e);
             return e.Message;
         }
-    }
-
-    /// <summary>
-    /// Asynchronously sends a prompt to the specified model and retrieves the response.
-    /// </summary>
-    /// <param name="prompt">The prompt to send to the model.</param>
-    /// <param name="provider">The provider of the model. If null, the default provider is used.</param>
-    /// <param name="model">The specific model to use. If null, the default model is used.</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains the model's response as a string.</returns>
-    /// <exception cref="CellmException">Thrown when an unexpected error occurs during the operation.</exception>
-
-    internal static async Task<string> GetResponseAsync(Prompt prompt, Provider provider)
-    {
-        var client = CellmAddIn.Services.GetRequiredService<Client>();
-        var response = await client.GetResponseAsync(prompt, provider, CancellationToken.None);
-        return response.Messages.Last().Text ?? throw new NullReferenceException("No text response");
     }
 }

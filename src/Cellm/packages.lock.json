@@ -14,11 +14,11 @@
       },
       "ExcelDna.AddIn": {
         "type": "Direct",
-        "requested": "[1.9.0-alpha3, )",
-        "resolved": "1.9.0-alpha3",
-        "contentHash": "N77/NrKCNQTjoVrNKFyYIZIPxVTLEbkoU7B0lLGuEbfFQLzBZ/CAEfQDSRYB0qo47os1yPAbE7y+LWTRR3S4Bw==",
+        "requested": "[1.9.0-beta2, )",
+        "resolved": "1.9.0-beta2",
+        "contentHash": "73J87o/NXT2j/m3EWAJ+ETicPzWjBDkslDzJx4W6Do32mMiDGqSST5YMBBJQnr71phTMyhnvHBjaJgvKDdlkIQ==",
         "dependencies": {
-          "ExcelDna.Integration": "[1.9.0-alpha3]"
+          "ExcelDna.Integration": "[1.9.0-beta2]"
         }
       },
       "ExcelDna.Interop": {
@@ -292,8 +292,8 @@
       },
       "ExcelDna.Integration": {
         "type": "Transitive",
-        "resolved": "1.9.0-alpha3",
-        "contentHash": "vQZP+bXCXkiIx4bkntd2iWnMDS57ECcul2XFQvMSvgcTy6+2q81xI2Sp6FGXr9tU/t7eHfpG7vVv/7TZKOLnxA=="
+        "resolved": "1.9.0-beta2",
+        "contentHash": "Zk4JICXGXJY10Bh3hFVUmvMvhwcytQ4Zr46nEAyIpUJcStAhUatju8JyXGd8OhiyponPI5cighZOM31z4wVRSw=="
       },
       "ExCSS": {
         "type": "Transitive",
