@@ -62,7 +62,7 @@ internal class ObserveResponse(Prompt prompt, Provider provider) : IExcelObserva
         }, _cancellationTokenSource.Token);
 
         return new ActionDisposable(() =>
-        {          
+        {
             _logger.LogDebug("Getting response ... Disposing");
             _cancellationTokenSource.Cancel();
         });
