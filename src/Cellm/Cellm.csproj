@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net9.0-windows</TargetFramework>
@@ -32,7 +32,7 @@
 
   <ItemGroup>
     <PackageReference Include="Anthropic.SDK" Version="5.1.1" />
-    <PackageReference Include="ExcelDna.Addin" Version="1.9.0-alpha3" />
+    <PackageReference Include="ExcelDna.Addin" Version="1.9.0-beta2" />
     <PackageReference Include="ExcelDna.Interop" Version="15.0.1" />
     <PackageReference Include="MediatR" Version="12.5.0" />
     <PackageReference Include="Microsoft.Extensions.AI" Version="9.4.0-preview.1.25207.5" />

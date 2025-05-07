@@ -165,9 +165,9 @@ public class ArgumentParser
             var rows = reference.RowLast - reference.RowFirst + 1;
             var columns = reference.ColumnLast - reference.ColumnFirst + 1;
 
-            for (int row = 0; row < rows; row++)
+            for (var row = 0; row < rows; row++)
             {
-                for (int column = 0; column < columns; column++)
+                for (var column = 0; column < columns; column++)
                 {
                     var value = worksheet.Cells[reference.RowFirst + row + 1, reference.ColumnFirst + column + 1].Text;
                     valueBuilder.Append(value);

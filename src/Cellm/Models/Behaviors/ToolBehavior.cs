@@ -26,6 +26,7 @@ internal class ToolBehavior<TRequest, TResponse>(
     // TODO: Use HybridCache
     private readonly ConcurrentDictionary<string, IMcpClient> _mcpClientCache = [];
     private readonly ConcurrentDictionary<string, IList<McpClientTool>> _mcpClientToolCache = [];
+    private readonly SemaphoreSlim _asyncLock = new(1, 1);
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
@@ -87,16 +88,26 @@ internal class ToolBehavior<TRequest, TResponse>(
 
             if (serverTools is null)
             {
-                _mcpClientCache.TryGetValue(serverName, out var mcpClient);
+                await _asyncLock.WaitAsync(cancellationToken);
 
-                if (mcpClient is null)
+                try
                 {
-                    var clientTransport = new StdioClientTransport(serverConfiguration);
-                    mcpClient = await McpClientFactory.CreateAsync(clientTransport, loggerFactory: loggerFactory, cancellationToken: cancellationToken);
-                }
+                    _mcpClientCache.TryGetValue(serverName, out var StdioMcpClient);
 
-                serverTools = await mcpClient.ListToolsAsync(cancellationToken: cancellationToken);
-                _mcpClientToolCache[serverName] = serverTools;
+                    if (StdioMcpClient is null)
+                    {
+                        var clientTransport = new StdioClientTransport(serverConfiguration);
+                        StdioMcpClient = await McpClientFactory.CreateAsync(clientTransport, loggerFactory: loggerFactory, cancellationToken: cancellationToken);
+                        _mcpClientCache[serverName] = StdioMcpClient;
+                    }
+
+                    serverTools = await StdioMcpClient.ListToolsAsync(cancellationToken: cancellationToken);
+                    _mcpClientToolCache[serverName] = serverTools;
+                }
+                finally
+                {
+                    _asyncLock.Release();
+                }
             }
 
             foreach (var serverTool in serverTools)
@@ -118,16 +129,26 @@ internal class ToolBehavior<TRequest, TResponse>(
 
             if (serverTools is null)
             {
-                _mcpClientCache.TryGetValue(serverName, out var mcpClient);
+                await _asyncLock.WaitAsync(cancellationToken);
 
-                if (mcpClient is null)
+                try
                 {
-                    var clientTransport = new SseClientTransport(serverConfiguration);
-                    mcpClient = await McpClientFactory.CreateAsync(clientTransport, loggerFactory: loggerFactory, cancellationToken: cancellationToken);
-                }
+                    _mcpClientCache.TryGetValue(serverName, out var SseMcpClient);
 
-                serverTools = await mcpClient.ListToolsAsync(cancellationToken: cancellationToken);
-                _mcpClientToolCache[serverName] = serverTools;
+                    if (SseMcpClient is null)
+                    {
+                        var clientTransport = new SseClientTransport(serverConfiguration);
+                        SseMcpClient = await McpClientFactory.CreateAsync(clientTransport, loggerFactory: loggerFactory, cancellationToken: cancellationToken);
+                        _mcpClientCache[serverName] = SseMcpClient;
+                    }
+
+                    serverTools = await SseMcpClient.ListToolsAsync(cancellationToken: cancellationToken);
+                    _mcpClientToolCache[serverName] = serverTools;
+                }
+                finally
+                {
+                    _asyncLock.Release();
+                }
             }
 
             foreach (var serverTool in serverTools)
