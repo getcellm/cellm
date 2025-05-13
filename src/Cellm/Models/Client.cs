@@ -13,7 +13,7 @@ internal class Client(ISender sender, ResiliencePipelineProvider<string> resilie
 
         return await retryPipeline.Execute(async () =>
         {
-            var response = await sender.Send(new ProviderRequest(prompt, provider));
+            var response = await sender.Send(new ProviderRequest(prompt, provider), cancellationToken);
             return response.Prompt;
         });
     }
