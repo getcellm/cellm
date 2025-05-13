@@ -1,11 +1,11 @@
-﻿using System.Diagnostics;
-using System.Text;
+﻿using System.Text;
 using Cellm.AddIn.Exceptions;
 using Cellm.Models.Prompts;
 using Cellm.Models.Providers;
 using ExcelDna.Integration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Cellm.AddIn;
@@ -76,7 +76,6 @@ public static class CellmFunctions
             IsCellReferenceGettingData(instructionsOrContext) ||
             IsCellReferenceGettingData(instructionsOrTemperature))
         {
-            Debug.WriteLine("PromptWith: Detected #GETTING_DATA in one of the resolved input values. Returning ExcelError.ExcelErrorGettingData.");
             return ExcelError.ExcelErrorGettingData;
         }
 
@@ -111,11 +110,17 @@ public static class CellmFunctions
                 new object[] { providerAndModel, instructionsOrContext, instructionsOrTemperature, temperature },
                 () => new ObserveResponse(prompt, arguments.Provider));
         }
-        catch (CellmException e)
+        catch (CellmException ex)
         {
-            SentrySdk.CaptureException(e);
-            Debug.WriteLine(e);
-            return e.Message;
+            SentrySdk.CaptureException(ex);
+
+            var logger = CellmAddIn.Services
+                .GetRequiredService<ILoggerFactory>()
+                .CreateLogger(nameof(PromptWith));
+
+            logger.LogError(ex, "{method} failed", nameof(PromptWith));
+
+            return ExcelError.ExcelErrorValue;
         }
     }
 
