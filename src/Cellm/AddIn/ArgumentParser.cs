@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Cellm.AddIn;
 
-public class ArgumentParser
+public class ArgumentParser(IConfiguration configuration)
 {
     private string? _provider;
     private string? _model;
@@ -18,13 +18,6 @@ public class ArgumentParser
     public static readonly string ContextEndTag = "</context>";
     public static readonly string InstructionsStartTag = "<instructions>";
     public static readonly string InstructionsEndTag = "<instructions>";
-
-    private readonly IConfiguration _configuration;
-
-    public ArgumentParser(IConfiguration configuration)
-    {
-        _configuration = configuration;
-    }
 
     public ArgumentParser AddProvider(object providerAndModel)
     {
@@ -73,22 +66,22 @@ public class ArgumentParser
 
     public Arguments Parse()
     {
-        var providerAsString = _provider ?? _configuration
+        var providerAsString = _provider ?? configuration
             .GetSection(nameof(ProviderConfiguration))
             .GetValue<string>(nameof(ProviderConfiguration.DefaultProvider))
             ?? throw new ArgumentException(nameof(ProviderConfiguration.DefaultProvider));
 
         if (!Enum.TryParse<Provider>(providerAsString, true, out var provider))
         {
-            throw new ArgumentException($"Unsupported default provider: {providerAsString}");
+            throw new ArgumentException($"Unsupported provider: {providerAsString}");
         }
 
-        var model = _model ?? _configuration
+        var model = _model ?? configuration
             .GetSection($"{provider}Configuration")
             .GetValue<string>(nameof(IProviderConfiguration.DefaultModel))
             ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
 
-        var defaultTemperature = _configuration
+        var defaultTemperature = configuration
             .GetSection(nameof(ProviderConfiguration))
             .GetValue<double?>(nameof(ProviderConfiguration.DefaultTemperature))
             ?? throw new ArgumentException(nameof(ProviderConfiguration.DefaultTemperature));
@@ -150,6 +143,7 @@ public class ArgumentParser
         return providerAndModel.GetValue()?.ToString() ?? throw new ArgumentException("Provider and model argument must be a valid cell reference");
     }
 
+    // Render sheet as Markdown table because models have seen loads of those
     private static string ParseCells(ExcelReference reference)
     {
         try
@@ -159,32 +153,96 @@ public class ArgumentParser
             sheetName = sheetName[(sheetName.LastIndexOf(']') + 1)..];
             var worksheet = app.Sheets[sheetName];
 
-            var tableBuilder = new StringBuilder();
-            var valueBuilder = new StringBuilder();
+            var numberOfRows = reference.RowLast - reference.RowFirst + 1;  // 1-indexed
+            var numberOfColumns = reference.ColumnLast - reference.ColumnFirst + 1;  // 1-indexed
 
-            var rows = reference.RowLast - reference.RowFirst + 1;
-            var columns = reference.ColumnLast - reference.ColumnFirst + 1;
+            var numberOfRenderedRows = numberOfRows + 1; // Includes the header row
+            var numberOfRenderedColumns = numberOfColumns + 1; // Includes the row-number column
 
-            for (int row = 0; row < rows; row++)
+            var isEmpty = true;
+
+            // Column-major for easy calculation of padding
+            var table = new List<List<string>>();
+
+            // Initialize table with empty rows for reduced number of heap allocations
+            for (var c = 0; c < numberOfRenderedColumns; c++)
             {
-                for (int column = 0; column < columns; column++)
-                {
-                    var value = worksheet.Cells[reference.RowFirst + row + 1, reference.ColumnFirst + column + 1].Text;
-                    valueBuilder.Append(value);
-
-                    tableBuilder.Append("| ");
-                    tableBuilder.Append(GetColumnName(reference.ColumnFirst + column) + GetRowName(reference.RowFirst + row));
-                    tableBuilder.Append(' ');
-                    tableBuilder.Append(value);
-                    tableBuilder.Append(' ');
-                }
-
-                tableBuilder.AppendLine("|");
+                table.Add(new List<string>(numberOfRenderedRows));
             }
 
-            if (string.IsNullOrEmpty(valueBuilder.ToString()))
+            // Add row number column
+            table[0].Add("Row \\ Col");  // Top-left
+
+            for (var r = 0; r < numberOfRows; r++)
             {
-                throw new ArgumentException("Empty cells");
+                table[0].Add(GetRowName(reference.RowFirst + r));
+            }
+
+            // Add other columns
+            for (var c = 0; c < numberOfColumns; c++)
+            {
+                table[c + 1].Add(GetColumnName(reference.ColumnFirst + c)); // Column header
+
+                for (var r = 0; r < numberOfRows; r++)
+                {
+                    var value = worksheet.Cells[reference.RowFirst + r + 1, reference.ColumnFirst + c + 1].Text?.ToString() ?? string.Empty;
+
+                    if (isEmpty && !string.IsNullOrEmpty(value))
+                    {
+                        isEmpty = false;
+                    }
+
+                    string sanitizedCellValue = value.Replace("\r\n", " ").Replace("\n", " ").Replace("|", "\\|");
+                    table[c + 1].Add(sanitizedCellValue);
+                }
+            }
+
+            // Pad columns
+            foreach (var column in table)
+            {
+                var maxWidth = column.Max(cell => cell?.Length ?? 0);
+
+                for (var r = 0; r < column.Count; r++)
+                {
+                    column[r] = column[r].PadRight(maxWidth);
+                }
+            }
+
+            var tableBuilder = new StringBuilder();
+
+            // Iterate row-major for StringBuilder
+            for (var r = 0; r < numberOfRenderedRows; r++)
+            {
+                tableBuilder.Append('|');
+
+                for (var c = 0; c < numberOfRenderedColumns; c++)
+                {
+                    tableBuilder.Append(' ');
+                    tableBuilder.Append(table[c][r]); // Access [column][row]
+                    tableBuilder.Append(" |");
+                }
+
+                tableBuilder.AppendLine();
+
+                // Add separator line after the header row (r == 0)
+                if (r == 0)
+                {
+                    tableBuilder.Append('|');
+                    for (var c = 0; c < numberOfRenderedColumns; c++)
+                    {
+                        tableBuilder.Append(' ');
+                        // Length of separator is based on the padded header cell's length
+                        tableBuilder.Append(new string('-', table[c][r].Length));
+                        tableBuilder.Append(" |");
+                    }
+
+                    tableBuilder.AppendLine();
+                }
+            }
+
+            if (isEmpty)
+            {
+                throw new ArgumentNullException(nameof(reference));
             }
 
             return tableBuilder.ToString();
@@ -197,12 +255,14 @@ public class ArgumentParser
 
     private static string GetColumnName(int columnNumber)
     {
-        string columnName = "";
+        var columnName = string.Empty;
+
         while (columnNumber >= 0)
         {
             columnName = (char)('A' + columnNumber % 26) + columnName;
             columnNumber = columnNumber / 26 - 1;
         }
+
         return columnName;
     }
 

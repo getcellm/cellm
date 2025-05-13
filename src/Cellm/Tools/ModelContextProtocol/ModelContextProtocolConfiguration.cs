@@ -4,5 +4,7 @@ namespace Cellm.Tools.ModelContextProtocol;
 
 internal class ModelContextProtocolConfiguration
 {
-    public List<StdioClientTransport> Servers { get; init; } = [];
+    public List<StdioClientTransportOptions> StdioServers { get; init; } = [];
+
+    public List<SseClientTransportOptions> SseServers { get; init; } = [];
 }

@@ -110,9 +110,9 @@ public class CellmAddIn : IExcelAddIn
             .AddMediatR(cfg =>
             {
                 cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
-                cfg.AddOpenBehavior(typeof(SentryBehavior<,>), ServiceLifetime.Singleton);
-                cfg.AddOpenBehavior(typeof(ToolBehavior<,>), ServiceLifetime.Singleton);
-                cfg.AddOpenBehavior(typeof(CacheBehavior<,>), ServiceLifetime.Singleton);
+                cfg.AddBehavior(typeof(SentryBehavior<ProviderRequest, ProviderResponse>), ServiceLifetime.Singleton);
+                cfg.AddBehavior(typeof(ToolBehavior<ProviderRequest, ProviderResponse>), ServiceLifetime.Singleton);
+                cfg.AddBehavior(typeof(CacheBehavior<ProviderRequest, ProviderResponse>), ServiceLifetime.Singleton);
             })
             .AddSingleton(configuration)
             .AddTransient<ArgumentParser>()

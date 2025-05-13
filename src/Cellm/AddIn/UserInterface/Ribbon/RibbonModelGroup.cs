@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using Cellm.AddIn.UserInterface.Forms;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
@@ -159,7 +159,7 @@ public partial class RibbonMain
                 </box>
                 <separator id="cacheSeparator" />
                 <toggleButton id="{nameof(ModelGroupControlIds.CacheToggleButton)}" label="Cache" size="large" imageMso="SourceControlRefreshStatus"
-                    screentip="Enable/disable local caching of model responses. Disabling cache will clear all cached responses."
+                    screentip="Enable/disable local caching of model responses. Enabled: Return cached responses for identical prompts. Disabled: Always request new responses. Disabling cache will clear entries."
                     onAction="{nameof(OnCacheToggled)}" getPressed="{nameof(OnGetCachePressed)}" />
             </group>
             """;
@@ -177,7 +177,8 @@ public partial class RibbonMain
         var account = CellmAddIn.Services.GetRequiredService<Account>();
 
         // The 'tag' property of the menu button holds the index we stored.
-        if (int.TryParse(control.Tag, out int index))
+
+        if (int.TryParse(control.Tag, out var index))
         {
             if (_providerItems.TryGetValue(index, out var item) && !string.IsNullOrEmpty(item.Image))
             {
