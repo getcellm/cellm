@@ -1,13 +1,15 @@
-﻿using Cellm.Models;
+﻿using System.Text;
+using Cellm.Models;
 using Cellm.Models.Prompts;
 using Cellm.Models.Providers;
 using ExcelDna.Integration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Cellm.AddIn;
 
-internal class ObserveResponse(Prompt prompt, Provider provider) : IExcelObservable
+internal class ObserveResponse(Arguments arguments) : IExcelObservable
 {
     private IExcelObserver? _observer;
     private Task? _task;
@@ -37,33 +39,65 @@ internal class ObserveResponse(Prompt prompt, Provider provider) : IExcelObserva
         {
             try
             {
+                var userMessage = new StringBuilder()
+                    .AppendLine(arguments.Instructions)
+                    .AppendLine(arguments.Context)
+                    .ToString();
+
+                var providerConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<ProviderConfiguration>>();
+
+                var prompt = new PromptBuilder()
+                    .SetModel(arguments.Model)
+                    .SetTemperature(arguments.Temperature)
+                    .SetMaxOutputTokens(providerConfiguration.CurrentValue.MaxOutputTokens)
+                    .AddSystemMessage(SystemMessages.SystemMessage)
+                    .AddUserMessage(userMessage)
+                    .Build();
+
+                // Check for cancellation before sending request
+                _cancellationTokenSource.Token.ThrowIfCancellationRequested();
+
                 var client = CellmAddIn.Services.GetRequiredService<Client>();
-                var response = await client.GetResponseAsync(prompt, provider, _cancellationTokenSource.Token);
+                var response = await client.GetResponseAsync(prompt, arguments.Provider, _cancellationTokenSource.Token);
                 var assistantMessage = response.Messages.LastOrDefault()?.Text ?? throw new InvalidOperationException("No text response");
 
                 // Check for cancellation before notifying observer
                 _cancellationTokenSource.Token.ThrowIfCancellationRequested();
 
-                _observer.OnNext(assistantMessage);
-                _observer.OnCompleted();
+                // Notify observer on the main thread
+                ExcelAsyncUtil.QueueAsMacro(() =>
+                {
+                    _observer?.OnNext(assistantMessage);
+                    _observer?.OnCompleted();
+                });
 
-                _logger.LogDebug("Getting response ... Done");
+                _logger.LogDebug("Getting response {id} ... Done", _task?.Id);
             }
             catch (OperationCanceledException ex)
             {
-                _logger.LogDebug(ex, "Getting response ... Cancelled");
-                _observer.OnError(ex);
+                // Notify observer on the main thread
+                ExcelAsyncUtil.QueueAsMacro(() =>
+                {
+                    _observer.OnError(ex);
+                });
+
+                _logger.LogDebug(ex, "Getting response {id} ... Cancelled", _task?.Id);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Getting response ... Failed: {message}", ex.Message);
-                observer.OnError(ex);
+                // Notify observer on the main thread
+                ExcelAsyncUtil.QueueAsMacro(() =>
+                {
+                    observer.OnError(ex);
+                });
+
+                _logger.LogError(ex, "Getting response {id} ... Failed: {message}", _task?.Id, ex.Message);
             }
         }, _cancellationTokenSource.Token);
 
         return new ActionDisposable(() =>
         {
-            _logger.LogDebug("Getting response ... Disposing");
+            _logger.LogDebug("Getting response {id} ... Disposing ({status})", _task.Id, _task.IsCompleted ? "done" : "cancelled");
             _cancellationTokenSource.Cancel();
         });
     }

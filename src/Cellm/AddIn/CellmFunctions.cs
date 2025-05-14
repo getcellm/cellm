@@ -71,7 +71,7 @@ public static class CellmFunctions
         [ExcelArgument(AllowReference = true, Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
         [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
     {
-        // Short-circuit if any of the inputs is #GETTING_DATA. This function will be re-triggered when inputs are updated with realized values.
+        // Short-circuit if any inputs are #GETTING_DATA. This function will be re-triggered when inputs are updated with realized values.
         if (IsCellReferenceGettingData(providerAndModel) ||
             IsCellReferenceGettingData(instructionsOrContext) ||
             IsCellReferenceGettingData(instructionsOrTemperature))
@@ -84,6 +84,7 @@ public static class CellmFunctions
             var argumentParser = CellmAddIn.Services.GetRequiredService<ArgumentParser>();
             var providerConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<ProviderConfiguration>>();
 
+            // We must parse arguments on the main thread
             var arguments = argumentParser
                 .AddProvider(providerAndModel)
                 .AddModel(providerAndModel)
@@ -92,23 +93,11 @@ public static class CellmFunctions
                 .AddTemperature(temperature)
                 .Parse();
 
-            var userMessage = new StringBuilder()
-                .AppendLine(arguments.Instructions)
-                .AppendLine(arguments.Context)
-                .ToString();
-
-            var prompt = new PromptBuilder()
-                .SetModel(arguments.Model)
-                .SetTemperature(arguments.Temperature)
-                .SetMaxOutputTokens(providerConfiguration.CurrentValue.MaxOutputTokens)
-                .AddSystemMessage(SystemMessages.SystemMessage)
-                .AddUserMessage(userMessage)
-                .Build();
-
+            // ObserveResponse will send request on another thread and update the cell value on the main thread
             return ExcelAsyncUtil.Observe(
                 nameof(PromptWith),
                 new object[] { providerAndModel, instructionsOrContext, instructionsOrTemperature, temperature },
-                () => new ObserveResponse(prompt, arguments.Provider));
+                () => new ObserveResponse(arguments));
         }
         catch (CellmException ex)
         {
