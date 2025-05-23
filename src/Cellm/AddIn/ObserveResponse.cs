@@ -29,7 +29,6 @@ internal class ObserveResponse(Arguments arguments) : IExcelObservable
                 throw new InvalidOperationException("Internal error: GetResponse instance has already been subscribed to. Each call requires a new instance.");
             }
 
-            _logger.LogDebug("Getting response ...");
             _observer = observer ?? throw new ArgumentNullException(nameof(observer));
         }
 
@@ -39,6 +38,8 @@ internal class ObserveResponse(Arguments arguments) : IExcelObservable
         {
             try
             {
+                _logger.LogDebug("Getting response {id} ...", _task?.Id);
+
                 var userMessage = new StringBuilder()
                     .AppendLine(arguments.Instructions)
                     .AppendLine(arguments.Context)

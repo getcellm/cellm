@@ -2,4 +2,6 @@
 
 namespace Cellm.AddIn;
 
-public record Arguments(Provider Provider, string Model, string Context, string Instructions, double Temperature);
+internal record Cells(int RowFirst, int RowLast, int ColumnFirst, int ColumnLast, string[,] Values);
+
+internal record Arguments(Provider Provider, string Model, Cells Cells, string Instructions, double Temperature);

@@ -88,7 +88,7 @@ public static class CellmFunctions
             var arguments = argumentParser
                 .AddProvider(providerAndModel)
                 .AddModel(providerAndModel)
-                .AddInstructionsOrContext(instructionsOrContext)
+                .AddInstructionsOrCells(instructionsOrContext)
                 .AddInstructionsOrTemperature(instructionsOrTemperature)
                 .AddTemperature(temperature)
                 .Parse();

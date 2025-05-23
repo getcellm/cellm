@@ -10,13 +10,13 @@ public class ArgumentParser(IConfiguration configuration)
 {
     private string? _provider;
     private string? _model;
-    private object? _instructionsOrContext;
+    private object? _instructionsOrCells;
     private object? _instructionsOrTemperature;
     private object? _temperature;
 
-    public static readonly string ContextStartTag = "<context>";
-    public static readonly string ContextEndTag = "</context>";
-    public static readonly string InstructionsStartTag = "<instructions>";
+    public static readonly string CellsBeginTag = "<cells>";
+    public static readonly string CellsEndTag = "</cells>";
+    public static readonly string InstructionsBeginTag = "<instructions>";
     public static readonly string InstructionsEndTag = "<instructions>";
 
     public ArgumentParser AddProvider(object providerAndModel)
@@ -43,9 +43,9 @@ public class ArgumentParser(IConfiguration configuration)
         return this;
     }
 
-    public ArgumentParser AddInstructionsOrContext(object instructionsOrContext)
+    public ArgumentParser AddInstructionsOrCells(object instructionsOrCells)
     {
-        _instructionsOrContext = instructionsOrContext;
+        _instructionsOrCells = instructionsOrCells;
 
         return this;
     }
@@ -86,26 +86,26 @@ public class ArgumentParser(IConfiguration configuration)
             .GetValue<double?>(nameof(ProviderConfiguration.DefaultTemperature))
             ?? throw new ArgumentException(nameof(ProviderConfiguration.DefaultTemperature));
 
-        return (_instructionsOrContext, _instructionsOrTemperature, _temperature) switch
+        return (_instructionsOrCells, _instructionsOrTemperature, _temperature) switch
         {
             // "=PROMPT("Extract keywords")
             (string instructions, ExcelMissing, ExcelMissing) => new Arguments(provider, model, string.Empty, RenderInstructions(instructions), ParseTemperature(defaultTemperature)),
             // "=PROMPT("Extract keywords", 0.7)
             (string instructions, double temperature, ExcelMissing) => new Arguments(provider, model, string.Empty, RenderInstructions(instructions), ParseTemperature(temperature)),
             // "=PROMPT(A1:B2)
-            (ExcelReference context, ExcelMissing, ExcelMissing) => new Arguments(provider, model, RenderCells(ParseCells(context)), RenderInstructions(SystemMessages.InlineInstructions), ParseTemperature(defaultTemperature)),
+            (ExcelReference cells, ExcelMissing, ExcelMissing) => new Arguments(provider, model, RenderCells(ParseCells(cells)), RenderInstructions(SystemMessages.InlineInstructions), ParseTemperature(defaultTemperature)),
             // "=PROMPT(A1:B2, 0.7)
-            (ExcelReference context, double temperature, ExcelMissing) => new Arguments(provider, model, RenderCells(ParseCells(context)), RenderInstructions(SystemMessages.InlineInstructions), ParseTemperature(defaultTemperature)),
+            (ExcelReference cells, double temperature, ExcelMissing) => new Arguments(provider, model, RenderCells(ParseCells(cells)), RenderInstructions(SystemMessages.InlineInstructions), ParseTemperature(defaultTemperature)),
             // "=PROMPT(A1:B2, "Extract keywords")
-            (ExcelReference context, string instructions, ExcelMissing) => new Arguments(provider, model, RenderCells(ParseCells(context)), RenderInstructions(instructions), ParseTemperature(defaultTemperature)),
+            (ExcelReference cells, string instructions, ExcelMissing) => new Arguments(provider, model, RenderCells(ParseCells(cells)), RenderInstructions(instructions), ParseTemperature(defaultTemperature)),
             // "=PROMPT(A1:B2, "Extract keywords", 0.7)
-            (ExcelReference context, string instructions, double temperature) => new Arguments(provider, model, RenderCells(ParseCells(context)), RenderInstructions(instructions), ParseTemperature(temperature)),
+            (ExcelReference cells, string instructions, double temperature) => new Arguments(provider, model, RenderCells(ParseCells(cells)), RenderInstructions(instructions), ParseTemperature(temperature)),
             // "=PROMPT(A1:B2, C1:D2)
-            (ExcelReference context, ExcelReference instructions, ExcelMissing) => new Arguments(provider, model, RenderCells(ParseCells(context)), RenderInstructions(ParseCells(instructions)), ParseTemperature(defaultTemperature)),
+            (ExcelReference cells, ExcelReference instructions, ExcelMissing) => new Arguments(provider, model, RenderCells(ParseCells(cells)), RenderInstructions(ParseCells(instructions)), ParseTemperature(defaultTemperature)),
             // "=PROMPT(A1:B2, C1:D2, 0.7)
-            (ExcelReference context, ExcelReference instructions, double temperature) => new Arguments(provider, model, RenderCells(ParseCells(context)), RenderInstructions(ParseCells(instructions)), ParseTemperature(temperature)),
+            (ExcelReference cells, ExcelReference instructions, double temperature) => new Arguments(provider, model, RenderCells(ParseCells(cells)), RenderInstructions(ParseCells(instructions)), ParseTemperature(temperature)),
             // Anything else
-            _ => throw new ArgumentException($"Invalid arguments ({_instructionsOrContext?.GetType().Name}, {_instructionsOrTemperature?.GetType().Name}, {_temperature?.GetType().Name})")
+            _ => throw new ArgumentException($"Invalid arguments ({_instructionsOrCells?.GetType().Name}, {_instructionsOrTemperature?.GetType().Name}, {_temperature?.GetType().Name})")
         };
     }
 
@@ -274,16 +274,16 @@ public class ArgumentParser(IConfiguration configuration)
     private static string RenderCells(string context)
     {
         return new StringBuilder()
-            .AppendLine(ContextStartTag)
+            .AppendLine(CellsBeginTag)
             .AppendLine(context)
-            .AppendLine(ContextEndTag)
+            .AppendLine(CellsEndTag)
             .ToString();
     }
 
     private static string RenderInstructions(string instructions)
     {
         return new StringBuilder()
-            .AppendLine(InstructionsStartTag)
+            .AppendLine(InstructionsBeginTag)
             .AppendLine(instructions)
             .AppendLine(InstructionsEndTag)
             .ToString();

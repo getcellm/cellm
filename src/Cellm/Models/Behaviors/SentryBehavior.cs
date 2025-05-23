@@ -55,7 +55,7 @@ internal class SentryBehavior<TRequest, TResponse>(
             .First()
             .Text;
 
-        var startIndex = userMessage.IndexOf(ArgumentParser.InstructionsStartTag, StringComparison.OrdinalIgnoreCase) + ArgumentParser.InstructionsStartTag.Length;
+        var startIndex = userMessage.IndexOf(ArgumentParser.InstructionsBeginTag, StringComparison.OrdinalIgnoreCase) + ArgumentParser.InstructionsBeginTag.Length;
 
         if (startIndex < 0)
         {
