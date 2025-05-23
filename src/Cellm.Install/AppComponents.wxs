@@ -1,0 +1,37 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Fragment>
+    <ComponentGroup Id="AppComponents" Directory="INSTALLFOLDER">
+      <Component Id="Cellm64Component" Guid="421F66BC-6680-4FC9-9311-27E6996C562C">
+        <File Id="CellmAddIn64PackedXll" Name="Cellm-AddIn64-packed.xll" Source="..\Cellm\bin\$(Configuration)\net9.0-windows\publish\Cellm-AddIn64-packed.xll" />
+        <RegistryKey Root="HKCU" Key="Software\TokenFactory\Cellm">
+          <RegistryValue Type="string" Name="CellmInstalled" Value="yes" KeyPath="yes" />
+        </RegistryKey>
+        <RemoveFolder Id='RemoveInstallFolder' Directory='INSTALLFOLDER' On='uninstall' />
+      </Component>
+
+      <Component Id="Office12Registry" Guid="A1126967-D155-4817-82D2-CC8D38DC7FB5" Condition="OFFICE12INSTALLED">
+        <RegistryKey Root="HKCU" Key="Software\Microsoft\Office\12.0\Excel\Options">
+          <RegistryValue Type="string" Name="OPEN1" Value="/R [INSTALLFOLDER]Cellm-AddIn64-packed.xll" KeyPath="yes" />
+        </RegistryKey>
+      </Component>
+
+      <Component Id="Office14Registry" Guid="5C22D506-FCFC-46AC-82B0-211F61391AE0" Condition="OFFICE14INSTALLED">
+        <RegistryKey Root="HKCU" Key="Software\Microsoft\Office\14.0\Excel\Options">
+          <RegistryValue Type="string" Name="OPEN1" Value="/R [INSTALLFOLDER]Cellm-AddIn64-packed.xll" KeyPath="yes" />
+        </RegistryKey>
+      </Component>
+
+      <Component Id="Office15Registry" Guid="27522B4F-788C-4B7A-9EC2-476A67DEF021" Condition="OFFICE15INSTALLED">
+        <RegistryKey Root="HKCU" Key="Software\Microsoft\Office\15.0\Excel\Options">
+          <RegistryValue Type="string" Name="OPEN1" Value="/R [INSTALLFOLDER]Cellm-AddIn64-packed.xll" KeyPath="yes" />
+        </RegistryKey>
+      </Component>
+
+      <Component Id="Office16Registry" Guid="0411319A-EF99-4D96-8D68-93D675050458" Condition="OFFICE16INSTALLED">
+        <RegistryKey Root="HKCU" Key="Software\Microsoft\Office\16.0\Excel\Options">
+          <RegistryValue Type="string" Name="OPEN1" Value="/R [INSTALLFOLDER]Cellm-AddIn64-packed.xll" KeyPath="yes" />
+        </RegistryKey>
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+</Wix>
