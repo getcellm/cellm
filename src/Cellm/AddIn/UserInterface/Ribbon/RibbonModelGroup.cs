@@ -54,7 +54,7 @@ public partial class RibbonMain
 
     private const string NoPresetsPlaceholder = "(No presets configured)";
 
-    private readonly Dictionary<int, ProviderItem> _providerItems = new Dictionary<int, ProviderItem>
+    private readonly Dictionary<int, ProviderItem> _providerItems = new()
     {
         [0] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.Anthropic)}", Image = $"{ResourcesBasePath}/anthropic.png", Label = nameof(Provider.Anthropic), Entitlement = Entitlement.EnableAnthropicProvider },
         [1] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.DeepSeek)}", Image = $"{ResourcesBasePath}/deepseek.png", Label = nameof(Provider.DeepSeek), Entitlement = Entitlement.EnableDeepSeekProvider },
@@ -102,9 +102,9 @@ public partial class RibbonMain
         // Dynamic provider menu items (IDs generated here, not in enum)
         foreach (var kvp in _providerItems.OrderBy(p => p.Value.Label))
         {
-            int index = kvp.Key;
-            ProviderItem item = kvp.Value;
-            string menuItemId = item.Id; // Dynamic ID
+            var index = kvp.Key;
+            var item = kvp.Value;
+            var menuItemId = item.Id; // Dynamic ID
             providerMenuItemsXml.AppendLine(
                 $@"<button id=""{menuItemId}""
                      label=""{System.Security.SecurityElement.Escape(item.Label)}""
@@ -245,7 +245,7 @@ public partial class RibbonMain
     public Bitmap? GetProviderMenuItemImage(IRibbonControl control)
     {
         // The 'tag' property of the menu button holds the index we stored.
-        if (int.TryParse(control.Tag, out int index))
+        if (int.TryParse(control.Tag, out var index))
         {
             if (_providerItems.TryGetValue(index, out var item) && !string.IsNullOrEmpty(item.Image))
             {
@@ -320,7 +320,7 @@ public partial class RibbonMain
     public void OnModelComboBoxChange(IRibbonControl control, string text)
     {
         var provider = GetCurrentProvider();
-        string configKey = $"{provider}Configuration:{nameof(OpenAiConfiguration.DefaultModel)}"; // Using OpenAI as template name
+        var configKey = $"{provider}Configuration:{nameof(OpenAiConfiguration.DefaultModel)}"; // Using OpenAI as template name
 
 
         if (text == NoPresetsPlaceholder)
@@ -357,7 +357,7 @@ public partial class RibbonMain
     public int GetModelComboBoxItemCount(IRibbonControl control)
     {
         var provider = GetCurrentProvider();
-        int actualCount = GetAvailableModelNamesForProvider(provider).Count;
+        var actualCount = GetAvailableModelNamesForProvider(provider).Count;
 
         if (actualCount == 0)
         {
@@ -416,9 +416,9 @@ public partial class RibbonMain
     private List<string> GetAvailableModelNamesForProvider(Provider provider)
     {
         var modelNames = new List<string>();
-        string small = GetModelNameForProvider(provider, "Small");
-        string big = GetModelNameForProvider(provider, "Big");
-        string thinking = GetModelNameForProvider(provider, "Thinking");
+        var small = GetModelNameForProvider(provider, "Small");
+        var big = GetModelNameForProvider(provider, "Big");
+        var thinking = GetModelNameForProvider(provider, "Thinking");
 
         if (!string.IsNullOrEmpty(small) && !small.StartsWith("No ")) modelNames.Add(small);
         if (!string.IsNullOrEmpty(big) && !big.StartsWith("No ")) modelNames.Add(big);
@@ -497,11 +497,10 @@ public partial class RibbonMain
     public void HandleProviderMenuSelection(IRibbonControl control)
     {
         // ... (parsing index and getting selectedProviderItem logic remains the same) ...
-        if (int.TryParse(control.Tag, out int index))
+        if (int.TryParse(control.Tag, out var index))
         {
-            if (_providerItems.ContainsKey(index))
+            if (_providerItems.TryGetValue(index, out var selectedProviderItem))
             {
-                var selectedProviderItem = _providerItems[index];
                 if (_selectedProviderIndex != index) // Only update if selection actually changed
                 {
                     _selectedProviderIndex = index;
@@ -534,12 +533,12 @@ public partial class RibbonMain
             }
             else
             {
-                _logger.LogWarning(": Invalid index from tag: {index}", index);
+                _logger.LogWarning("Invalid index from tag: {index}", index);
             }
         }
         else
         {
-            _logger.LogWarning($": Could not parse index from tag '{control.Tag}' for selected menu item '{control.Id}'.");
+            _logger.LogWarning("Could not parse index from tag '{tag}' for selected menu item '{id}'.", control.Tag, control.Id);
         }
     }
 
@@ -674,34 +673,32 @@ public partial class RibbonMain
         }
 
         // Instantiate and show the form
-        using (var settingsForm = new ProviderSettingsForm(provider, currentApiKey, currentBaseAddress))
+        using var settingsForm = new ProviderSettingsForm(provider, currentApiKey, currentBaseAddress);
+        var result = settingsForm.ShowDialog(); // Show modally
+
+        if (result == DialogResult.OK)
         {
-            var result = settingsForm.ShowDialog(); // Show modally
+            // User clicked OK, save the potentially updated values
+            var newApiKey = settingsForm.ApiKey;
+            var newBaseAddress = settingsForm.BaseAddress;
 
-            if (result == DialogResult.OK)
+            try
             {
-                // User clicked OK, save the potentially updated values
-                string newApiKey = settingsForm.ApiKey;
-                string newBaseAddress = settingsForm.BaseAddress;
-
-                try
+                if (IsApiKeyEditable(provider))
                 {
-                    if (IsApiKeyEditable(provider))
-                    {
-                        SetValue($"{provider}Configuration:ApiKey", newApiKey);
-                    }
+                    SetValue($"{provider}Configuration:ApiKey", newApiKey);
+                }
 
-                    // Save BaseAddress only if it's relevant AND editable for this provider
-                    if (IsBaseAddressEditable(provider))
-                    {
-                        SetValue($"{provider}Configuration:BaseAddress", newBaseAddress);
-                    }
-                }
-                catch (Exception ex)
+                // Save BaseAddress only if it's relevant AND editable for this provider
+                if (IsBaseAddressEditable(provider))
                 {
-                    _logger.LogDebug("ERROR saving settings for {provider}: {message}", provider, ex.Message);
-                    MessageBox.Show($"Error saving settings: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    SetValue($"{provider}Configuration:BaseAddress", newBaseAddress);
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug("ERROR saving settings for {provider}: {message}", provider, ex.Message);
+                MessageBox.Show($"Error saving settings: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }
@@ -724,7 +721,7 @@ public partial class RibbonMain
     }
 
     // Array of temperature suggestions
-    private static readonly string[] TemperatureOptions = { "0.0", "0.3", "0.7", "1.0" };
+    private static readonly string[] TemperatureOptions = ["0.0", "0.3", "0.7", "1.0"];
 
     public string GetTemperatureText(IRibbonControl control)
     {
@@ -775,7 +772,7 @@ public partial class RibbonMain
             try
             {
                 // Format to ensure consistent display
-                string formattedTemperature = temperature.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture);
+                var formattedTemperature = temperature.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture);
                 SetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultTemperature)}", formattedTemperature);
             }
             catch (Exception ex)

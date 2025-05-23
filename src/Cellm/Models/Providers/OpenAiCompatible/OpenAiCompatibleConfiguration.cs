@@ -2,9 +2,9 @@
 
 internal class OpenAiCompatibleConfiguration : IProviderConfiguration
 {
-    public Uri BaseAddress { get; set; } = default!;
+    public Uri BaseAddress { get; set; } = new Uri("https://api.openai.com/v1/");
 
-    public string DefaultModel { get; init; } = string.Empty;
+    public string DefaultModel { get; init; } = "gpt-4.1-mini";
 
     public string ApiKey { get; init; } = string.Empty;
 

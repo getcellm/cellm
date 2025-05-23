@@ -53,7 +53,7 @@ public partial class RibbonMain : ExcelRibbon
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error in EnsureDefaultProvider: {ex.Message}. Falling back to index 0.");
+            _logger.LogError("Error in EnsureDefaultProvider: {message}. Falling back to index 0.", ex.Message);
 
             // General fallback if parsing or other issues occur
             SetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultProvider)}", _providerItems[0].Label);

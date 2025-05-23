@@ -2,9 +2,9 @@
 
 public class RetryConfiguration
 {
-    public int MaxRetryAttempts { get; init; }
+    public int MaxRetryAttempts { get; init; } = 3;
 
-    public int HttpTimeoutInSeconds { get; init; }
+    public int DelayInSeconds { get; init; } = 9;
 
-    public int DelayInSeconds { get; init; }
+    public int HttpTimeoutInSeconds { get; init; } = 600;  // Must accommodate slow local models
 }

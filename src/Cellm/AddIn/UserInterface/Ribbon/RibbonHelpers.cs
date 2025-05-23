@@ -2,6 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Cellm.Models.Providers;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -50,31 +51,14 @@ public partial class RibbonMain
 
     public static string GetValue(string key)
     {
-        var keySegments = key.Split(':');
-
-        // 1. Check local settings first
-        if (File.Exists(_appsettingsLocalPath))
-        {
-            var localNode = JsonNode.Parse(File.ReadAllText(_appsettingsLocalPath));
-            var value = GetValueFromNode(localNode, keySegments);
-            if (value != null) return value.ToString();
-        }
-
-        // 2. Fall back to base settings
-        if (File.Exists(_appSettingsPath))
-        {
-            var baseNode = JsonNode.Parse(File.ReadAllText(_appSettingsPath));
-            var value = GetValueFromNode(baseNode, keySegments);
-            if (value != null) return value.ToString();
-        }
-
-        throw new KeyNotFoundException($"Key '{key}' not found in configuration files");
+        var configuration = CellmAddIn.Services.GetRequiredService<IConfiguration>();
+        return configuration[key] ?? throw new KeyNotFoundException($"Key '{key}' not found in configuration");
     }
 
     public static void SetValue(string key, string value)
     {
         var keySegments = key.Split(':');
-        JsonNode localNode = File.Exists(_appsettingsLocalPath)
+        var localNode = File.Exists(_appsettingsLocalPath)
             ? JsonNode.Parse(File.ReadAllText(_appsettingsLocalPath)) ?? new JsonObject()
             : new JsonObject();
 
@@ -107,7 +91,7 @@ public partial class RibbonMain
     private static void SetValueInNode(JsonObject node, string[] keySegments, string value)
     {
         var current = node;
-        for (int i = 0; i < keySegments.Length; i++)
+        for (var i = 0; i < keySegments.Length; i++)
         {
             var isLast = i == keySegments.Length - 1;
             var segment = keySegments[i];
