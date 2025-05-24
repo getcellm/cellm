@@ -35,8 +35,8 @@ public static class CellmFunctions
     {
         var configuration = CellmAddIn.Services.GetRequiredService<IConfiguration>();
 
-        var provider = configuration.GetSection(nameof(ProviderConfiguration)).GetValue<string>(nameof(ProviderConfiguration.DefaultProvider))
-            ?? throw new ArgumentException(nameof(ProviderConfiguration.DefaultProvider));
+        var provider = configuration.GetSection(nameof(CellmAddInConfiguration)).GetValue<string>(nameof(CellmAddInConfiguration.DefaultProvider))
+            ?? throw new ArgumentException(nameof(CellmAddInConfiguration.DefaultProvider));
 
         var model = configuration.GetSection($"{provider}Configuration").GetValue<string>(nameof(IProviderConfiguration.DefaultModel))
             ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
@@ -82,7 +82,7 @@ public static class CellmFunctions
         try
         {
             var argumentParser = CellmAddIn.Services.GetRequiredService<ArgumentParser>();
-            var providerConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<ProviderConfiguration>>();
+            var providerConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<CellmAddInConfiguration>>();
 
             // We must parse arguments on the main thread
             var arguments = argumentParser

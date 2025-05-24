@@ -21,16 +21,18 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Sentry.Infrastructure;
 
 namespace Cellm.AddIn;
 
 public class CellmAddIn : IExcelAddIn
 {
-    internal static string ConfigurationPath { get; set; } = ExcelDnaUtil.XllPathInfo?.Directory?.FullName ?? throw new NullReferenceException("Could not get Cellm path");
+    internal static string ConfigurationPath => ExcelDnaUtil.XllPathInfo?.Directory?.FullName ?? throw new NullReferenceException("Could not get Cellm path");
 
-    private static readonly Lazy<IServiceProvider> _serviceProvider = new(() => ConfigureServices(new ServiceCollection()).BuildServiceProvider());
-    public static IServiceProvider Services => _serviceProvider.Value;
+    private static readonly Lazy<ServiceProvider> _serviceProvider = new(() => ConfigureServices(new ServiceCollection()).BuildServiceProvider());
+
+    public static ServiceProvider Services => _serviceProvider.Value;
 
 
     public void AutoOpen()
@@ -49,7 +51,7 @@ public class CellmAddIn : IExcelAddIn
         SentrySdk.Flush();
     }
 
-    private static IServiceCollection ConfigureServices(IServiceCollection services)
+    private static ServiceCollection ConfigureServices(ServiceCollection services)
     {
         if (string.IsNullOrEmpty(ConfigurationPath))
         {
@@ -68,7 +70,7 @@ public class CellmAddIn : IExcelAddIn
             .Configure<AnthropicConfiguration>(configuration.GetRequiredSection(nameof(AnthropicConfiguration)))
             .Configure<CellmConfiguration>(configuration.GetRequiredSection(nameof(CellmConfiguration)))
             .Configure<DeepSeekConfiguration>(configuration.GetRequiredSection(nameof(DeepSeekConfiguration)))
-            .Configure<ProviderConfiguration>(configuration.GetRequiredSection(nameof(ProviderConfiguration)))
+            .Configure<CellmAddInConfiguration>(configuration.GetRequiredSection(nameof(CellmAddInConfiguration)))
             .Configure<MistralConfiguration>(configuration.GetRequiredSection(nameof(MistralConfiguration)))
             .Configure<ModelContextProtocolConfiguration>(configuration.GetRequiredSection(nameof(ModelContextProtocolConfiguration)))
             .Configure<OllamaConfiguration>(configuration.GetRequiredSection(nameof(OllamaConfiguration)))
@@ -77,9 +79,11 @@ public class CellmAddIn : IExcelAddIn
             .Configure<ResilienceConfiguration>(configuration.GetRequiredSection(nameof(ResilienceConfiguration)))
             .Configure<SentryConfiguration>(configuration.GetRequiredSection(nameof(SentryConfiguration)));
 
+        // Build a temporary service provider to resolve the registered configurations while configuring services
+        var configurationProvider = services.BuildServiceProvider();
+
         // Logging
-        var sentryConfiguration = configuration.GetRequiredSection(nameof(SentryConfiguration)).Get<SentryConfiguration>()
-            ?? throw new NullReferenceException(nameof(SentryConfiguration));
+        var sentryConfiguration = configurationProvider.GetRequiredService<IOptions<SentryConfiguration>>();
 
         services
           .AddLogging(loggingBuilder =>
@@ -90,16 +94,16 @@ public class CellmAddIn : IExcelAddIn
                   .AddDebug()
                   .AddSentry(sentryLoggingOptions =>
                   {
-                      sentryLoggingOptions.InitializeSdk = sentryConfiguration.IsEnabled;
+                      sentryLoggingOptions.InitializeSdk = sentryConfiguration.Value.IsEnabled;
                       sentryLoggingOptions.Release = GetReleaseVersion();
-                      sentryLoggingOptions.Environment = sentryConfiguration.Environment;
-                      sentryLoggingOptions.Dsn = sentryConfiguration.Dsn;
-                      sentryLoggingOptions.Debug = sentryConfiguration.Debug;
+                      sentryLoggingOptions.Environment = sentryConfiguration.Value.Environment;
+                      sentryLoggingOptions.Dsn = sentryConfiguration.Value.Dsn;
+                      sentryLoggingOptions.Debug = sentryConfiguration.Value.Debug;
                       sentryLoggingOptions.DiagnosticLevel = SentryLevel.Debug;
                       sentryLoggingOptions.DiagnosticLogger = new TraceDiagnosticLogger(SentryLevel.Debug);
-                      sentryLoggingOptions.TracesSampleRate = sentryConfiguration.TracesSampleRate;
-                      sentryLoggingOptions.ProfilesSampleRate = sentryConfiguration.ProfilesSampleRate;
-                      sentryLoggingOptions.Environment = sentryConfiguration.Environment;
+                      sentryLoggingOptions.TracesSampleRate = sentryConfiguration.Value.TracesSampleRate;
+                      sentryLoggingOptions.ProfilesSampleRate = sentryConfiguration.Value.ProfilesSampleRate;
+                      sentryLoggingOptions.Environment = sentryConfiguration.Value.Environment;
                       sentryLoggingOptions.AutoSessionTracking = true;
                       sentryLoggingOptions.AddIntegration(new ProfilingIntegration());
                   });
@@ -118,8 +122,8 @@ public class CellmAddIn : IExcelAddIn
             .AddTransient<ArgumentParser>()
             .AddSingleton<Account>()
             .AddSingleton<Client>()
-            .AddRateLimiter(configuration)
-            .AddRetryHttpClient(configuration);
+            .AddRateLimiter(configurationProvider)
+            .AddRetryHttpClient(configurationProvider);
 
 #pragma warning disable EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates.
         services

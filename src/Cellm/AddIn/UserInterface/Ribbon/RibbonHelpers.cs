@@ -2,6 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Cellm.Models.Providers;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -11,7 +12,7 @@ public partial class RibbonMain
 {
     private Provider GetCurrentProvider()
     {
-        return Enum.Parse<Provider>(GetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultProvider)}"), true);
+        return Enum.Parse<Provider>(GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}"), true);
     }
 
     private static T GetProviderConfiguration<T>()
@@ -48,6 +49,49 @@ public partial class RibbonMain
         return providerAndModel[(index + 1)..];
     }
 
+    public static void SetValue(string key, string value)
+    {
+        var keySegments = key.Split(':');
+        var localNode = File.Exists(_appsettingsLocalPath)
+            ? JsonNode.Parse(File.ReadAllText(_appsettingsLocalPath)) ?? new JsonObject()
+            : new JsonObject();
+
+        SetValueInNode(localNode.AsObject(), keySegments, value);
+
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
+
+        Directory.CreateDirectory(Path.GetDirectoryName(_appsettingsLocalPath)!);
+        File.WriteAllText(_appsettingsLocalPath, localNode.ToJsonString(options));
+    }
+
+    private static void SetValueInNode(JsonObject node, string[] keySegments, string value)
+    {
+        var current = node;
+        for (var i = 0; i < keySegments.Length; i++)
+        {
+            var isLast = i == keySegments.Length - 1;
+            var segment = keySegments[i];
+
+            if (isLast)
+            {
+                current[segment] = value;
+            }
+            else
+            {
+                if (!current.TryGetPropertyValue(segment, out var nextNode))
+                {
+                    nextNode = new JsonObject();
+                    current[segment] = nextNode;
+                }
+                current = nextNode!.AsObject();
+            }
+        }
+    }
+
     public static string GetValue(string key)
     {
         var keySegments = key.Split(':');
@@ -71,25 +115,6 @@ public partial class RibbonMain
         throw new KeyNotFoundException($"Key '{key}' not found in configuration files");
     }
 
-    public static void SetValue(string key, string value)
-    {
-        var keySegments = key.Split(':');
-        JsonNode localNode = File.Exists(_appsettingsLocalPath)
-            ? JsonNode.Parse(File.ReadAllText(_appsettingsLocalPath)) ?? new JsonObject()
-            : new JsonObject();
-
-        SetValueInNode(localNode.AsObject(), keySegments, value);
-
-        var options = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-        };
-
-        Directory.CreateDirectory(Path.GetDirectoryName(_appsettingsLocalPath)!);
-        File.WriteAllText(_appsettingsLocalPath, localNode.ToJsonString(options));
-    }
-
     private static JsonNode? GetValueFromNode(JsonNode? node, string[] keySegments)
     {
         foreach (var segment in keySegments)
@@ -102,29 +127,5 @@ public partial class RibbonMain
             if (node == null) break;
         }
         return node;
-    }
-
-    private static void SetValueInNode(JsonObject node, string[] keySegments, string value)
-    {
-        var current = node;
-        for (int i = 0; i < keySegments.Length; i++)
-        {
-            var isLast = i == keySegments.Length - 1;
-            var segment = keySegments[i];
-
-            if (isLast)
-            {
-                current[segment] = value;
-            }
-            else
-            {
-                if (!current.TryGetPropertyValue(segment, out var nextNode))
-                {
-                    nextNode = new JsonObject();
-                    current[segment] = nextNode;
-                }
-                current = nextNode!.AsObject();
-            }
-        }
     }
 }
