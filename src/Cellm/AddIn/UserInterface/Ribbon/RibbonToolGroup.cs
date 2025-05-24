@@ -89,12 +89,12 @@ public partial class RibbonMain
 
         }
 
-        SetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.EnableCache)}", enabled.ToString());
+        SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableCache)}", enabled.ToString());
     }
 
     public bool OnGetCachePressed(IRibbonControl control)
     {
-        return bool.Parse(GetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.EnableCache)}"));
+        return bool.Parse(GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableCache)}"));
     }
 
     public string GetMcpMenuContent()

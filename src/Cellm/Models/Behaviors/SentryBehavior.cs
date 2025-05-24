@@ -1,6 +1,5 @@
 ﻿using Cellm.AddIn;
 using Cellm.Models.Prompts;
-using Cellm.Models.Providers;
 using Cellm.Users;
 using MediatR;
 using Microsoft.Extensions.AI;
@@ -10,7 +9,7 @@ using Microsoft.Extensions.Options;
 namespace Cellm.Models.Behaviors;
 
 internal class SentryBehavior<TRequest, TResponse>(
-    IOptionsMonitor<ProviderConfiguration> providerConfiguration,
+    IOptionsMonitor<CellmAddInConfiguration> providerConfiguration,
     Account account,
     ILogger<SentryBehavior<TRequest, TResponse>> logger)
     : IPipelineBehavior<TRequest, TResponse>

@@ -1,9 +1,10 @@
-﻿using Cellm.Tools.FileReader;
+﻿using Cellm.Models.Providers;
+using Cellm.Tools.FileReader;
 using Cellm.Tools.FileSearch;
 
-namespace Cellm.Models.Providers;
+namespace Cellm.AddIn;
 
-public class ProviderConfiguration
+public class CellmAddInConfiguration
 {
     public string DefaultProvider { get; init; } = nameof(Provider.Ollama);
 

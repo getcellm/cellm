@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using Cellm.AddIn;
 using Cellm.Models.Prompts;
 using Cellm.Models.Providers;
 using MediatR;
@@ -12,7 +13,7 @@ namespace Cellm.Models.Behaviors;
 
 internal class CacheBehavior<TRequest, TResponse>(
     HybridCache cache,
-    IOptionsMonitor<ProviderConfiguration> providerConfiguration,
+    IOptionsMonitor<CellmAddInConfiguration> providerConfiguration,
     ILogger<CacheBehavior<TRequest, TResponse>> logger) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IPrompt
     where TResponse : IPrompt

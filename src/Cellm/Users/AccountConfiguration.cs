@@ -8,7 +8,7 @@ internal class AccountConfiguration
 
     public string Password { get; init; } = string.Empty;
 
-    public int CacheTimeoutInSeconds { get; init; } = 60 * 60;
+    public int CacheTimeoutInSeconds { get; init; }
 
     public bool IsEnabled => false;
 }

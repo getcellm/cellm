@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using Cellm.Models;
 using Cellm.Models.Prompts;
-using Cellm.Models.Providers;
 using ExcelDna.Integration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -44,7 +43,7 @@ internal class ObserveResponse(Arguments arguments) : IExcelObservable
                     .AppendLine(arguments.Context)
                     .ToString();
 
-                var providerConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<ProviderConfiguration>>();
+                var providerConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<CellmAddInConfiguration>>();
 
                 var prompt = new PromptBuilder()
                     .SetModel(arguments.Model)

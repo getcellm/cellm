@@ -12,7 +12,7 @@ public partial class RibbonMain
 {
     private Provider GetCurrentProvider()
     {
-        return Enum.Parse<Provider>(GetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultProvider)}"), true);
+        return Enum.Parse<Provider>(GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}"), true);
     }
 
     private static T GetProviderConfiguration<T>()
@@ -52,6 +52,16 @@ public partial class RibbonMain
     public static string GetValue(string key)
     {
         var configuration = CellmAddIn.Services.GetRequiredService<IConfiguration>();
+
+        try
+        {
+            return configuration[key] ?? throw new KeyNotFoundException($"Key '{key}' not found in configuration");
+        }
+        catch (Exception e)
+        {
+            var a = 1;
+        }
+
         return configuration[key] ?? throw new KeyNotFoundException($"Key '{key}' not found in configuration");
     }
 
@@ -72,20 +82,6 @@ public partial class RibbonMain
 
         Directory.CreateDirectory(Path.GetDirectoryName(_appsettingsLocalPath)!);
         File.WriteAllText(_appsettingsLocalPath, localNode.ToJsonString(options));
-    }
-
-    private static JsonNode? GetValueFromNode(JsonNode? node, string[] keySegments)
-    {
-        foreach (var segment in keySegments)
-        {
-            node = node is JsonObject obj
-                && obj.TryGetPropertyValue(segment, out var childNode)
-                ? childNode
-                : null;
-
-            if (node == null) break;
-        }
-        return node;
     }
 
     private static void SetValueInNode(JsonObject node, string[] keySegments, string value)

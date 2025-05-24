@@ -9,10 +9,8 @@ namespace Cellm.AddIn.UserInterface.Ribbon;
 [ComVisible(true)]
 public partial class RibbonMain : ExcelRibbon
 {
-    // Icons: https://developer.microsoft.com/en-us/fluentui#/styles/web/icons
     private IRibbonUI? _ribbonUi;
 
-    private static readonly string _appSettingsPath = Path.Combine(CellmAddIn.ConfigurationPath, "appsettings.json");
     private static readonly string _appsettingsLocalPath = Path.Combine(CellmAddIn.ConfigurationPath, "appsettings.Local.json");
 
     private readonly ILogger<RibbonMain> _logger;
@@ -32,7 +30,7 @@ public partial class RibbonMain : ExcelRibbon
     {
         try
         {
-            var providerName = GetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultProvider)}");
+            var providerName = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}");
             var provider = Enum.Parse<Provider>(providerName, true);
             var item = _providerItems.FirstOrDefault(kvp => kvp.Value.Label.Equals(provider.ToString(), StringComparison.OrdinalIgnoreCase));
             if (item.Value != null)
@@ -47,7 +45,7 @@ public partial class RibbonMain : ExcelRibbon
         {
             // Set default if missing 
             var defaultProviderName = nameof(Provider.Ollama);
-            SetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultProvider)}", defaultProviderName);
+            SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}", defaultProviderName);
             var item = _providerItems.FirstOrDefault(kvp => kvp.Value.Label.Equals(defaultProviderName, StringComparison.OrdinalIgnoreCase));
             return item.Value != null ? item.Key : 3; // Use 3 (Ollama's index) as a hard fallback
         }
@@ -56,7 +54,7 @@ public partial class RibbonMain : ExcelRibbon
             _logger.LogError("Error in EnsureDefaultProvider: {message}. Falling back to index 0.", ex.Message);
 
             // General fallback if parsing or other issues occur
-            SetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultProvider)}", _providerItems[0].Label);
+            SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}", _providerItems[0].Label);
             return 0;
         }
     }
@@ -66,12 +64,12 @@ public partial class RibbonMain : ExcelRibbon
         try
         {
             // Check if EnableCache exists
-            GetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.EnableCache)}");
+            GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableCache)}");
         }
         catch (KeyNotFoundException)
         {
             // Set default to false if missing
-            SetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.EnableCache)}", "False");
+            SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableCache)}", "False");
         }
     }
 

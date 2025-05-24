@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
+using Cellm.AddIn;
 using Cellm.Models.Prompts;
-using Cellm.Models.Providers;
 using Cellm.Tools.ModelContextProtocol;
 using Cellm.Users;
 using MediatR;
@@ -15,7 +15,7 @@ namespace Cellm.Models.Behaviors;
 
 internal class ToolBehavior<TRequest, TResponse>(
     Account account,
-    IOptionsMonitor<ProviderConfiguration> providerConfiguration,
+    IOptionsMonitor<CellmAddInConfiguration> providerConfiguration,
     IOptionsMonitor<ModelContextProtocolConfiguration> modelContextProtocolConfiguration,
     IEnumerable<AIFunction> functions,
     ILogger<ToolBehavior<TRequest, TResponse>> logger,

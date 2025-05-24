@@ -60,7 +60,7 @@ public class CellmAddIn : IExcelAddIn
         // Configurations
         IConfiguration configuration = new ConfigurationBuilder()
             .SetBasePath(ConfigurationPath)
-            .AddJsonFile("appsettings.json", reloadOnChange: true, optional: true)
+            .AddJsonFile("appsettings.json", reloadOnChange: true, optional: false)
             .AddJsonFile("appsettings.Local.json", reloadOnChange: true, optional: true)
             .Build();
 
@@ -68,8 +68,8 @@ public class CellmAddIn : IExcelAddIn
             .Configure<AccountConfiguration>(configuration.GetSection(nameof(AccountConfiguration)))
             .Configure<AnthropicConfiguration>(configuration.GetSection(nameof(AnthropicConfiguration)))
             .Configure<CellmConfiguration>(configuration.GetSection(nameof(CellmConfiguration)))
+            .Configure<CellmAddInConfiguration>(configuration.GetSection(nameof(CellmAddInConfiguration)))
             .Configure<DeepSeekConfiguration>(configuration.GetSection(nameof(DeepSeekConfiguration)))
-            .Configure<ProviderConfiguration>(configuration.GetSection(nameof(ProviderConfiguration)))
             .Configure<MistralConfiguration>(configuration.GetSection(nameof(MistralConfiguration)))
             .Configure<ModelContextProtocolConfiguration>(configuration.GetSection(nameof(ModelContextProtocolConfiguration)))
             .Configure<OllamaConfiguration>(configuration.GetSection(nameof(OllamaConfiguration)))

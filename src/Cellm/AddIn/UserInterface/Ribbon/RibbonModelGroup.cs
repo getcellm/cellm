@@ -70,7 +70,7 @@ public partial class RibbonMain
     {
         try
         {
-            var defaultProviderName = GetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultProvider)}");
+            var defaultProviderName = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}");
             var defaultProvider = Enum.Parse<Provider>(defaultProviderName, true);
 
             _selectedProviderIndex = _providerItems.FirstOrDefault(kvp => kvp.Value.Label.Equals(defaultProvider.ToString(), StringComparison.OrdinalIgnoreCase)).Key;
@@ -84,7 +84,7 @@ public partial class RibbonMain
         catch (KeyNotFoundException)
         {
             // Set default if missing (Ollama corresponds to index 3 in our example)
-            SetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultProvider)}", nameof(Provider.Ollama));
+            SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}", nameof(Provider.Ollama));
             _selectedProviderIndex = _providerItems.FirstOrDefault(kvp => kvp.Value.Label.Equals(nameof(Provider.Ollama), StringComparison.OrdinalIgnoreCase)).Key;
             if (!_providerItems.ContainsKey(_selectedProviderIndex)) _selectedProviderIndex = 3; // Hardcode index if needed as fallback
         }
@@ -307,7 +307,7 @@ public partial class RibbonMain
             if (presetsAvailable)
             {
                 // Presets exist, prompt user to select from dropdown
-                return "Select Model";
+                return "[Select Model]";
             }
             else
             {
@@ -509,7 +509,7 @@ public partial class RibbonMain
                     {
                         if (Enum.TryParse<Provider>(selectedProviderItem.Label, true, out var selectedProviderEnum))
                         {
-                            SetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultProvider)}", selectedProviderEnum.ToString());
+                            SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}", selectedProviderEnum.ToString());
                         }
                         else
                         {
@@ -594,7 +594,7 @@ public partial class RibbonMain
         var provider = GetProvider(providerAndModel);
         var model = GetModel(providerAndModel);
 
-        SetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultProvider)}", provider.ToString());
+        SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}", provider.ToString());
         SetValue($"{provider}Configuration:{nameof(OpenAiConfiguration.DefaultModel)}", model);
 
         _ribbonUi?.Invalidate();
@@ -727,7 +727,7 @@ public partial class RibbonMain
     {
         try
         {
-            var temperature = GetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultTemperature)}");
+            var temperature = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultTemperature)}");
 
             if (double.TryParse(temperature, out var tempVal))
             {
@@ -739,7 +739,7 @@ public partial class RibbonMain
         catch (KeyNotFoundException)
         {
             // If not found, set a default value
-            SetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultTemperature)}", "0");
+            SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultTemperature)}", "0");
             return "0.0";
         }
         catch (Exception ex)
@@ -773,7 +773,7 @@ public partial class RibbonMain
             {
                 // Format to ensure consistent display
                 var formattedTemperature = temperature.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture);
-                SetValue($"{nameof(ProviderConfiguration)}:{nameof(ProviderConfiguration.DefaultTemperature)}", formattedTemperature);
+                SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultTemperature)}", formattedTemperature);
             }
             catch (Exception ex)
             {
