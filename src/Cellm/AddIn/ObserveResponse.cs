@@ -40,9 +40,22 @@ internal class ObserveResponse(Arguments arguments) : IExcelObservable
             {
                 _logger.LogDebug("Getting response {id} ...", _task?.Id);
 
+                var instructions = arguments.Instructions switch
+                {
+                    string instruction => instruction,
+                    Cells values => ArgumentParser.ParseCells(values),
+                    _ => throw new ArgumentException(nameof(arguments.Instructions))
+                };
+
+                var cells = arguments.Cells switch
+                {
+                    Cells values => ArgumentParser.ParseCells(values),
+                    null => "No cells"
+                };
+
                 var userMessage = new StringBuilder()
-                    .AppendLine(arguments.Instructions)
-                    .AppendLine(arguments.Context)
+                    .AppendLine(ArgumentParser.RenderInstructions(instructions))
+                    .AppendLine(ArgumentParser.RenderCells(cells))
                     .ToString();
 
                 var providerConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<ProviderConfiguration>>();
