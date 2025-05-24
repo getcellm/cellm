@@ -78,7 +78,7 @@ public class CellmAddIn : IExcelAddIn
             .Configure<ResilienceConfiguration>(configuration.GetSection(nameof(ResilienceConfiguration)))
             .Configure<SentryConfiguration>(configuration.GetSection(nameof(SentryConfiguration)));
 
-        // Build a temporary service provider to resolve registered configurations
+        // Build a temporary service provider to resolve the registered configurations while configuring services
         var configurationProvider = services.BuildServiceProvider();
 
         // Logging
