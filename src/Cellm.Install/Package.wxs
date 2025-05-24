@@ -4,11 +4,11 @@
     <MajorUpgrade DowngradeErrorMessage="!(loc.DowngradeError)" />
     <Media Id="1" Cabinet="Cellm.cab" EmbedCab="yes" />
     <Feature Id="Main">
-      <ComponentRef Id="Cellm64Component" />
-      <ComponentRef Id="Office12Registry" />
-      <ComponentRef Id="Office14Registry" />
-      <ComponentRef Id="Office15Registry" />
-      <ComponentRef Id="Office16Registry" />
+      <ComponentRef Id="CellmAddIn" />
+      <ComponentRef Id="CellmAddInOffice12RegistryKey" />
+      <ComponentRef Id="CellmAddInOffice14RegistryKey" />
+      <ComponentRef Id="CellmAddInOffice15RegistryKey" />
+      <ComponentRef Id="CellmAddInOffice16RegistryKey" />
     </Feature>
     <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
     <Property Id="OFFICE12INSTALLED">
@@ -21,7 +21,7 @@
     </Property>
     <Property Id="OFFICE14INSTALLED">
       <RegistrySearch 
-        Id="Office14RegistrySearchh" 
+        Id="Office14RegistrySearch" 
         Root="HKLM"
         Key="SOFTWARE\Microsoft\Office\14.0\Excel\InstallRoot"
         Name="Path"
