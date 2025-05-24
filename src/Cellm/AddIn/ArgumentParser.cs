@@ -67,9 +67,9 @@ public class ArgumentParser(IConfiguration configuration)
     public Arguments Parse()
     {
         var providerAsString = _provider ?? configuration
-            .GetSection(nameof(ProviderConfiguration))
-            .GetValue<string>(nameof(ProviderConfiguration.DefaultProvider))
-            ?? throw new ArgumentException(nameof(ProviderConfiguration.DefaultProvider));
+            .GetSection(nameof(CellmAddInConfiguration))
+            .GetValue<string>(nameof(CellmAddInConfiguration.DefaultProvider))
+            ?? throw new ArgumentException(nameof(CellmAddInConfiguration.DefaultProvider));
 
         if (!Enum.TryParse<Provider>(providerAsString, true, out var provider))
         {
@@ -82,9 +82,9 @@ public class ArgumentParser(IConfiguration configuration)
             ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
 
         var defaultTemperature = configuration
-            .GetSection(nameof(ProviderConfiguration))
-            .GetValue<double?>(nameof(ProviderConfiguration.DefaultTemperature))
-            ?? throw new ArgumentException(nameof(ProviderConfiguration.DefaultTemperature));
+            .GetSection(nameof(CellmAddInConfiguration))
+            .GetValue<double?>(nameof(CellmAddInConfiguration.DefaultTemperature))
+            ?? throw new ArgumentException(nameof(CellmAddInConfiguration.DefaultTemperature));
 
         return (_instructionsOrContext, _instructionsOrTemperature, _temperature) switch
         {
