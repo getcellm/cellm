@@ -1,10 +1,10 @@
-<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:netfx="http://wixtoolset.org/schemas/v4/wxs/netfx">
   <Fragment>
     <ComponentGroup Id="AppComponents" Directory="INSTALLFOLDER">
       <Component Id="CellmAddIn" Guid="421F66BC-6680-4FC9-9311-27E6996C562C">
         <File Id="CellmAddIn64PackedXll" Name="Cellm-AddIn64-packed.xll" Source="..\Cellm\bin\$(Configuration)\net9.0-windows\publish\Cellm-AddIn64-packed.xll" />
-		<File Id="AppSettings" Name="appsettings.json" Source="..\Cellm\bin\$(Configuration)\net9.0-windows\appsettings.json" />
-		<RegistryKey Root="HKCU" Key="Software\TokenFactory\Cellm">
+		    <File Id="AppSettings" Name="appsettings.json" Source="..\Cellm\bin\$(Configuration)\net9.0-windows\appsettings.json" />
+		    <RegistryKey Root="HKCU" Key="Software\TokenFactory\Cellm">
           <RegistryValue Type="string" Name="CellmInstalled" Value="yes" KeyPath="yes" />
         </RegistryKey>
         <RemoveFolder Id='RemoveInstallFolder' Directory='INSTALLFOLDER' On='uninstall' />
@@ -34,5 +34,8 @@
         </RegistryKey>
       </Component>
     </ComponentGroup>
+
+    <netfx:DotNetCompatibilityCheck Property="DOTNETRUNTIMECHECK" RollForward="major" Platform="x64" RuntimeType="desktop" Version="9.0.0" />
+    <Launch Condition="Installed OR DOTNETRUNTIMECHECK=0" Message="Cellm requires .NET 9.0 or greater. Download the .NET 9.0 x64 Desktop Runtime from https://dotnet.microsoft.com/." />
   </Fragment>
 </Wix>

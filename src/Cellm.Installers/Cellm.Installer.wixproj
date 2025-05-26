@@ -1,0 +1,9 @@
+﻿<Project Sdk="WixToolset.Sdk/6.0.0">
+  <PropertyGroup>
+    <OutputName>Cellm-AddIn-$(Configuration)-$(Platform)</OutputName>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="WixToolset.Netfx.wixext" Version="6.0.0" />
+    <PackageReference Include="WixToolset.UI.wixext" Version="6.0.0" />
+  </ItemGroup>
+</Project>
