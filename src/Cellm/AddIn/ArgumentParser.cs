@@ -8,44 +8,34 @@ namespace Cellm.AddIn;
 
 public class ArgumentParser(IConfiguration configuration)
 {
-    private string? _provider;
-    private string? _model;
-    private object? _instructionsOrContext;
+    private object? _provider;
+    private object? _model;
+    private object? _instructionsOrCells;
     private object? _instructionsOrTemperature;
     private object? _temperature;
 
-    public static readonly string ContextStartTag = "<context>";
-    public static readonly string ContextEndTag = "</context>";
-    public static readonly string InstructionsStartTag = "<instructions>";
+    public static readonly string CellsBeginTag = "<cells>";
+    public static readonly string CellsEndTag = "</cells>";
+    public static readonly string InstructionsBeginTag = "<instructions>";
     public static readonly string InstructionsEndTag = "<instructions>";
 
     public ArgumentParser AddProvider(object providerAndModel)
     {
-        _provider = providerAndModel switch
-        {
-            string providerAndModelAsString => GetProvider(providerAndModelAsString),
-            ExcelReference providerAndModelAsExcelReference => GetProvider(GetCellAsString(providerAndModelAsExcelReference)),
-            _ => throw new ArgumentException("Provider and model argument must be a string or single cell")
-        };
+        _provider = providerAndModel;
 
         return this;
     }
 
     public ArgumentParser AddModel(object providerAndModel)
     {
-        _model = providerAndModel switch
-        {
-            string providerAndModelAsString => GetModel(providerAndModelAsString),
-            ExcelReference providerAndModelAsExcelReference => GetModel(GetCellAsString(providerAndModelAsExcelReference)),
-            _ => throw new ArgumentException("Provider and model argument must be a string or single cell")
-        };
+        _model = providerAndModel;
 
         return this;
     }
 
-    public ArgumentParser AddInstructionsOrContext(object instructionsOrContext)
+    public ArgumentParser AddInstructionsOrCells(object instructionsOrCells)
     {
-        _instructionsOrContext = instructionsOrContext;
+        _instructionsOrCells = instructionsOrCells;
 
         return this;
     }
@@ -64,9 +54,9 @@ public class ArgumentParser(IConfiguration configuration)
         return this;
     }
 
-    public Arguments Parse()
+    internal Arguments Parse()
     {
-        var providerAsString = _provider ?? configuration
+        var providerAsString = ParseProvider(_provider) ?? configuration
             .GetSection(nameof(CellmAddInConfiguration))
             .GetValue<string>(nameof(CellmAddInConfiguration.DefaultProvider))
             ?? throw new ArgumentException(nameof(CellmAddInConfiguration.DefaultProvider));
@@ -76,7 +66,7 @@ public class ArgumentParser(IConfiguration configuration)
             throw new ArgumentException($"Unsupported provider: {providerAsString}");
         }
 
-        var model = _model ?? configuration
+        var model = ParseModel(_model) ?? configuration
             .GetSection($"{provider}Configuration")
             .GetValue<string>(nameof(IProviderConfiguration.DefaultModel))
             ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
@@ -86,26 +76,202 @@ public class ArgumentParser(IConfiguration configuration)
             .GetValue<double?>(nameof(CellmAddInConfiguration.DefaultTemperature))
             ?? throw new ArgumentException(nameof(CellmAddInConfiguration.DefaultTemperature));
 
-        return (_instructionsOrContext, _instructionsOrTemperature, _temperature) switch
+        var arguments = (_instructionsOrCells, _instructionsOrTemperature, _temperature) switch
         {
             // "=PROMPT("Extract keywords")
-            (string instructions, ExcelMissing, ExcelMissing) => new Arguments(provider, model, string.Empty, RenderInstructions(instructions), ParseTemperature(defaultTemperature)),
+            (string instructions, ExcelMissing, ExcelMissing) => new Arguments(provider, model, string.Empty, instructions, ParseTemperature(defaultTemperature)),
             // "=PROMPT("Extract keywords", 0.7)
-            (string instructions, double temperature, ExcelMissing) => new Arguments(provider, model, string.Empty, RenderInstructions(instructions), ParseTemperature(temperature)),
+            (string instructions, double temperature, ExcelMissing) => new Arguments(provider, model, string.Empty, instructions, ParseTemperature(temperature)),
             // "=PROMPT(A1:B2)
-            (ExcelReference context, ExcelMissing, ExcelMissing) => new Arguments(provider, model, RenderCells(ParseCells(context)), RenderInstructions(SystemMessages.InlineInstructions), ParseTemperature(defaultTemperature)),
+            (ExcelReference cells, ExcelMissing, ExcelMissing) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), SystemMessages.InlineInstructions, ParseTemperature(defaultTemperature)),
             // "=PROMPT(A1:B2, 0.7)
-            (ExcelReference context, double temperature, ExcelMissing) => new Arguments(provider, model, RenderCells(ParseCells(context)), RenderInstructions(SystemMessages.InlineInstructions), ParseTemperature(defaultTemperature)),
+            (ExcelReference cells, double temperature, ExcelMissing) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), SystemMessages.InlineInstructions, ParseTemperature(defaultTemperature)),
             // "=PROMPT(A1:B2, "Extract keywords")
-            (ExcelReference context, string instructions, ExcelMissing) => new Arguments(provider, model, RenderCells(ParseCells(context)), RenderInstructions(instructions), ParseTemperature(defaultTemperature)),
+            (ExcelReference cells, string instructions, ExcelMissing) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), instructions, ParseTemperature(defaultTemperature)),
             // "=PROMPT(A1:B2, "Extract keywords", 0.7)
-            (ExcelReference context, string instructions, double temperature) => new Arguments(provider, model, RenderCells(ParseCells(context)), RenderInstructions(instructions), ParseTemperature(temperature)),
+            (ExcelReference cells, string instructions, double temperature) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), instructions, ParseTemperature(temperature)),
             // "=PROMPT(A1:B2, C1:D2)
-            (ExcelReference context, ExcelReference instructions, ExcelMissing) => new Arguments(provider, model, RenderCells(ParseCells(context)), RenderInstructions(ParseCells(instructions)), ParseTemperature(defaultTemperature)),
+            (ExcelReference cells, ExcelReference instructions, ExcelMissing) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), new Cells(instructions.RowFirst, instructions.RowLast, instructions.GetValue()), ParseTemperature(defaultTemperature)),
             // "=PROMPT(A1:B2, C1:D2, 0.7)
-            (ExcelReference context, ExcelReference instructions, double temperature) => new Arguments(provider, model, RenderCells(ParseCells(context)), RenderInstructions(ParseCells(instructions)), ParseTemperature(temperature)),
+            (ExcelReference cells, ExcelReference instructions, double temperature) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), new Cells(instructions.RowFirst, instructions.RowLast, instructions.GetValue()), ParseTemperature(temperature)),
             // Anything else
-            _ => throw new ArgumentException($"Invalid arguments ({_instructionsOrContext?.GetType().Name}, {_instructionsOrTemperature?.GetType().Name}, {_temperature?.GetType().Name})")
+            _ => throw new ArgumentException($"Invalid arguments ({_instructionsOrCells?.GetType().Name}, {_instructionsOrTemperature?.GetType().Name}, {_temperature?.GetType().Name})")
+        };
+
+        if (arguments.Cells is Cells contextCells && contextCells.Values is ExcelError contextCellsError)
+        {
+            throw new ExcelErrorException(contextCellsError);
+        }
+
+        if (arguments.Instructions is Cells instructionCells && instructionCells.Values is ExcelError instructionsCellsError)
+        {
+            throw new ExcelErrorException(instructionsCellsError);
+        }
+
+        return arguments;
+    }
+
+    internal static string AddCellTags(string context)
+    {
+        return new StringBuilder()
+            .AppendLine(CellsBeginTag)
+            .AppendLine(context)
+            .AppendLine(CellsEndTag)
+            .ToString();
+    }
+
+    internal static string AddInstructionTags(string instructions)
+    {
+        return new StringBuilder()
+            .AppendLine(InstructionsBeginTag)
+            .AppendLine(instructions)
+            .AppendLine(InstructionsEndTag)
+            .ToString();
+    }
+
+    // Render sheet as Markdown table because models have seen loads of those
+    internal static string ParseCells(Cells cells)
+    {
+        var values = cells.Values switch
+        {
+            object[,] manyCells => manyCells,
+            string singleCell => new string[1, 1] { { singleCell } },
+            object invalidType => throw new ArgumentException($"Invalid type: {invalidType.GetType()} ({invalidType?.ToString()})", nameof(cells))
+        };
+
+        var numberOfRows = values.GetLength(0);
+        var numberOfColumns = values.GetLength(1);
+
+        var numberOfRenderedRows = numberOfRows + 1; // Includes the header row
+        var numberOfRenderedColumns = numberOfColumns + 1; // Includes the row enumeration column
+
+        // We go over the table twice, once to fill it with values and once to build the final string
+        var table = new string[numberOfRenderedRows, numberOfRenderedColumns];
+        var tableIsEmpty = true;
+
+        table[0, 0] = string.Empty;
+        var maxColumnWidth = new int[numberOfRenderedColumns];
+
+        // The row enumeration column is always at least 1 character wide
+        maxColumnWidth[0] = 1;
+
+        // Add header row
+        for (var c = 1; c < numberOfRenderedColumns; c++)
+        {
+            table[0, c] = GetColumnName(cells.ColumnFirst + c - 1);
+            maxColumnWidth[c] = table[0, c].Length;
+        }
+
+        // Add enumeration column
+        for (var r = 0; r < numberOfRows; r++)
+        {
+            table[r + 1, 0] = GetRowName(cells.RowFirst + r);
+        }
+
+        // Parse cells and track max column width along the way
+        for (var r = 0; r < numberOfRows; r++)
+        {
+            for (var c = 0; c < numberOfColumns; c++)
+            {
+                if (values[r, c] is ExcelEmpty)
+                {
+                    values[r, c] = string.Empty;
+                }
+
+                var value = values[r, c].ToString() ?? string.Empty;
+
+                if (tableIsEmpty && !string.IsNullOrEmpty(value))
+                {
+                    tableIsEmpty = false;
+                }
+
+                maxColumnWidth[c + 1] = Math.Max(maxColumnWidth[c + 1], value.Length);
+
+                table[r + 1, c + 1] = value.Replace("\r\n", " ").Replace("\n", " ").Replace("|", "\\|");
+            }
+        }
+
+        // Build the Markdown table
+        var tableBuilder = new StringBuilder();
+
+        // Render header row
+        tableBuilder.Append('|');
+
+        for (var c = 0; c < numberOfRenderedColumns; c++)
+        {
+            tableBuilder.Append(' ');
+            tableBuilder.Append(table[0, c].PadRight(maxColumnWidth[c]));
+            tableBuilder.Append(" |");
+        }
+
+        tableBuilder.AppendLine();
+
+        // Render header separator
+        tableBuilder.Append('|');
+
+        for (var c = 0; c < numberOfRenderedColumns; c++)
+        {
+            tableBuilder.Append(' ');
+            tableBuilder.Append(new string('-', maxColumnWidth[c]));
+            tableBuilder.Append(" |");
+        }
+
+        tableBuilder.AppendLine();
+
+        // Render cells
+        for (var r = 1; r < numberOfRenderedRows; r++)
+        {
+            tableBuilder.Append('|');
+
+            // Render row enumeration
+            tableBuilder.Append(' ');
+            tableBuilder.Append(table[r, 0].PadRight(maxColumnWidth[0]));
+            tableBuilder.Append(" |");
+
+            // Render row
+            for (var c = 1; c < numberOfRenderedColumns; c++)
+            {
+                tableBuilder.Append(' ');
+                tableBuilder.Append(table[r, c].PadRight(maxColumnWidth[c]));
+                tableBuilder.Append(" |");
+            }
+
+            tableBuilder.AppendLine();
+        }
+
+        if (tableIsEmpty)
+        {
+            throw new CellmException($"Empty cells " +
+                $"{GetColumnName(cells.ColumnFirst)}{GetRowName(cells.RowFirst)}:" +
+                $"{GetColumnName(cells.ColumnFirst + values.GetLength(0))}{GetRowName(cells.RowFirst + values.GetLength(1))}");
+        }
+
+        return tableBuilder.ToString();
+    }
+
+    private static double ParseTemperature(double temperature)
+    {
+        if (temperature < 0 || temperature > 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(temperature), "Temperature argument must be between 0 and 1");
+        }
+
+        return temperature;
+    }
+
+    private static string? ParseProvider(object? providerAndModel)
+    {
+        if (providerAndModel is ExcelError excelError)
+        {
+            throw new ExcelErrorException(excelError);
+        }
+
+        return providerAndModel switch
+        {
+            string providerAndModelAsString => GetProvider(providerAndModelAsString),
+            ExcelReference providerAndModelAsExcelReference => GetProvider(GetCellAsString(providerAndModelAsExcelReference)),
+            null => null,  // Set to default
+            _ => throw new ArgumentException("Provider and model argument must be a string or single cell")
         };
     }
 
@@ -119,6 +285,22 @@ public class ArgumentParser(IConfiguration configuration)
         }
 
         return providerAndModel[..index];
+    }
+
+    private static string? ParseModel(object? providerAndModel)
+    {
+        if (providerAndModel is ExcelError excelError)
+        {
+            throw new ExcelErrorException(excelError);
+        }
+
+        return providerAndModel switch
+        {
+            string providerAndModelAsString => GetModel(providerAndModelAsString),
+            ExcelReference providerAndModelAsExcelReference => GetModel(GetCellAsString(providerAndModelAsExcelReference)),
+            null => null,  // Set to default
+            _ => throw new ArgumentException("Provider and model argument must be a string or single cell")
+        };
     }
 
     private static string GetModel(string providerAndModel)
@@ -140,117 +322,8 @@ public class ArgumentParser(IConfiguration configuration)
         {
             throw new ArgumentException("Provider and model argument must be a string or a single cell");
         }
+
         return providerAndModel.GetValue()?.ToString() ?? throw new ArgumentException("Provider and model argument must be a valid cell reference");
-    }
-
-    // Render sheet as Markdown table because models have seen loads of those
-    private static string ParseCells(ExcelReference reference)
-    {
-        try
-        {
-            var app = ExcelDnaUtil.Application;
-            var sheetName = (string)XlCall.Excel(XlCall.xlSheetNm, reference);
-            sheetName = sheetName[(sheetName.LastIndexOf(']') + 1)..];
-            var worksheet = app.Sheets[sheetName];
-
-            var numberOfRows = reference.RowLast - reference.RowFirst + 1;  // 1-indexed
-            var numberOfColumns = reference.ColumnLast - reference.ColumnFirst + 1;  // 1-indexed
-
-            var numberOfRenderedRows = numberOfRows + 1; // Includes the header row
-            var numberOfRenderedColumns = numberOfColumns + 1; // Includes the row-number column
-
-            var isEmpty = true;
-
-            // Column-major for easy calculation of padding
-            var table = new List<List<string>>();
-
-            // Initialize table with empty rows for reduced number of heap allocations
-            for (var c = 0; c < numberOfRenderedColumns; c++)
-            {
-                table.Add(new List<string>(numberOfRenderedRows));
-            }
-
-            // Add row number column
-            table[0].Add("Row \\ Col");  // Top-left
-
-            for (var r = 0; r < numberOfRows; r++)
-            {
-                table[0].Add(GetRowName(reference.RowFirst + r));
-            }
-
-            // Add other columns
-            for (var c = 0; c < numberOfColumns; c++)
-            {
-                table[c + 1].Add(GetColumnName(reference.ColumnFirst + c)); // Column header
-
-                for (var r = 0; r < numberOfRows; r++)
-                {
-                    var value = worksheet.Cells[reference.RowFirst + r + 1, reference.ColumnFirst + c + 1].Text?.ToString() ?? string.Empty;
-
-                    if (isEmpty && !string.IsNullOrEmpty(value))
-                    {
-                        isEmpty = false;
-                    }
-
-                    string sanitizedCellValue = value.Replace("\r\n", " ").Replace("\n", " ").Replace("|", "\\|");
-                    table[c + 1].Add(sanitizedCellValue);
-                }
-            }
-
-            // Pad columns
-            foreach (var column in table)
-            {
-                var maxWidth = column.Max(cell => cell?.Length ?? 0);
-
-                for (var r = 0; r < column.Count; r++)
-                {
-                    column[r] = column[r].PadRight(maxWidth);
-                }
-            }
-
-            var tableBuilder = new StringBuilder();
-
-            // Iterate row-major for StringBuilder
-            for (var r = 0; r < numberOfRenderedRows; r++)
-            {
-                tableBuilder.Append('|');
-
-                for (var c = 0; c < numberOfRenderedColumns; c++)
-                {
-                    tableBuilder.Append(' ');
-                    tableBuilder.Append(table[c][r]); // Access [column][row]
-                    tableBuilder.Append(" |");
-                }
-
-                tableBuilder.AppendLine();
-
-                // Add separator line after the header row (r == 0)
-                if (r == 0)
-                {
-                    tableBuilder.Append('|');
-                    for (var c = 0; c < numberOfRenderedColumns; c++)
-                    {
-                        tableBuilder.Append(' ');
-                        // Length of separator is based on the padded header cell's length
-                        tableBuilder.Append(new string('-', table[c][r].Length));
-                        tableBuilder.Append(" |");
-                    }
-
-                    tableBuilder.AppendLine();
-                }
-            }
-
-            if (isEmpty)
-            {
-                throw new ArgumentNullException(nameof(reference));
-            }
-
-            return tableBuilder.ToString();
-        }
-        catch (Exception ex)
-        {
-            throw new CellmException($"Failed to parse context: {ex.Message}", ex);
-        }
     }
 
     private static string GetColumnName(int columnNumber)
@@ -269,33 +342,5 @@ public class ArgumentParser(IConfiguration configuration)
     private static string GetRowName(int rowNumber)
     {
         return (rowNumber + 1).ToString();
-    }
-
-    private static string RenderCells(string context)
-    {
-        return new StringBuilder()
-            .AppendLine(ContextStartTag)
-            .AppendLine(context)
-            .AppendLine(ContextEndTag)
-            .ToString();
-    }
-
-    private static string RenderInstructions(string instructions)
-    {
-        return new StringBuilder()
-            .AppendLine(InstructionsStartTag)
-            .AppendLine(instructions)
-            .AppendLine(InstructionsEndTag)
-            .ToString();
-    }
-
-    private static double ParseTemperature(double temperature)
-    {
-        if (temperature < 0 || temperature > 1)
-        {
-            throw new ArgumentOutOfRangeException(nameof(temperature), "Temperature argument must be between 0 and 1");
-        }
-
-        return temperature;
     }
 }

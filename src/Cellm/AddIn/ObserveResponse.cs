@@ -38,9 +38,23 @@ internal class ObserveResponse(Arguments arguments) : IExcelObservable
         {
             try
             {
+                var cells = arguments.Cells switch
+                {
+                    Cells argumentCells => ArgumentParser.ParseCells(argumentCells),
+                    null => "Not available",
+                    _ => throw new ArgumentException(nameof(arguments.Cells))
+                };
+
+                var instructions = arguments.Instructions switch
+                {
+                    string instruction => instruction,
+                    Cells values => ArgumentParser.ParseCells(values),
+                    _ => throw new ArgumentException(nameof(arguments.Instructions))
+                };
+
                 var userMessage = new StringBuilder()
-                    .AppendLine(arguments.Instructions)
-                    .AppendLine(arguments.Context)
+                    .AppendLine(ArgumentParser.AddInstructionTags(instructions))
+                    .AppendLine(ArgumentParser.AddCellTags(cells))
                     .ToString();
 
                 var cellmAddInConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<CellmAddInConfiguration>>();

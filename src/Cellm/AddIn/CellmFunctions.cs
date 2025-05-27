@@ -52,7 +52,7 @@ public static class CellmFunctions
     /// Sends a prompt to the specified model.
     /// </summary>
     /// <param name="providerAndModel">The provider and model in the format "provider/model".</param>
-    /// <param name="instructionsOrContext">A string with instructions or a cell or range of cells with context.</param>
+    /// <param name="instructionsOrCells">A string with instructions or a cell or range of cells with context.</param>
     /// <param name="instructionsOrTemperature">
     /// A cell or range of cells with instructions, or a temperature value.
     /// If omitted, any instructions found in the context will be used.
@@ -67,18 +67,10 @@ public static class CellmFunctions
     [ExcelFunction(Name = "PROMPTWITH", Description = "Send a prompt to a specific model")]
     public static object PromptWith(
         [ExcelArgument(AllowReference = true, Name = "Provider/Model")] object providerAndModel,
-        [ExcelArgument(AllowReference = true, Name = "InstructionsOrContext", Description = "A string with instructions or a cell or range of cells with context")] object instructionsOrContext,
+        [ExcelArgument(AllowReference = true, Name = "InstructionsOrContext", Description = "A string with instructions or a cell or range of cells with context")] object instructionsOrCells,
         [ExcelArgument(AllowReference = true, Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
         [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
     {
-        // Short-circuit if any inputs are #GETTING_DATA. This function will be re-triggered when inputs are updated with realized values.
-        if (IsCellReferenceGettingData(providerAndModel) ||
-            IsCellReferenceGettingData(instructionsOrContext) ||
-            IsCellReferenceGettingData(instructionsOrTemperature))
-        {
-            return ExcelError.ExcelErrorGettingData;
-        }
-
         try
         {
             var argumentParser = CellmAddIn.Services.GetRequiredService<ArgumentParser>();
@@ -88,7 +80,7 @@ public static class CellmFunctions
             var arguments = argumentParser
                 .AddProvider(providerAndModel)
                 .AddModel(providerAndModel)
-                .AddInstructionsOrContext(instructionsOrContext)
+                .AddInstructionsOrCells(instructionsOrCells)
                 .AddInstructionsOrTemperature(instructionsOrTemperature)
                 .AddTemperature(temperature)
                 .Parse();
@@ -96,8 +88,13 @@ public static class CellmFunctions
             // ObserveResponse will send request on another thread and update the cell value on the main thread
             return ExcelAsyncUtil.Observe(
                 nameof(PromptWith),
-                new object[] { providerAndModel, instructionsOrContext, instructionsOrTemperature, temperature },
+                new object[] { providerAndModel, instructionsOrCells, instructionsOrTemperature, temperature },
                 () => new ObserveResponse(arguments));
+        }
+        catch (ExcelErrorException ex)
+        {
+            // Short-circuit if any inputs are #GETTING_DATA or or contain errors. Excel will re-trigger this function when inputs are updated with realized values.
+            return ex.GetExcelError();
         }
         catch (CellmException ex)
         {
@@ -111,20 +108,5 @@ public static class CellmFunctions
 
             return ExcelError.ExcelErrorValue;
         }
-    }
-
-    private static bool IsCellReferenceGettingData(object argument)
-    {
-        if (argument is not ExcelReference reference)
-        {
-            return false;
-        }
-
-        return reference.GetValue() switch
-        {
-            ExcelError.ExcelErrorGettingData => true,
-            object[,] cells => cells.Cast<object>().Any(cell => cell is ExcelError.ExcelErrorGettingData),
-            _ => false
-        };
     }
 }

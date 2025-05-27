@@ -2,4 +2,4 @@
 
 namespace Cellm.AddIn;
 
-public record Arguments(Provider Provider, string Model, string Context, string Instructions, double Temperature);
+internal record Arguments(Provider Provider, string Model, object Cells, object Instructions, double Temperature);
