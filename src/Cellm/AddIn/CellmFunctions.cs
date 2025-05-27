@@ -71,14 +71,6 @@ public static class CellmFunctions
         [ExcelArgument(AllowReference = true, Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
         [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
     {
-        // Short-circuit if any inputs are #GETTING_DATA. This function will be re-triggered when inputs are updated with realized values.
-        if (IsCellReferenceGettingData(providerAndModel) ||
-            IsCellReferenceGettingData(instructionsOrContext) ||
-            IsCellReferenceGettingData(instructionsOrTemperature))
-        {
-            return ExcelError.ExcelErrorGettingData;
-        }
-
         try
         {
             var argumentParser = CellmAddIn.Services.GetRequiredService<ArgumentParser>();
@@ -99,6 +91,10 @@ public static class CellmFunctions
                 new object[] { providerAndModel, instructionsOrContext, instructionsOrTemperature, temperature },
                 () => new ObserveResponse(arguments));
         }
+        catch (GettingDataException)
+        {
+            return ExcelError.ExcelErrorGettingData;
+        }
         catch (CellmException ex)
         {
             SentrySdk.CaptureException(ex);
@@ -113,14 +109,9 @@ public static class CellmFunctions
         }
     }
 
-    private static bool IsCellReferenceGettingData(object argument)
+    private static bool IsCellGettingData(object argument)
     {
-        if (argument is not ExcelReference reference)
-        {
-            return false;
-        }
-
-        return reference.GetValue() switch
+        return argument switch
         {
             ExcelError.ExcelErrorGettingData => true,
             object[,] cells => cells.Cast<object>().Any(cell => cell is ExcelError.ExcelErrorGettingData),
