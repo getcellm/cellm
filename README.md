@@ -1,16 +1,23 @@
+[![CI](https://github.com/getcellm/cellm/actions/workflows/ci.yml/badge.svg)](https://github.com/getcellm/cellm/actions/workflows/ci.yml)
+
 # Cellm
-Cellm is an Excel extension that lets you use Large Language Models (LLMs) like ChatGPT in cell formulas.
+Use AI in Excel formulas to run your prompt on thousands of rows of tasks in minutes.
 
 ## What is Cellm?
-Cellm's `=PROMPT()` function outputs AI responses to a range of text, similar to how Excel's `=SUM()` function outputs the sum of a range of numbers.  
+Cellm is an Excel extension that lets you use Large Language Models (LLMs) like ChatGPT in cell formulas. Cellm's `=PROMPT()` function outputs AI responses to a range of text, similar to how Excel's `=SUM()` function outputs the sum of a range of numbers.  
 
 For example, you can write `=PROMPT(A1, "Extract all person names mentioned in the text.")` in a cell's formula and drag the cell to apply the prompt to many rows. Cellm is useful when you want to use AI for repetitive tasks that would normally require copy-pasting data in and out of a chat window many times.
 
-## Key features
-This extension does one thing and one thing well:
+Read more in our [documentation](https://docs.getcellm.com).
 
-- Calls LLMs in formulas and returns short answers suitable for cells
-- Supports models from Anthropic, Mistral, OpenAI, and Google as well as locally hosted models via Llamafiles, Ollama, or vLLM
+## Why use Cellm?
+- Make quick work of data cleaning, classification, and extraction tasks that once took hours.
+- Immediately free your team from repetitive manual work with the spreadsheet they already master.
+- Bypass lengthy rollouts of many AI systems. Your team already have Excel on their computers.
+- Enable marketing, finance, sales, operations and other teams to automate everyday tasks without depending on developers.
+
+> “I love feeding data to ChatGPT, one copy-paste at a time”
+> — no one who’s run the same prompt 5 times
 
 ## Example
 Say you're reviewing medical studies and need to quickly identify papers relevant to your research. Here's how Cellm can help:
@@ -43,7 +50,7 @@ Green cells denote correct classifications and red cells denote incorrect classi
 
 4. Download a model, e.g. Gemma 2 2B: Open Windows Terminal (open start menu, type `Windows Terminal`, and click `OK`), type `ollama pull gemma2:2b`, and wait for the download to finish.
 
-For permanent installation and more options, see our [Installation Guide](https://docs.getcellm.com/get-started/install).
+For permanent installation and more options, see our [installation guide](https://docs.getcellm.com/get-started/install).
 
 ## Basic usage
 
@@ -51,7 +58,7 @@ Select a cell and type `=PROMPT("What model are you and who made you?")`. For Ge
 
 You can also use cell references. For example, copy a news article into cell A1 and type in cell B1: `=PROMPT(A1, "Extract all person names mentioned in the text")`. You can reference many cells using standard Excel notation, e.g. `=PROMPT(A1:F10, "Extract all person names in the cells")`
 
-For more advanced usage, including function calling and configuration, see our [Documentation](https://docs.getcellm.com).
+For more advanced usage, including function calling and configuration, see our [documentation](https://docs.getcellm.com).
 
 ## Models
 
@@ -59,7 +66,7 @@ Cellm supports:
 - Hosted models from Anthropic, OpenAI, Mistral, and others
 - Local models via Ollama, Llamafiles, or vLLM
 
-For detailed information about configuring different models, see our documentation on [Local Models](https://docs.getcellm.com/models/local-models) and [Hosted Models](https://docs.getcellm.com/models/hosted-models).
+For detailed information about configuring different models, see our documentation on [local models](https://docs.getcellm.com/models/local-models) and [hosted models](https://docs.getcellm.com/models/hosted-models).
 
 ## Use cases
 
@@ -75,7 +82,7 @@ For more use cases and examples, see our [Prompting Guide](https://docs.getcellm
 
 ## Development
 
-For build instructions with Visual Studio or command line, see our [Development Guide](https://docs.getcellm.com/get-started/development).
+For build instructions with Visual Studio or command line, see our [development guide](https://docs.getcellm.com/get-started/development).
 
 ## Why did we make Cellm?
 A friend was writing a systematic review paper and had to compare 7,500 papers against inclusion/exclusion criteria. We thought this was a great use case for LLMs but quickly realized that individually copying papers in and out of chat windows was a total pain. This sparked the idea to make an AI tool to automate repetitive tasks for people who would rather avoid programming.
@@ -90,7 +97,7 @@ To help us improve Cellm, we collect limited, anonymous telemetry data:
 
 We do not collect any data from your spreadsheet and we have no way of associating your prompts with you. You can see for yourself at [Cellm.Models/Behaviors/SentryBehavior.cs](Cellm.Models/Behaviors/SentryBehavior.cs).
 
-You can disable telemetry at any time by creating an `appsettings.json` file in the same folder as `Cellm-AddIn64-packed.xll` with the following contents:
+You can disable telemetry at any time by adding the following contents to your `appsettings.json` file in the same folder as `Cellm-AddIn64-packed.xll`:
 
 ```json
 {
