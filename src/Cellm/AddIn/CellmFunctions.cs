@@ -26,7 +26,7 @@ public static class CellmFunctions
     /// <returns>
     /// The model's response as a string. If an error occurs, it returns the error message.
     /// </returns>
-    [ExcelFunction(Name = "PROMPT", Description = "Send a prompt to the default model")]
+    [ExcelFunction(Name = "PROMPT", Description = "Send a prompt to the default model", IsThreadSafe = true)]
     public static object Prompt(
     [ExcelArgument(AllowReference = true, Name = "InstructionsOrContext", Description = "A string with instructions or a cell or range of cells with context")] object context,
     [ExcelArgument(AllowReference = true, Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
@@ -63,7 +63,7 @@ public static class CellmFunctions
     /// <returns>
     /// The model's response as a string. If an error occurs, it returns the error message.
     /// </returns>
-    [ExcelFunction(Name = "PROMPTWITH", Description = "Send a prompt to a specific model")]
+    [ExcelFunction(Name = "PROMPTWITH", Description = "Send a prompt to a specific model", IsThreadSafe = true)]
     public static object PromptWith(
         [ExcelArgument(AllowReference = true, Name = "Provider/Model")] object providerAndModel,
         [ExcelArgument(AllowReference = true, Name = "InstructionsOrContext", Description = "A string with instructions or a cell or range of cells with context")] object instructionsOrCells,
