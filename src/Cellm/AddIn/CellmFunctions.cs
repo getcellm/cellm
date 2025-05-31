@@ -1,6 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
 using Cellm.AddIn.Exceptions;
-using Cellm.Models.Prompts;
 using Cellm.Models.Providers;
 using ExcelDna.Integration;
 using Microsoft.Extensions.Configuration;
@@ -73,6 +72,8 @@ public static class CellmFunctions
     {
         try
         {
+            var stopwatch = Stopwatch.StartNew(); 
+
             var argumentParser = CellmAddIn.Services.GetRequiredService<ArgumentParser>();
             var providerConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<CellmAddInConfiguration>>();
 
@@ -89,7 +90,7 @@ public static class CellmFunctions
             return ExcelAsyncUtil.Observe(
                 nameof(PromptWith),
                 new object[] { providerAndModel, instructionsOrCells, instructionsOrTemperature, temperature },
-                () => new ObserveResponse(arguments));
+                () => new ObserveResponse(arguments, stopwatch));
         }
         catch (ExcelErrorException ex)
         {
@@ -100,11 +101,10 @@ public static class CellmFunctions
         {
             SentrySdk.CaptureException(ex);
 
-            var logger = CellmAddIn.Services
+            CellmAddIn.Services
                 .GetRequiredService<ILoggerFactory>()
-                .CreateLogger(nameof(PromptWith));
-
-            logger.LogError(ex, "{method} failed", nameof(PromptWith));
+                .CreateLogger(nameof(PromptWith))
+                .LogError(ex, "{method} failed", nameof(PromptWith));
 
             return ExcelError.ExcelErrorValue;
         }

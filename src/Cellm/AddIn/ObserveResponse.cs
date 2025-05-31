@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 using Cellm.Models;
 using Cellm.Models.Prompts;
 using ExcelDna.Integration;
@@ -8,7 +9,7 @@ using Microsoft.Extensions.Options;
 
 namespace Cellm.AddIn;
 
-internal class ObserveResponse(Arguments arguments) : IExcelObservable
+internal class ObserveResponse(Arguments arguments, Stopwatch stopwatch) : IExcelObservable
 {
     private IExcelObserver? _observer;
     private Task? _task;
@@ -28,13 +29,12 @@ internal class ObserveResponse(Arguments arguments) : IExcelObservable
                 throw new InvalidOperationException("Internal error: GetResponse instance has already been subscribed to. Each call requires a new instance.");
             }
 
-            _logger.LogDebug("Getting response ...");
             _observer = observer ?? throw new ArgumentNullException(nameof(observer));
         }
 
         _observer.OnNext(ExcelError.ExcelErrorGettingData);
 
-        _task = Task.Run(async () =>
+        _task = Task.Factory.StartNew(async () =>
         {
             try
             {
@@ -71,7 +71,7 @@ internal class ObserveResponse(Arguments arguments) : IExcelObservable
                 _cancellationTokenSource.Token.ThrowIfCancellationRequested();
 
                 var client = CellmAddIn.Services.GetRequiredService<Client>();
-                var response = await client.GetResponseAsync(prompt, arguments.Provider, _cancellationTokenSource.Token);
+                var response = await client.GetResponseAsync(prompt, arguments.Provider, _cancellationTokenSource.Token).ConfigureAwait(false);
                 var assistantMessage = response.Messages.LastOrDefault()?.Text ?? throw new InvalidOperationException("No text response");
 
                 // Check for cancellation before notifying observer
@@ -84,7 +84,7 @@ internal class ObserveResponse(Arguments arguments) : IExcelObservable
                     _observer?.OnCompleted();
                 });
 
-                _logger.LogDebug("Getting response {id} ... Done", _task?.Id);
+                _logger.LogInformation("Sending request {id} ... Done (elapsed time: {} ms)", _task?.Id, stopwatch.ElapsedMilliseconds);
             }
             catch (OperationCanceledException ex)
             {
@@ -94,7 +94,7 @@ internal class ObserveResponse(Arguments arguments) : IExcelObservable
                     _observer.OnError(ex);
                 });
 
-                _logger.LogDebug(ex, "Getting response {id} ... Cancelled", _task?.Id);
+                _logger.LogInformation(ex, "Sending request {id} ... Cancelled (elapsed time: {} ms)", _task?.Id, stopwatch.ElapsedMilliseconds);
             }
             catch (Exception ex)
             {
@@ -104,13 +104,16 @@ internal class ObserveResponse(Arguments arguments) : IExcelObservable
                     observer.OnError(ex);
                 });
 
-                _logger.LogError(ex, "Getting response {id} ... Failed: {message}", _task?.Id, ex.Message);
+                _logger.LogError(ex, "Sending request {id} ... Failed: {message} (elapsed time: {} ms)", _task?.Id, ex.Message, stopwatch.ElapsedMilliseconds);
             }
-        }, _cancellationTokenSource.Token);
+        // Provide a hint to the scheduler that a new thread might be required, to avoid thread pool starvation
+        }, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+
+        _logger.LogInformation("Sending request {id} ... Queued (elapsed time: {} ms)", _task?.Id, stopwatch.ElapsedMilliseconds);
 
         return new ActionDisposable(() =>
         {
-            _logger.LogDebug("Getting response {id} ... Disposing ({status})", _task.Id, _task.IsCompleted ? "done" : "cancelled");
+            _logger.LogInformation("Sending request {id} ... Disposing ({status}, elapsed time: {} ms))", _task.Id, _task.IsCompleted ? "done" : "cancelled", stopwatch.ElapsedMilliseconds);
             _cancellationTokenSource.Cancel();
         });
     }
