@@ -106,7 +106,7 @@ internal class ObserveResponse(Arguments arguments, Stopwatch stopwatch) : IExce
 
                 _logger.LogError(ex, "Sending request {id} ... Failed: {message} (elapsed time: {} ms)", _task?.Id, ex.Message, stopwatch.ElapsedMilliseconds);
             }
-        // Provide a hint to the scheduler that a new thread might be required, to avoid thread pool starvation
+            // Provide a hint to the scheduler that a new thread might be required, to avoid thread pool starvation
         }, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
         _logger.LogInformation("Sending request {id} ... Queued (elapsed time: {} ms)", _task?.Id, stopwatch.ElapsedMilliseconds);

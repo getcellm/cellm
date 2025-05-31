@@ -72,7 +72,7 @@ public static class CellmFunctions
     {
         try
         {
-            var stopwatch = Stopwatch.StartNew(); 
+            var stopwatch = Stopwatch.StartNew();
 
             var argumentParser = CellmAddIn.Services.GetRequiredService<ArgumentParser>();
             var providerConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<CellmAddInConfiguration>>();
