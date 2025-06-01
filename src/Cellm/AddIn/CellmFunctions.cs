@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using ModelContextProtocol.Protocol.Types;
 
 namespace Cellm.AddIn;
 
@@ -26,7 +27,7 @@ public static class CellmFunctions
     /// <returns>
     /// The model's response as a string. If an error occurs, it returns the error message.
     /// </returns>
-    [ExcelFunction(Name = "PROMPT", Description = "Send a prompt to the default model", IsThreadSafe = true)]
+    [ExcelFunction(Name = "PROMPT", Description = "Send a prompt to the default model", IsVolatile = false)]
     public static object Prompt(
     [ExcelArgument(AllowReference = true, Name = "InstructionsOrContext", Description = "A string with instructions or a cell or range of cells with context")] object context,
     [ExcelArgument(AllowReference = true, Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
@@ -34,10 +35,10 @@ public static class CellmFunctions
     {
         var configuration = CellmAddIn.Services.GetRequiredService<IConfiguration>();
 
-        var provider = configuration.GetSection(nameof(CellmAddInConfiguration)).GetValue<string>(nameof(CellmAddInConfiguration.DefaultProvider))
+        var provider = configuration[$"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}"]
             ?? throw new ArgumentException(nameof(CellmAddInConfiguration.DefaultProvider));
 
-        var model = configuration.GetSection($"{provider}Configuration").GetValue<string>(nameof(IProviderConfiguration.DefaultModel))
+        var model = configuration[$"{provider}Configuration:{nameof(IProviderConfiguration.DefaultModel)}"]
             ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
 
         return PromptWith(
@@ -63,19 +64,18 @@ public static class CellmFunctions
     /// <returns>
     /// The model's response as a string. If an error occurs, it returns the error message.
     /// </returns>
-    [ExcelFunction(Name = "PROMPTWITH", Description = "Send a prompt to a specific model", IsThreadSafe = true)]
+    [ExcelFunction(Name = "PROMPTWITH", Description = "Send a prompt to a specific model", IsVolatile = false)]
     public static object PromptWith(
         [ExcelArgument(AllowReference = true, Name = "Provider/Model")] object providerAndModel,
         [ExcelArgument(AllowReference = true, Name = "InstructionsOrContext", Description = "A string with instructions or a cell or range of cells with context")] object instructionsOrCells,
         [ExcelArgument(AllowReference = true, Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
         [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
     {
+        var stopwatch = Stopwatch.StartNew();
+
         try
         {
-            var stopwatch = Stopwatch.StartNew();
-
             var argumentParser = CellmAddIn.Services.GetRequiredService<ArgumentParser>();
-            var providerConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<CellmAddInConfiguration>>();
 
             // We must parse arguments on the main thread
             var arguments = argumentParser
@@ -86,7 +86,7 @@ public static class CellmFunctions
                 .AddTemperature(temperature)
                 .Parse();
 
-            // ObserveResponse will send request on another thread and update the cell value on the main thread
+            // ObserveResponse will send request on another thread
             return ExcelAsyncUtil.Observe(
                 nameof(PromptWith),
                 new object[] { providerAndModel, instructionsOrCells, instructionsOrTemperature, temperature },
@@ -94,8 +94,15 @@ public static class CellmFunctions
         }
         catch (ExcelErrorException ex)
         {
-            // Short-circuit if any inputs are #GETTING_DATA or or contain errors. Excel will re-trigger this function when inputs are updated with realized values.
+            // Short-circuit if any inputs are #GETTING_DATA or contain errors. Excel will re-trigger this function
+            // (or already has) when inputs are updated with realized values.
             return ex.GetExcelError();
+        }
+        catch (XlCallException)
+        {
+            // Could be many things but the only thing observed so far is XlReturnUncalced, meaning an
+            // ExcelReference's value wasn't calculated yet
+            return ExcelError.ExcelErrorGettingData;
         }
         catch (CellmException ex)
         {
@@ -104,7 +111,7 @@ public static class CellmFunctions
             CellmAddIn.Services
                 .GetRequiredService<ILoggerFactory>()
                 .CreateLogger(nameof(PromptWith))
-                .LogError(ex, "{method} failed", nameof(PromptWith));
+                .LogError(ex, "{method} failed ({})", nameof(PromptWith), ex.Message);
 
             return ExcelError.ExcelErrorValue;
         }

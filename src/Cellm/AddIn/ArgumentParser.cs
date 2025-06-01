@@ -56,9 +56,8 @@ public class ArgumentParser(IConfiguration configuration)
 
     internal Arguments Parse()
     {
-        var providerAsString = ParseProvider(_provider) ?? configuration
-            .GetSection(nameof(CellmAddInConfiguration))
-            .GetValue<string>(nameof(CellmAddInConfiguration.DefaultProvider))
+        var providerAsString = ParseProvider(_provider)
+            ?? configuration[$"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}"]
             ?? throw new ArgumentException(nameof(CellmAddInConfiguration.DefaultProvider));
 
         if (!Enum.TryParse<Provider>(providerAsString, true, out var provider))
@@ -66,32 +65,29 @@ public class ArgumentParser(IConfiguration configuration)
             throw new ArgumentException($"Unsupported provider: {providerAsString}");
         }
 
-        var model = ParseModel(_model) ?? configuration
-            .GetSection($"{provider}Configuration")
-            .GetValue<string>(nameof(IProviderConfiguration.DefaultModel))
+        var model = ParseModel(_model) 
+            ?? configuration[$"{provider}Configuration:{nameof(IProviderConfiguration.DefaultModel)}"]
             ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
 
-        var defaultTemperature = configuration
-            .GetSection(nameof(CellmAddInConfiguration))
-            .GetValue<double?>(nameof(CellmAddInConfiguration.DefaultTemperature))
+        var defaultTemperature = configuration[$"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultTemperature)}"]
             ?? throw new ArgumentException(nameof(CellmAddInConfiguration.DefaultTemperature));
 
         var arguments = (_instructionsOrCells, _instructionsOrTemperature, _temperature) switch
         {
             // "=PROMPT("Extract keywords")
-            (string instructions, ExcelMissing, ExcelMissing) => new Arguments(provider, model, string.Empty, instructions, ParseTemperature(defaultTemperature)),
+            (string instructions, ExcelMissing, ExcelMissing) => new Arguments(provider, model, string.Empty, instructions, ParseTemperature(Convert.ToDouble(defaultTemperature))),
             // "=PROMPT("Extract keywords", 0.7)
             (string instructions, double temperature, ExcelMissing) => new Arguments(provider, model, string.Empty, instructions, ParseTemperature(temperature)),
             // "=PROMPT(A1:B2)
-            (ExcelReference cells, ExcelMissing, ExcelMissing) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), SystemMessages.InlineInstructions, ParseTemperature(defaultTemperature)),
+            (ExcelReference cells, ExcelMissing, ExcelMissing) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), SystemMessages.InlineInstructions, ParseTemperature(Convert.ToDouble(defaultTemperature))),
             // "=PROMPT(A1:B2, 0.7)
-            (ExcelReference cells, double temperature, ExcelMissing) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), SystemMessages.InlineInstructions, ParseTemperature(defaultTemperature)),
+            (ExcelReference cells, double temperature, ExcelMissing) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), SystemMessages.InlineInstructions, ParseTemperature(Convert.ToDouble(defaultTemperature))),
             // "=PROMPT(A1:B2, "Extract keywords")
-            (ExcelReference cells, string instructions, ExcelMissing) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), instructions, ParseTemperature(defaultTemperature)),
+            (ExcelReference cells, string instructions, ExcelMissing) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), instructions, ParseTemperature(Convert.ToDouble(defaultTemperature))),
             // "=PROMPT(A1:B2, "Extract keywords", 0.7)
             (ExcelReference cells, string instructions, double temperature) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), instructions, ParseTemperature(temperature)),
             // "=PROMPT(A1:B2, C1:D2)
-            (ExcelReference cells, ExcelReference instructions, ExcelMissing) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), new Cells(instructions.RowFirst, instructions.RowLast, instructions.GetValue()), ParseTemperature(defaultTemperature)),
+            (ExcelReference cells, ExcelReference instructions, ExcelMissing) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), new Cells(instructions.RowFirst, instructions.RowLast, instructions.GetValue()), ParseTemperature(Convert.ToDouble(defaultTemperature))),
             // "=PROMPT(A1:B2, C1:D2, 0.7)
             (ExcelReference cells, ExcelReference instructions, double temperature) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), new Cells(instructions.RowFirst, instructions.RowLast, instructions.GetValue()), ParseTemperature(temperature)),
             // Anything else
@@ -134,9 +130,9 @@ public class ArgumentParser(IConfiguration configuration)
     {
         var values = cells.Values switch
         {
+            ExcelError excelError => throw new ExcelErrorException(excelError),
             object[,] manyCells => manyCells,
-            string singleCell => new string[1, 1] { { singleCell } },
-            object invalidType => throw new ArgumentException($"Invalid type: {invalidType.GetType()} ({invalidType?.ToString()})", nameof(cells))
+            object singleCell => new object[1, 1] { { singleCell } }
         };
 
         var numberOfRows = values.GetLength(0);
@@ -173,6 +169,11 @@ public class ArgumentParser(IConfiguration configuration)
         {
             for (var c = 0; c < numberOfColumns; c++)
             {
+                if (values[r, c] is ExcelError excelError)
+                {
+                    throw new ExcelErrorException(excelError);
+                }
+
                 if (values[r, c] is ExcelEmpty)
                 {
                     values[r, c] = string.Empty;
