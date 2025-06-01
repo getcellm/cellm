@@ -93,8 +93,8 @@ internal class ObserveResponse(Arguments arguments, Stopwatch stopwatch) : IExce
         }
         catch (ExcelErrorException ex)
         {
-             observer.OnNext(ex.GetExcelError());
-             observer.OnCompleted();
+            observer.OnNext(ex.GetExcelError());
+            observer.OnCompleted();
 
         }
         catch (OperationCanceledException)

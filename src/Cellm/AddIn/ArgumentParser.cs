@@ -65,7 +65,7 @@ public class ArgumentParser(IConfiguration configuration)
             throw new ArgumentException($"Unsupported provider: {providerAsString}");
         }
 
-        var model = ParseModel(_model) 
+        var model = ParseModel(_model)
             ?? configuration[$"{provider}Configuration:{nameof(IProviderConfiguration.DefaultModel)}"]
             ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
 
