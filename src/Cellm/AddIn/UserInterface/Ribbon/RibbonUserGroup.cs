@@ -79,14 +79,14 @@ public partial class RibbonMain
         // Note: ShowDialog() blocks until the form is closed.
         if (loginForm.ShowDialog() == DialogResult.OK)
         {
-            string username = loginForm.Username;
-            string password = loginForm.Password;
+            var username = loginForm.Username;
+            var password = loginForm.Password;
 
             // Perform the check immediately with the entered credentials
-            Task<bool> checkTask = PerformServerLoginCheckAsync(username, password);
+            var checkTask = PerformServerLoginCheckAsync(username, password);
 
             // Block and wait for the result (acceptable after modal dialog)
-            bool loginSuccess = checkTask.Result; // Use .Result here as we need the outcome now
+            var loginSuccess = checkTask.Result; // Use .Result here as we need the outcome now
 
             if (loginSuccess)
             {
@@ -182,7 +182,7 @@ public partial class RibbonMain
 
     public string GetUserScreentip(IRibbonControl control)
     {
-        bool isLoggedIn = _cachedLoginState ?? false;
+        var isLoggedIn = _cachedLoginState ?? false;
 
         if (isLoggedIn)
         {
@@ -220,8 +220,8 @@ public partial class RibbonMain
             try
             {
                 // Perform check using SAVED credentials (no args passed)
-                bool actualLoginState = await PerformServerLoginCheckAsync();
-                bool stateChanged = !_cachedLoginState.HasValue || _cachedLoginState.Value != actualLoginState;
+                var actualLoginState = await PerformServerLoginCheckAsync();
+                var stateChanged = !_cachedLoginState.HasValue || _cachedLoginState.Value != actualLoginState;
                 _cachedLoginState = actualLoginState;
                 _cacheExpiry = DateTime.UtcNow.Add(_cacheDuration);
                 if (stateChanged && _ribbonUi != null) InvalidateUserControls();
@@ -241,10 +241,10 @@ public partial class RibbonMain
 
     private async Task<bool> PerformServerLoginCheckAsync(string? usernameToCheck = null, string? passwordToCheck = null)
     {
-        string? username = usernameToCheck;
-        string? password = passwordToCheck;
+        var username = usernameToCheck;
+        var password = passwordToCheck;
 
-        _logger.LogInformation($"Performing server login check for user: {(string.IsNullOrWhiteSpace(username) ? "(Saved User)" : username)}");
+        _logger.LogInformation("Performing server login check for user: {}", (string.IsNullOrWhiteSpace(username) ? "(Saved User)" : username));
 
         // If no credentials passed, try reading saved ones
         if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
@@ -339,7 +339,7 @@ public partial class RibbonMain
 
     public void OnAccountActionClicked(IRibbonControl control)
     {
-        string url = IsLoggedIn(control) ? ManageAccountUrl : SignUpUrl;
+        var url = IsLoggedIn(control) ? ManageAccountUrl : SignUpUrl;
 
         try
         {
