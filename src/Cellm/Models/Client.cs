@@ -11,10 +11,10 @@ internal class Client(ISender sender, ResiliencePipelineProvider<string> resilie
     {
         var retryPipeline = resiliencePipelineProvider.GetPipeline("RateLimiter");
 
-        return await retryPipeline.Execute(async () =>
+        return await retryPipeline.ExecuteAsync(async (pipelineCancellationToken) =>
         {
-            var response = await sender.Send(new ProviderRequest(prompt, provider), cancellationToken);
+            var response = await sender.Send(new ProviderRequest(prompt, provider), pipelineCancellationToken);
             return response.Prompt;
-        });
+        }, cancellationToken);
     }
 }
