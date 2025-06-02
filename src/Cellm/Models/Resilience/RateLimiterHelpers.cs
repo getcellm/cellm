@@ -1,8 +1,8 @@
-﻿using Polly;
-using Cellm.Models.Prompts;
-using Polly.Timeout;
+﻿using System.ClientModel;
 using Anthropic.SDK;
-using System.ClientModel;
+using Cellm.Models.Prompts;
+using Polly;
+using Polly.Timeout;
 
 namespace Cellm.Models.Resilience;
 
