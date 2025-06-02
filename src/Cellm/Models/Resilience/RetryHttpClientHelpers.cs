@@ -8,24 +8,6 @@ namespace Cellm.Models.Resilience;
 
 internal static class RetryHttpClientHelpers
 {
-    public static bool ShouldBreakCircuit(Outcome<HttpResponseMessage> outcome) => outcome switch
-    {
-        { Result: HttpResponseMessage response } => IsCircuitBreakerError(response),
-        { Exception: Exception exception } => IsCircuitBreakerException(exception),
-        _ => false
-    };
-
-    private static bool IsCircuitBreakerError(HttpResponseMessage response) =>
-        response.StatusCode == HttpStatusCode.RequestTimeout ||
-        response.StatusCode == HttpStatusCode.TooManyRequests ||
-        response.StatusCode == HttpStatusCode.GatewayTimeout;
-
-    private static bool IsCircuitBreakerException(Exception exception) =>
-        IsRetryableException(exception) || IsCatastrophicException(exception);
-
-    private static bool IsCatastrophicException(Exception exception) =>
-        exception is OutOfMemoryException or ThreadAbortException;
-
     public static bool ShouldRetry(Outcome<HttpResponseMessage> outcome) => outcome switch
     {
         { Result: HttpResponseMessage response } => IsRetryableError(response),
