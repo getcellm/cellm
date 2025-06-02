@@ -1,6 +1,8 @@
 using System.Security;
 using System.Text;
 using Cellm.Models.Providers;
+using Cellm.Tools.FileReader;
+using Cellm.Tools.FileSearch;
 using Cellm.Tools.ModelContextProtocol;
 using Cellm.Users;
 using ExcelDna.Integration.CustomUI;
@@ -60,23 +62,23 @@ public partial class RibbonMain
 
     public void OnFileSearchToggled(IRibbonControl control, bool pressed)
     {
-        SetValue("ProviderConfiguration:EnableTools:FileSearchRequest", pressed.ToString());
+        SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableTools)}:{nameof(FileSearchRequest)}", pressed.ToString());
     }
 
     public bool OnGetFileSearchPressed(IRibbonControl control)
     {
-        var value = GetValue("ProviderConfiguration:EnableTools:FileSearchRequest");
+        var value = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableTools)}:{nameof(FileSearchRequest)}");
         return bool.Parse(value);
     }
 
     public void OnFileReaderToggled(IRibbonControl control, bool pressed)
     {
-        SetValue("ProviderConfiguration:EnableTools:FileReaderRequest", pressed.ToString());
+        SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableTools)}:{nameof(FileReaderRequest)}", pressed.ToString());
     }
 
     public bool OnGetFileReaderPressed(IRibbonControl control)
     {
-        var value = GetValue("ProviderConfiguration:EnableTools:FileReaderRequest");
+        var value = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableTools)}:{nameof(FileReaderRequest)}");
         return bool.Parse(value);
     }
 
@@ -171,7 +173,7 @@ public partial class RibbonMain
         var serverName = control.Id.Substring(McpCheckBoxIdPrefix.Length);
         if (string.IsNullOrWhiteSpace(serverName)) return; // Should not happen if ID generation is correct
 
-        var configKey = $"ProviderConfiguration:EnableModelContextProtocolServers:{serverName}";
+        var configKey = $"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableModelContextProtocolServers)}:{serverName}";
 
         try
         {
@@ -200,7 +202,7 @@ public partial class RibbonMain
             return false;
         }
 
-        var configKey = $"ProviderConfiguration:EnableModelContextProtocolServers:{serverName}";
+        var configKey = $"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableModelContextProtocolServers)}:{serverName}";
 
         try
         {
