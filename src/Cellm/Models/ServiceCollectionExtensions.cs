@@ -27,6 +27,7 @@ using System.ClientModel.Primitives;
 using System.Net.Http.Headers;
 using System.Threading.RateLimiting;
 using Anthropic.SDK;
+using Cellm.Models.Prompts;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
 using Cellm.Models.Providers.Cellm;
@@ -43,7 +44,6 @@ using Microsoft.Extensions.Options;
 using Mistral.SDK;
 using OpenAI;
 using Polly;
-using Polly.CircuitBreaker;
 using Polly.Retry;
 
 namespace Cellm.Models;
@@ -54,21 +54,29 @@ public static class ServiceCollectionExtensions
     {
         var resilienceConfiguration = configurationProvider.GetRequiredService<IOptions<ResilienceConfiguration>>();
 
-        return services.AddResiliencePipeline("RateLimiter", builder =>
+        return services.AddResiliencePipeline<string, Prompt>("RateLimiter", builder =>
         {
             builder
                 .AddRateLimiter(new TokenBucketRateLimiter(new TokenBucketRateLimiterOptions
                 {
-                    QueueLimit = resilienceConfiguration.Value.RateLimiterConfiguration.QueueLimit,
+                    QueueLimit = resilienceConfiguration.Value.RateLimiterConfiguration.RateLimiterQueueLimit,
                     TokenLimit = resilienceConfiguration.Value.RateLimiterConfiguration.TokenLimit,
                     ReplenishmentPeriod = TimeSpan.FromSeconds(resilienceConfiguration.Value.RateLimiterConfiguration.ReplenishmentPeriodInSeconds),
                     TokensPerPeriod = resilienceConfiguration.Value.RateLimiterConfiguration.TokensPerPeriod,
                 }))
                 .AddConcurrencyLimiter(new ConcurrencyLimiterOptions
                 {
-                    QueueLimit = resilienceConfiguration.Value.RateLimiterConfiguration.QueueLimit,
+                    QueueLimit = resilienceConfiguration.Value.RateLimiterConfiguration.ConcurrencyLimiterQueueLimit,
                     PermitLimit = resilienceConfiguration.Value.RateLimiterConfiguration.ConcurrencyLimit,
 
+                })
+                .AddRetry(new RetryStrategyOptions<Prompt>
+                {
+                    ShouldHandle = args => ValueTask.FromResult(RateLimiterHelpers.ShouldRetry(args.Outcome)),
+                    BackoffType = DelayBackoffType.Exponential,
+                    UseJitter = true,
+                    MaxRetryAttempts = resilienceConfiguration.Value.RetryConfiguration.MaxRetryAttempts,
+                    Delay = TimeSpan.FromSeconds(resilienceConfiguration.Value.RetryConfiguration.DelayInSeconds),
                 })
                 .Build();
         });
@@ -95,14 +103,6 @@ public static class ServiceCollectionExtensions
                         UseJitter = true,
                         MaxRetryAttempts = resilienceConfiguration.Value.RetryConfiguration.MaxRetryAttempts,
                         Delay = TimeSpan.FromSeconds(resilienceConfiguration.Value.RetryConfiguration.DelayInSeconds),
-                    })
-                    .AddCircuitBreaker(new CircuitBreakerStrategyOptions<HttpResponseMessage>
-                    {
-                        ShouldHandle = args => ValueTask.FromResult(RetryHttpClientHelpers.ShouldBreakCircuit(args.Outcome)),
-                        FailureRatio = resilienceConfiguration.Value.CircuitBreakerConfiguration.FailureRatio,
-                        SamplingDuration = TimeSpan.FromSeconds(resilienceConfiguration.Value.CircuitBreakerConfiguration.SamplingDurationInSeconds),
-                        MinimumThroughput = resilienceConfiguration.Value.CircuitBreakerConfiguration.MinimumThroughput,
-                        BreakDuration = TimeSpan.FromSeconds(resilienceConfiguration.Value.CircuitBreakerConfiguration.BreakDurationInSeconds),
                     })
                     .AddTimeout(TimeSpan.FromSeconds(resilienceConfiguration.Value.RetryConfiguration.HttpTimeoutInSeconds))
                     .Build();
