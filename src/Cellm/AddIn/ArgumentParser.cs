@@ -327,7 +327,7 @@ public class ArgumentParser(IConfiguration configuration)
         return providerAndModel.GetValue()?.ToString() ?? throw new ArgumentException("Provider and model argument must be a valid cell reference");
     }
 
-    private static string GetColumnName(int columnNumber)
+    internal static string GetColumnName(int columnNumber)
     {
         var columnName = string.Empty;
 
@@ -340,7 +340,7 @@ public class ArgumentParser(IConfiguration configuration)
         return columnName;
     }
 
-    private static string GetRowName(int rowNumber)
+    internal static string GetRowName(int rowNumber)
     {
         return (rowNumber + 1).ToString();
     }

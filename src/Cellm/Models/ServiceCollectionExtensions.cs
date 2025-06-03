@@ -41,10 +41,12 @@ using Cellm.Users;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Compliance.Redaction;
 using Mistral.SDK;
 using OpenAI;
 using Polly;
 using Polly.Retry;
+using Polly.Telemetry;
 
 namespace Cellm.Models;
 
@@ -54,8 +56,18 @@ public static class ServiceCollectionExtensions
     {
         var resilienceConfiguration = configurationProvider.GetRequiredService<IOptions<ResilienceConfiguration>>();
 
-        return services.AddResiliencePipeline<string, Prompt>("RateLimiter", builder =>
+        return services.AddResiliencePipeline<string, Prompt>("RateLimiter", (builder, context) =>
         {
+            // Decrease severity of most Polly events
+            var telemetryOptions = new TelemetryOptions(context.GetOptions<TelemetryOptions>())
+            {
+                SeverityProvider = args => args.Event.EventName switch
+                {
+                    "OnRetry" => ResilienceEventSeverity.Information,
+                    _ => ResilienceEventSeverity.Debug
+                }
+            };
+
             builder
                 .AddRateLimiter(new TokenBucketRateLimiter(new TokenBucketRateLimiterOptions
                 {
@@ -78,6 +90,7 @@ public static class ServiceCollectionExtensions
                     MaxRetryAttempts = resilienceConfiguration.Value.RetryConfiguration.MaxRetryAttempts,
                     Delay = TimeSpan.FromSeconds(resilienceConfiguration.Value.RetryConfiguration.DelayInSeconds),
                 })
+                .ConfigureTelemetry(telemetryOptions)
                 .Build();
         });
     }
@@ -87,15 +100,28 @@ public static class ServiceCollectionExtensions
         var resilienceConfiguration = configurationProvider.GetRequiredService<IOptions<ResilienceConfiguration>>();
 
         services
+            .AddRedaction()
+            .AddExtendedHttpClientLogging()
             .AddHttpClient("ResilientHttpClient", resilientHttpClient =>
             {
                 // Delegate timeout to resilience pipeline
                 resilientHttpClient.Timeout = Timeout.InfiniteTimeSpan;
             })
             .AddAsKeyed()
-            .AddResilienceHandler("RetryHttpClientHandler", builder =>
+            .AddResilienceHandler("RetryHttpClientHandler", (builder, context) =>
             {
-                _ = builder
+                // Decrease severity of most Polly events
+                var telemetryOptions = new TelemetryOptions(context.GetOptions<TelemetryOptions>())
+                {
+                    SeverityProvider = args => args.Event.EventName switch
+                    {
+                        // Decrease severity of specific events
+                        "OnRetry" => ResilienceEventSeverity.Information,
+                        _ => ResilienceEventSeverity.Debug
+                    }
+                };
+
+                builder
                     .AddRetry(new RetryStrategyOptions<HttpResponseMessage>
                     {
                         ShouldHandle = args => ValueTask.FromResult(RetryHttpClientHelpers.ShouldRetry(args.Outcome)),
@@ -105,6 +131,7 @@ public static class ServiceCollectionExtensions
                         Delay = TimeSpan.FromSeconds(resilienceConfiguration.Value.RetryConfiguration.DelayInSeconds),
                     })
                     .AddTimeout(TimeSpan.FromSeconds(resilienceConfiguration.Value.RetryConfiguration.HttpTimeoutInSeconds))
+                    .ConfigureTelemetry(telemetryOptions)
                     .Build();
             });
 
@@ -196,10 +223,7 @@ public static class ServiceCollectionExtensions
                 var mistralConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<MistralConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
-                return new MistralClient(mistralConfiguration.CurrentValue.ApiKey, resilientHttpClient)
-                    .Completions
-                    .AsBuilder()
-                    .Build();
+                return new MistralClient(mistralConfiguration.CurrentValue.ApiKey, resilientHttpClient).Completions;
             }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 

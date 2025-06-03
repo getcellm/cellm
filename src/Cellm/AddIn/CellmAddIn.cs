@@ -22,7 +22,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Sentry.Infrastructure;
 
 namespace Cellm.AddIn;
 
@@ -47,8 +46,8 @@ public class CellmAddIn : IExcelAddIn
 
     public void AutoClose()
     {
-        DisposeServices();
         SentrySdk.Flush();
+        DisposeServices();
     }
 
     private static ServiceCollection ConfigureServices(ServiceCollection services)
@@ -99,8 +98,6 @@ public class CellmAddIn : IExcelAddIn
                       sentryLoggingOptions.Environment = sentryConfiguration.Value.Environment;
                       sentryLoggingOptions.Dsn = sentryConfiguration.Value.Dsn;
                       sentryLoggingOptions.Debug = sentryConfiguration.Value.Debug;
-                      sentryLoggingOptions.DiagnosticLevel = SentryLevel.Debug;
-                      sentryLoggingOptions.DiagnosticLogger = new TraceDiagnosticLogger(SentryLevel.Debug);
                       sentryLoggingOptions.TracesSampleRate = sentryConfiguration.Value.TracesSampleRate;
                       sentryLoggingOptions.ProfilesSampleRate = sentryConfiguration.Value.ProfilesSampleRate;
                       sentryLoggingOptions.Environment = sentryConfiguration.Value.Environment;

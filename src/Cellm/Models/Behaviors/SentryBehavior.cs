@@ -22,7 +22,7 @@ internal class SentryBehavior<TRequest, TResponse>(
         if (!SentrySdk.IsEnabled || disableTelemetry)
         {
             logger.LogDebug("Telemetry disabled");
-            return await next();
+            return await next().ConfigureAwait(false);
         }
 
         logger.LogDebug("Telemetry enabled");
@@ -39,7 +39,7 @@ internal class SentryBehavior<TRequest, TResponse>(
 
         try
         {
-            return await next();
+            return await next().ConfigureAwait(false);
         }
         finally
         {
