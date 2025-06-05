@@ -59,7 +59,7 @@ internal class ToolBehavior<TRequest, TResponse>(
             logger.LogDebug("MCP tools disabled");
         }
 
-        if (request.Prompt.Options.Tools is not null && request.Prompt.Options.Tools.Any())
+        if (request.Prompt.Options.Tools?.Any() ?? false)
         {
             logger.LogDebug("Tools: {tools}", request.Prompt.Options.Tools);
         }
