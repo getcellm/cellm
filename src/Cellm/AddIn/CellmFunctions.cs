@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Text;
 using Cellm.AddIn.Exceptions;
-using Cellm.Models.Prompts;
 using Cellm.Models;
+using Cellm.Models.Prompts;
 using Cellm.Models.Providers;
 using ExcelDna.Integration;
 using Microsoft.Extensions.Configuration;
