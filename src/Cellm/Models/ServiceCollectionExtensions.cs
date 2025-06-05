@@ -39,7 +39,6 @@ using Cellm.Models.Providers.OpenAiCompatible;
 using Cellm.Models.Resilience;
 using Cellm.Users;
 using Microsoft.Extensions.AI;
-using Microsoft.Extensions.Compliance.Redaction;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Mistral.SDK;
