@@ -30,7 +30,7 @@ internal class CacheBehavior<TRequest, TResponse>(
         if (!providerConfiguration.CurrentValue.EnableCache)
         {
             logger.LogDebug("Prompt caching disabled");
-            return await next();
+            return await next().ConfigureAwait(false);
         }
 
         logger.LogDebug("Prompt caching enabled");
@@ -49,6 +49,6 @@ internal class CacheBehavior<TRequest, TResponse>(
             options: _cacheEntryOptions,
             Tags,
             cancellationToken
-        );
+        ).ConfigureAwait(false);
     }
 }

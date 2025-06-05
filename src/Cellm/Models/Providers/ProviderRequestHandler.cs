@@ -13,7 +13,7 @@ internal class ProviderRequestHandler(IChatClientFactory chatClientFactory) : IR
         var chatResponse = await chatClient.GetResponseAsync(
             request.Prompt.Messages,
             request.Prompt.Options,
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
 
         var prompt = new PromptBuilder(request.Prompt)
             .AddMessages(chatResponse.Messages)

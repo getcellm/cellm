@@ -64,7 +64,7 @@ internal class ToolBehavior<TRequest, TResponse>(
             logger.LogDebug("Tools: {tools}", request.Prompt.Options.Tools);
         }
 
-        return await next();
+        return await next().ConfigureAwait(false);
     }
 
     private List<AITool> GetNativeTools()
@@ -88,7 +88,7 @@ internal class ToolBehavior<TRequest, TResponse>(
 
             if (serverTools is null)
             {
-                await _asyncLock.WaitAsync(cancellationToken);
+                await _asyncLock.WaitAsync(cancellationToken).ConfigureAwait(false);
 
                 try
                 {
@@ -97,11 +97,11 @@ internal class ToolBehavior<TRequest, TResponse>(
                     if (StdioMcpClient is null)
                     {
                         var clientTransport = new StdioClientTransport(serverConfiguration);
-                        StdioMcpClient = await McpClientFactory.CreateAsync(clientTransport, loggerFactory: loggerFactory, cancellationToken: cancellationToken);
+                        StdioMcpClient = await McpClientFactory.CreateAsync(clientTransport, loggerFactory: loggerFactory, cancellationToken: cancellationToken).ConfigureAwait(false);
                         _mcpClientCache[serverName] = StdioMcpClient;
                     }
 
-                    serverTools = await StdioMcpClient.ListToolsAsync(cancellationToken: cancellationToken);
+                    serverTools = await StdioMcpClient.ListToolsAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
                     _mcpClientToolCache[serverName] = serverTools;
                 }
                 finally
@@ -129,7 +129,7 @@ internal class ToolBehavior<TRequest, TResponse>(
 
             if (serverTools is null)
             {
-                await _asyncLock.WaitAsync(cancellationToken);
+                await _asyncLock.WaitAsync(cancellationToken).ConfigureAwait(false);
 
                 try
                 {
@@ -138,11 +138,11 @@ internal class ToolBehavior<TRequest, TResponse>(
                     if (SseMcpClient is null)
                     {
                         var clientTransport = new SseClientTransport(serverConfiguration);
-                        SseMcpClient = await McpClientFactory.CreateAsync(clientTransport, loggerFactory: loggerFactory, cancellationToken: cancellationToken);
+                        SseMcpClient = await McpClientFactory.CreateAsync(clientTransport, loggerFactory: loggerFactory, cancellationToken: cancellationToken).ConfigureAwait(false);
                         _mcpClientCache[serverName] = SseMcpClient;
                     }
 
-                    serverTools = await SseMcpClient.ListToolsAsync(cancellationToken: cancellationToken);
+                    serverTools = await SseMcpClient.ListToolsAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
                     _mcpClientToolCache[serverName] = serverTools;
                 }
                 finally
