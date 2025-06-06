@@ -32,6 +32,7 @@ using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
 using Cellm.Models.Providers.Cellm;
 using Cellm.Models.Providers.DeepSeek;
+using Cellm.Models.Providers.Google;
 using Cellm.Models.Providers.Mistral;
 using Cellm.Models.Providers.Ollama;
 using Cellm.Models.Providers.OpenAi;
@@ -205,6 +206,32 @@ public static class ServiceCollectionExtensions
                     });
 
                 return openAiClient.GetChatClient(deepSeekConfiguration.CurrentValue.DefaultModel).AsIChatClient();
+            }, ServiceLifetime.Transient)
+            .UseFunctionInvocation();
+
+        return services;
+    }
+
+    public static IServiceCollection AddGoogleGeminiChatClient(this IServiceCollection services)
+    {
+        services
+            .AddKeyedChatClient(Provider.GoogleGemini, serviceProvider =>
+            {
+                var account = serviceProvider.GetRequiredService<Account>();
+                account.RequireEntitlement(Entitlement.EnableGoogleGeminiProvider);
+
+                var googleGeminiConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<GoogleGeminiConfiguration>>();
+                var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
+
+                var openAiClient = new OpenAIClient(
+                    new ApiKeyCredential(googleGeminiConfiguration.CurrentValue.ApiKey),
+                    new OpenAIClientOptions
+                    {
+                        Transport = new HttpClientPipelineTransport(resilientHttpClient),
+                        Endpoint = googleGeminiConfiguration.CurrentValue.BaseAddress
+                    });
+
+                return openAiClient.GetChatClient(googleGeminiConfiguration.CurrentValue.DefaultModel).AsIChatClient();
             }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 

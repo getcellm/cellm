@@ -174,7 +174,6 @@ public static class CellmFunctions
             logger.LogInformation("Sending prompt ({}) ... Done (elapsed time: {}ms, request time: {}ms)", callerCoordinates, wallClock.ElapsedMilliseconds, requestClock.ElapsedMilliseconds);
 
             return assistantMessage;
-
         }
         // Short-circuit if any cells were found to be #GETTING_DATA or contain other errors during cell parsing. 
         // Excel will re-trigger this function (or already has) when inputs are updated with realized values.

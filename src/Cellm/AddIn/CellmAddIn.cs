@@ -7,6 +7,7 @@ using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
 using Cellm.Models.Providers.Cellm;
 using Cellm.Models.Providers.DeepSeek;
+using Cellm.Models.Providers.Google;
 using Cellm.Models.Providers.Mistral;
 using Cellm.Models.Providers.Ollama;
 using Cellm.Models.Providers.OpenAi;
@@ -68,6 +69,7 @@ public class CellmAddIn : IExcelAddIn
             .Configure<AccountConfiguration>(configuration.GetRequiredSection(nameof(AccountConfiguration)))
             .Configure<AnthropicConfiguration>(configuration.GetRequiredSection(nameof(AnthropicConfiguration)))
             .Configure<CellmConfiguration>(configuration.GetRequiredSection(nameof(CellmConfiguration)))
+            .Configure<GoogleGeminiConfiguration>(configuration.GetRequiredSection(nameof(GoogleGeminiConfiguration)))
             .Configure<DeepSeekConfiguration>(configuration.GetRequiredSection(nameof(DeepSeekConfiguration)))
             .Configure<CellmAddInConfiguration>(configuration.GetRequiredSection(nameof(CellmAddInConfiguration)))
             .Configure<MistralConfiguration>(configuration.GetRequiredSection(nameof(MistralConfiguration)))
@@ -133,6 +135,7 @@ public class CellmAddIn : IExcelAddIn
             .AddAnthropicChatClient()
             .AddCellmChatClient()
             .AddDeepSeekChatClient()
+            .AddGoogleGeminiChatClient()
             .AddMistralChatClient()
             .AddOllamaChatClient()
             .AddOpenAiChatClient()
