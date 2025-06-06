@@ -101,7 +101,7 @@ internal class Account(
     private async Task<ActiveEntitlements> GetEntitlements(CancellationToken cancellationToken)
     {
 
-        var request = new HttpRequestMessage(HttpMethod.Get, new Uri(accountConfiguration.CurrentValue.BaseAddress, "user/permissions"));
+        var request = new HttpRequestMessage(HttpMethod.Get, new Uri(accountConfiguration.CurrentValue.BaseAddress, "/user/permissions"));
         request.Headers.Add("Authorization", $"Basic {GetBasicAuthCredentials()}");
 
         try
