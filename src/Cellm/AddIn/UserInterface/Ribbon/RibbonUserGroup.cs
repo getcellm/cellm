@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Http.Headers;
 using Cellm.AddIn.UserInterface.Forms;
+using Cellm.Models;
 using Cellm.Users;
 using ExcelDna.Integration.CustomUI;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,9 +17,6 @@ public partial class RibbonMain
     private static DateTime _cacheExpiry = DateTime.MinValue;
     private static readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(5);
     private static volatile bool _isLoginCheckRunning = false;
-    private const string AuthCheckUrl = "https://dev.getcellm.com/v1/up";
-    private const string SignUpUrl = "https://dev.getcellm.com/signup";
-    private const string ManageAccountUrl = "https://dev.getcellm.com/account";
 
     private enum UserGroupControlIds
     {
@@ -274,7 +272,8 @@ public partial class RibbonMain
             var account = CellmAddIn.Services.GetRequiredService<Account>();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", account.GetBasicAuthCredentials(username, password));
 
-            HttpResponseMessage response = await client.GetAsync(AuthCheckUrl);
+            var accountConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<AccountConfiguration>>();
+            var response = await client.GetAsync($"{accountConfiguration.CurrentValue.BaseAddress}/up");
             _logger.LogInformation("Authorization response: {statusCode}", response.StatusCode);
 
             return response.StatusCode == HttpStatusCode.OK;
@@ -328,8 +327,8 @@ public partial class RibbonMain
     public string GetAccountActionScreentip(IRibbonControl control)
     {
         return IsLoggedIn(control)
-            ? "Open your Cellm account settings in your browser."
-            : "Open the Cellm sign-up page in your browser.";
+            ? "Open your Cellm account settings in getcell.com"
+            : "Sign up on getcell.com to enable all features";
     }
 
     public Bitmap? GetAccountActionImage(IRibbonControl control)
@@ -339,11 +338,12 @@ public partial class RibbonMain
 
     public void OnAccountActionClicked(IRibbonControl control)
     {
-        var url = IsLoggedIn(control) ? ManageAccountUrl : SignUpUrl;
+        var accountConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<AccountConfiguration>>();
+        var url = IsLoggedIn(control) ? $"{accountConfiguration.CurrentValue.Homepage}/account" : $"{accountConfiguration.CurrentValue.Homepage}/user/new";
 
         try
         {
-            ProcessStartInfo psi = new ProcessStartInfo
+            var psi = new ProcessStartInfo
             {
                 FileName = url,
                 UseShellExecute = true
