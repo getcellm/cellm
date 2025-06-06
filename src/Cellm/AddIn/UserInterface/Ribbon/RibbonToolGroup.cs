@@ -226,8 +226,6 @@ public partial class RibbonMain
 
     public bool GetMcpEnabled(IRibbonControl control)
     {
-        return false;
-
         var account = CellmAddIn.Services.GetRequiredService<Account>();
 
         return account.HasEntitlement(Entitlement.EnableModelContextProtocol);

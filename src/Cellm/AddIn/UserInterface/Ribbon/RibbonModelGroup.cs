@@ -65,7 +65,7 @@ public partial class RibbonMain
         [6] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.OpenAiCompatible)}", Image = $"{ResourcesBasePath}/openai.png", Label = nameof(Provider.OpenAiCompatible) }
     };
 
-    internal int _selectedProviderIndex = 0; // Default to the first item (Red)
+    internal int _selectedProviderIndex = 3; // Default to Ollama
 
     private void InitializeSelectedProviderIndex()
     {
@@ -75,24 +75,15 @@ public partial class RibbonMain
             var defaultProvider = Enum.Parse<Provider>(defaultProviderName, true);
 
             _selectedProviderIndex = _providerItems.FirstOrDefault(kvp => kvp.Value.Label.Equals(defaultProvider.ToString(), StringComparison.OrdinalIgnoreCase)).Key;
-
-            // Fallback to 0 if not found, though EnsureDefaultProvider should handle this case.
-            if (!_providerItems.ContainsKey(_selectedProviderIndex))
-            {
-                _selectedProviderIndex = 0; // Default to first item if lookup fails
-            }
         }
-        catch (KeyNotFoundException)
+        catch (Exception ex) when (ex is KeyNotFoundException || ex is ArgumentException)
         {
-            // Set default if missing (Ollama corresponds to index 3 in our example)
             SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}", nameof(Provider.Ollama));
             _selectedProviderIndex = _providerItems.FirstOrDefault(kvp => kvp.Value.Label.Equals(nameof(Provider.Ollama), StringComparison.OrdinalIgnoreCase)).Key;
-            if (!_providerItems.ContainsKey(_selectedProviderIndex)) _selectedProviderIndex = 3; // Hardcode index if needed as fallback
         }
         catch (Exception ex) // Catch other potential errors during init
         {
             _logger.LogError("Error initializing selected provider index: {message}", ex.Message);
-            _selectedProviderIndex = 0; // Safe default
         }
     }
 

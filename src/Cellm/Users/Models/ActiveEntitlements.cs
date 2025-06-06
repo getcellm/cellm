@@ -15,9 +15,7 @@ internal class ActiveEntitlements()
     // Entitlements for anonymous users
     [JsonIgnore]
     private readonly List<Entitlement> AnonymousEntitlements = [
-        Entitlement.EnableAnthropicProvider,
         Entitlement.EnableOllamaProvider,
-        Entitlement.EnableOpenAiProvider
     ];
 
     [JsonIgnore]
@@ -32,7 +30,7 @@ internal class ActiveEntitlements()
                 if (string.IsNullOrEmpty(rawEntitlement.Name)) continue;
 
                 // Convert kebab-case to PascalCase for enum matching
-                string enumCandidateName = rawEntitlement.Name.Replace("-", "");
+                var enumCandidateName = rawEntitlement.Name.Replace("-", "");
 
                 // Attempt to parse, case insensitive. Ignore if TryParse fails.
                 if (Enum.TryParse<Entitlement>(enumCandidateName, ignoreCase: true, out var parsedEntitlement))

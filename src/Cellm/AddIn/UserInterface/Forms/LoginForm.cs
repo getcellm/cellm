@@ -1,6 +1,7 @@
-﻿using System;
-using System.Diagnostics;
-using System.Windows.Forms;
+﻿using System.Diagnostics;
+using Cellm.Users;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 
 namespace Cellm.AddIn.UserInterface.Forms;
@@ -15,7 +16,6 @@ public partial class LoginForm : Form
         InitializeComponent();
     }
 
-    // Event Handler for the OK Button
     private void btnLogin_Click(object sender, EventArgs e)
     {
         // Basic validation: Ensure fields are not empty
@@ -23,14 +23,12 @@ public partial class LoginForm : Form
         {
             MessageBox.Show("Please enter both username and password.", "Login Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             this.DialogResult = DialogResult.None; // Prevent the form from closing
-            TextBoxUsername.Focus();                   // Set focus back to the username field
-            return;                                // Stop further execution
+            TextBoxUsername.Focus();               // Set focus back to the username field
+            return;
         }
-        // If validation passes, the DialogResult remains OK (set by the button property),
-        // and the form will close automatically when ShowDialog returns.
+
     }
 
-    // Event Handler for the Cancel Button
     private void btnCancel_Click(object sender, EventArgs e)
     {
         // No-op
@@ -38,13 +36,13 @@ public partial class LoginForm : Form
 
     private void ForgotPassword_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
     {
-        // Define the URL for password reset
-        string passwordResetUrl = "https://dev.getcellm.com/password-reset"; // Use the correct URL
+        var accountConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<AccountConfiguration>>();
+        var passwordResetUrl = $"{accountConfiguration.CurrentValue.Homepage}/account";
 
         try
         {
             // Use Process.Start to open the URL in the default browser
-            ProcessStartInfo psi = new ProcessStartInfo
+            var psi = new ProcessStartInfo
             {
                 FileName = passwordResetUrl,
                 UseShellExecute = true // Important for opening URLs correctly
@@ -64,12 +62,13 @@ public partial class LoginForm : Form
 
     private void CreateAccount_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
     {
-        string signUpUrl = "https://dev.getcellm.com/signup";
+        var accountConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<AccountConfiguration>>();
+        var signUpUrl = $"{accountConfiguration.CurrentValue.Homepage}/user/new";
 
         try
         {
             // Use Process.Start to open the URL in the default browser
-            ProcessStartInfo psi = new ProcessStartInfo
+            var psi = new ProcessStartInfo
             {
                 FileName = signUpUrl,
                 UseShellExecute = true // Important for opening URLs correctly

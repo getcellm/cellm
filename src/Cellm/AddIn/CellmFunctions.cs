@@ -128,7 +128,7 @@ public static class CellmFunctions
 
         try
         {
-            logger.LogInformation("Sending prompt ({}) ... (elapsed time: {}ms)", callerCoordinates, wallClock.ElapsedMilliseconds);
+            logger.LogInformation("Sending prompt to {}/{} ({}) ... (elapsed time: {}ms)", arguments.Provider, arguments.Model, callerCoordinates, wallClock.ElapsedMilliseconds);
 
             // Check for cancellation before doing any work
             cancellationToken.ThrowIfCancellationRequested();
@@ -171,7 +171,7 @@ public static class CellmFunctions
             var response = await client.GetResponseAsync(prompt, arguments.Provider, cancellationToken).ConfigureAwait(false);
             var assistantMessage = response.Messages.LastOrDefault()?.Text ?? throw new InvalidOperationException("No text response");
 
-            logger.LogInformation("Sending prompt ({}) ... Done (elapsed time: {}ms, request time: {}ms)", callerCoordinates, wallClock.ElapsedMilliseconds, requestClock.ElapsedMilliseconds);
+            logger.LogInformation("Sending prompt to {}/{} ({}) ... Done (elapsed time: {}ms, request time: {}ms)", arguments.Provider, arguments.Model, callerCoordinates, wallClock.ElapsedMilliseconds, requestClock.ElapsedMilliseconds);
 
             return assistantMessage;
         }
@@ -186,7 +186,7 @@ public static class CellmFunctions
             CellmAddIn.Services
                 .GetRequiredService<ILoggerFactory>()
                 .CreateLogger(nameof(GetResponseAsync))
-                .LogInformation("Sending prompt ({}) ... Cancelled (elapsed time: {}ms, request time: {}ms)", callerCoordinates, wallClock.ElapsedMilliseconds, requestClock.ElapsedMilliseconds);
+                .LogInformation("Sending prompt to {}/{} ({}) ... Cancelled (elapsed time: {}ms, request time: {}ms)", arguments.Provider, arguments.Model, callerCoordinates, wallClock.ElapsedMilliseconds, requestClock.ElapsedMilliseconds);
 
             return "Cancelled"; // Cancellation is not an error, just return _something_
         }
@@ -195,7 +195,7 @@ public static class CellmFunctions
             CellmAddIn.Services
                 .GetRequiredService<ILoggerFactory>()
                 .CreateLogger(nameof(GetResponseAsync))
-                .LogError(ex, "Sending prompt ({}) ... Failed: {message} (elapsed time: {}ms, request time: {}ms)", callerCoordinates, ex.Message, wallClock.ElapsedMilliseconds, requestClock.ElapsedMilliseconds);
+                .LogError(ex, "Sending prompt to {}/{} ({}) ... Failed: {message} (elapsed time: {}ms, request time: {}ms)", arguments.Provider, arguments.Model, callerCoordinates, ex.Message, wallClock.ElapsedMilliseconds, requestClock.ElapsedMilliseconds);
 
             return ex.Message;
         }
