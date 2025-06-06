@@ -24,7 +24,7 @@ public partial class LoginForm : Form
             MessageBox.Show("Please enter both username and password.", "Login Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             this.DialogResult = DialogResult.None; // Prevent the form from closing
             TextBoxUsername.Focus();               // Set focus back to the username field
-            return;                                
+            return;
         }
 
     }
