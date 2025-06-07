@@ -1,6 +1,6 @@
 ﻿namespace Cellm.Models.Providers.Google;
 
-internal class GoogleGeminiConfiguration
+internal class GeminiConfiguration
 {
     public Uri BaseAddress => new("https://generativelanguage.googleapis.com/v1beta/openai/");
 

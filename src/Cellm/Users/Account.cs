@@ -81,7 +81,7 @@ internal class Account(
         }
     }
 
-    internal void RequireEntitlement(Entitlement entitlement)
+    internal void ThrowIfNotEntitled(Entitlement entitlement)
     {
         Task.Run(async () => await RequireEntitlementAsync(entitlement)).GetAwaiter().GetResult();
     }

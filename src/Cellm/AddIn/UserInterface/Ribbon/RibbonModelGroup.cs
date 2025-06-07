@@ -57,7 +57,7 @@ public partial class RibbonMain
     private readonly Dictionary<int, ProviderItem> _providerItems = new()
     {
         [0] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.Anthropic)}", Image = $"{ResourcesBasePath}/anthropic.png", Label = nameof(Provider.Anthropic), Entitlement = Entitlement.EnableAnthropicProvider },
-        [1] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.GoogleGemini)}", Image = $"{ResourcesBasePath}/google.png", Label = nameof(Provider.GoogleGemini), Entitlement = Entitlement.EnableGoogleGeminiProvider },
+        [1] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.Gemini)}", Image = $"{ResourcesBasePath}/google.png", Label = nameof(Provider.Gemini), Entitlement = Entitlement.EnableGeminiProvider },
         [2] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.DeepSeek)}", Image = $"{ResourcesBasePath}/deepseek.png", Label = nameof(Provider.DeepSeek), Entitlement = Entitlement.EnableDeepSeekProvider },
         [3] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.Mistral)}", Image = $"{ResourcesBasePath}/mistral.png", Label = nameof(Provider.Mistral), Entitlement = Entitlement.EnableMistralProvider },
         [4] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.Ollama)}", Image = $"{ResourcesBasePath}/ollama.png", Label = nameof(Provider.Ollama), Entitlement = Entitlement.EnableOllamaProvider },

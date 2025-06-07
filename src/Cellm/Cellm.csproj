@@ -37,7 +37,6 @@
     <PackageReference Include="MediatR" Version="12.5.0" />
     <PackageReference Include="Microsoft.Extensions.AI" Version="9.5.0" />
     <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="9.5.0" />
-    <PackageReference Include="Microsoft.Extensions.AI.Ollama" Version="9.4.4-preview.1.25259.16" />
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="9.4.4-preview.1.25259.16" />
     <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="9.5.0" />
     <PackageReference Include="Microsoft.Extensions.Compliance.Redaction" Version="9.5.0" />
@@ -55,6 +54,7 @@
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.5" />
     <PackageReference Include="Mistral.SDK" Version="2.2.0" />
     <PackageReference Include="ModelContextProtocol" Version="0.1.0-preview.11" />
+    <PackageReference Include="OllamaSharp" Version="5.2.2" />
     <PackageReference Include="PdfPig" Version="0.1.10" />
     <PackageReference Include="Sentry.Extensions.Logging" Version="5.5.1" />
     <PackageReference Include="Sentry.Profiling" Version="5.5.1" />

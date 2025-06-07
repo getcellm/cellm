@@ -58,17 +58,6 @@
         "resolved": "9.5.0",
         "contentHash": "Y46j1S4zOPtLAHCUzhHIm1IhCMr7764754bLYupyc1JZcvLNXjUk+VC7H3Bou20S2hHgDJnfox7X/H/3BYEvzA=="
       },
-      "Microsoft.Extensions.AI.Ollama": {
-        "type": "Direct",
-        "requested": "[9.4.4-preview.1.25259.16, )",
-        "resolved": "9.4.4-preview.1.25259.16",
-        "contentHash": "+h8u6Zm+Gca/hIFmbxWUucJRhuf2Jgd1VG8/PRS+BvXw6vSdlYFtrhvpD9hrHa5feadIq6lvVYoaUNjnVKe+eA==",
-        "dependencies": {
-          "Microsoft.Extensions.AI.Abstractions": "9.4.4-preview.1.25259.16",
-          "System.Net.Http.Json": "9.0.4",
-          "System.Text.Json": "9.0.4"
-        }
-      },
       "Microsoft.Extensions.AI.OpenAI": {
         "type": "Direct",
         "requested": "[9.4.4-preview.1.25259.16, )",
@@ -254,6 +243,15 @@
           "Microsoft.Extensions.Hosting.Abstractions": "9.0.4",
           "Microsoft.Extensions.Logging.Abstractions": "9.0.4",
           "System.Net.ServerSentEvents": "10.0.0-preview.2.25163.2"
+        }
+      },
+      "OllamaSharp": {
+        "type": "Direct",
+        "requested": "[5.2.2, )",
+        "resolved": "5.2.2",
+        "contentHash": "7K4cza2hQQjMsovNx6Axw2EoyALJuG2PM14nDtcW7dhxWHt9yl7hXgd/jTMJ5PeoxPGrgnxjSB99HJUF3O+mtA==",
+        "dependencies": {
+          "Microsoft.Extensions.AI.Abstractions": "9.5.0"
         }
       },
       "PdfPig": {
