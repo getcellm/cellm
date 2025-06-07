@@ -43,6 +43,7 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Mistral.SDK;
+using OllamaSharp;
 using OpenAI;
 using Polly;
 using Polly.Retry;
@@ -144,7 +145,7 @@ public static class ServiceCollectionExtensions
             .AddKeyedChatClient(Provider.Anthropic, serviceProvider =>
             {
                 var account = serviceProvider.GetRequiredService<Account>();
-                account.RequireEntitlement(Entitlement.EnableAnthropicProvider);
+                account.ThrowIfNotEntitled(Entitlement.EnableAnthropicProvider);
 
                 var anthropicConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<AnthropicConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
@@ -165,7 +166,7 @@ public static class ServiceCollectionExtensions
             .AddKeyedChatClient(Provider.Cellm, serviceProvider =>
             {
                 var account = serviceProvider.GetRequiredService<Account>();
-                account.RequireEntitlement(Entitlement.EnableCellmProvider);
+                account.ThrowIfNotEntitled(Entitlement.EnableCellmProvider);
 
                 var cellmConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<CellmConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
@@ -192,7 +193,7 @@ public static class ServiceCollectionExtensions
             .AddKeyedChatClient(Provider.DeepSeek, serviceProvider =>
             {
                 var account = serviceProvider.GetRequiredService<Account>();
-                account.RequireEntitlement(Entitlement.EnableDeepSeekProvider);
+                account.ThrowIfNotEntitled(Entitlement.EnableDeepSeekProvider);
 
                 var deepSeekConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<DeepSeekConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
@@ -212,26 +213,26 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddGoogleGeminiChatClient(this IServiceCollection services)
+    public static IServiceCollection AddGeminiChatClient(this IServiceCollection services)
     {
         services
-            .AddKeyedChatClient(Provider.GoogleGemini, serviceProvider =>
+            .AddKeyedChatClient(Provider.Gemini, serviceProvider =>
             {
                 var account = serviceProvider.GetRequiredService<Account>();
-                account.RequireEntitlement(Entitlement.EnableGoogleGeminiProvider);
+                account.ThrowIfNotEntitled(Entitlement.EnableGeminiProvider);
 
-                var googleGeminiConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<GoogleGeminiConfiguration>>();
+                var geminiConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<GeminiConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
                 var openAiClient = new OpenAIClient(
-                    new ApiKeyCredential(googleGeminiConfiguration.CurrentValue.ApiKey),
+                    new ApiKeyCredential(geminiConfiguration.CurrentValue.ApiKey),
                     new OpenAIClientOptions
                     {
                         Transport = new HttpClientPipelineTransport(resilientHttpClient),
-                        Endpoint = googleGeminiConfiguration.CurrentValue.BaseAddress
+                        Endpoint = geminiConfiguration.CurrentValue.BaseAddress
                     });
 
-                return openAiClient.GetChatClient(googleGeminiConfiguration.CurrentValue.DefaultModel).AsIChatClient();
+                return openAiClient.GetChatClient(geminiConfiguration.CurrentValue.DefaultModel).AsIChatClient();
             }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 
@@ -244,7 +245,7 @@ public static class ServiceCollectionExtensions
             .AddKeyedChatClient(Provider.Mistral, serviceProvider =>
             {
                 var account = serviceProvider.GetRequiredService<Account>();
-                account.RequireEntitlement(Entitlement.EnableMistralProvider);
+                account.ThrowIfNotEntitled(Entitlement.EnableMistralProvider);
 
                 var mistralConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<MistralConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
@@ -262,15 +263,13 @@ public static class ServiceCollectionExtensions
             .AddKeyedChatClient(Provider.Ollama, serviceProvider =>
             {
                 var account = serviceProvider.GetRequiredService<Account>();
-                account.RequireEntitlement(Entitlement.EnableOllamaProvider);
+                account.ThrowIfNotEntitled(Entitlement.EnableOllamaProvider);
 
                 var ollamaConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<OllamaConfiguration>>();
-                var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
-                return new OllamaChatClient(
+                return new OllamaApiClient(
                     ollamaConfiguration.CurrentValue.BaseAddress,
-                    ollamaConfiguration.CurrentValue.DefaultModel,
-                    resilientHttpClient);
+                    ollamaConfiguration.CurrentValue.DefaultModel);
             }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 
@@ -283,7 +282,7 @@ public static class ServiceCollectionExtensions
             .AddKeyedChatClient(Provider.OpenAi, serviceProvider =>
             {
                 var account = serviceProvider.GetRequiredService<Account>();
-                account.RequireEntitlement(Entitlement.EnableOpenAiProvider);
+                account.ThrowIfNotEntitled(Entitlement.EnableOpenAiProvider);
 
                 var openAiConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<OpenAiConfiguration>>();
 
@@ -302,7 +301,7 @@ public static class ServiceCollectionExtensions
             .AddKeyedChatClient(Provider.OpenAiCompatible, serviceProvider =>
             {
                 var account = serviceProvider.GetRequiredService<Account>();
-                account.RequireEntitlement(Entitlement.EnableOpenAiCompatibleProvider);
+                account.ThrowIfNotEntitled(Entitlement.EnableOpenAiCompatibleProvider);
 
                 var openAiCompatibleConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<OpenAiCompatibleConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");

@@ -5,7 +5,7 @@ public enum Entitlement
     EnableAnthropicProvider,
     EnableCellmProvider,
     EnableDeepSeekProvider,
-    EnableGoogleGeminiProvider,
+    EnableGeminiProvider,
     EnableMistralProvider,
     EnableOllamaProvider,
     EnableOpenAiProvider,

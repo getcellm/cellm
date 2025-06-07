@@ -5,7 +5,7 @@ public enum Provider
     Anthropic,
     Cellm,
     DeepSeek,
-    GoogleGemini,
+    Gemini,
     Mistral,
     Ollama,
     OpenAi,
