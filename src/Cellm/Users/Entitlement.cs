@@ -3,6 +3,7 @@
 public enum Entitlement
 {
     EnableAnthropicProvider,
+    EnableAzureProvider,
     EnableCellmProvider,
     EnableDeepSeekProvider,
     EnableGeminiProvider,
@@ -11,6 +12,6 @@ public enum Entitlement
     EnableOpenAiProvider,
     EnableOpenAiCompatibleProvider,
     EnableModelContextProtocol,
-    DisableTelemetry,
+    DisableTelemetry
 }
 

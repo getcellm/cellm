@@ -10,6 +10,7 @@ using Cellm.Models.Providers.OpenAi;
 using Cellm.Models.Providers.OpenAiCompatible;
 using Cellm.Users;
 using ExcelDna.Integration.CustomUI;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -57,12 +58,13 @@ public partial class RibbonMain
     private readonly Dictionary<int, ProviderItem> _providerItems = new()
     {
         [0] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.Anthropic)}", Image = $"{ResourcesBasePath}/anthropic.png", Label = nameof(Provider.Anthropic), Entitlement = Entitlement.EnableAnthropicProvider },
-        [1] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.Gemini)}", Image = $"{ResourcesBasePath}/google.png", Label = nameof(Provider.Gemini), Entitlement = Entitlement.EnableGeminiProvider },
-        [2] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.DeepSeek)}", Image = $"{ResourcesBasePath}/deepseek.png", Label = nameof(Provider.DeepSeek), Entitlement = Entitlement.EnableDeepSeekProvider },
-        [3] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.Mistral)}", Image = $"{ResourcesBasePath}/mistral.png", Label = nameof(Provider.Mistral), Entitlement = Entitlement.EnableMistralProvider },
-        [4] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.Ollama)}", Image = $"{ResourcesBasePath}/ollama.png", Label = nameof(Provider.Ollama), Entitlement = Entitlement.EnableOllamaProvider },
-        [5] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.OpenAi)}", Image = $"{ResourcesBasePath}/openai.png", Label = nameof(Provider.OpenAi), Entitlement = Entitlement.EnableOpenAiProvider },
-        [6] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.OpenAiCompatible)}", Image = $"{ResourcesBasePath}/openai.png", Label = nameof(Provider.OpenAiCompatible) }
+        [1] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.Azure)}", Image = $"{ResourcesBasePath}/azure.png", Label = nameof(Provider.Azure), Entitlement = Entitlement.EnableAzureProvider },
+        [2] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.Gemini)}", Image = $"{ResourcesBasePath}/google.png", Label = nameof(Provider.Gemini), Entitlement = Entitlement.EnableGeminiProvider },
+        [3] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.DeepSeek)}", Image = $"{ResourcesBasePath}/deepseek.png", Label = nameof(Provider.DeepSeek), Entitlement = Entitlement.EnableDeepSeekProvider },
+        [4] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.Mistral)}", Image = $"{ResourcesBasePath}/mistral.png", Label = nameof(Provider.Mistral), Entitlement = Entitlement.EnableMistralProvider },
+        [5] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.Ollama)}", Image = $"{ResourcesBasePath}/ollama.png", Label = nameof(Provider.Ollama), Entitlement = Entitlement.EnableOllamaProvider },
+        [6] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.OpenAi)}", Image = $"{ResourcesBasePath}/openai.png", Label = nameof(Provider.OpenAi), Entitlement = Entitlement.EnableOpenAiProvider },
+        [7] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.OpenAiCompatible)}", Image = $"{ResourcesBasePath}/openai.png", Label = nameof(Provider.OpenAiCompatible) }
     };
 
     internal int _selectedProviderIndex = 3; // Default to Ollama
@@ -276,7 +278,7 @@ public partial class RibbonMain
         }
         catch (KeyNotFoundException)
         {
-            currentModel = string.Empty; // Explicitly null
+            currentModel = string.Empty;
         }
         catch (Exception ex)
         {
@@ -416,7 +418,7 @@ public partial class RibbonMain
         if (!string.IsNullOrEmpty(big) && !big.StartsWith("No ")) modelNames.Add(big);
         if (!string.IsNullOrEmpty(thinking) && !thinking.StartsWith("No ")) modelNames.Add(thinking);
 
-        // Remove duplicates if Small/Big/Thinking are configured to the same model
+        // Remove duplicates
         return modelNames.Distinct().ToList();
     }
 
@@ -424,59 +426,9 @@ public partial class RibbonMain
     {
         try
         {
-            return provider switch
-            {
-                Provider.Cellm => modelType switch
-                {
-                    "SmallModel" => GetProviderConfiguration<CellmConfiguration>()?.SmallModel ?? "No small model",
-                    "MediumModel" => GetProviderConfiguration<CellmConfiguration>()?.MediumModel ?? "No big model",
-                    "LargeModel" => GetProviderConfiguration<CellmConfiguration>()?.LargeModel ?? "No thinking model",
-                    _ => "N/A"
-                },
-                Provider.Anthropic => modelType switch
-                {
-                    "SmallModel" => GetProviderConfiguration<AnthropicConfiguration>()?.SmallModel ?? "No small model",
-                    "MediumModel" => GetProviderConfiguration<AnthropicConfiguration>()?.MediumModel ?? "No big model",
-                    "LargeModel" => GetProviderConfiguration<AnthropicConfiguration>()?.LargeModel ?? "No thinking model",
-                    _ => "N/A"
-                },
-                Provider.DeepSeek => modelType switch
-                {
-                    "SmallModel" => GetProviderConfiguration<DeepSeekConfiguration>()?.SmallModel ?? "No small model",
-                    "MediumModel" => GetProviderConfiguration<DeepSeekConfiguration>()?.MediumModel ?? "No big model",
-                    "LargeModel" => GetProviderConfiguration<DeepSeekConfiguration>()?.LargeModel ?? "No thinking model",
-                    _ => "N/A"
-                },
-                Provider.Mistral => modelType switch
-                {
-                    "SmallModel" => GetProviderConfiguration<MistralConfiguration>()?.SmallModel ?? "No small model",
-                    "MediumModel" => GetProviderConfiguration<MistralConfiguration>()?.MediumModel ?? "No big model",
-                    "LargeModel" => GetProviderConfiguration<MistralConfiguration>()?.LargeModel ?? "No thinking model",
-                    _ => "N/A"
-                },
-                Provider.Ollama => modelType switch
-                {
-                    "SmallModel" => GetProviderConfiguration<OllamaConfiguration>()?.SmallModel ?? "No small model",
-                    "MediumModel" => GetProviderConfiguration<OllamaConfiguration>()?.MediumModel ?? "No big model",
-                    "LargeModel" => GetProviderConfiguration<OllamaConfiguration>()?.LargeModel ?? "No thinking model",
-                    _ => "N/A"
-                },
-                Provider.OpenAi => modelType switch
-                {
-                    "SmallModel" => GetProviderConfiguration<OpenAiConfiguration>()?.SmallModel ?? "No small model",
-                    "MediumModel" => GetProviderConfiguration<OpenAiConfiguration>()?.MediumModel ?? "No big model",
-                    "LargeModel" => GetProviderConfiguration<OpenAiConfiguration>()?.LargeModel ?? "No thinking model",
-                    _ => "N/A"
-                },
-                Provider.OpenAiCompatible => modelType switch
-                {
-                    "SmallModel" => GetProviderConfiguration<OpenAiCompatibleConfiguration>()?.SmallModel ?? "No small model",
-                    "MediumModel" => GetProviderConfiguration<OpenAiCompatibleConfiguration>()?.MediumModel ?? "No big model",
-                    "LargeModel" => GetProviderConfiguration<OpenAiCompatibleConfiguration>()?.LargeModel ?? "No thinking model",
-                    _ => "N/A"
-                },
-                _ => "N/A" // Default case for unhandled providers
-            };
+            var configuration = CellmAddIn.Services.GetRequiredService<IConfiguration>();
+            var key = $"{provider}Configuration:{modelType}";
+            return configuration[key] ?? string.Empty;
         }
         catch (Exception ex)
         {
@@ -709,7 +661,7 @@ public partial class RibbonMain
     {
         return provider switch
         {
-            Provider.Ollama or Provider.OpenAiCompatible => true,
+            Provider.Azure or Provider.Gemini or Provider.Ollama or Provider.OpenAiCompatible => true,
             _ => false
         };
     }

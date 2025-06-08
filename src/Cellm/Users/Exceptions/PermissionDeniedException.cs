@@ -15,6 +15,7 @@ internal class PermissionDeniedException : CellmException
         return entitlement switch
         {
             Entitlement.EnableAnthropicProvider => $"You do not have permission to use models hosted by Anthropic.",
+            Entitlement.EnableAzureProvider => $"You do not have permission to use models hosted by Azure.",
             Entitlement.EnableCellmProvider => $"You do not have permission to use models hosted by Cellm.",
             Entitlement.EnableDeepSeekProvider => $"You do not have permission to use models hosted by DeepSeek.",
             Entitlement.EnableMistralProvider => $"You do not have permission to use models hosted by Mistral.",
