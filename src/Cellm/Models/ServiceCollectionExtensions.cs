@@ -30,6 +30,7 @@ using Anthropic.SDK;
 using Cellm.Models.Prompts;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
+using Cellm.Models.Providers.Azure;
 using Cellm.Models.Providers.Cellm;
 using Cellm.Models.Providers.DeepSeek;
 using Cellm.Models.Providers.Google;
@@ -40,6 +41,7 @@ using Cellm.Models.Providers.OpenAiCompatible;
 using Cellm.Models.Resilience;
 using Cellm.Users;
 using Microsoft.Extensions.AI;
+using Azure.AI.Inference;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Mistral.SDK;
@@ -48,6 +50,7 @@ using OpenAI;
 using Polly;
 using Polly.Retry;
 using Polly.Telemetry;
+using Azure;
 
 namespace Cellm.Models;
 
@@ -145,7 +148,7 @@ public static class ServiceCollectionExtensions
             .AddKeyedChatClient(Provider.Anthropic, serviceProvider =>
             {
                 var account = serviceProvider.GetRequiredService<Account>();
-                account.ThrowIfNotEntitled(Entitlement.EnableAnthropicProvider);
+                account.ThrowIfNotEntitled(Entitlement.EnableAzureProvider);
 
                 var anthropicConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<AnthropicConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
@@ -154,6 +157,27 @@ public static class ServiceCollectionExtensions
                     .Messages
                     .AsBuilder()
                     .Build();
+            }, ServiceLifetime.Transient)
+            .UseFunctionInvocation();
+
+        return services;
+    }
+
+    public static IServiceCollection AddAzureChatClient(this IServiceCollection services)
+    {
+        services
+            .AddKeyedChatClient(Provider.Azure, serviceProvider =>
+            {
+                var account = serviceProvider.GetRequiredService<Account>();
+                account.ThrowIfNotEntitled(Entitlement.EnableAzureProvider);
+
+                var azureConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<AzureConfiguration>>();
+                var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
+
+                return new ChatCompletionsClient(
+                    azureConfiguration.CurrentValue.BaseAddress, 
+                    new AzureKeyCredential(azureConfiguration.CurrentValue.ApiKey))
+                    .AsIChatClient(azureConfiguration.CurrentValue.DefaultModel);
             }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 

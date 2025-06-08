@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <None Remove="AddIn\UserInterface\Resources\anthropic.png" />
+    <None Remove="AddIn\UserInterface\Resources\azure.png" />
     <None Remove="AddIn\UserInterface\Resources\deepseek.png" />
     <None Remove="AddIn\UserInterface\Resources\external-link.svg" />
     <None Remove="AddIn\UserInterface\Resources\google.png" />
@@ -37,6 +38,7 @@
     <PackageReference Include="MediatR" Version="12.5.0" />
     <PackageReference Include="Microsoft.Extensions.AI" Version="9.5.0" />
     <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="9.5.0" />
+    <PackageReference Include="Microsoft.Extensions.AI.AzureAIInference" Version="9.5.0-preview.1.25265.7" />
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="9.4.4-preview.1.25259.16" />
     <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="9.5.0" />
     <PackageReference Include="Microsoft.Extensions.Compliance.Redaction" Version="9.5.0" />
@@ -70,6 +72,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="AddIn\UserInterface\Resources\anthropic.png" />
+    <EmbeddedResource Include="AddIn\UserInterface\Resources\azure.png" />
     <EmbeddedResource Include="AddIn\UserInterface\Resources\deepseek.png" />
     <EmbeddedResource Include="AddIn\UserInterface\Resources\external-link.svg" />
     <EmbeddedResource Include="AddIn\UserInterface\Resources\google.png" />
