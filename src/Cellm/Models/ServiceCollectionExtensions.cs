@@ -27,6 +27,8 @@ using System.ClientModel.Primitives;
 using System.Net.Http.Headers;
 using System.Threading.RateLimiting;
 using Anthropic.SDK;
+using Azure;
+using Azure.AI.Inference;
 using Cellm.Models.Prompts;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
@@ -41,7 +43,6 @@ using Cellm.Models.Providers.OpenAiCompatible;
 using Cellm.Models.Resilience;
 using Cellm.Users;
 using Microsoft.Extensions.AI;
-using Azure.AI.Inference;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Mistral.SDK;
@@ -50,7 +51,6 @@ using OpenAI;
 using Polly;
 using Polly.Retry;
 using Polly.Telemetry;
-using Azure;
 
 namespace Cellm.Models;
 
@@ -175,7 +175,7 @@ public static class ServiceCollectionExtensions
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
                 return new ChatCompletionsClient(
-                    azureConfiguration.CurrentValue.BaseAddress, 
+                    azureConfiguration.CurrentValue.BaseAddress,
                     new AzureKeyCredential(azureConfiguration.CurrentValue.ApiKey))
                     .AsIChatClient(azureConfiguration.CurrentValue.DefaultModel);
             }, ServiceLifetime.Transient)

@@ -433,7 +433,7 @@ public partial class RibbonMain
         catch (Exception ex)
         {
             _logger.LogError("Error retrieving model name for {provider}/{modelType}: {ex.Message}", provider, modelType, ex.Message);
-            return string.Empty ;
+            return string.Empty;
         }
     }
 
