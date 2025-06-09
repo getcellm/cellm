@@ -12,6 +12,17 @@
           "Microsoft.Extensions.AI.Abstractions": "9.5.0"
         }
       },
+      "AWSSDK.Extensions.Bedrock.MEAI": {
+        "type": "Direct",
+        "requested": "[4.0.1.1, )",
+        "resolved": "4.0.1.1",
+        "contentHash": "c0dVx6HSwLF4/A1hj+FDBojmvk3elRzChIP5ENWe76nXc8J6Zxe+7eLmOkalv0VyAgGZrPCzb3eQ8bEyFAznIQ==",
+        "dependencies": {
+          "AWSSDK.BedrockRuntime": "4.0.0.3",
+          "AWSSDK.Core": "4.0.0.4",
+          "Microsoft.Extensions.AI.Abstractions": "9.5.0"
+        }
+      },
       "ExcelDna.AddIn": {
         "type": "Direct",
         "requested": "[1.9.0-beta2, )",
@@ -309,6 +320,19 @@
         "requested": "[9.0.5, )",
         "resolved": "9.0.5",
         "contentHash": "WobqAA+zMpzxJ6EkSNkHrjltyx+s+yTM+BoBJt74aqjBDyrsLE+buHvFyp49sjAyzRZ/ywJ25T4LMDX5b+zL3Q=="
+      },
+      "AWSSDK.BedrockRuntime": {
+        "type": "Transitive",
+        "resolved": "4.0.0.3",
+        "contentHash": "LKKiz2RcixI387PCitnSNxcUYG3KJhU9CmcFZi+3Pq3ZRaaDHOMZ7E0nHPPzJ2FAFyj8Mn+m6XTbLQKp6reaBw==",
+        "dependencies": {
+          "AWSSDK.Core": "[4.0.0.4, 5.0.0)"
+        }
+      },
+      "AWSSDK.Core": {
+        "type": "Transitive",
+        "resolved": "4.0.0.4",
+        "contentHash": "5JNAlVZK5dH86G+HJhGpIN3MHlAI2/VEnjMVPfIo0v5raulf+HIypPkvRBsmFhKkgTVp+KOV2AVBMZj9b5sCzA=="
       },
       "Azure.AI.Inference": {
         "type": "Transitive",

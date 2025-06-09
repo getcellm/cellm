@@ -137,15 +137,16 @@ public static class CellmFunctions
 
             var cells = arguments.Cells switch
             {
-                Cells argumentCells => ArgumentParser.ParseCells(argumentCells),
+                string singleCell => singleCell,
+                Cells manyCells => ArgumentParser.ParseCells(manyCells),
                 null => "Not available",
                 _ => throw new ArgumentException(nameof(arguments.Cells))
             };
 
             var instructions = arguments.Instructions switch
             {
-                string argumentInstruction => argumentInstruction,
-                Cells argumentInstruction => ArgumentParser.ParseCells(argumentInstruction),
+                string singleCell => singleCell,
+                Cells manyCells => ArgumentParser.ParseCells(manyCells),
                 _ => throw new ArgumentException(nameof(arguments.Instructions))
             };
 
