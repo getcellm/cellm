@@ -3,6 +3,7 @@
 public enum Provider
 {
     Anthropic,
+    Aws,
     Azure,
     Cellm,
     DeepSeek,

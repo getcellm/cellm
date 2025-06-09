@@ -5,6 +5,7 @@ using Cellm.Models;
 using Cellm.Models.Behaviors;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
+using Cellm.Models.Providers.Aws;
 using Cellm.Models.Providers.Azure;
 using Cellm.Models.Providers.Cellm;
 using Cellm.Models.Providers.DeepSeek;
@@ -69,6 +70,7 @@ public class CellmAddIn : IExcelAddIn
         services
             .Configure<AccountConfiguration>(configuration.GetRequiredSection(nameof(AccountConfiguration)))
             .Configure<AnthropicConfiguration>(configuration.GetRequiredSection(nameof(AnthropicConfiguration)))
+            .Configure<AwsConfiguration>(configuration.GetRequiredSection(nameof(AwsConfiguration)))
             .Configure<AzureConfiguration>(configuration.GetRequiredSection(nameof(AzureConfiguration)))
             .Configure<CellmConfiguration>(configuration.GetRequiredSection(nameof(CellmConfiguration)))
             .Configure<GeminiConfiguration>(configuration.GetRequiredSection(nameof(GeminiConfiguration)))
@@ -135,6 +137,7 @@ public class CellmAddIn : IExcelAddIn
         services
             .AddSingleton<IChatClientFactory, ChatClientFactory>()
             .AddAnthropicChatClient()
+            .AddAwsChatClient()
             .AddAzureChatClient()
             .AddCellmChatClient()
             .AddDeepSeekChatClient()

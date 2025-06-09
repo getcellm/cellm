@@ -26,12 +26,16 @@ using System.ClientModel;
 using System.ClientModel.Primitives;
 using System.Net.Http.Headers;
 using System.Threading.RateLimiting;
+using Amazon;
+using Amazon.BedrockRuntime;
 using Anthropic.SDK;
 using Azure;
 using Azure.AI.Inference;
+using Cellm.AddIn.Exceptions;
 using Cellm.Models.Prompts;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
+using Cellm.Models.Providers.Aws;
 using Cellm.Models.Providers.Azure;
 using Cellm.Models.Providers.Cellm;
 using Cellm.Models.Providers.DeepSeek;
@@ -157,6 +161,36 @@ public static class ServiceCollectionExtensions
                     .Messages
                     .AsBuilder()
                     .Build();
+            }, ServiceLifetime.Transient)
+            .UseFunctionInvocation();
+
+        return services;
+    }
+
+    public static IServiceCollection AddAwsChatClient(this IServiceCollection services)
+    {
+        services
+            .AddKeyedChatClient(Provider.Aws, serviceProvider =>
+            {
+                var account = serviceProvider.GetRequiredService<Account>();
+                account.ThrowIfNotEntitled(Entitlement.EnableAwsProvider);
+
+                var awsConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<AwsConfiguration>>();
+                var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
+
+                var parts = awsConfiguration.CurrentValue.ApiKey.Split(':');
+
+                if (parts.Length < 3)
+                {
+                    throw new CellmException("Invalid AWS API key or invalid format (must be \"Region:AccessKeyId:SecretAccessKey\", e.g. us-east-1:AKIAIOSFODNN7EXAMPLE:wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY)");
+                }
+
+                var region = parts[0];
+                var accessKeyId = parts[1];
+                var secretAccessKey = string.Join(':', parts[2..]);
+
+                return new AmazonBedrockRuntimeClient(accessKeyId, secretAccessKey, RegionEndpoint.GetBySystemName(region))
+                    .AsIChatClient(awsConfiguration.CurrentValue.DefaultModel);
             }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 

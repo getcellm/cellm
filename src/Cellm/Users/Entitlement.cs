@@ -3,6 +3,7 @@
 public enum Entitlement
 {
     EnableAnthropicProvider,
+    EnableAwsProvider,
     EnableAzureProvider,
     EnableCellmProvider,
     EnableDeepSeekProvider,
