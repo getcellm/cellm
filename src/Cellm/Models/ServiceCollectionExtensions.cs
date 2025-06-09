@@ -26,11 +26,12 @@ using System.ClientModel;
 using System.ClientModel.Primitives;
 using System.Net.Http.Headers;
 using System.Threading.RateLimiting;
-using Amazon.BedrockRuntime;
 using Amazon;
+using Amazon.BedrockRuntime;
 using Anthropic.SDK;
 using Azure;
 using Azure.AI.Inference;
+using Cellm.AddIn.Exceptions;
 using Cellm.Models.Prompts;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
@@ -54,7 +55,6 @@ using OpenAI;
 using Polly;
 using Polly.Retry;
 using Polly.Telemetry;
-using Cellm.AddIn.Exceptions;
 
 namespace Cellm.Models;
 
