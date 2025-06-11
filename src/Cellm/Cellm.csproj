@@ -57,7 +57,7 @@
     <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.5" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.5" />
     <PackageReference Include="Mistral.SDK" Version="2.2.0" />
-    <PackageReference Include="ModelContextProtocol" Version="0.1.0-preview.11" />
+    <PackageReference Include="ModelContextProtocol" Version="0.2.0-preview.3" />
     <PackageReference Include="OllamaSharp" Version="5.2.2" />
     <PackageReference Include="PdfPig" Version="0.1.10" />
     <PackageReference Include="Sentry.Extensions.Logging" Version="5.5.1" />

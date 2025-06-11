@@ -9,152 +9,113 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ModelContextProtocol.Client;
-using ModelContextProtocol.Protocol.Transport;
 
 namespace Cellm.Models.Behaviors;
 
 internal class ToolBehavior<TRequest, TResponse>(
-    Account account,
-    IOptionsMonitor<CellmAddInConfiguration> providerConfiguration,
-    IOptionsMonitor<ModelContextProtocolConfiguration> modelContextProtocolConfiguration,
-    IEnumerable<AIFunction> functions,
-    ILogger<ToolBehavior<TRequest, TResponse>> logger,
-    ILoggerFactory loggerFactory)
-    : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : IPrompt
+  Account account,
+  IOptionsMonitor<CellmAddInConfiguration> cellmAddInConfiguration,
+  IOptionsMonitor<ModelContextProtocolConfiguration> modelContextProtocolConfiguration,
+  IEnumerable<AIFunction> functions,
+  ILogger<ToolBehavior<TRequest, TResponse>> logger,
+  ILoggerFactory loggerFactory)
+  : IPipelineBehavior<TRequest, TResponse>
+  where TRequest : IPrompt
 {
-    // TODO: Use HybridCache
-    private readonly ConcurrentDictionary<string, IMcpClient> _mcpClientCache = [];
-    private readonly ConcurrentDictionary<string, IList<McpClientTool>> _mcpClientToolCache = [];
-    private readonly SemaphoreSlim _asyncLock = new(1, 1);
+    // TODO: Cannot use HybridCache because McpClientTool instances can be serialized
+    private readonly ConcurrentDictionary<string, IList<McpClientTool>> _cache = new();
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
-        if (providerConfiguration.CurrentValue.EnableTools.Any(t => t.Value))
+        if (cellmAddInConfiguration.CurrentValue.EnableTools.Any(t => t.Value))
         {
-            logger.LogDebug("Native tools enabled");
-
-            request.Prompt.Options.Tools = GetNativeTools();
-        }
-        else
-        {
-            logger.LogDebug("Native tools disabled");
+            request.Prompt.Options.Tools = [.. functions.Where(f => cellmAddInConfiguration.CurrentValue.EnableTools[f.Name])];
         }
 
-        var enableModelContextProtocol = await account.HasEntitlementAsync(Entitlement.EnableModelContextProtocol);
+        var enableModelContextProtocol = await account.HasEntitlementAsync(Entitlement.EnableModelContextProtocol).ConfigureAwait(false);
 
-        if (providerConfiguration.CurrentValue.EnableModelContextProtocolServers.Any(t => t.Value) && enableModelContextProtocol)
+        if (cellmAddInConfiguration.CurrentValue.EnableModelContextProtocolServers.Any(t => t.Value) && enableModelContextProtocol)
         {
-            logger.LogDebug("MCP tools enabled");
-
-            request.Prompt.Options.Tools ??= [];
-
-            await foreach (var tool in GetModelContextProtocolToolsAsync(cancellationToken))
+            await foreach (var tool in GetMcpToolsAsync(cancellationToken))
             {
+                request.Prompt.Options.Tools ??= [];
                 request.Prompt.Options.Tools.Add(tool);
             }
-        }
-        else
-        {
-            logger.LogDebug("MCP tools disabled");
         }
 
         if (request.Prompt.Options.Tools?.Any() ?? false)
         {
-            logger.LogDebug("Tools: {tools}", request.Prompt.Options.Tools);
+            logger.LogDebug("Tools enabled: {tools}", request.Prompt.Options.Tools);
+        }
+        else
+        {
+            logger.LogDebug("Tools disabled");
         }
 
         return await next().ConfigureAwait(false);
     }
 
-    private List<AITool> GetNativeTools()
+    private async IAsyncEnumerable<McpClientTool> GetMcpToolsAsync([EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        return [.. functions.Where(f => providerConfiguration.CurrentValue.EnableTools[f.Name])];
+        var stdioToolTasks = modelContextProtocolConfiguration.CurrentValue.StdioServers
+            .Where(stdioClientTransportOptions => cellmAddInConfiguration.CurrentValue.EnableModelContextProtocolServers
+                .TryGetValue(stdioClientTransportOptions.Name ?? throw new NullReferenceException(nameof(stdioClientTransportOptions.Name)), out var isEnabled) && isEnabled)
+            .Select(stdioClientTransportOptions => GetOrFetchServerToolsAsync(stdioClientTransportOptions, cancellationToken))
+            .ToList();
+
+        var sseToolTasks = modelContextProtocolConfiguration.CurrentValue.SseServers
+            .Where(sseClientTransportOptions => cellmAddInConfiguration.CurrentValue.EnableModelContextProtocolServers
+                .TryGetValue(sseClientTransportOptions.Name ?? throw new NullReferenceException(nameof(sseClientTransportOptions.Name)), out var isEnabled) && isEnabled)
+            .Select(sseClientTransportOptions => GetOrFetchServerToolsAsync(sseClientTransportOptions, cancellationToken))
+            .ToList();
+
+        List<Task<IList<McpClientTool>>> pendingTasks = [.. stdioToolTasks, .. sseToolTasks];
+
+        while (pendingTasks.Count > 0)
+        {
+            var completedTask = await Task.WhenAny(pendingTasks).ConfigureAwait(false);
+            pendingTasks.Remove(completedTask);
+
+            foreach (var tool in await completedTask)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                yield return tool;
+            }
+        }
     }
 
-    // TODO: Query servers in parallel
-    private async IAsyncEnumerable<AITool> GetModelContextProtocolToolsAsync([EnumeratorCancellation] CancellationToken cancellationToken)
+    private async Task<IList<McpClientTool>> GetOrFetchServerToolsAsync(StdioClientTransportOptions stdioClientTransportOptions, CancellationToken cancellationToken)
     {
-        foreach (var serverConfiguration in modelContextProtocolConfiguration.CurrentValue.StdioServers)
+        if (_cache.ContainsKey(stdioClientTransportOptions.Name ?? throw new NullReferenceException(nameof(stdioClientTransportOptions))) && _cache[stdioClientTransportOptions.Name] is IList<McpClientTool> cachedTools)
         {
-            var serverName = serverConfiguration.Name ?? throw new NullReferenceException(nameof(serverConfiguration.Name));
-
-            if (!providerConfiguration.CurrentValue.EnableModelContextProtocolServers.TryGetValue(serverName, out var isEnabled) || !isEnabled)
-            {
-                continue;
-            }
-
-            _mcpClientToolCache.TryGetValue(serverName, out var serverTools);
-
-            if (serverTools is null)
-            {
-                await _asyncLock.WaitAsync(cancellationToken).ConfigureAwait(false);
-
-                try
-                {
-                    _mcpClientCache.TryGetValue(serverName, out var StdioMcpClient);
-
-                    if (StdioMcpClient is null)
-                    {
-                        var clientTransport = new StdioClientTransport(serverConfiguration);
-                        StdioMcpClient = await McpClientFactory.CreateAsync(clientTransport, loggerFactory: loggerFactory, cancellationToken: cancellationToken).ConfigureAwait(false);
-                        _mcpClientCache[serverName] = StdioMcpClient;
-                    }
-
-                    serverTools = await StdioMcpClient.ListToolsAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-                    _mcpClientToolCache[serverName] = serverTools;
-                }
-                finally
-                {
-                    _asyncLock.Release();
-                }
-            }
-
-            foreach (var serverTool in serverTools)
-            {
-                yield return serverTool;
-            }
+            logger.LogDebug("Using cached tools for {ServerName}", stdioClientTransportOptions.Name);
+            return cachedTools;
         }
 
-        foreach (var serverConfiguration in modelContextProtocolConfiguration.CurrentValue.SseServers)
+        var clientTransport = new StdioClientTransport(stdioClientTransportOptions);
+        var mcpClient = await McpClientFactory.CreateAsync(clientTransport, loggerFactory: loggerFactory, cancellationToken: cancellationToken).ConfigureAwait(false);
+        var tools = await mcpClient.ListToolsAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+
+        _cache[stdioClientTransportOptions.Name ?? throw new NullReferenceException(nameof(stdioClientTransportOptions))] = tools;
+
+        return tools;
+    }
+
+    private async Task<IList<McpClientTool>> GetOrFetchServerToolsAsync(SseClientTransportOptions sseClientTransportOptions, CancellationToken cancellationToken)
+    {
+        if (_cache.ContainsKey(sseClientTransportOptions.Name ?? throw new NullReferenceException(nameof(sseClientTransportOptions))) && _cache[sseClientTransportOptions.Name] is IList<McpClientTool> cachedTools)
         {
-            var serverName = serverConfiguration.Name ?? throw new NullReferenceException(nameof(serverConfiguration.Name));
-
-            if (!providerConfiguration.CurrentValue.EnableModelContextProtocolServers.TryGetValue(serverName, out var isEnabled) || !isEnabled)
-            {
-                continue;
-            }
-
-            _mcpClientToolCache.TryGetValue(serverName, out var serverTools);
-
-            if (serverTools is null)
-            {
-                await _asyncLock.WaitAsync(cancellationToken).ConfigureAwait(false);
-
-                try
-                {
-                    _mcpClientCache.TryGetValue(serverName, out var SseMcpClient);
-
-                    if (SseMcpClient is null)
-                    {
-                        var clientTransport = new SseClientTransport(serverConfiguration);
-                        SseMcpClient = await McpClientFactory.CreateAsync(clientTransport, loggerFactory: loggerFactory, cancellationToken: cancellationToken).ConfigureAwait(false);
-                        _mcpClientCache[serverName] = SseMcpClient;
-                    }
-
-                    serverTools = await SseMcpClient.ListToolsAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-                    _mcpClientToolCache[serverName] = serverTools;
-                }
-                finally
-                {
-                    _asyncLock.Release();
-                }
-            }
-
-            foreach (var serverTool in serverTools)
-            {
-                yield return serverTool;
-            }
+            logger.LogDebug("Using cached tools for {ServerName}", sseClientTransportOptions.Name);
+            return cachedTools;
         }
+
+        var clientTransport = new SseClientTransport(sseClientTransportOptions);
+        var mcpClient = await McpClientFactory.CreateAsync(clientTransport, loggerFactory: loggerFactory, cancellationToken: cancellationToken).ConfigureAwait(false);
+        var tools = await mcpClient.ListToolsAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+
+        _cache[sseClientTransportOptions.Name ?? throw new NullReferenceException(nameof(sseClientTransportOptions))] = tools;
+
+        return tools;
     }
 }
+

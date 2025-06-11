@@ -40,12 +40,12 @@ internal class CacheBehavior<TRequest, TResponse>(
         // Tools are explicitly [JsonIgnore]'d, but we want to send prompt if user added/removed tools
         var toolsAsJson = JsonSerializer.Serialize(request.Prompt.Options.Tools);
 
-        byte[] hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(promptAsJson + toolsAsJson));
-        var key = Convert.ToBase64String(hashBytes);
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(promptAsJson + toolsAsJson));
+        var key = Convert.ToBase64String(hash);
 
         return await cache.GetOrCreateAsync(
             key,
-            async innerCancellationToken => await next(),
+            async innerCancellationToken => await next().ConfigureAwait(false),
             options: _cacheEntryOptions,
             Tags,
             cancellationToken

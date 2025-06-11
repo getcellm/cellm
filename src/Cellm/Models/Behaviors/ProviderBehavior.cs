@@ -20,7 +20,7 @@ internal class ProviderBehavior<TRequest, TResponse>(IEnumerable<IProviderBehavi
             providerBehavior.Before(request.Prompt);
         }
 
-        var response = await next();
+        var response = await next().ConfigureAwait(false);
 
         foreach (var providerBehavior in enabledProviderBehaviors)
         {
