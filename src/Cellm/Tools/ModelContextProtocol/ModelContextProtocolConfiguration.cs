@@ -1,4 +1,4 @@
-﻿using ModelContextProtocol.Protocol.Transport;
+﻿using ModelContextProtocol.Client;
 
 namespace Cellm.Tools.ModelContextProtocol;
 

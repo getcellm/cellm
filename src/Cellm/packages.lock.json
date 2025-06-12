@@ -257,15 +257,12 @@
       },
       "ModelContextProtocol": {
         "type": "Direct",
-        "requested": "[0.1.0-preview.11, )",
-        "resolved": "0.1.0-preview.11",
-        "contentHash": "TWSeMx0mcdX4pZVB0gS2ii06Ll9pz+PAG8OieTI0MG9rD4YmFBrCMKoRXf381I/S0jVjktJeFHdrJVKeSiH7BA==",
+        "requested": "[0.2.0-preview.3, )",
+        "resolved": "0.2.0-preview.3",
+        "contentHash": "logBVqTpZuYc3Exkx+9AmjHENVYT7+LkeTbXBDK5ghiUSDpGuCoxndeJOHRj0c9K9JqFZJweNXqlu4hihK2CKQ==",
         "dependencies": {
-          "Microsoft.Extensions.AI": "9.4.0-preview.1.25207.5",
-          "Microsoft.Extensions.AI.Abstractions": "9.4.0-preview.1.25207.5",
-          "Microsoft.Extensions.Hosting.Abstractions": "9.0.4",
-          "Microsoft.Extensions.Logging.Abstractions": "9.0.4",
-          "System.Net.ServerSentEvents": "10.0.0-preview.2.25163.2"
+          "Microsoft.Extensions.Hosting.Abstractions": "9.0.5",
+          "ModelContextProtocol.Core": "0.2.0-preview.3"
         }
       },
       "OllamaSharp": {
@@ -609,6 +606,16 @@
           "Microsoft.NETCore.Platforms": "5.0.0"
         }
       },
+      "ModelContextProtocol.Core": {
+        "type": "Transitive",
+        "resolved": "0.2.0-preview.3",
+        "contentHash": "90zVR7ZcGN6cyDZM2EjV48n/H17AdA5fYt3jjTL0PY275BquFhESyRAcorAAG3BCqV/vXo6HuQpFUuPam/9xOw==",
+        "dependencies": {
+          "Microsoft.Extensions.AI.Abstractions": "9.5.0",
+          "Microsoft.Extensions.Logging.Abstractions": "9.0.5",
+          "System.Net.ServerSentEvents": "10.0.0-preview.4.25258.110"
+        }
+      },
       "OpenAI": {
         "type": "Transitive",
         "resolved": "2.2.0-beta.4",
@@ -681,8 +688,8 @@
       },
       "System.Net.ServerSentEvents": {
         "type": "Transitive",
-        "resolved": "10.0.0-preview.2.25163.2",
-        "contentHash": "XHyvtQSgco0Sv0kz9yNBv93k3QOoAVzIVd5XbQoTqjV9sqkzWHsToNknyxtNjcXQwb+O9TfzSlNobsBWwnKD3Q=="
+        "resolved": "10.0.0-preview.4.25258.110",
+        "contentHash": "5SG8yFN0e6y3VVaCMWSRYdDW15Apzg2LQoYUtl+jFrGb/+RLSMYmIdU9hO1hbHqpU0JD/lfBlCox0FebdAGGOQ=="
       },
       "System.Numerics.Vectors": {
         "type": "Transitive",
