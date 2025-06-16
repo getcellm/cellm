@@ -1,2 +1,2 @@
 # Debug
-msiexec /i "Install.msi" /L*v "install.log"
+msiexec /i "Cellm-AddIn-Debug-x64.msi" /L*v "install.log"
