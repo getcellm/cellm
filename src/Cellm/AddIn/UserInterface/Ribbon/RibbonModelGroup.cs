@@ -2,8 +2,11 @@ using System.Text;
 using Cellm.AddIn.UserInterface.Forms;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
+using Cellm.Models.Providers.Aws;
+using Cellm.Models.Providers.Azure;
 using Cellm.Models.Providers.Cellm;
 using Cellm.Models.Providers.DeepSeek;
+using Cellm.Models.Providers.Google;
 using Cellm.Models.Providers.Mistral;
 using Cellm.Models.Providers.Ollama;
 using Cellm.Models.Providers.OpenAi;
@@ -587,8 +590,17 @@ public partial class RibbonMain
             // Determine if BaseAddress is relevant and get its value if so
             switch (provider)
             {
+                case Provider.Azure:
+                    currentBaseAddress = GetProviderConfiguration<AzureConfiguration>()?.BaseAddress?.ToString() ?? "";
+                    break;
+                case Provider.Aws:
+                    currentBaseAddress = GetProviderConfiguration<AwsConfiguration>()?.BaseAddress?.ToString() ?? "";
+                    break;
                 case Provider.DeepSeek:
                     currentBaseAddress = GetProviderConfiguration<DeepSeekConfiguration>()?.BaseAddress?.ToString() ?? "";
+                    break;
+                case Provider.Gemini:
+                    currentBaseAddress = GetProviderConfiguration<GeminiConfiguration>()?.BaseAddress?.ToString() ?? "";
                     break;
                 case Provider.Mistral:
                     currentBaseAddress = GetProviderConfiguration<MistralConfiguration>()?.BaseAddress?.ToString() ?? "";
@@ -605,8 +617,7 @@ public partial class RibbonMain
                 case Provider.OpenAiCompatible:
                     currentBaseAddress = GetProviderConfiguration<OpenAiCompatibleConfiguration>()?.BaseAddress?.ToString() ?? "";
                     break;
-                // Add other providers if they have a BaseAddress property, even if fixed
-                case Provider.Cellm: // Assuming Cellm doesn't have a user-settable BaseAddress
+                case Provider.Cellm:
                     currentBaseAddress = GetProviderConfiguration<CellmConfiguration>()?.BaseAddress?.ToString() ?? "";
                     break;
                 default:
