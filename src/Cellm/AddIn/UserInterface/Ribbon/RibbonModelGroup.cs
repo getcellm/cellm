@@ -662,7 +662,7 @@ public partial class RibbonMain
     {
         return provider switch
         {
-            Provider.Azure or Provider.Gemini or Provider.Ollama or Provider.OpenAiCompatible => true,
+            Provider.Azure or Provider.Aws or Provider.OpenAiCompatible => true,
             _ => false
         };
     }
