@@ -99,7 +99,7 @@ namespace CustomActions
                 session.Log($"Office16NextOpen: {session["Office16NextOpen"]}");
 
                 session.Log($"End {nameof(GetOffice16NextOpen)}");
-            } 
+            }
             catch (Exception ex)
             {
                 session.Log($"Error in GetOffice16NextOpen: {ex.Message}");
@@ -118,7 +118,8 @@ namespace CustomActions
             // Find the highest number used in keys like "OPEN", "OPEN1", "OPEN2", etc.
             var maxOpenNumber = excelOptionsKeys
                 .Where(key => key.StartsWith("OPEN"))
-                .Select(key => {
+                .Select(key =>
+                {
                     switch (key)
                     {
                         case "OPEN":
@@ -240,7 +241,7 @@ namespace CustomActions
 
                 session.Log("Found npm.cmd");
 
-                var npxCmdPath = Path.Combine(nodeParentDir, "node","npx.cmd");
+                var npxCmdPath = Path.Combine(nodeParentDir, "node", "npx.cmd");
                 if (!File.Exists(nodeExePath))
                 {
                     session.Log($"ERROR: npx.cmd not found at '{npxCmdPath}'.");
