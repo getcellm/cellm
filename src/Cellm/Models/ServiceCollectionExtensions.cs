@@ -1,28 +1,4 @@
-﻿// Circumventing limitations anywhere in the codebase is a direct violation of the
-// Fair Core License, Version 1.0 until a commit transitions to the Apache 2.0 Future License.
-// Once a commit transitions to the Apache 2.0 Future License, you can checkout out
-// that commit and use the code under the Apache 2.0 License. A commit transitions to
-// the Apache 2.0 Future License on the second anniversary of the date the git commit
-// became available. 
-//
-// The relevant section of the Fair Core License, Version 1.0 is:
-//
-// > ### Limitations
-// > You must not move, change, disable, or circumvent the license key functionality
-// > in the Software; or modify any portion of the Software protected by the license
-// > key to:
-//
-// > 1. enable access to the protected functionality without a valid license key; or
-//
-// > 2. remove the protected functionality.
-//
-// You can checkout the latest commit licensed under the Apache 2.0 License like this:
-// 
-// $ git checkout $(git rev-list -n 1 --before="2 years ago" HEAD)
-//
-// For more details, go to https://github.com/getcellm/cellm/blob/main/LICENSE.
-
-using System.ClientModel;
+﻿using System.ClientModel;
 using System.ClientModel.Primitives;
 using System.Net.Http.Headers;
 using System.Threading.RateLimiting;
@@ -49,6 +25,8 @@ using Cellm.Users;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Connectors.Google;
 using Mistral.SDK;
 using OllamaSharp;
 using OpenAI;
@@ -282,15 +260,16 @@ public static class ServiceCollectionExtensions
                 var geminiConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<GeminiConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
-                var openAiClient = new OpenAIClient(
-                    new ApiKeyCredential(geminiConfiguration.CurrentValue.ApiKey),
-                    new OpenAIClientOptions
-                    {
-                        Transport = new HttpClientPipelineTransport(resilientHttpClient),
-                        Endpoint = geminiConfiguration.CurrentValue.BaseAddress
-                    });
+#pragma warning disable SKEXP0070 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+                var geminiClient = new GoogleAIGeminiChatCompletionService(
+                    geminiConfiguration.CurrentValue.DefaultModel,
+                    geminiConfiguration.CurrentValue.ApiKey,
+                    httpClient: resilientHttpClient);
+#pragma warning restore SKEXP0070 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
-                return openAiClient.GetChatClient(geminiConfiguration.CurrentValue.DefaultModel).AsIChatClient();
+#pragma warning disable SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+                return geminiClient.AsChatClient();
+#pragma warning restore SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
             }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 
