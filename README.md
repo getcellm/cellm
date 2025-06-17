@@ -20,17 +20,15 @@ Read more in our [documentation](https://docs.getcellm.com).
 > — no one who’s run the same prompt 5 times
 
 ## Example
-Say you're reviewing medical studies and need to quickly identify papers relevant to your research. Here's how Cellm can help:
+Say you need to track your international competitors, but their websites are in different languages. Visiting each one, finding the latest update, and plugging it into a translation tool is tedius. Here's how Cellm can do the work for you:
 
-https://github.com/user-attachments/assets/c93f7da9-aabd-4c13-a4f5-3e12332c5794
+https://github.com/user-attachments/assets/8967f557-50b8-4e39-80e8-86a1246c5a42
 
-In this example, we copy the papers' titles and abstracts into Excel and write this prompt: 
+This example uses news websites. We give Cellm a list of URLs and write a simple prompt that asks Cellm to grab the top headline from each one. Then, in the next columns, we ask the model to translate the headline, identify its original language, and even sort it into a category like "Politics" or "Business". 
 
-> "If the paper studies diabetic neuropathy and stroke, return "Include", otherwise, return "Exclude"."  
+With a single drag to autofill, Cellm visits every site, pulls the key information, and organizes it for you. What would have taken perhaps an hour of manual work is now done in seconds. And you can do anything you usually do with AI. Imagine what you could prepare every day before your daily 09:00 meeting.
 
-We then use autofill to apply the prompt to many papers. Simple and powerful.
-
-Green cells denote correct classifications and red cells denote incorrect classifications. The models _will_ make mistakes at times and it is your responsibility to validate that a model is accurate enough for your use case.
+Just remember that the models do make mistakes at times. They might misunderstand a headline or assign the wrong category. It is your responsibility to validate that the results are accurate enough for your use case.
 
 ## Quick start
 
@@ -54,7 +52,7 @@ For permanent installation and more options, see our [installation guide](https:
 
 ## Basic usage
 
-Select a cell and type `=PROMPT("What model are you and who made you?")`. For Gemma 2 2B, it will tell you that it's called "Gemma" and made by Google DeepMind.
+Select a cell and type `=PROMPT("What model are you and who made you?")`. For Gemma 3 4B, it will tell you that it's called "Gemma" and made by Google DeepMind.
 
 You can also use cell references. For example, copy a news article into cell A1 and type in cell B1: `=PROMPT(A1, "Extract all person names mentioned in the text")`. You can reference many cells using standard Excel notation, e.g. `=PROMPT(A1:F10, "Extract all person names in the cells")`
 
@@ -63,7 +61,7 @@ For more advanced usage, including function calling and configuration, see our [
 ## Models
 
 Cellm supports:
-- Hosted models from Anthropic, OpenAI, Mistral, and others
+- Hosted models from Azure, AWS, Google, Anthropic, OpenAI, Mistral, and others
 - Local models via Ollama, Llamafiles, or vLLM
 
 For detailed information about configuring different models, see our documentation on [local models](https://docs.getcellm.com/models/local-models) and [hosted models](https://docs.getcellm.com/models/hosted-models).
@@ -85,9 +83,11 @@ For more use cases and examples, see our [Prompting Guide](https://docs.getcellm
 For build instructions with Visual Studio or command line, see our [development guide](https://docs.getcellm.com/get-started/development).
 
 ## Why did we make Cellm?
-A friend was writing a systematic review paper and had to compare 7,500 papers against inclusion/exclusion criteria. We thought this was a great use case for LLMs but quickly realized that individually copying papers in and out of chat windows was a total pain. This sparked the idea to make an AI tool to automate repetitive tasks for people who would rather avoid programming.
+A friend was writing a systematic review paper and had to compare 7,500 papers against inclusion/exclusion criteria to identify papers relevant to her research. We thought this was a great use case for LLMs but quickly realized that individually copying papers in and out of chat windows was a total pain. This sparked the idea to make an AI tool to automate repetitive tasks for people who would rather avoid programming.
 
-Cellm enables everyone to automate repetitive tasks with AI to a level that was previously available only to programmers.
+A quick prototype enabled her to quickly import a CSV file into Excel and classify all 7,500 papers with a prompt like "If the paper studies diabetic neuropathy and stroke, return INCLUDE otherwise return EXCLUDE". So we decided to develop it further.
+
+We think Cellm is really cool because it enables everyone to automate tasks with AI to a level that was previously available only to programmers.
 
 ## Telemetry
 To help us improve Cellm, we collect limited, anonymous telemetry data:
