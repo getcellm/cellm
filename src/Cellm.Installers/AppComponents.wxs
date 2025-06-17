@@ -1,4 +1,4 @@
-<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:netfx="http://wixtoolset.org/schemas/v4/wxs/netfx">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:netfx="http://wixtoolset.org/schemas/v4/wxs/netfx" xmlns:util="http://wixtoolset.org/schemas/v4/wxs/UtilExtension">
   <Fragment>
     <ComponentGroup Id="AppComponents" Directory="INSTALLFOLDER">
       <Component Id="CellmAddIn" Guid="421F66BC-6680-4FC9-9311-27E6996C562C">
@@ -7,35 +7,35 @@
 		    <RegistryKey Root="HKCU" Key="Software\TokenFactory\Cellm">
           <RegistryValue Type="string" Name="CellmInstalled" Value="yes" KeyPath="yes" />
         </RegistryKey>
-        <RemoveFolder Id='RemoveInstallFolder' Directory='INSTALLFOLDER' On='uninstall' />
+        <RemoveFolder Id="RemoveInstallFolder" Directory="INSTALLFOLDER" On="uninstall" />
       </Component>
 
       <Component Id="CellmAddInOffice12RegistryKey" Guid="A1126967-D155-4817-82D2-CC8D38DC7FB5" Condition="OFFICE12INSTALLED">
         <RegistryKey Root="HKCU" Key="Software\Microsoft\Office\12.0\Excel\Options">
-          <RegistryValue Type="string" Name="OPEN" Value="/R [INSTALLFOLDER]Cellm-AddIn64-packed.xll" KeyPath="yes" />
+          <RegistryValue Type="string" Name="[Office12NextOpen]" Value="/R [INSTALLFOLDER]Cellm-AddIn64-packed.xll" KeyPath="yes" />
         </RegistryKey>
       </Component>
 
       <Component Id="CellmAddInOffice14RegistryKey" Guid="5C22D506-FCFC-46AC-82B0-211F61391AE0" Condition="OFFICE14INSTALLED">
         <RegistryKey Root="HKCU" Key="Software\Microsoft\Office\14.0\Excel\Options">
-          <RegistryValue Type="string" Name="OPEN" Value="/R [INSTALLFOLDER]Cellm-AddIn64-packed.xll" KeyPath="yes" />
+          <RegistryValue Type="string" Name="[Office14NextOpen]" Value="/R [INSTALLFOLDER]Cellm-AddIn64-packed.xll" KeyPath="yes" />
         </RegistryKey>
       </Component>
 
       <Component Id="CellmAddInOffice15RegistryKey" Guid="27522B4F-788C-4B7A-9EC2-476A67DEF021" Condition="OFFICE15INSTALLED">
         <RegistryKey Root="HKCU" Key="Software\Microsoft\Office\15.0\Excel\Options">
-          <RegistryValue Type="string" Name="OPEN" Value="/R [INSTALLFOLDER]Cellm-AddIn64-packed.xll" KeyPath="yes" />
+          <RegistryValue Type="string" Name="[Office15NextOpen]" Value="/R [INSTALLFOLDER]Cellm-AddIn64-packed.xll" KeyPath="yes" />
         </RegistryKey>
       </Component>
 
       <Component Id="CellmAddInOffice16RegistryKey" Guid="0411319A-EF99-4D96-8D68-93D675050458" Condition="OFFICE16INSTALLED">
         <RegistryKey Root="HKCU" Key="Software\Microsoft\Office\16.0\Excel\Options">
-          <RegistryValue Type="string" Name="OPEN" Value="/R [INSTALLFOLDER]Cellm-AddIn64-packed.xll" KeyPath="yes" />
+          <RegistryValue Type="string" Name="[Office16NextOpen]" Value="/R [INSTALLFOLDER]Cellm-AddIn64-packed.xll" KeyPath="yes" />
         </RegistryKey>
       </Component>
     </ComponentGroup>
 
     <netfx:DotNetCompatibilityCheck Property="DOTNETRUNTIMECHECK" RollForward="major" Platform="x64" RuntimeType="desktop" Version="9.0.0" />
-    <Launch Condition="Installed OR DOTNETRUNTIMECHECK=0" Message="Cellm requires .NET 9.0 or greater. Download the .NET 9.0 x64 Desktop Runtime from https://dotnet.microsoft.com/." />
+    <Launch Condition="Installed OR DOTNETRUNTIMECHECK=0" Message="Cellm requires .NET 9 x64 or greater. Download the .NET 9 x64 Desktop Runtime from https://dotnet.microsoft.com/." />
   </Fragment>
 </Wix>
