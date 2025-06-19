@@ -132,12 +132,13 @@ public partial class RibbonMain
                         {providerMenuItemsXml}
                     </menu>
                 </splitButton>
+                <separator id="providerSeparator" />
                 <box id="{nameof(ModelGroupControlIds.VerticalContainer)}" boxStyle="vertical">
                     <box id="{nameof(ModelGroupControlIds.ProviderModelBox)}" boxStyle="horizontal">
                         <comboBox id="{nameof(ModelGroupControlIds.ModelComboBox)}"
                                   label="Model"
                                   showLabel="false"
-                                  sizeString="WWWWWWWWWWWWW"
+                                  sizeString="WWWWWWWWW"
                                   getText="{nameof(GetSelectedModelText)}"
                                   onChange="{nameof(OnModelComboBoxChange)}"
                                   getItemCount="{nameof(GetModelComboBoxItemCount)}"
@@ -146,8 +147,8 @@ public partial class RibbonMain
                         <comboBox id="{nameof(ModelGroupControlIds.TemperatureComboBox)}"
                                  label="Temp"
                                  showLabel="false"
-                                 sizeString="0.0"
-                                 screentip="Temperature (0.0-1.0). Lower values make responses more deterministic. Automatically scaled for providers with other ranges."
+                                 sizeString="Consistent"
+                                 screentip="Temperature. Controls the balance between deterministic outputs and creative exploration. Fow low values the model will almost always give you the same result, for high values the responses will vary. Must be a number between 0.0 and 1.0 or Consistent (0.0), Neutral (0.3), or Creative (0.7)."
                                  getText="{nameof(GetTemperatureText)}"
                                  onChange="{nameof(OnTemperatureChange)}"
                                  getItemCount="{nameof(GetTemperatureItemCount)}"
@@ -679,7 +680,7 @@ public partial class RibbonMain
     }
 
     // Array of temperature suggestions
-    private static readonly string[] TemperatureOptions = ["0.0", "0.3", "0.7", "1.0"];
+    private static readonly string[] TemperatureOptions = ["Consistent", "Neutral", "Creative"];
 
     public string GetTemperatureText(IRibbonControl control)
     {
@@ -687,12 +688,42 @@ public partial class RibbonMain
         {
             var temperature = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultTemperature)}");
 
+            if (temperature == "Consistent")
+            {
+                return temperature;
+            }
+
+            if (temperature == "Neutral")
+            {
+                return temperature;
+            }
+
+            if (temperature == "Creative")
+            {
+                return temperature;
+            }
+
             if (double.TryParse(temperature, out var tempVal))
             {
+                if (tempVal == 0)
+                {
+                    return "Consistent";
+                }
+
+                if (tempVal == 0.3)
+                {
+                    return "Neutral";
+                }
+
+                if (tempVal == 0.7)
+                {
+                    return "Creative";
+                }
+
                 return tempVal.ToString("0.0");
             }
 
-            return "0.0";
+            return "Deterministic";
         }
         catch (KeyNotFoundException)
         {
@@ -707,17 +738,32 @@ public partial class RibbonMain
         }
     }
 
-    public void OnTemperatureChange(IRibbonControl control, string text)
+    public void OnTemperatureChange(IRibbonControl control, string temperatureAsString)
     {
-        if (string.IsNullOrWhiteSpace(text))
+        if (string.IsNullOrWhiteSpace(temperatureAsString))
         {
             _logger.LogDebug("Warning: Temperature cannot be empty. Change ignored.");
             _ribbonUi?.InvalidateControl(control.Id);
             return;
         }
 
+        if (temperatureAsString == "Consistent")
+        {
+            temperatureAsString = "0";
+        }
+
+        if (temperatureAsString == "Neutral")
+        {
+            temperatureAsString = "0.3";
+        }
+
+        if (temperatureAsString == "Creative")
+        {
+            temperatureAsString = "0.7";
+        }
+
         // Validate that the input is a valid temperature (between 0 and 1)
-        if (double.TryParse(text, out var temperature))
+        if (double.TryParse(temperatureAsString, out var temperature))
         {
             if (temperature < 0 || temperature > 1)
             {
