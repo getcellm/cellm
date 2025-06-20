@@ -9,7 +9,7 @@ namespace Cellm.AddIn.UserInterface.Ribbon;
 [ComVisible(true)]
 public partial class RibbonMain : ExcelRibbon
 {
-    private IRibbonUI? _ribbonUi;
+    internal static IRibbonUI? _ribbonUi;
 
     private static readonly string _appSettingsPath = Path.Combine(CellmAddIn.ConfigurationPath, "appsettings.json");
     private static readonly string _appsettingsLocalPath = Path.Combine(CellmAddIn.ConfigurationPath, "appsettings.Local.json");

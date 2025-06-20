@@ -121,6 +121,7 @@ public class CellmAddIn : IExcelAddIn
                 cfg.AddBehavior<SentryBehavior<ProviderRequest, ProviderResponse>>(ServiceLifetime.Singleton);
                 cfg.AddBehavior<ToolBehavior<ProviderRequest, ProviderResponse>>(ServiceLifetime.Singleton);
                 cfg.AddBehavior<CacheBehavior<ProviderRequest, ProviderResponse>>(ServiceLifetime.Singleton);
+                cfg.AddBehavior<TokenUsageBehavior<ProviderRequest, ProviderResponse>>(ServiceLifetime.Singleton);
             })
             .AddSingleton<IProviderBehavior, GeminiTemperatureBehavior>();
 
