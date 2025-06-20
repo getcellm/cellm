@@ -99,7 +99,6 @@ public static class ServiceCollectionExtensions
                 {
                     SeverityProvider = args => args.Event.EventName switch
                     {
-                        // Decrease severity of specific events
                         "OnRetry" => ResilienceEventSeverity.Information,
                         _ => ResilienceEventSeverity.Debug
                     }
