@@ -869,7 +869,7 @@ public partial class RibbonMain
 
     public string GetSpeedStatistics(IRibbonControl control)
     {
-        return $"{TokenUsageNotificationHandler.GetTokensPerSecond():F0} TPS / {TokenUsageNotificationHandler.GetRequestsPerSecond():F1} RPS";
+        return $"{TokenUsageNotificationHandler.GetTokensPerSecond():F0} TPS x {TokenUsageNotificationHandler.GetRequestsPerBusySecond():F1} RPS";
     }
 
     public static string FormatCount(long number)
