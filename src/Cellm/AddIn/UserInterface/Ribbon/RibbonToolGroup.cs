@@ -82,23 +82,6 @@ public partial class RibbonMain
         return bool.Parse(value);
     }
 
-    public async Task OnCacheToggled(IRibbonControl control, bool enabled)
-    {
-        if (!enabled)
-        {
-            var cache = CellmAddIn.Services.GetRequiredService<HybridCache>();
-            await cache.RemoveByTagAsync(nameof(ProviderResponse));
-
-        }
-
-        SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableCache)}", enabled.ToString());
-    }
-
-    public bool GetCachePressed(IRibbonControl control)
-    {
-        return bool.Parse(GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableCache)}"));
-    }
-
     public string GetMcpMenuContent()
     {
         try

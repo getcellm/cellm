@@ -14,6 +14,7 @@ using Cellm.Models.Providers.OpenAi;
 using Cellm.Models.Providers.OpenAiCompatible;
 using Cellm.Users;
 using ExcelDna.Integration.CustomUI;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -36,11 +37,6 @@ public partial class RibbonMain
 
         ModelComboBox,
         TemperatureComboBox,
-
-        OutputCell,
-        OutputRow,
-        OutputTable,
-        OutputColumn,
 
         CacheToggleButton,
 
@@ -146,60 +142,44 @@ public partial class RibbonMain
                         <comboBox id="{nameof(ModelGroupControlIds.ModelComboBox)}"
                                   label="Model"
                                   showLabel="false"
-                                  sizeString="WWWWWWWWW"
+                                  sizeString="WWWWWWWWWW"
                                   getText="{nameof(GetSelectedModelText)}"
                                   onChange="{nameof(OnModelComboBoxChange)}"
                                   getItemCount="{nameof(GetModelComboBoxItemCount)}"
-                                  getItemLabel="{nameof(GetModelComboBoxItemLabel)}"
-                                  />
+                                  getItemLabel="{nameof(GetModelComboBoxItemLabel)}" />
                         <comboBox id="{nameof(ModelGroupControlIds.TemperatureComboBox)}"
                                  label="Temp"
                                  showLabel="false"
                                  sizeString="Consistent"
-                                 screentip="Temperature. Controls the balance between deterministic outputs and creative exploration. Fow low values the model will almost always give you the same result, for high values the responses will vary. Must be a number between 0.0 and 1.0 or Consistent (0.0), Neutral (0.3), or Creative (0.7)."
+                                 screentip="Temperature. Controls the balance between deterministic outputs and creative exploration. Fow low values the model will almost always give you the same responses for the same prompts, for high values the responses to the same prompts will vary. Must be a number between 0.0 and 1.0 or Consistent (0.0), Neutral (0.3), or Creative (0.7)."
                                  getText="{nameof(GetTemperatureText)}"
                                  onChange="{nameof(OnTemperatureChange)}"
                                  getItemCount="{nameof(GetTemperatureItemCount)}"
-                                 getItemLabel="{nameof(GetTemperatureItemLabel)}"
-                                 />
-                    </box>
-                    <box id="{nameof(ModelGroupControlIds.HorizontalContainer)}" boxStyle="horizontal">
-                        <buttonGroup id="SelectionButtonGroup">
-                            <toggleButton id="{nameof(ModelGroupControlIds.OutputCell)}" 
-                                    imageMso="TableSelectCell"
-                                    getPressed="{nameof(GetOutputCellPressed)}"
-                                    onAction="{nameof(OnOutputCellClicked)}"
-                                    screentip="Output response in a single cell (default)" />
-                            <toggleButton id="{nameof(ModelGroupControlIds.OutputRow)}" 
-                                    imageMso="TableRowSelect"
-                                    getPressed="{nameof(GetOutputRowPressed)}"
-                                    onAction="{nameof(OnOutputRowClicked)}" 
-                                    screentip="Respond with row"
-                                    supertip="Spill multiple response values (if any) across cells to the right." />
-                            <toggleButton id="{nameof(ModelGroupControlIds.OutputTable)}" 
-                                    imageMso="TableSelect"
-                                    getPressed="{nameof(GetOutputTablePressed)}"
-                                    onAction="{nameof(OnOutputTableClicked)}" 
-                                    screentip="Respond with table"
-                                    supertip="Let model decide how to output multiple values (as single cell, row, column, or table, just tell it what you want)" />
-                            <toggleButton id="{nameof(ModelGroupControlIds.OutputColumn)}" 
-                                    imageMso="TableColumnSelect" 
-                                    getPressed="{nameof(GetOutputColumnPressed)}"
-                                    onAction="{nameof(OnOutputColumnClicked)}" 
-                                    screentip="Respond with column"
-                                    supertip="Spill multiple response values (if any) across cells below" />
-                        </buttonGroup>
+                                 getItemLabel="{nameof(GetTemperatureItemLabel)}" />
                     </box>
                 </box>
                 <separator id="cacheSeparator" />
                 <toggleButton id="{nameof(ModelGroupControlIds.CacheToggleButton)}" 
-                    label="Memory On" size="large" 
-                    imageMso="SourceControlRefreshStatus"
-                    screentip="Enable/disable local caching of model responses. Enabled: Return cached responses for identical prompts. Disabled: Always request new responses. Disabling cache will clear entries."
+                    getLabel="{nameof(GetCacheLabel)}"
+                    size="large" 
+                    imageMso="CustomAutoTextGallery"
+                    screentip="Enable/disable local caching of model responses. Enabled: Return cached responses for identical prompts. Disabled: Always return new responses. Disabling memory will wipe saved responses."
                     onAction="{nameof(OnCacheToggled)}" 
                     getPressed="{nameof(GetCachePressed)}" />
             </group>
             """;
+    }
+
+    public string GetCacheLabel(IRibbonControl control)
+    {
+        var isEnabledString = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableCache)}");
+
+        if (!bool.TryParse(isEnabledString, out var isEnabled))
+        {
+            return "Memory";
+        }
+
+        return isEnabled ? "Memory On" : "Memory Off";
     }
 
     public bool IsProviderEnabled(IRibbonControl control)
@@ -848,80 +828,21 @@ public partial class RibbonMain
         return string.Empty;
     }
 
-    public void OnOutputCellClicked(IRibbonControl control, bool isPressed)
+    public async Task OnCacheToggled(IRibbonControl control, bool enabled)
     {
-        // Default, cannot toggle off via this button
-        SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(StructuredOutputShape)}", StructuredOutputShape.None.ToString());
-        InvalidateOutputToggleButtons();
-    }
-
-    public void OnOutputRowClicked(IRibbonControl control, bool isPressed)
-    {
-        if (isPressed)
+        if (!enabled)
         {
-            SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(StructuredOutputShape)}", StructuredOutputShape.Row.ToString());
-            InvalidateOutputToggleButtons();
+            var cache = CellmAddIn.Services.GetRequiredService<HybridCache>();
+            await cache.RemoveByTagAsync(nameof(ProviderResponse));
+
         }
-        else
-        {
-            SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(StructuredOutputShape)}", StructuredOutputShape.None.ToString());
-            InvalidateOutputToggleButtons();
-        }
+
+        SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableCache)}", enabled.ToString());
+        _ribbonUi?.InvalidateControl(control.Id);
     }
 
-    public void OnOutputTableClicked(IRibbonControl control, bool isPressed)
+    public bool GetCachePressed(IRibbonControl control)
     {
-        if (isPressed)
-        {
-            SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(StructuredOutputShape)}", StructuredOutputShape.Table.ToString());
-            InvalidateOutputToggleButtons();
-        }
-        else
-        {
-            SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(StructuredOutputShape)}", StructuredOutputShape.None.ToString());
-            InvalidateOutputToggleButtons();
-        }
-    }
-
-    public void OnOutputColumnClicked(IRibbonControl control, bool isPressed)
-    {
-        if (isPressed)
-        {
-            SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(StructuredOutputShape)}", StructuredOutputShape.Column.ToString());
-            InvalidateOutputToggleButtons();
-        }
-        else
-        {
-            SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(StructuredOutputShape)}", StructuredOutputShape.None.ToString());
-            InvalidateOutputToggleButtons();
-        }
-    }
-
-    public bool GetOutputCellPressed(IRibbonControl control)
-    {
-        return GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.StructuredOutputShape)}") == StructuredOutputShape.None.ToString();
-    }
-
-    public bool GetOutputRowPressed(IRibbonControl control)
-    {
-        return GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.StructuredOutputShape)}") == StructuredOutputShape.Row.ToString();
-    }
-
-    public bool GetOutputTablePressed(IRibbonControl control)
-    {
-        return GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.StructuredOutputShape)}") == StructuredOutputShape.Table.ToString();
-    }
-
-    public bool GetOutputColumnPressed(IRibbonControl control)
-    {
-        return GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.StructuredOutputShape)}") == StructuredOutputShape.Column.ToString();
-    }
-
-    private void InvalidateOutputToggleButtons()
-    {
-        _ribbonUi?.InvalidateControl(nameof(ModelGroupControlIds.OutputCell));
-        _ribbonUi?.InvalidateControl(nameof(ModelGroupControlIds.OutputRow));
-        _ribbonUi?.InvalidateControl(nameof(ModelGroupControlIds.OutputTable));
-        _ribbonUi?.InvalidateControl(nameof(ModelGroupControlIds.OutputColumn));
+        return bool.Parse(GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableCache)}"));
     }
 }
