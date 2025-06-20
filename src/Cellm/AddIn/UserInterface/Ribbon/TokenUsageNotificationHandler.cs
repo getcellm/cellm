@@ -31,20 +31,20 @@ internal class TokenUsageNotificationHandler(ILogger<TokenUsageNotificationHandl
 
         _tokensPerSecond[DateTime.UtcNow] = (notification.Usage.OutputTokenCount ?? 0, notification.ElapsedTime.TotalSeconds);
 
-        // Remove measurements until we are at allowed max
-        while (_tokensPerSecond.Count > _maxTokensPerSecondMeasurements)
-        {
-            var oldestMeasurement = _tokensPerSecond.Keys.Min();
-            _tokensPerSecond.TryRemove(oldestMeasurement, out _);
-        }
-
-        // Remove measurements older than 30 seconds, as they mess up the statistics
+        // Limit measurements to recent ones
         var cutoffTime = DateTime.UtcNow.AddSeconds(-30);
-        var keysToRemove = _tokensPerSecond.Keys.Where(k => k < cutoffTime).ToList();
+        var keysToRemove = _tokensPerSecond.Keys.Where(t => t < cutoffTime).ToList();
 
         foreach (var key in keysToRemove)
         {
             _tokensPerSecond.TryRemove(key, out _);
+        }
+
+        // Hard limit on number of measurements
+        while (_tokensPerSecond.Count > _maxTokensPerSecondMeasurements)
+        {
+            var oldestMeasurement = _tokensPerSecond.Keys.Min();
+            _tokensPerSecond.TryRemove(oldestMeasurement, out _);
         }
 
         ExcelAsyncUtil.QueueAsMacro(() =>
@@ -75,23 +75,66 @@ internal class TokenUsageNotificationHandler(ILogger<TokenUsageNotificationHandl
             return 0;
         }
 
-        return _tokensPerSecond.Sum(kvp => kvp.Value.Item1) / (_tokensPerSecond.Average(kvp => kvp.Value.Item2) + 0.01);
+        return _tokensPerSecond.Sum(kvp => kvp.Value.Item1) / (_tokensPerSecond.Sum(kvp => kvp.Value.Item2) + 0.01);
     }
 
-    public static double GetRequestsPerSecond()
+    // Calculate requests per busy seconds
+    public static double GetRequestsPerBusySecond()
     {
-        if (_tokensPerSecond.Count < 2)
+        if (_tokensPerSecond.IsEmpty)
+        {
+            return 0;
+        }
+
+        // Create a list of time intervals [StartTime, EndTime] for each request.
+        var intervals = _tokensPerSecond
+            .Select(kvp =>
+            {
+                var endTime = kvp.Key;
+                var duration = kvp.Value.Item2;
+                var startTime = endTime.AddSeconds(-duration);
+                return (StartTime: startTime, EndTime: endTime);
+            })
+            .OrderBy(i => i.StartTime) // 2. Sort intervals by their start time.
+            .ToList();
+
+        // 3. Merge the overlapping intervals to find the total busy time.
+        double busySeconds = 0;
+        var mergedStart = intervals[0].StartTime;
+        var mergedEnd = intervals[0].EndTime;
+
+        for (var i = 1; i < intervals.Count; i++)
+        {
+            var (startTime, endTime) = intervals[i];
+
+            if (startTime < mergedEnd)
+            {
+                // The current interval overlaps with the merged one.
+                // Extend the merged interval if the current one ends later.
+                if (endTime > mergedEnd)
+                {
+                    mergedEnd = endTime;
+                }
+            }
+            else
+            {
+                // A gap was found. The previous merged interval is complete.
+                // Add its duration to the total and start a new merged interval.
+                busySeconds += (mergedEnd - mergedStart).TotalSeconds;
+                mergedStart = startTime;
+                mergedEnd = endTime;
+            }
+        }
+
+        // Add the duration of the last merged interval.
+        busySeconds += (mergedEnd - mergedStart).TotalSeconds;
+
+        // Calculate RPS using busy time.
+        if (busySeconds < 0.1)
         {
             return 1;
         }
 
-        var durationInSeconds = _tokensPerSecond.Keys.Max().Subtract(_tokensPerSecond.Keys.Min()).TotalSeconds;
-
-        if (durationInSeconds < 0.01)
-        {
-            return 1;
-        }
-
-        return _tokensPerSecond.Count / durationInSeconds;
+        return _tokensPerSecond.Count / busySeconds;
     }
 }
