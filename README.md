@@ -11,22 +11,22 @@ For example, you can write `=PROMPT(A1, "Extract all person names mentioned in t
 Read more in our [documentation](https://docs.getcellm.com).
 
 ## Why use Cellm?
-- Make quick work of data cleaning, classification, and extraction tasks that once took hours.
-- Immediately free your team from repetitive manual work with the spreadsheet they already master.
-- Bypass lengthy rollouts of many AI systems. Your team already have Excel on their computers.
+- Make quick work of data cleaning, classification, and extraction tasks.
 - Enable marketing, finance, sales, operations and other teams to automate everyday tasks without depending on developers.
+- Immediately free yourself and your team from repetitive manual work with the spreadsheet they already master.
+- Bypass lengthy rollouts of specialized AI apps. Your team already have Excel on their computers.
 
 > “I love feeding data to ChatGPT, one copy-paste at a time”
 > — no one who’s run the same prompt 5 times
 
 ## Example
-Say you need to track your international competitors, but their websites are in different languages. Visiting each one, finding the latest update, and plugging it into a translation tool is tedius. Here's how Cellm can do the work for you:
+Say you need to track your international competitors, but their websites are in different languages. Visiting each one, finding the latest update, and plugging it into a translation tool totally sucks. Instead, let Cellm do the manual work for you:
 
 https://github.com/user-attachments/assets/8967f557-50b8-4e39-80e8-86a1246c5a42
 
 This example uses news websites. We give Cellm a list of URLs and write a simple prompt that asks Cellm to grab the top headline from each one. Then, in the next columns, we ask the model to translate the headline, identify its original language, and even sort it into a category like "Politics" or "Business". 
 
-With a single drag to autofill, Cellm visits every site, pulls the key information, and organizes it for you. What would have taken perhaps an hour of manual work is now done in seconds. And you can do anything you usually do with AI. Imagine what you could prepare every day before your daily 09:00 meeting.
+With a drag to autofill, Cellm visits every site, pulls your data and organizes it for you. What would have taken perhaps an hour of manual work is now done in seconds. Imagine what you could prepare every day before your daily 09:00 meeting.
 
 Just remember that the models do make mistakes at times. They might misunderstand a headline or assign the wrong category. It is your responsibility to validate that the results are accurate enough for your use case.
 
@@ -95,7 +95,7 @@ To help us improve Cellm, we collect limited, anonymous telemetry data:
 - **Crash reports:** To help us fix bugs.
 - **Prompts:** To help us understand usage patterns. For example, if you use `=PROMPT(A1:B2, "Extract person names")`, we capture the text "Extract person names" and prompt options. The prompt options are things like the model you use and the temperature setting. We do not capture the data in cells A1:B2. 
 
-We do not collect any data from your spreadsheet and we have no way of associating your prompts with you. You can see for yourself at [Cellm.Models/Behaviors/SentryBehavior.cs](Cellm.Models/Behaviors/SentryBehavior.cs).
+We do not collect any data from your spreadsheet and we have no way of associating your prompts with you. You can see for yourself at [src/Cellm/Models/Behaviors/SentryBehavior.cs](src/Cellm/Models/Behaviors/SentryBehavior.cs).
 
 You can disable telemetry at any time by adding the following contents to your `appsettings.json` file in the same folder as `Cellm-AddIn64-packed.xll`:
 
