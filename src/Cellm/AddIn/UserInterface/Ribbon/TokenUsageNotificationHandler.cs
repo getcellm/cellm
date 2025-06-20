@@ -78,7 +78,6 @@ internal class TokenUsageNotificationHandler(ILogger<TokenUsageNotificationHandl
         return _tokensPerSecond.Sum(kvp => kvp.Value.Item1) / (_tokensPerSecond.Sum(kvp => kvp.Value.Item2) + 0.01);
     }
 
-    // Calculate requests per busy seconds
     public static double GetRequestsPerBusySecond()
     {
         if (_tokensPerSecond.IsEmpty)
@@ -95,46 +94,45 @@ internal class TokenUsageNotificationHandler(ILogger<TokenUsageNotificationHandl
                 var startTime = endTime.AddSeconds(-duration);
                 return (StartTime: startTime, EndTime: endTime);
             })
-            .OrderBy(i => i.StartTime) // 2. Sort intervals by their start time.
+            .OrderBy(i => i.StartTime)
             .ToList();
 
-        // 3. Merge the overlapping intervals to find the total busy time.
+        // Merge the overlapping intervals
         double busySeconds = 0;
-        var mergedStart = intervals[0].StartTime;
-        var mergedEnd = intervals[0].EndTime;
+        var (mergeIntervalStart, mergeIntervalEnd) = intervals[0];
 
         for (var i = 1; i < intervals.Count; i++)
         {
             var (startTime, endTime) = intervals[i];
 
-            if (startTime < mergedEnd)
+            if (startTime < mergeIntervalEnd)
             {
                 // The current interval overlaps with the merged one.
                 // Extend the merged interval if the current one ends later.
-                if (endTime > mergedEnd)
+                if (endTime > mergeIntervalEnd)
                 {
-                    mergedEnd = endTime;
+                    mergeIntervalEnd = endTime;
                 }
             }
             else
             {
                 // A gap was found. The previous merged interval is complete.
-                // Add its duration to the total and start a new merged interval.
-                busySeconds += (mergedEnd - mergedStart).TotalSeconds;
-                mergedStart = startTime;
-                mergedEnd = endTime;
+                // Add its duration to the total and start a new merge interval.
+                busySeconds += (mergeIntervalEnd - mergeIntervalStart).TotalSeconds;
+                mergeIntervalStart = startTime;
+                mergeIntervalEnd = endTime;
             }
         }
 
         // Add the duration of the last merged interval.
-        busySeconds += (mergedEnd - mergedStart).TotalSeconds;
-
-        // Calculate RPS using busy time.
+        busySeconds += (mergeIntervalEnd - mergeIntervalStart).TotalSeconds;
+        
         if (busySeconds < 0.1)
         {
             return 1;
         }
 
+        // Calculate RPS using busy time
         return _tokensPerSecond.Count / busySeconds;
     }
 }
