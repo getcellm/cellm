@@ -32,10 +32,10 @@ internal class TokenUsageNotificationHandler(ILogger<TokenUsageNotificationHandl
         _tokensPerSecond[DateTime.UtcNow] = (notification.Usage.OutputTokenCount ?? 0, notification.ElapsedTime.TotalSeconds);
 
         // Limit measurements to recent ones
-        var cutoffTime = DateTime.UtcNow.AddSeconds(-30);
-        var keysToRemove = _tokensPerSecond.Keys.Where(t => t < cutoffTime).ToList();
+        var window = DateTime.UtcNow.AddSeconds(-30);
+        var keysOutsideWindow = _tokensPerSecond.Keys.Where(t => t < window).ToList();
 
-        foreach (var key in keysToRemove)
+        foreach (var key in keysOutsideWindow)
         {
             _tokensPerSecond.TryRemove(key, out _);
         }
