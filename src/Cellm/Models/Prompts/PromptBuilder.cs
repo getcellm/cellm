@@ -2,78 +2,86 @@
 
 namespace Cellm.Models.Prompts;
 
-public class PromptBuilder
+internal class PromptBuilder
 {
     private readonly List<ChatMessage> _messages = [];
     private readonly ChatOptions _options = new();
+    private StructuredOutputShape _outputShape = StructuredOutputShape.None;
 
-    public PromptBuilder()
+    internal PromptBuilder()
     {
     }
 
-    public PromptBuilder(Prompt prompt)
+    internal PromptBuilder(Prompt prompt)
     {
         // Do not mutate prompt
         _messages = new List<ChatMessage>(prompt.Messages);
         _options = prompt.Options.Clone();
+        _outputShape = prompt.OutputShape;
     }
 
-    public PromptBuilder SetModel(string model)
+    internal PromptBuilder SetModel(string model)
     {
         _options.ModelId = model;
         return this;
     }
 
-    public PromptBuilder SetTemperature(double temperature)
+    internal PromptBuilder SetTemperature(double temperature)
     {
         _options.Temperature = (float)temperature;
         return this;
     }
 
-    public PromptBuilder SetMaxOutputTokens(int maxOutputTokens)
+    internal PromptBuilder SetMaxOutputTokens(int maxOutputTokens)
     {
         _options.MaxOutputTokens = maxOutputTokens;
         return this;
     }
 
-    public PromptBuilder AddSystemMessage(string content)
+    internal PromptBuilder SetOutputShape(StructuredOutputShape outputShape)
+    {
+        _outputShape = outputShape;
+        return this;
+    }
+
+    internal PromptBuilder AddSystemMessage(string content)
     {
         _messages.Add(new ChatMessage(ChatRole.System, content));
         return this;
     }
 
-    public PromptBuilder AddUserMessage(string content)
+    internal PromptBuilder AddUserMessage(string content)
     {
         _messages.Add(new ChatMessage(ChatRole.User, content));
         return this;
     }
 
-    public PromptBuilder AddAssistantMessage(string content)
+    internal PromptBuilder AddAssistantMessage(string content)
     {
         _messages.Add(new ChatMessage(ChatRole.User, content));
         return this;
     }
 
-    public PromptBuilder AddMessage(ChatMessage message)
+    internal PromptBuilder AddMessage(ChatMessage message)
     {
         _messages.Add(message);
         return this;
     }
 
-    public PromptBuilder AddMessages(IList<ChatMessage> messages)
+    internal PromptBuilder AddMessages(IList<ChatMessage> messages)
     {
         _messages.AddRange(messages);
         return this;
     }
 
-    public PromptBuilder SetTools(IList<AITool> tools)
+    internal PromptBuilder SetTools(IList<AITool> tools)
     {
         _options.Tools = tools;
         return this;
     }
 
-    public Prompt Build()
+    internal Prompt Build()
     {
-        return new Prompt(_messages, _options);
+        return new Prompt(_messages, _options, _outputShape);
     }
 }

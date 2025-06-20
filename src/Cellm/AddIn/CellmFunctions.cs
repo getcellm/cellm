@@ -161,6 +161,7 @@ public static class CellmFunctions
                 .SetModel(arguments.Model)
                 .SetTemperature(arguments.Temperature)
                 .SetMaxOutputTokens(cellmAddInConfiguration.CurrentValue.MaxOutputTokens)
+                .SetOutputShape(cellmAddInConfiguration.CurrentValue.StructuredOutputShape)
                 .AddSystemMessage(SystemMessages.SystemMessage)
                 .AddUserMessage(userMessage)
                 .Build();
@@ -172,7 +173,15 @@ public static class CellmFunctions
             var response = await client.GetResponseAsync(prompt, arguments.Provider, cancellationToken).ConfigureAwait(false);
             var assistantMessage = response.Messages.LastOrDefault()?.Text ?? throw new InvalidOperationException("No text response");
 
+            // Check for cancellation before returning response
+            cancellationToken.ThrowIfCancellationRequested();
+
             logger.LogInformation("Sending prompt to {}/{} ({}) ... Done (elapsed time: {}ms, request time: {}ms)", arguments.Provider, arguments.Model, callerCoordinates, wallClock.ElapsedMilliseconds, requestClock.ElapsedMilliseconds);
+
+            if (StructuredOutput.TryParse(assistantMessage, response.OutputShape, out var array2d) && array2d is not null)
+            {
+                return array2d;
+            }
 
             return assistantMessage;
         }
