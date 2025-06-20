@@ -126,7 +126,7 @@ internal class TokenUsageNotificationHandler(ILogger<TokenUsageNotificationHandl
 
         // Add the duration of the last merged interval.
         busySeconds += (mergeIntervalEnd - mergeIntervalStart).TotalSeconds;
-        
+
         if (busySeconds < 0.1)
         {
             return 1;
