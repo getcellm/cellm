@@ -2,4 +2,4 @@
 
 namespace Cellm.Models.Prompts;
 
-public record Prompt(IList<ChatMessage> Messages, ChatOptions Options);
+internal record Prompt(IList<ChatMessage> Messages, ChatOptions Options, StructuredOutputShape OutputShape);

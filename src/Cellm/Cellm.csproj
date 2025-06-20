@@ -56,7 +56,6 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.5" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.5" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.5" />
-    <PackageReference Include="Microsoft.SemanticKernel.Connectors.Google" Version="1.56.0-alpha" />
     <PackageReference Include="Mistral.SDK" Version="2.2.0" />
     <PackageReference Include="ModelContextProtocol" Version="0.2.0-preview.3" />
     <PackageReference Include="OllamaSharp" Version="5.2.2" />

@@ -25,8 +25,6 @@ using Cellm.Users;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Connectors.Google;
 using Mistral.SDK;
 using OllamaSharp;
 using OpenAI;
@@ -101,7 +99,6 @@ public static class ServiceCollectionExtensions
                 {
                     SeverityProvider = args => args.Event.EventName switch
                     {
-                        // Decrease severity of specific events
                         "OnRetry" => ResilienceEventSeverity.Information,
                         _ => ResilienceEventSeverity.Debug
                     }
@@ -260,16 +257,15 @@ public static class ServiceCollectionExtensions
                 var geminiConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<GeminiConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
-#pragma warning disable SKEXP0070 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-                var geminiClient = new GoogleAIGeminiChatCompletionService(
-                    geminiConfiguration.CurrentValue.DefaultModel,
-                    geminiConfiguration.CurrentValue.ApiKey,
-                    httpClient: resilientHttpClient);
-#pragma warning restore SKEXP0070 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+                var openAiClient = new OpenAIClient(
+                    new ApiKeyCredential(geminiConfiguration.CurrentValue.ApiKey),
+                    new OpenAIClientOptions
+                    {
+                        Transport = new HttpClientPipelineTransport(resilientHttpClient),
+                        Endpoint = geminiConfiguration.CurrentValue.BaseAddress
+                    });
 
-#pragma warning disable SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-                return geminiClient.AsChatClient();
-#pragma warning restore SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+                return openAiClient.GetChatClient(geminiConfiguration.CurrentValue.DefaultModel).AsIChatClient();
             }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 

@@ -1,5 +1,6 @@
 using System.Text;
 using Cellm.AddIn.UserInterface.Forms;
+using Cellm.Models.Prompts;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
 using Cellm.Models.Providers.Aws;
@@ -25,6 +26,7 @@ public partial class RibbonMain
     private enum ModelGroupControlIds
     {
         VerticalContainer,
+        HorizontalContainer,
 
         ModelProviderGroup,
         ProviderModelBox,
@@ -34,6 +36,12 @@ public partial class RibbonMain
 
         ModelComboBox,
         TemperatureComboBox,
+
+        OutputCell,
+        OutputRow,
+        OutputTable,
+        OutputColumn,
+
         CacheToggleButton,
 
         ProviderSettingsButton
@@ -155,11 +163,41 @@ public partial class RibbonMain
                                  getItemLabel="{nameof(GetTemperatureItemLabel)}"
                                  />
                     </box>
+                    <box id="{nameof(ModelGroupControlIds.HorizontalContainer)}" boxStyle="horizontal">
+                        <buttonGroup id="SelectionButtonGroup">
+                            <toggleButton id="{nameof(ModelGroupControlIds.OutputCell)}" 
+                                    imageMso="TableSelectCell"
+                                    getPressed="{nameof(GetOutputCellPressed)}"
+                                    onAction="{nameof(OnOutputCellClicked)}"
+                                    screentip="Output response in a single cell (default)" />
+                            <toggleButton id="{nameof(ModelGroupControlIds.OutputRow)}" 
+                                    imageMso="TableRowSelect"
+                                    getPressed="{nameof(GetOutputRowPressed)}"
+                                    onAction="{nameof(OnOutputRowClicked)}" 
+                                    screentip="Respond with row"
+                                    supertip="Spill multiple response values (if any) across cells to the right." />
+                            <toggleButton id="{nameof(ModelGroupControlIds.OutputTable)}" 
+                                    imageMso="TableSelect"
+                                    getPressed="{nameof(GetOutputTablePressed)}"
+                                    onAction="{nameof(OnOutputTableClicked)}" 
+                                    screentip="Respond with table"
+                                    supertip="Let model decide how to output multiple values (as single cell, row, column, or table, just tell it what you want)" />
+                            <toggleButton id="{nameof(ModelGroupControlIds.OutputColumn)}" 
+                                    imageMso="TableColumnSelect" 
+                                    getPressed="{nameof(GetOutputColumnPressed)}"
+                                    onAction="{nameof(OnOutputColumnClicked)}" 
+                                    screentip="Respond with column"
+                                    supertip="Spill multiple response values (if any) across cells below" />
+                        </buttonGroup>
+                    </box>
                 </box>
                 <separator id="cacheSeparator" />
-                <toggleButton id="{nameof(ModelGroupControlIds.CacheToggleButton)}" label="Cache" size="large" imageMso="SourceControlRefreshStatus"
+                <toggleButton id="{nameof(ModelGroupControlIds.CacheToggleButton)}" 
+                    label="Memory On" size="large" 
+                    imageMso="SourceControlRefreshStatus"
                     screentip="Enable/disable local caching of model responses. Enabled: Return cached responses for identical prompts. Disabled: Always request new responses. Disabling cache will clear entries."
-                    onAction="{nameof(OnCacheToggled)}" getPressed="{nameof(GetCachePressed)}" />
+                    onAction="{nameof(OnCacheToggled)}" 
+                    getPressed="{nameof(GetCachePressed)}" />
             </group>
             """;
     }
@@ -808,5 +846,82 @@ public partial class RibbonMain
 
         _logger.LogWarning("Invalid index {index} requested for GetTemperatureItemLabel", index);
         return string.Empty;
+    }
+
+    public void OnOutputCellClicked(IRibbonControl control, bool isPressed)
+    {
+        // Default, cannot toggle off via this button
+        SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(StructuredOutputShape)}", StructuredOutputShape.None.ToString());
+        InvalidateOutputToggleButtons();
+    }
+
+    public void OnOutputRowClicked(IRibbonControl control, bool isPressed)
+    {
+        if (isPressed)
+        {
+            SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(StructuredOutputShape)}", StructuredOutputShape.Row.ToString());
+            InvalidateOutputToggleButtons();
+        }
+        else
+        {
+            SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(StructuredOutputShape)}", StructuredOutputShape.None.ToString());
+            InvalidateOutputToggleButtons();
+        }
+    }
+
+    public void OnOutputTableClicked(IRibbonControl control, bool isPressed)
+    {
+        if (isPressed)
+        {
+            SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(StructuredOutputShape)}", StructuredOutputShape.Table.ToString());
+            InvalidateOutputToggleButtons();
+        }
+        else
+        {
+            SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(StructuredOutputShape)}", StructuredOutputShape.None.ToString());
+            InvalidateOutputToggleButtons();
+        }
+    }
+
+    public void OnOutputColumnClicked(IRibbonControl control, bool isPressed)
+    {
+        if (isPressed)
+        {
+            SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(StructuredOutputShape)}", StructuredOutputShape.Column.ToString());
+            InvalidateOutputToggleButtons();
+        }
+        else
+        {
+            SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(StructuredOutputShape)}", StructuredOutputShape.None.ToString());
+            InvalidateOutputToggleButtons();
+        }
+    }
+
+    public bool GetOutputCellPressed(IRibbonControl control)
+    {
+        return GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.StructuredOutputShape)}") == StructuredOutputShape.None.ToString();
+    }
+
+    public bool GetOutputRowPressed(IRibbonControl control)
+    {
+        return GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.StructuredOutputShape)}") == StructuredOutputShape.Row.ToString();
+    }
+
+    public bool GetOutputTablePressed(IRibbonControl control)
+    {
+        return GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.StructuredOutputShape)}") == StructuredOutputShape.Table.ToString();
+    }
+
+    public bool GetOutputColumnPressed(IRibbonControl control)
+    {
+        return GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.StructuredOutputShape)}") == StructuredOutputShape.Column.ToString();
+    }
+
+    private void InvalidateOutputToggleButtons()
+    {
+        _ribbonUi?.InvalidateControl(nameof(ModelGroupControlIds.OutputCell));
+        _ribbonUi?.InvalidateControl(nameof(ModelGroupControlIds.OutputRow));
+        _ribbonUi?.InvalidateControl(nameof(ModelGroupControlIds.OutputTable));
+        _ribbonUi?.InvalidateControl(nameof(ModelGroupControlIds.OutputColumn));
     }
 }
