@@ -1,7 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using Cellm.AddIn;
-using Cellm.Models.Prompts;
 using Cellm.Tools.ModelContextProtocol;
 using Cellm.Users;
 using MediatR;
@@ -20,7 +19,7 @@ internal class ToolBehavior<TRequest, TResponse>(
   ILogger<ToolBehavior<TRequest, TResponse>> logger,
   ILoggerFactory loggerFactory)
   : IPipelineBehavior<TRequest, TResponse>
-  where TRequest : IPrompt
+  where TRequest : IGetPrompt
 {
     // TODO: Cannot use HybridCache because McpClientTool instances can be serialized
     private readonly ConcurrentDictionary<string, IList<McpClientTool>> _cache = new();

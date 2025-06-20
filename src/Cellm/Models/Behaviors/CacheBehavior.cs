@@ -2,7 +2,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Cellm.AddIn;
-using Cellm.Models.Prompts;
 using Cellm.Models.Providers;
 using MediatR;
 using Microsoft.Extensions.Caching.Hybrid;
@@ -15,8 +14,8 @@ internal class CacheBehavior<TRequest, TResponse>(
     HybridCache cache,
     IOptionsMonitor<CellmAddInConfiguration> providerConfiguration,
     ILogger<CacheBehavior<TRequest, TResponse>> logger) : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : IPrompt
-    where TResponse : IPrompt
+    where TRequest : IGetPrompt
+    where TResponse : IGetPrompt
 {
     private readonly HybridCacheEntryOptions _cacheEntryOptions = new()
     {

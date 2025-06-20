@@ -1,0 +1,97 @@
+﻿using System.Collections.Concurrent;
+using Cellm.Models.Behaviors;
+using ExcelDna.Integration;
+using MediatR;
+using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Logging;
+
+namespace Cellm.AddIn.UserInterface.Ribbon;
+
+internal class TokenUsageNotificationHandler(ILogger<TokenUsageNotificationHandler> logger) : INotificationHandler<TokenUsageNotification>
+{
+    private static readonly ConcurrentDictionary<string, long> _tokenUsage = new()
+    {
+        [nameof(UsageDetails.InputTokenCount)] = 0,
+        [nameof(UsageDetails.OutputTokenCount)] = 0
+    };
+
+    private static readonly ConcurrentDictionary<DateTime, (long, double)> _tokensPerSecond = new();
+    private readonly int _maxTokensPerSecondMeasurements = 100;
+
+    public Task Handle(TokenUsageNotification notification, CancellationToken cancellationToken)
+    {
+        if (notification is null)
+        {
+            logger.LogWarning("Received null usage notification");
+            return Task.CompletedTask;
+        }
+
+        _tokenUsage[nameof(UsageDetails.InputTokenCount)] += notification.Usage.InputTokenCount ?? 0;
+        _tokenUsage[nameof(UsageDetails.OutputTokenCount)] += notification.Usage.OutputTokenCount ?? 0;
+
+        _tokensPerSecond[DateTime.UtcNow] = (notification.Usage.OutputTokenCount ?? 0, notification.ElapsedTime.TotalSeconds);
+
+        // Remove measurements until we are at allowed max
+        while (_tokensPerSecond.Count > _maxTokensPerSecondMeasurements)
+        {
+            var oldestMeasurement = _tokensPerSecond.Keys.Min();
+            _tokensPerSecond.TryRemove(oldestMeasurement, out _);
+        }
+
+        // Remove measurements older than 30 seconds, as they mess up the statistics
+        var cutoffTime = DateTime.UtcNow.AddSeconds(-30);
+        var keysToRemove = _tokensPerSecond.Keys.Where(k => k < cutoffTime).ToList();
+
+        foreach (var key in keysToRemove)
+        {
+            _tokensPerSecond.TryRemove(key, out _);
+        }
+
+        ExcelAsyncUtil.QueueAsMacro(() =>
+        {
+            RibbonMain._ribbonUi?.InvalidateControl(nameof(RibbonMain.ModelGroupControlIds.TokenStatistics));
+        });
+
+        // Update speed statistics iff we have two measurements or more
+        if (_tokensPerSecond.Count >= 2)
+        {
+            ExcelAsyncUtil.QueueAsMacro(() =>
+            {
+                RibbonMain._ribbonUi?.InvalidateControl(nameof(RibbonMain.ModelGroupControlIds.SpeedStatistics));
+            });
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public static long GetTotalInputTokens() => _tokenUsage[nameof(UsageDetails.InputTokenCount)];
+
+    public static long GetTotalOutputTokens() => _tokenUsage[nameof(UsageDetails.OutputTokenCount)];
+
+    public static double GetTokensPerSecond()
+    {
+        if (_tokensPerSecond.IsEmpty)
+        {
+            return 0;
+        }
+
+        return _tokensPerSecond.Sum(kvp => kvp.Value.Item1) / (_tokensPerSecond.Average(kvp => kvp.Value.Item2) + 0.01);
+    }
+
+    public static double GetRequestsPerSecond()
+    {
+        if (_tokensPerSecond.Count < 2)
+        {
+            return 1;
+        }
+
+        var durationInSeconds = _tokensPerSecond.Keys.Max().Subtract(_tokensPerSecond.Keys.Min()).TotalSeconds;
+
+        if (durationInSeconds < 0.01)
+        {
+            return 1;
+        }
+
+        return _tokensPerSecond.Count / durationInSeconds;
+    }
+}
