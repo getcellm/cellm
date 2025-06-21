@@ -4,7 +4,7 @@ using Microsoft.Extensions.AI;
 
 namespace Cellm.Models.Behaviors;
 
-public record TokenUsageNotification(
+public record UsageNotification(
     UsageDetails Usage,
     Provider Provider,
     string? Model,
