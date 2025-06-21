@@ -1,0 +1,12 @@
+<!-- Copy this file to Cellm.Installer.wixproj.user and EITHER
+  (i) fill in CERTIFICATE_PATH and CERTIFICATE_PASSWORD to sign the installer OR 
+  (ii) run Scripts\MakeTestCert.ps1 to sign the installer with test certificate compatible with these values -->
+<!-- IMPORTANT! Don't just rename, this file is tracked by git -->
+<Project>
+  <PropertyGroup>
+  	<SignOutput>true</SignOutput>
+    <CERTIFICATE_PATH>$(MSBuildProjectDirectory)\Scripts\TestCertificateContainer.pfx</CERTIFICATE_PATH>
+    <CERTIFICATE_PASSWORD>password</CERTIFICATE_PASSWORD>
+  </PropertyGroup>
+</Project>
+ 
