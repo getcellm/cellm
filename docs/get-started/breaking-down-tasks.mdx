@@ -19,11 +19,24 @@ To get the most out of Cellm, it’s important to break your business tasks into
 - "Analyze this spreadsheet, find all errors, suggest improvements, and write a summary report."
 
 **Just Right:**
-- "Find errors in this spreadsheet."
-- "Suggest improvements for this spreadsheet."
-- "Write a summary report based on these findings."
+- "Classify the sentiment of the text in this cell as Positive, Negative, or Neutral."
+- "Extract all person names mentioned in the text in this cell."
+- "Categorize this product review as Electronics, Clothing, or Home."
+- "Detect if the email in this cell is spam or not spam."
+- "Extract the invoice date from the text in this cell."
+- "Fetch the current weather for the city mentioned in this cell using Playwright MCP."
+
+> **Note:** With Playwright MCP enabled, Cellm can fetch online data (e.g., scrape a website or retrieve live information) on behalf of the user. For most users, Cellm only processes data provided in the spreadsheet.
+
 
 Break down big tasks into a sequence of smaller prompts. This makes it easier for the AI to help you, and for you to review the results at each step.
+
+**Example:**
+Suppose you want to analyze customer feedback and categorize each comment.
+
+1. In column A, list the feedback comments.
+2. In column B, use `=PROMPT(A2, "Classify this feedback as Positive, Negative, or Neutral.")`
+3. In column C, use `=PROMPT(A2, "Extract all product names mentioned.")`
 
 ## Choosing the Right Model Size
 
@@ -41,26 +54,37 @@ Cellm offers three model sizes for each provider:
 - Generate simple reports or lists
 - Help brainstorm ideas
 - Answer questions based on provided data
+- (With Playwright MCP) Fetch online data if configured
 
 **AI Can’t:**
-- Access real-time or external data not provided in your prompt
+- Access real-time or external data not provided in your prompt (unless using Playwright MCP)
 - Perform complex, multi-step reasoning reliably
 - Guarantee 100% accuracy or up-to-date knowledge
 - Replace expert judgment for critical business decisions
 
 ## Best Practices
-- Start with a clear, specific prompt
-- Break complex tasks into smaller steps
-- Use the smallest model that gets the job done
-- Review and edit AI output before using it
-- Iterate: refine your prompts based on results
+- Start with a clear, specific prompt  
+  _Example: “Extract all dates mentioned in the text.”_
+- Break complex tasks into smaller steps  
+  _Example: First extract names, then classify sentiment in separate columns._
+- Use the smallest model that gets the job done  
+  _Example: Try a Small model for simple extraction before using a Large model._
+- Review and edit AI output before using it  
+  _Example: Spot-check a few results for accuracy._
+- Iterate: refine your prompts based on results  
+  _Example: If results are inconsistent, rephrase your prompt for clarity._
 
 ## Common Pitfalls
-- Overloading a single prompt with too many tasks
-- Expecting the AI to know things you haven’t provided
-- Using vague or ambiguous language
-- Not matching model size to task complexity
-- Not reviewing AI-generated content
+- Overloading a single prompt with too many tasks  
+  _Example: “Extract names, summarize the text, and classify sentiment” (too much for one cell)._
+- Expecting the AI to know things you haven’t provided  
+  _Example: “Summarize the latest news” (without providing the news text)._
+- Using vague or ambiguous language  
+  _Example: “Analyze this” (unclear what to do)._
+- Not matching model size to task complexity  
+  _Example: Using a Large model for simple keyword extraction (wastes resources)._
+- Not reviewing AI-generated content  
+  _Example: Trusting all outputs without checking for errors._
 
 ## Screenshots
 
