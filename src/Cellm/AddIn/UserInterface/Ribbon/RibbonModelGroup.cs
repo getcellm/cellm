@@ -38,14 +38,6 @@ public partial class RibbonMain
         ModelComboBox,
         TemperatureComboBox,
 
-        StatisticsContainer,
-        StatisticsTokensContainer,
-        StatisticsSpeedContainer,
-        TokensLabel,
-        TokenStatistics,
-        SpeedLabel,
-        SpeedStatistics,
-
         CacheToggleButton,
 
         ProviderSettingsButton
@@ -165,14 +157,7 @@ public partial class RibbonMain
                                  getItemCount="{nameof(GetTemperatureItemCount)}"
                                  getItemLabel="{nameof(GetTemperatureItemLabel)}" />
                     </box>
-                    <box id="{nameof(ModelGroupControlIds.StatisticsTokensContainer)}" boxStyle="horizontal">
-                        <labelControl id="{nameof(ModelGroupControlIds.TokensLabel)}" label="Tokens:" />
-                        <labelControl id="{nameof(ModelGroupControlIds.TokenStatistics)}" getLabel="{nameof(GetTokenStatistics)}" supertip="Total input and output token usage this session" />
-                    </box>
-                    <box id="{nameof(ModelGroupControlIds.StatisticsSpeedContainer)}" boxStyle="horizontal">
-                        <labelControl id="{nameof(ModelGroupControlIds.SpeedLabel)}" label="Speed:" />
-                        <labelControl id="{nameof(ModelGroupControlIds.SpeedStatistics)}" getLabel="{nameof(GetSpeedStatistics)}" supertip="Average Tokens Per Second (TPS) per request and average Requests Per Second" />
-                    </box>
+                    {ModelGroupStatistics()}
                 </box>
                 <separator id="cacheSeparator" />
                 <toggleButton id="{nameof(ModelGroupControlIds.CacheToggleButton)}" 
@@ -860,37 +845,5 @@ public partial class RibbonMain
     public bool GetCachePressed(IRibbonControl control)
     {
         return bool.Parse(GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableCache)}"));
-    }
-
-    public string GetTokenStatistics(IRibbonControl control)
-    {
-        return $"{FormatCount(TokenUsageNotificationHandler.GetTotalInputTokens())} in / {FormatCount(TokenUsageNotificationHandler.GetTotalOutputTokens())} out";
-    }
-
-    public string GetSpeedStatistics(IRibbonControl control)
-    {
-        return $"{TokenUsageNotificationHandler.GetTokensPerSecond():F0} TPS x {TokenUsageNotificationHandler.GetRequestsPerBusySecond():F1} RPS";
-    }
-
-    public static string FormatCount(long number)
-    {
-        if (number == 0) return "0";
-
-        string[] suffixes = { "", "K", "M", "B", "T", "P", "E" }; // Kilo, Mega, Giga, Tera, Peta, Exa
-
-        // The log base 1000 of the number gives us the magnitude
-        var magnitude = (int)Math.Log(Math.Abs(number), 1000);
-
-        // Don't go beyond the available suffixes
-        if (magnitude >= suffixes.Length)
-        {
-            magnitude = suffixes.Length - 1;
-        }
-
-        // Scale the number down to the 1-999 range
-        var scaledNumber = number / Math.Pow(1000, magnitude);
-
-        // Format the number with one optional decimal place and append the correct suffix
-        return $"{scaledNumber:0.#}{suffixes[magnitude]}";
     }
 }
