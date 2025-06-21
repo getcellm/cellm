@@ -142,7 +142,7 @@ public partial class RibbonMain
                         <comboBox id="{nameof(ModelGroupControlIds.ModelComboBox)}"
                                   label="Model"
                                   showLabel="false"
-                                  sizeString="WWWWWWWWWW"
+                                  sizeString="WWWWWWWWWWWW"
                                   getText="{nameof(GetSelectedModelText)}"
                                   onChange="{nameof(OnModelComboBoxChange)}"
                                   getItemCount="{nameof(GetModelComboBoxItemCount)}"

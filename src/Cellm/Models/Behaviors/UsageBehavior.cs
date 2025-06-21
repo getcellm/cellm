@@ -4,9 +4,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Cellm.Models.Behaviors;
 
-internal class TokenUsageBehavior<TRequest, TResponse>(
+internal class UsageBehavior<TRequest, TResponse>(
     IPublisher publisher,
-    ILogger<TokenUsageBehavior<TRequest, TResponse>> logger) : IPipelineBehavior<TRequest, TResponse>
+    ILogger<UsageBehavior<TRequest, TResponse>> logger) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>, IGetProvider
     where TResponse : IChatResponse
 {
@@ -23,7 +23,7 @@ internal class TokenUsageBehavior<TRequest, TResponse>(
         if (response.ChatResponse?.Usage is null)
         {
             logger.LogDebug(
-                "{provider} completed request in {ElapsedMilliseconds:F2}ms. No token usage details found in response.",
+                "{provider} completed request in {ElapsedMilliseconds}ms. No token usage details found in response.",
                 request.Provider,
                 elapsedTime.TotalMilliseconds
             );
@@ -34,12 +34,12 @@ internal class TokenUsageBehavior<TRequest, TResponse>(
         var requestType = typeof(TRequest).Name;
 
         logger.LogInformation(
-            "{provider} completed request in {ElapsedMilliseconds:F2}ms",
-            requestType,
+            "{provider} completed request in {ElapsedMilliseconds}ms",
+            request.Provider,
             elapsedTime.TotalMilliseconds
         );
 
-        var notification = new TokenUsageNotification(
+        var notification = new UsageNotification(
             Usage: response.ChatResponse.Usage,
             Provider: request.Provider,
             Model: response.ChatResponse.ModelId,

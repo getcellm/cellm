@@ -1,24 +1,24 @@
 ﻿using System.Collections.Concurrent;
 using Cellm.Models.Behaviors;
-using ExcelDna.Integration;
 using MediatR;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 
 namespace Cellm.AddIn.UserInterface.Ribbon;
 
-internal class TokenUsageNotificationHandler(ILogger<TokenUsageNotificationHandler> logger) : INotificationHandler<TokenUsageNotification>
+internal class UsageNotificationHandler(ILogger<UsageNotificationHandler> logger) : INotificationHandler<UsageNotification>
 {
     private static readonly ConcurrentDictionary<string, long> _tokenUsage = new()
     {
         [nameof(UsageDetails.InputTokenCount)] = 0,
-        [nameof(UsageDetails.OutputTokenCount)] = 0
+        [nameof(UsageDetails.OutputTokenCount)] = 0,
+        ["Prompts"] = 0
     };
 
     private static readonly ConcurrentDictionary<DateTime, (long, double)> _tokensPerSecond = new();
     private readonly int _maxTokensPerSecondMeasurements = 100;
 
-    public Task Handle(TokenUsageNotification notification, CancellationToken cancellationToken)
+    public Task Handle(UsageNotification notification, CancellationToken cancellationToken)
     {
         if (notification is null)
         {
@@ -28,6 +28,7 @@ internal class TokenUsageNotificationHandler(ILogger<TokenUsageNotificationHandl
 
         _tokenUsage[nameof(UsageDetails.InputTokenCount)] += notification.Usage.InputTokenCount ?? 0;
         _tokenUsage[nameof(UsageDetails.OutputTokenCount)] += notification.Usage.OutputTokenCount ?? 0;
+        _tokenUsage["Prompts"] += 1;
 
         _tokensPerSecond[DateTime.UtcNow] = (notification.Usage.OutputTokenCount ?? 0, notification.ElapsedTime.TotalSeconds);
 
@@ -47,7 +48,7 @@ internal class TokenUsageNotificationHandler(ILogger<TokenUsageNotificationHandl
             _tokensPerSecond.TryRemove(oldestMeasurement, out _);
         }
 
-        RibbonMain.UpdateTokenStatistics(GetTotalInputTokens(), GetTotalOutputTokens());
+        RibbonMain.UpdateTokenStatistics(GetTotalInputTokens(), GetTotalOutputTokens(), GetTotalPrompts());
         RibbonMain.UpdateSpeedStatistics(GetTokensPerSecond(), GetRequestsPerBusySecond());
 
         return Task.CompletedTask;
@@ -56,6 +57,8 @@ internal class TokenUsageNotificationHandler(ILogger<TokenUsageNotificationHandl
     private static long GetTotalInputTokens() => _tokenUsage[nameof(UsageDetails.InputTokenCount)];
 
     private static long GetTotalOutputTokens() => _tokenUsage[nameof(UsageDetails.OutputTokenCount)];
+
+    private static long GetTotalPrompts() => _tokenUsage["Prompts"];
 
     private static double GetTokensPerSecond()
     {
