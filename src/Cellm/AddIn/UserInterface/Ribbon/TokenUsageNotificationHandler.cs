@@ -47,28 +47,17 @@ internal class TokenUsageNotificationHandler(ILogger<TokenUsageNotificationHandl
             _tokensPerSecond.TryRemove(oldestMeasurement, out _);
         }
 
-        ExcelAsyncUtil.QueueAsMacro(() =>
-        {
-            RibbonMain._ribbonUi?.InvalidateControl(nameof(RibbonMain.ModelGroupControlIds.TokenStatistics));
-        });
-
-        // Update speed statistics iff we have two measurements or more
-        if (_tokensPerSecond.Count >= 2)
-        {
-            ExcelAsyncUtil.QueueAsMacro(() =>
-            {
-                RibbonMain._ribbonUi?.InvalidateControl(nameof(RibbonMain.ModelGroupControlIds.SpeedStatistics));
-            });
-        }
+        RibbonMain.UpdateTokenStatistics(GetTotalInputTokens(), GetTotalOutputTokens());
+        RibbonMain.UpdateSpeedStatistics(GetTokensPerSecond(), GetRequestsPerBusySecond());
 
         return Task.CompletedTask;
     }
 
-    public static long GetTotalInputTokens() => _tokenUsage[nameof(UsageDetails.InputTokenCount)];
+    private static long GetTotalInputTokens() => _tokenUsage[nameof(UsageDetails.InputTokenCount)];
 
-    public static long GetTotalOutputTokens() => _tokenUsage[nameof(UsageDetails.OutputTokenCount)];
+    private static long GetTotalOutputTokens() => _tokenUsage[nameof(UsageDetails.OutputTokenCount)];
 
-    public static double GetTokensPerSecond()
+    private static double GetTokensPerSecond()
     {
         if (_tokensPerSecond.IsEmpty)
         {
@@ -78,7 +67,7 @@ internal class TokenUsageNotificationHandler(ILogger<TokenUsageNotificationHandl
         return _tokensPerSecond.Sum(kvp => kvp.Value.Item1) / (_tokensPerSecond.Sum(kvp => kvp.Value.Item2) + 0.01);
     }
 
-    public static double GetRequestsPerBusySecond()
+    private static double GetRequestsPerBusySecond()
     {
         if (_tokensPerSecond.IsEmpty)
         {
