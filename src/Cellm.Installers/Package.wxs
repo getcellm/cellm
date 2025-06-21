@@ -35,10 +35,8 @@
     <CustomAction Id="CustomActionGetOffice14NextOpen" DllEntry="GetOffice14NextOpen" BinaryRef="CustomActions" Execute="immediate" />
     <CustomAction Id="CustomActionGetOffice15NextOpen" DllEntry="GetOffice15NextOpen" BinaryRef="CustomActions" Execute="immediate" />
     <CustomAction Id="CustomActionGetOffice16NextOpen" DllEntry="GetOffice16NextOpen" BinaryRef="CustomActions" Execute="immediate" />
-    <CustomAction Id="CustomActionInstallNodeJsSetProperties" Return="check" Property="CustomActionInstallNodeJs"
-                  Value="NODE_PARENT_DIR=[INSTALLFOLDER];NODEJS_VERSION=[NODEJS_VERSION]" />  
-    <CustomAction Id="CustomActionInstallPlaywrightSetProperties" Property="CustomActionInstallPlaywright"
-                  Value="NODE_PARENT_DIR=[INSTALLFOLDER]" />
+    <CustomAction Id="CustomActionInstallNodeJsSetProperties" Return="check" Property="CustomActionInstallNodeJs" Value="NODE_PARENT_DIR=[INSTALLFOLDER];NODEJS_VERSION=[NODEJS_VERSION]" />  
+    <CustomAction Id="CustomActionInstallPlaywrightSetProperties" Property="CustomActionInstallPlaywright" Value="NODE_PARENT_DIR=[INSTALLFOLDER]" />
     <CustomAction Id="CustomActionInstallNodeJs" Return="check" DllEntry="InstallNodeJs" BinaryRef="CustomActions" Execute="deferred" />
     <CustomAction Id="CustomActionInstallPlaywright" Return="check" DllEntry="InstallPlaywright" BinaryRef="CustomActions" Execute="deferred" />
     <InstallExecuteSequence>

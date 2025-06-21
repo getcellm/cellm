@@ -1,11 +1,16 @@
 ﻿<Project Sdk="WixToolset.Sdk/6.0.0">
   <PropertyGroup>
     <OutputName>Cellm-AddIn-$(Configuration)-$(Platform)</OutputName>
+    <SignOutput>false</SignOutput>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="WixToolset.Netfx.wixext" Version="6.0.0" />
     <PackageReference Include="WixToolset.UI.wixext" Version="6.0.0" />
   </ItemGroup>
+  <Target Name="SignMsi">
+    <Message Importance="high" Text="SignMsi: @(SignMsi)" />
+    <Exec Command='signtool.exe sign /fd SHA256 /td SHA256 /v /f $(CERTIFICATE_PATH) /p $(CERTIFICATE_PASSWORD) "%(SignMsi.FullPath)" ' />
+  </Target>
   <ItemGroup>
     <ProjectReference Include="CustomActions\Cellm.Installer.CustomActions.csproj">
       <Name>CustomActions</Name>
