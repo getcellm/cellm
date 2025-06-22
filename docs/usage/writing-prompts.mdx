@@ -1,0 +1,113 @@
+---
+title: 'Writing Prompts'
+description: 'Use LLMs in Excel formulas'
+icon: 'text'
+---
+
+## Writing your first prompt in Excel
+Cellm's `=PROMPT()` function outputs the AI response to a range of text, similar to how Excel's `=SUM()` function that outputs the sum of a range of numbers.  
+
+For example, you can write `=PROMPT("Hello, what model are you and who made you?")` in a cell's formula. The default model will tell you that is called "Gemma" and made by Google DeepMind.
+
+<Frame>
+  <img src="https://assets.getcellm.com/docs/images/usage/first-prompt.png" />
+</Frame>
+
+## Selecting a model
+A model is denoted by its provider and name seperated by a forward slash (`/`). The default model is Gemma 2 2B served via Ollama. This is denoted by `ollama/gemme2:2b`. Gemma 2 2B is a clever little model thats runs fine on a normal computer without GPU off-loading. Expand the drop-down list in Cellm's ribbon menu select another model: 
+
+<Frame caption="Select a model via the drop-down list.">
+  <img src="https://assets.getcellm.com/docs/images/usage/select-model.png" />
+</Frame>
+
+The drop-down contains a list of preset models that offers a variety of speed and intelligence trade-offs.
+
+<Tip>
+You can use a speficic model in a single cell with the `=PROMPTWITH()` function. This function takes the model name as its first argument but is otherwise identical to `=PROMPT()`. For example: `=PROMPTWITH("openai/gpt4o", A1, "Extract all person names mentioned in the text.").
+</Tip>
+
+<Info>See [Choosing Model](/models/choosing-model) to learn more about choosing the right model for the right task.</Info>
+
+
+## Referencing data in other cells
+
+Cellm becomes powerful when you reference other cells and drag a prompt formula across many rows with data in them. This allows you to dynamically modify the context for your prompts based on data elsewhere in your spreadsheet.
+
+For example, you can import a CSV with a million news articles, write in a cell e.g. `=PROMPT(A1, "Extract all person names mentioned in the text.")` in a cell's formula and drag the the cell down across all rows, then watch it happily chugging along until all rows are processed. Oddly satisfying. Cellm is useful when you want to use AI for repetitive tasks that would normally require copy-pasting data in and out of a chat window many times.
+
+
+
+
+## Controlling the shape of the output
+You can control how the AI's output is structured using the **Output** selectors in the Cellm ribbon. This lets you choose whether to place the result in a single cell, spill it into a row or column, or create a multi-column table.
+
+<Frame caption="Select the desired output shape from the Cellm ribbon before writing your formula.">
+  <img src="https://assets.getcellm.com/docs/images/usage/first-prompt.png" />
+</Frame>
+
+This feature allows you to get structured data without complex prompt instructions. Your prompt can focus on *what* you want to extract, while the ribbon setting handles *how* it's formatted.
+
+### For Single Cells, Rows, or Columns
+When you want the model to output single piece of information or a list, do the following:
+
+1.  Select **Cell**, **Row**, or **Column** from the ribbon's Output Shape menu.
+2.  Write a simple prompt asking for the information you need. You don't need to specify the format (e.g., "list each on a new line").
+3.  Cellm places output constrains on the model response behind the scenes, and Excel displays the results accordingly.
+
+For example, with the prompt `=PROMPT(A2, "Extract all the features mentioned in this product review.")`:
+- **Cell**: The model places all features into a single cell, typically as a comma-separated list.
+- **Row**: Excel spills each feature into a new cell to the right.
+- **Column**: Excel spills each feature into a new cell downwards.
+
+<Frame caption="Select 'Column' in the ribbon. The prompt just asks for the features, and Cellm handles the list formatting.">
+  <img src="https://assets.getcellm.com/docs/images/usage/first-prompt.png" />
+</Frame>
+
+### For Tables
+Creating a table is a two-step process that combines the ribbon selection with a more specific prompt:
+
+1.  Select **Table** from the ribbon's Output Shape menu.
+2.  In your prompt, you can tell the model how it should format its response or just let the model output its response on what it finds most appropriate.
+
+For example, to extract product details into a structured table, you would select "Table" in the ribbon and then write a prompt like this:
+
+`=PROMPT(A2, "Give me 10 rows of synthetic data with email, name, and address.")`
+
+Cellm will use your specified columns to structure the AI's response, and Excel will spill the result into a clean, rectangular grid.
+
+<Frame caption="After selecting 'Table' in the ribbon, the prompt must define the column names.">
+  <img src="https://assets.getcellm.com/docs/images/usage/first-prompt.png" />
+</Frame>
+
+In short: use the ribbon to set the **structure** and the prompt to define the **content**.
+
+## Dos And Don'ts
+Do:
+
+- Experiment with different prompts to find the most effective instructions for your data.
+- Use cell references to dynamically change your prompts based on other data in your spreadsheet.
+- Use local models for sensitive and confidential data.
+- Refer to the cell data as "context" in your instructions.
+- Verify at least a subset of a model's responses. Models will make errors and rely entirely on your input, which may also contain errors.
+
+Don't:
+
+- Don't use Cellm to compute sums, averages, and other numerical calculations. The current generation of LLMs are not designed for mathematical operations. Use Excel's existing functions instead.
+- Don't use cloud model providers to process sensitive or confidential data.
+- Don't use extremely long prompts or give Cellm complex tasks. A normal chat UI lets you have a back and forth conversation which is better for exploring complex topics.
+- Don't use Cellm for tasks that require up-to-date information beyond the AI model's knowledge cutoff date _unless_ you provide the information as context.
+
+<CardGroup cols={2}>
+  <Card
+    title="Breaking Down Tasks"
+    icon="server"
+    href="/models/local-models">
+    Learn how to decompose your tasks into clear, manageable steps to improve AI reliability.
+  </Card>
+  <Card
+    title="Choosing Model"
+    icon="server"
+    href="/models/local-models">
+    Learn how to choose the right model for the right task.
+  </Card>
+</CardGroup>
