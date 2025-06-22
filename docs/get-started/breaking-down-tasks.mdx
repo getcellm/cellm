@@ -1,0 +1,97 @@
+---
+title: 'Breaking Down Tasks for AI'
+description: 'How to structure tasks and select the right model in Cellm'
+icon: 'lightbulb'
+---
+
+# How to Break Down Tasks for AI
+
+## Why Task Breakdown Matters
+
+To get the most out of Cellm, it’s important to break your business tasks into clear, manageable steps. This helps the AI understand what you want, and increases the chances of getting useful results. If a task is too broad or too complex, even the largest models may struggle. If it’s too simple, you may not be using the AI’s capabilities effectively.
+
+## Decomposing Business Tasks: Examples
+
+**Too Simple:**
+- "Summarize this sentence."
+
+**Too Complex:**
+- "Analyze this spreadsheet, find all errors, suggest improvements, and write a summary report."
+
+**Just Right:**
+- "Classify the sentiment of the text in this cell as Positive, Negative, or Neutral."
+- "Extract all person names mentioned in the text in this cell."
+- "Categorize this product review as Electronics, Clothing, or Home."
+- "Detect if the email in this cell is spam or not spam."
+- "Extract the invoice date from the text in this cell."
+- "Fetch the current weather for the city mentioned in this cell using Playwright MCP."
+
+> **Note:** With Playwright MCP enabled, Cellm can fetch online data (e.g., scrape a website or retrieve live information) on behalf of the user. For most users, Cellm only processes data provided in the spreadsheet.
+
+
+Break down big tasks into a sequence of smaller prompts. This makes it easier for the AI to help you, and for you to review the results at each step.
+
+**Example:**
+Suppose you want to analyze customer feedback and categorize each comment.
+
+1. In column A, list the feedback comments.
+2. In column B, use `=PROMPT(A2, "Classify this feedback as Positive, Negative, or Neutral.")`
+3. In column C, use `=PROMPT(A2, "Extract all product names mentioned.")`
+
+## Choosing the Right Model Size
+
+Cellm offers three model sizes for each provider:
+- **Small:** Fast and cost-effective. Great for simple tasks like summarization, extracting data, or basic text generation.
+- **Medium:** Good for moderately complex tasks, such as multi-step reasoning or more nuanced text generation.
+- **Large:** Best for complex tasks that require deep understanding, creativity, or handling large amounts of information. Use with care—these models are slower and more expensive.
+
+**Tip:** Start with a Small or Medium model. Only use Large models if you need to.
+
+## What AI Can and Can’t Do
+
+**AI Can:**
+- Summarize, rewrite, or extract information from text
+- Generate simple reports or lists
+- Help brainstorm ideas
+- Answer questions based on provided data
+- (With Playwright MCP) Fetch online data if configured
+
+**AI Can’t:**
+- Access real-time or external data not provided in your prompt (unless using Playwright MCP)
+- Perform complex, multi-step reasoning reliably
+- Guarantee 100% accuracy or up-to-date knowledge
+- Replace expert judgment for critical business decisions
+
+## Best Practices
+- Start with a clear, specific prompt  
+  _Example: “Extract all dates mentioned in the text.”_
+- Break complex tasks into smaller steps  
+  _Example: First extract names, then classify sentiment in separate columns._
+- Use the smallest model that gets the job done  
+  _Example: Try a Small model for simple extraction before using a Large model._
+- Review and edit AI output before using it  
+  _Example: Spot-check a few results for accuracy._
+- Iterate: refine your prompts based on results  
+  _Example: If results are inconsistent, rephrase your prompt for clarity._
+
+## Common Pitfalls
+- Overloading a single prompt with too many tasks  
+  _Example: “Extract names, summarize the text, and classify sentiment” (too much for one cell)._
+- Expecting the AI to know things you haven’t provided  
+  _Example: “Summarize the latest news” (without providing the news text)._
+- Using vague or ambiguous language  
+  _Example: “Analyze this” (unclear what to do)._
+- Not matching model size to task complexity  
+  _Example: Using a Large model for simple keyword extraction (wastes resources)._
+- Not reviewing AI-generated content  
+  _Example: Trusting all outputs without checking for errors._
+
+## Screenshots
+
+<Frame caption="Selecting a model size in Cellm (UI example)">
+  <img src="https://assets.getcellm.com/docs/images/usage/select-model.png" />
+</Frame>
+
+---
+
+For more on writing effective prompts, see [Prompting](../usage/prompting.mdx). For details on available models, see [Models](../models/).
