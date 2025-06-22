@@ -1,0 +1,15 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "Run Cellm (default)",
+			"command": "dotnet run --project src/Cellm/Cellm.csproj",
+			"group": "build",
+			"isBackground": false,
+			"problemMatcher": [
+				"$msCompile"
+			]
+		}
+	]
+}
