@@ -25,13 +25,14 @@
           {
             "group": "Usage",
             "pages": [
-              "usage/prompting",
-              "usage/function-calling"
+              "usage/writing-prompts",
+              "usage/calling-functions"
             ]
           },
           {
             "group": "Models",
             "pages": [
+              "models/choosing-model",
               "models/local-models",
               "models/hosted-models"
             ]
