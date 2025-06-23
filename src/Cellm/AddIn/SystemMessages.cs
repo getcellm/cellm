@@ -4,7 +4,7 @@ namespace Cellm.AddIn;
 
 internal static class SystemMessages
 {
-    public static string SystemMessage(Provider provider, string model, DateTime now) 
+    public static string SystemMessage(Provider provider, string model, DateTime now)
     {
         return $"""
         You are {model}, a Large Language Model (LLM) created by {provider}.
@@ -43,7 +43,7 @@ internal static class SystemMessages
             Do not provide explanations, steps, or engage in conversation.
         </output format instructions>
         """;
-    } 
+    }
 
     public const string InlineInstructions = "Analyze the cells carefully and follow any instructions within the table.";
 }
