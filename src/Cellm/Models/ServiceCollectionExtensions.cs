@@ -92,7 +92,7 @@ public static class ServiceCollectionExtensions
                 resilientHttpClient.Timeout = Timeout.InfiniteTimeSpan;
             })
             .AddAsKeyed()
-            .AddResilienceHandler("RetryHttpClientHandler", (builder, context) =>
+            .AddResilienceHandler("ResilientHttpClientHandler", (builder, context) =>
             {
                 // Decrease severity of most Polly events
                 var telemetryOptions = new TelemetryOptions(context.GetOptions<TelemetryOptions>())

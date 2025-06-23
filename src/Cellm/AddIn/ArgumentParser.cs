@@ -74,9 +74,9 @@ public class ArgumentParser(IConfiguration configuration)
 
         var arguments = (_instructionsOrCells, _instructionsOrTemperature, _temperature) switch
         {
-            // "=PROMPT("Extract keywords")
+            // "=PROMPT("Hello world")
             (string instructions, ExcelMissing, ExcelMissing) => new Arguments(provider, model, string.Empty, instructions, ParseTemperature(Convert.ToDouble(defaultTemperature))),
-            // "=PROMPT("Extract keywords", 0.7)
+            // "=PROMPT("Hello world", 0.7)
             (string instructions, double temperature, ExcelMissing) => new Arguments(provider, model, string.Empty, instructions, ParseTemperature(temperature)),
             // "=PROMPT(A1:B2)
             (ExcelReference cells, ExcelMissing, ExcelMissing) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), SystemMessages.InlineInstructions, ParseTemperature(Convert.ToDouble(defaultTemperature))),
@@ -148,8 +148,8 @@ public class ArgumentParser(IConfiguration configuration)
         table[0, 0] = string.Empty;
         var maxColumnWidth = new int[numberOfRenderedColumns];
 
-        // The row enumeration column is always at least 1 character wide
-        maxColumnWidth[0] = 1;
+        // The row enumeration column is always at least 9 characters wide (Row \ Col)
+        maxColumnWidth[0] = 9;
 
         // Add header row
         for (var c = 1; c < numberOfRenderedColumns; c++)
@@ -196,9 +196,9 @@ public class ArgumentParser(IConfiguration configuration)
         var tableBuilder = new StringBuilder();
 
         // Render header row
-        tableBuilder.Append('|');
+        tableBuilder.Append("| Row \\ Col |");
 
-        for (var c = 0; c < numberOfRenderedColumns; c++)
+        for (var c = 1; c < numberOfRenderedColumns; c++)
         {
             tableBuilder.Append(' ');
             tableBuilder.Append(table[0, c].PadRight(maxColumnWidth[c]));
