@@ -21,6 +21,4 @@ public class CellmAddInConfiguration
     public int CacheTimeoutInSeconds { get; init; } = 3600;
 
     public List<string> Models { get; init; } = [];
-
-    public StructuredOutputShape StructuredOutputShape { get; init; } = StructuredOutputShape.Table;
 }

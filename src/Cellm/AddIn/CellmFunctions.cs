@@ -43,11 +43,87 @@ public static class CellmFunctions
         var model = configuration[$"{provider}Configuration:{nameof(IProviderConfiguration.DefaultModel)}"]
             ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
 
-        return PromptWith(
-                   $"{provider}/{model}",
-                   context,
-                   instructionsOrTemperature,
-                   temperature);
+        return Send(
+            $"{provider}/{model}",
+            context,
+            instructionsOrTemperature,
+            temperature,
+            StructuredOutputShape.None);
+    }
+
+    /// <summary>
+    /// Same as Prompt, but multiple values spill into a row.
+    /// </returns>
+    [ExcelFunction(Name = "PROMPT.ROW", Description = "Send a prompt to the default model", IsThreadSafe = true, IsVolatile = false)]
+    public static object PromptRow(
+    [ExcelArgument(AllowReference = true, Name = "InstructionsOrCells", Description = "A string with instructions or a cell or range of cells with context")] object instructionsOrCells,
+    [ExcelArgument(AllowReference = true, Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
+    [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
+    {
+        var configuration = CellmAddIn.Services.GetRequiredService<IConfiguration>();
+
+        var provider = configuration[$"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}"]
+            ?? throw new ArgumentException(nameof(CellmAddInConfiguration.DefaultProvider));
+
+        var model = configuration[$"{provider}Configuration:{nameof(IProviderConfiguration.DefaultModel)}"]
+            ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
+
+        return Send(
+            $"{provider}/{model}",
+            instructionsOrCells,
+            instructionsOrTemperature,
+            temperature,
+            StructuredOutputShape.Row);
+    }
+
+    /// <summary>
+    /// Same as Prompt, but multiple values spill into a column.
+    /// </returns>
+    [ExcelFunction(Name = "PROMPT.COLUMN", Description = "Send a prompt to the default model", IsThreadSafe = true, IsVolatile = false)]
+    public static object PromptColumn(
+    [ExcelArgument(AllowReference = true, Name = "InstructionsOrCells", Description = "A string with instructions or a cell or range of cells with context")] object instructionsOrCells,
+    [ExcelArgument(AllowReference = true, Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
+    [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
+    {
+        var configuration = CellmAddIn.Services.GetRequiredService<IConfiguration>();
+
+        var provider = configuration[$"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}"]
+            ?? throw new ArgumentException(nameof(CellmAddInConfiguration.DefaultProvider));
+
+        var model = configuration[$"{provider}Configuration:{nameof(IProviderConfiguration.DefaultModel)}"]
+            ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
+
+        return Send(
+            $"{provider}/{model}",
+            instructionsOrCells,
+            instructionsOrTemperature,
+            temperature,
+            StructuredOutputShape.Column);
+    }
+
+    /// <summary>
+    /// Same as Prompt, but multiple values spill into multiple rows/columns.
+    /// </returns>
+    [ExcelFunction(Name = "PROMPT.TABLE", Description = "Send a prompt to the default model", IsThreadSafe = true, IsVolatile = false)]
+    public static object PromptTable(
+    [ExcelArgument(AllowReference = true, Name = "InstructionsOrCells", Description = "A string with instructions or a cell or range of cells with context")] object instructionsOrCells,
+    [ExcelArgument(AllowReference = true, Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
+    [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
+    {
+        var configuration = CellmAddIn.Services.GetRequiredService<IConfiguration>();
+
+        var provider = configuration[$"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}"]
+            ?? throw new ArgumentException(nameof(CellmAddInConfiguration.DefaultProvider));
+
+        var model = configuration[$"{provider}Configuration:{nameof(IProviderConfiguration.DefaultModel)}"]
+            ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
+
+        return Send(
+            $"{provider}/{model}",
+            instructionsOrCells,
+            instructionsOrTemperature,
+            temperature,
+            StructuredOutputShape.Table);
     }
 
     /// <summary>
@@ -66,12 +142,84 @@ public static class CellmFunctions
     /// <returns>
     /// The model's response as a string. If an error occurs, it returns the error message.
     /// </returns>
-    [ExcelFunction(Name = "PROMPTWITH", Description = "Send a prompt to a specific model", IsThreadSafe = true, IsVolatile = false)]
-    public static object PromptWith(
+    [ExcelFunction(Name = "PROMPTMODEL", Description = "Send a prompt to a specific model", IsThreadSafe = true, IsVolatile = false)]
+    public static object PromptModel(
         [ExcelArgument(AllowReference = true, Name = "Provider/Model")] object providerAndModel,
         [ExcelArgument(AllowReference = true, Name = "InstructionsOrContext", Description = "A string with instructions or a cell or range of cells with context")] object instructionsOrCells,
         [ExcelArgument(AllowReference = true, Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
         [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
+    {
+        return Send(
+            providerAndModel,
+            instructionsOrCells,
+            instructionsOrTemperature,
+            temperature,
+            StructuredOutputShape.None);
+    }
+
+    /// <summary>
+    /// Same as PromptModel, but multiple values spill into a row.
+    /// </returns>
+    [ExcelFunction(Name = "PROMPTMODEL.ROW", Description = "Send a prompt to a specific model", IsThreadSafe = true, IsVolatile = false)]
+    public static object PromptModelRow(
+    [ExcelArgument(AllowReference = true, Name = "Provider/Model")] object providerAndModel,
+    [ExcelArgument(AllowReference = true, Name = "InstructionsOrCells", Description = "A string with instructions or a cell or range of cells with context")] object instructionsOrCells,
+    [ExcelArgument(AllowReference = true, Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
+    [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
+    {
+        return Send(
+            providerAndModel,
+            instructionsOrCells,
+            instructionsOrTemperature,
+            temperature,
+            StructuredOutputShape.Row);
+    }
+
+    /// <summary>
+    /// Same as PromptModel, but multiple values spill into a column.
+    /// </returns>
+    [ExcelFunction(Name = "PROMPTMODEL.COLUMN", Description = "Send a prompt to a specific model", IsThreadSafe = true, IsVolatile = false)]
+    public static object PromptModelColumn(
+    [ExcelArgument(AllowReference = true, Name = "Provider/Model")] object providerAndModel,
+    [ExcelArgument(AllowReference = true, Name = "InstructionsOrCells", Description = "A string with instructions or a cell or range of cells with context")] object instructionsOrCells,
+    [ExcelArgument(AllowReference = true, Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
+    [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
+    {
+        return Send(
+            providerAndModel,
+            instructionsOrCells,
+            instructionsOrTemperature,
+            temperature,
+            StructuredOutputShape.Column);
+    }
+
+    /// <summary>
+    /// Same as PromptModel, but multiple values spill into a column.
+    /// </returns>
+    [ExcelFunction(Name = "PROMPTMODEL.TABLE", Description = "Send a prompt to a specific model", IsThreadSafe = true, IsVolatile = false)]
+    public static object PromptModelTable(
+    [ExcelArgument(AllowReference = true, Name = "Provider/Model")] object providerAndModel,
+    [ExcelArgument(AllowReference = true, Name = "InstructionsOrCells", Description = "A string with instructions or a cell or range of cells with context")] object instructionsOrCells,
+    [ExcelArgument(AllowReference = true, Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
+    [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
+    {
+        return Send(
+            providerAndModel,
+            instructionsOrCells,
+            instructionsOrTemperature,
+            temperature,
+            StructuredOutputShape.Table);
+    }
+
+    /// <summary>
+    /// Builds prompt, sends request, and returns response.
+    /// </summary>
+    public static object Send(
+        [ExcelArgument(AllowReference = true, Name = "Provider/Model")] object providerAndModel,
+        [ExcelArgument(AllowReference = true, Name = "InstructionsOrContext", Description = "A string with instructions or a cell or range of cells with context")] object instructionsOrCells,
+        [ExcelArgument(AllowReference = true, Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
+        [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature,
+        StructuredOutputShape outputShape)
     {
         try
         {
@@ -85,13 +233,14 @@ public static class CellmFunctions
                 .AddInstructionsOrCells(instructionsOrCells)
                 .AddInstructionsOrTemperature(instructionsOrTemperature)
                 .AddTemperature(temperature)
+                .AddOutputShape(outputShape)
                 .Parse();
 
             var caller = XlCall.Excel(XlCall.xlfCaller) as ExcelReference;
             var callerCoordinates = $"{ArgumentParser.GetColumnName(caller?.ColumnFirst ?? 0)}{ArgumentParser.GetRowName(caller?.RowFirst ?? 0)}";
 
             var response = ExcelAsyncUtil.RunTaskWithCancellation(
-                nameof(PromptWith),
+                nameof(Send),
                 new object[] { providerAndModel, instructionsOrCells, instructionsOrTemperature, temperature },
                 cancellationToken => GetResponseAsync(arguments, wallClock, callerCoordinates, cancellationToken));
 
@@ -161,7 +310,7 @@ public static class CellmFunctions
                 .SetModel(arguments.Model)
                 .SetTemperature(arguments.Temperature)
                 .SetMaxOutputTokens(cellmAddInConfiguration.CurrentValue.MaxOutputTokens)
-                .SetOutputShape(cellmAddInConfiguration.CurrentValue.StructuredOutputShape)
+                .SetOutputShape(arguments.OutputShape)
                 .AddSystemMessage(SystemMessages.SystemMessage(arguments.Provider, arguments.Model, DateTime.UtcNow))
                 .AddUserMessage(userMessage)
                 .Build();
