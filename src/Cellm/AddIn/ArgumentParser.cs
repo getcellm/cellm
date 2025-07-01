@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using Cellm.AddIn.Exceptions;
 using Cellm.Models.Prompts;
 using Cellm.Models.Providers;
