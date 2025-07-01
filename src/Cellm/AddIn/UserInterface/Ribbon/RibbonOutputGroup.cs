@@ -1,4 +1,3 @@
-using Cellm.Models.Prompts;
 using ExcelDna.Integration;
 using ExcelDna.Integration.CustomUI;
 
