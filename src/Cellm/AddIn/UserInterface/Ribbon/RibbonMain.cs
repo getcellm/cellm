@@ -83,7 +83,6 @@ public partial class RibbonMain : ExcelRibbon
             <tab id="cellm" label="Cellm">
                 {UserGroup()}
                 {ModelGroup()}
-                {OutputGroup()}
                 {ToolGroup()}
             </tab>
         </tabs>
