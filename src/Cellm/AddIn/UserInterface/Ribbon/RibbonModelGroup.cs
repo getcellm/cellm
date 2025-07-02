@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using Cellm.AddIn.UserInterface.Forms;
 using Cellm.Models.Providers;
@@ -782,7 +783,7 @@ public partial class RibbonMain
         }
 
         // Validate that the input is a valid temperature (between 0 and 1)
-        if (double.TryParse(temperatureAsString, out var temperature))
+        if (double.TryParse(temperatureAsString.Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out var temperature))
         {
             if (temperature < 0 || temperature > 1)
             {
