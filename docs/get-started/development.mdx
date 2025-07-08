@@ -4,6 +4,8 @@ description: 'Get started with Cellm development and contributions'
 icon: 'code'
 ---
 
+This guide will walk you through the build process step by step.
+
 ## Build with command line
 
 1. Clone this repository:
@@ -11,7 +13,7 @@ icon: 'code'
    git clone https://github.com/getcellm/cellm.git
    ```
 
-2. In your terminal, go into the root of the project directory:
+2. In your terminal, navigate to the root of the project directory:
    ```cmd
    cd cellm
    ```
@@ -26,6 +28,22 @@ icon: 'code'
    dotnet build --configuration Debug
    ```
 
+Once the build is complete, you load Cellm into Excel:
+
+1. Navigate to the output folder `src/Cellm/bin/net9.0-windows/publish/`
+
+2. Double-click `Cellm-AddIn64-packed.xll`
+
+Excel will open with Cellm ready to use test.
+
+### Troubleshooting
+
+If the build fails, here are some common things you can try:
+
+- Make sure you have .NET 9.0 SDK installed (not just the runtime). You can verify your .NET installation by running dotnet --version in your terminal.
+- Try running `dotnet clean` followed by `dotnet restore` and `dotnet build` again.
+- Check that you're in the correct directory (cellm folder).
+
 ## Build with Visual Studio
 
 1. In Visual Studio, go to File > Clone Repository.
@@ -34,11 +52,15 @@ icon: 'code'
 
 3. Run the "Excel" configuration. Visual Studio will build Cellm and open Excel. Click on "Enable this add-in for this session only" to load the build into Excel.
 
-To sign the installer, you need the Windows 10 SDK or Windows 11 SDK which includes the sign tool. Run the Visual Studio Installer and modify your Visual Studio installation to include one of these SDKs.
+All Visual Studio's usual debugging tools works when you run the "Excel" configuration. You can set breakpoints, inspect runtime variables, and view log messages in the Output window.
 
-## Debug with Visual Studio
+## Build the installer
 
-All Visual Studio's usual debugging tools works when you run the "Excel" configuration. You can set breakpoints, inspect runtime variables, and view log messages in the Output window. To exercise code, type e.g. `=PROMPT("Hello World")` in a cell's formula and run it. 
+1. Copy `src/Cellm.Installers/Cellm.Installer.wixproj.user.sign` to `src/Cellm.Installers/Cellm.Installer.wixproj.user` and set `CERTIFICATE_PATH` and `CERTIFICATE_PATH`. Don't just rename the file. It is tracked by git and you risk committing your sensitive information later.
+
+2. In Visual Studio, select the `Release` configuration and build the `Cellm.Installer` target. 
+
+You need the Windows 10 SDK or Windows 11 SDK which includes the sign tool. If you get errors about `signtool.exe` not being found, run the Visual Studio Installer and modify your Visual Studio installation to include one of these SDKs.
 
 ## Contributing
 
@@ -71,4 +93,4 @@ If you have questions about contributing:
 - Check existing issues and PRs to avoid duplicates
 - Join our community discussions in [Discord](https://discord.gg/zApxYpe2ZW) for general questions
 
-We review all PRs.
+We review or respond to all PRs.
