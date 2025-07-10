@@ -307,7 +307,7 @@ public partial class RibbonMain
             return;
         }
 
-        _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ProviderSelectionMenu));
+        _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ProviderMenu));
 
         foreach (var item in _providerItems)
         {

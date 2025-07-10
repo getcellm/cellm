@@ -20,6 +20,13 @@ public partial class RibbonMain
         return CellmAddIn.Services.GetRequiredService<IOptionsMonitor<T>>().CurrentValue;
     }
 
+    private static IProviderConfiguration GetProviderConfiguration(Provider provider)
+    {
+        return CellmAddIn.Services.GetRequiredService<IEnumerable<IOptionsMonitor<IProviderConfiguration>>>()
+            .Select(providerConfiguration => providerConfiguration.CurrentValue)
+            .Single(providerConfiguration => providerConfiguration.Id == provider);
+    }
+
     private static Provider GetProvider(string providerAndModel)
     {
         var index = providerAndModel.IndexOf('/');

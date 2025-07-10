@@ -1,3 +1,4 @@
+using System;
 using System.Globalization;
 using System.Text;
 using Cellm.AddIn.UserInterface.Forms;
@@ -34,7 +35,7 @@ public partial class RibbonMain
         ProviderModelBox,
         ProviderSplitButton,
         ProviderDisplayButton,
-        ProviderSelectionMenu,
+        ProviderMenu,
 
         ModelComboBox,
         TemperatureComboBox,
@@ -133,7 +134,7 @@ public partial class RibbonMain
                             showLabel="true"
                             onAction="{nameof(ShowProviderSettingsForm)}"
                             />
-                    <menu id="{nameof(ModelGroupControlIds.ProviderSelectionMenu)}" itemSize="normal">
+                    <dynamicMenu  id="{nameof(ModelGroupControlIds.ProviderMenu)}" itemSize="normal" getContent="GetProviderMenuItems">
                         {providerMenuItemsXml}
                     </menu>
                 </splitButton>
@@ -170,6 +171,32 @@ public partial class RibbonMain
                     getPressed="{nameof(GetCachePressed)}" />
             </group>
             """;
+    }
+
+    public string GetProviderMenuItems(IRibbonControl control)
+    {
+        var providerConfigurations = CellmAddIn.Services.GetRequiredService<IEnumerable<IOptionsMonitor<IProviderConfiguration>>>();
+
+        var providerMenuItemsXml = CellmAddIn.Services.GetRequiredService<IEnumerable<IOptionsMonitor<IProviderConfiguration>>>()
+            .Select(providerConfiguration => providerConfiguration.CurrentValue)
+            .Where(providerConfiguration => providerConfiguration != null && providerConfiguration.IsEnabled)
+            .Select(providerConfiguration => 
+                $@"<button id=""{ModelGroupControlIds.ProviderMenu}-{providerConfiguration.Id}""
+                    label=""{providerConfiguration.Name}""
+                    tag=""{providerConfiguration.Id}""
+                    getImage=""{nameof(GetProviderMenuItemImage)}""
+                    onAction=""{nameof(HandleProviderMenuSelection)}"" 
+                    getEnabled=""{nameof(IsProviderEnabled)}"" />");
+
+        var providerMenuItems = new StringBuilder();
+        providerMenuItems.AppendJoin(Environment.NewLine, providerMenuItemsXml);
+        providerMenuItems.AppendLine($@"<menuSeparator id=""providerMenuSeparator"" />");
+        providerMenuItems.AppendLine(
+            $@"<button id=""{nameof(ModelGroupControlIds.ProviderSettingsButton)}""
+                 getLabel=""{nameof(GetProviderSettingsButtonLabel)}""
+                 onAction=""{nameof(ShowProviderSettingsForm)}"" />");
+
+        return providerMenuItems.ToString();
     }
 
     public string GetCacheLabel(IRibbonControl control)
@@ -264,15 +291,9 @@ public partial class RibbonMain
     public Bitmap? GetProviderMenuItemImage(IRibbonControl control)
     {
         // The 'tag' property of the menu button holds the index we stored.
-        if (int.TryParse(control.Tag, out var index))
+        if (Enum.TryParse<Provider>(control.Tag, out var provider))
         {
-            if (_providerItems.TryGetValue(index, out var item) && !string.IsNullOrEmpty(item.Image))
-            {
-                // Use smaller size for menu items (e.g., 16x16)
-                return ImageLoader.LoadEmbeddedPngResized(item.Image, 16, 16); // Adjust size as needed
-            }
-
-            _logger.LogWarning("Could not get image for menu item index {index}.", index);
+            return ImageLoader.LoadEmbeddedPngResized(GetProviderConfiguration(provider).Icon, 16, 16);
         }
         else
         {
@@ -498,6 +519,7 @@ public partial class RibbonMain
                         _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ProviderDisplayButton));
                         _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ModelComboBox));
                         _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ProviderSettingsButton));
+                        _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ProviderMenu));
                     }
                 }
             }
