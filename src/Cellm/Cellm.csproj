@@ -19,7 +19,6 @@
     <None Remove="AddIn\UserInterface\Resources\azure.png" />
     <None Remove="AddIn\UserInterface\Resources\deepseek.png" />
     <None Remove="AddIn\UserInterface\Resources\external-link.svg" />
-    <None Remove="AddIn\UserInterface\Resources\google.png" />
     <None Remove="AddIn\UserInterface\Resources\logged-in.svg" />
     <None Remove="AddIn\UserInterface\Resources\logged-out.svg" />
     <None Remove="AddIn\UserInterface\Resources\login.svg" />
@@ -73,19 +72,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="AddIn\UserInterface\Resources\anthropic.png" />
-    <EmbeddedResource Include="AddIn\UserInterface\Resources\aws.png" />
-    <EmbeddedResource Include="AddIn\UserInterface\Resources\azure.png" />
-    <EmbeddedResource Include="AddIn\UserInterface\Resources\deepseek.png" />
+    <EmbeddedResource Include="AddIn\UserInterface\Resources\Anthropic.png" />
+    <EmbeddedResource Include="AddIn\UserInterface\Resources\Aws.png" />
+    <EmbeddedResource Include="AddIn\UserInterface\Resources\Azure.png" />
+    <EmbeddedResource Include="AddIn\UserInterface\Resources\DeepSeek.png" />
     <EmbeddedResource Include="AddIn\UserInterface\Resources\external-link.svg" />
-    <EmbeddedResource Include="AddIn\UserInterface\Resources\google.png" />
+    <EmbeddedResource Include="AddIn\UserInterface\Resources\Gemini.png" />
     <EmbeddedResource Include="AddIn\UserInterface\Resources\logged-in.svg" />
     <EmbeddedResource Include="AddIn\UserInterface\Resources\logged-out.svg" />
     <EmbeddedResource Include="AddIn\UserInterface\Resources\login.svg" />
     <EmbeddedResource Include="AddIn\UserInterface\Resources\logout.svg" />
     <EmbeddedResource Include="AddIn\UserInterface\Resources\mcp.png" />
-    <EmbeddedResource Include="AddIn\UserInterface\Resources\mistral.png" />
-    <EmbeddedResource Include="AddIn\UserInterface\Resources\ollama.png" />
-    <EmbeddedResource Include="AddIn\UserInterface\Resources\openai.png" />
+    <EmbeddedResource Include="AddIn\UserInterface\Resources\Mistral.png" />
+    <EmbeddedResource Include="AddIn\UserInterface\Resources\Ollama.png" />
+    <EmbeddedResource Include="AddIn\UserInterface\Resources\OpenAi.png" />
   </ItemGroup>
 </Project>

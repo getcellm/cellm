@@ -1,7 +1,17 @@
-﻿namespace Cellm.Models.Providers.Cellm;
+﻿using Cellm.Users;
+
+namespace Cellm.Models.Providers.Cellm;
 
 internal class CellmConfiguration : IProviderConfiguration
 {
+    public Provider Id { get => Provider.Cellm; }
+
+    public string Name { get => "Cellm"; }
+
+    public Entitlement Entitlement { get => Entitlement.EnableCellmProvider; }
+
+    public string Icon { get => $"AddIn/UserInterface/Resources/{nameof(Provider.Cellm)}.png"; }
+
     public Uri BaseAddress => new("https://getcellm.com/v1/");
 
     public string DefaultModel { get; init; } = string.Empty;
@@ -11,4 +21,6 @@ internal class CellmConfiguration : IProviderConfiguration
     public string MediumModel { get; init; } = string.Empty;
 
     public string LargeModel { get; init; } = string.Empty;
+
+    public bool IsEnabled { get; init; } = false;
 }

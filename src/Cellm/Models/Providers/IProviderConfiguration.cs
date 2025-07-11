@@ -1,7 +1,17 @@
-﻿namespace Cellm.Models.Providers;
+﻿using Cellm.Users;
 
-public interface IProviderConfiguration
+namespace Cellm.Models.Providers;
+
+internal interface IProviderConfiguration
 {
+    Provider Id { get; }
+
+    string Name { get; }
+
+    Entitlement Entitlement { get; }
+
+    string Icon { get; }
+
     string DefaultModel { get; init; }
 
     string SmallModel { get; init; }
@@ -9,4 +19,6 @@ public interface IProviderConfiguration
     string MediumModel { get; init; }
 
     string LargeModel { get; init; }
+
+    bool IsEnabled { get; init; }
 }

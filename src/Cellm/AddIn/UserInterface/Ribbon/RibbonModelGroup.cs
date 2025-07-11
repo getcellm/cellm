@@ -34,7 +34,7 @@ public partial class RibbonMain
         ProviderModelBox,
         ProviderSplitButton,
         ProviderDisplayButton,
-        ProviderSelectionMenu,
+        ProviderMenu,
 
         ModelComboBox,
         TemperatureComboBox,
@@ -63,66 +63,8 @@ public partial class RibbonMain
 
     private const string NoPresetsPlaceholder = "(No presets configured)";
 
-    private readonly Dictionary<int, ProviderItem> _providerItems = new()
-    {
-        [0] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.Anthropic)}", Image = $"{ResourcesBasePath}/anthropic.png", Label = nameof(Provider.Anthropic), Entitlement = Entitlement.EnableAnthropicProvider },
-        [1] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.Aws)}", Image = $"{ResourcesBasePath}/aws.png", Label = nameof(Provider.Aws), Entitlement = Entitlement.EnableAwsProvider },
-        [2] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.Azure)}", Image = $"{ResourcesBasePath}/azure.png", Label = nameof(Provider.Azure), Entitlement = Entitlement.EnableAzureProvider },
-        [3] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.Gemini)}", Image = $"{ResourcesBasePath}/google.png", Label = nameof(Provider.Gemini), Entitlement = Entitlement.EnableGeminiProvider },
-        [4] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.DeepSeek)}", Image = $"{ResourcesBasePath}/deepseek.png", Label = nameof(Provider.DeepSeek), Entitlement = Entitlement.EnableDeepSeekProvider },
-        [5] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.Mistral)}", Image = $"{ResourcesBasePath}/mistral.png", Label = nameof(Provider.Mistral), Entitlement = Entitlement.EnableMistralProvider },
-        [6] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.Ollama)}", Image = $"{ResourcesBasePath}/ollama.png", Label = nameof(Provider.Ollama), Entitlement = Entitlement.EnableOllamaProvider },
-        [7] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.OpenAi)}", Image = $"{ResourcesBasePath}/openai.png", Label = nameof(Provider.OpenAi), Entitlement = Entitlement.EnableOpenAiProvider },
-        [8] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.OpenAiCompatible)}", Image = $"{ResourcesBasePath}/openai.png", Label = nameof(Provider.OpenAiCompatible) }
-    };
-
-    internal int _selectedProviderIndex = 6; // Default to Ollama
-
-    private void InitializeSelectedProviderIndex()
-    {
-        try
-        {
-            var defaultProviderName = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}");
-            var defaultProvider = Enum.Parse<Provider>(defaultProviderName, true);
-
-            _selectedProviderIndex = _providerItems.FirstOrDefault(kvp => kvp.Value.Label.Equals(defaultProvider.ToString(), StringComparison.OrdinalIgnoreCase)).Key;
-        }
-        catch (Exception ex) when (ex is KeyNotFoundException || ex is ArgumentException)
-        {
-            SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}", nameof(Provider.Ollama));
-            _selectedProviderIndex = _providerItems.FirstOrDefault(kvp => kvp.Value.Label.Equals(nameof(Provider.Ollama), StringComparison.OrdinalIgnoreCase)).Key;
-        }
-        catch (Exception ex) // Catch other potential errors during init
-        {
-            _logger.LogError("Error initializing selected provider index: {message}", ex.Message);
-        }
-    }
-
     public string ModelGroup()
     {
-        var providerMenuItemsXml = new StringBuilder();
-
-        // Dynamic provider menu items (IDs generated here, not in enum)
-        foreach (var kvp in _providerItems.OrderBy(p => p.Value.Label))
-        {
-            var index = kvp.Key;
-            var item = kvp.Value;
-            var menuItemId = item.Id; // Dynamic ID
-            providerMenuItemsXml.AppendLine(
-                $@"<button id=""{menuItemId}""
-                     label=""{System.Security.SecurityElement.Escape(item.Label)}""
-                     getImage=""{nameof(GetProviderMenuItemImage)}""
-                     tag=""{index}""
-                     onAction=""{nameof(HandleProviderMenuSelection)}"" 
-                     getEnabled=""{nameof(IsProviderEnabled)}"" />");
-        }
-
-        providerMenuItemsXml.AppendLine($@"<menuSeparator id=""providerMenuSeparator"" />");
-        providerMenuItemsXml.AppendLine(
-            $@"<button id=""{nameof(ModelGroupControlIds.ProviderSettingsButton)}""
-                 getLabel=""{nameof(GetProviderSettingsButtonLabel)}""
-                 onAction=""{nameof(ShowProviderSettingsForm)}"" />");
-
         return $"""
             <group id="{nameof(ModelGroupControlIds.ModelProviderGroup)}" label="Model">
                 <splitButton id="{nameof(ModelGroupControlIds.ProviderSplitButton)}" size="large" showLabel="false">
@@ -133,8 +75,8 @@ public partial class RibbonMain
                             showLabel="true"
                             onAction="{nameof(ShowProviderSettingsForm)}"
                             />
-                    <menu id="{nameof(ModelGroupControlIds.ProviderSelectionMenu)}" itemSize="normal">
-                        {providerMenuItemsXml}
+                    <menu id="{nameof(ModelGroupControlIds.ProviderMenu)}" itemSize="normal">
+                        {GetProviderMenuItems()}
                     </menu>
                 </splitButton>
                 <separator id="providerSeparator" />
@@ -172,6 +114,36 @@ public partial class RibbonMain
             """;
     }
 
+    public string GetProviderMenuItems()
+    {
+        var providerConfigurations = GetProviderConfigurations();
+
+        var providerMenuItemsXml = GetProviderConfigurations()
+            .Where(providerConfiguration => providerConfiguration != null && providerConfiguration.IsEnabled)
+            .Select(providerConfiguration =>
+                $@"<button id=""{GetProviderMenuItemId(providerConfiguration.Id)}""
+                    label=""{providerConfiguration.Name}""
+                    tag=""{providerConfiguration.Id}""
+                    getImage=""{nameof(GetProviderImage)}""
+                    onAction=""{nameof(OnProviderSelected)}"" 
+                    getEnabled=""{nameof(IsProviderEnabled)}"" />");
+
+        var providerMenuItems = new StringBuilder();
+        providerMenuItems.AppendJoin(Environment.NewLine, providerMenuItemsXml);
+        providerMenuItems.AppendLine($@"<menuSeparator id=""providerMenuSeparator"" />");
+        providerMenuItems.AppendLine(
+            $@"<button id=""{nameof(ModelGroupControlIds.ProviderSettingsButton)}""
+                 getLabel=""{nameof(GetProviderSettingsButtonLabel)}""
+                 onAction=""{nameof(ShowProviderSettingsForm)}"" />");
+
+        return providerMenuItems.ToString();
+    }
+
+    private string GetProviderMenuItemId(Provider provider)
+    {
+        return $"{ModelGroupControlIds.ProviderMenu}.{provider}";
+    }
+
     public string GetCacheLabel(IRibbonControl control)
     {
         var isEnabledString = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableCache)}");
@@ -195,89 +167,40 @@ public partial class RibbonMain
 
         var account = CellmAddIn.Services.GetRequiredService<Account>();
 
-        // The 'tag' property of the menu button holds the index we stored.
-
-        if (int.TryParse(control.Tag, out var index))
+        if (Enum.TryParse<Provider>(control.Tag, out var provider))
         {
-            if (_providerItems.TryGetValue(index, out var item) && !string.IsNullOrEmpty(item.Image))
-            {
-                // Use smaller size for menu items (e.g., 16x16)
-                return account.HasEntitlement(item.Entitlement); // Adjust size as needed
-            }
+            return account.HasEntitlement(GetProviderConfiguration(provider).Entitlement);
+        }
 
-            _logger.LogWarning("Could not get image for menu item index {index}.", index);
-        }
-        else
-        {
-            _logger.LogWarning("Could not parse index from tag '{tag}' for menu item '{id}'.", control.Tag, control.Id);
-        }
+        _logger.LogWarning("Could not parse index from tag '{tag}' for menu item '{id}'.", control.Tag, control.Id);
 
         return false; // Or a default placeholder image
     }
 
-    /// <summary>
-    /// Gets the image for a specific item in the dropdown list.
-    /// </summary>
-    public Bitmap? GetProviderItemImage(IRibbonControl control, int index)
-    {
-        if (_providerItems.TryGetValue(index, out var item) && !string.IsNullOrEmpty(item.Image))
-        {
-            return ImageLoader.LoadEmbeddedPngResized(item.Image, 64, 64);
-        }
-        return null;
-    }
-
-    /// <summary>
-    /// Gets the index of the currently selected provider.
-    /// </summary>
-    public int GetSelectedProviderIndex(IRibbonControl control)
-    {
-        return _selectedProviderIndex;
-    }
-
-    public string GetSelectedProviderLabel(IRibbonControl control)
-    {
-        // Ensure _selectedProviderIndex is valid before accessing _providerItems
-        if (_providerItems.TryGetValue(_selectedProviderIndex, out var item))
-        {
-            return item.Label;
-        }
-
-        _logger.LogWarning("index {index} not found in _providerItems. Returning default label.", _selectedProviderIndex);
-
-        return "Select Provider"; // Fallback label
-    }
-
     public Bitmap? GetSelectedProviderImage(IRibbonControl control)
     {
-        if (_providerItems.TryGetValue(_selectedProviderIndex, out var item) && !string.IsNullOrEmpty(item.Image))
+        var providerAsString = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}");
+
+        if (Enum.TryParse<Provider>(providerAsString, out var provider))
         {
-            // Use appropriate size for the main split button display (e.g., 32x32 or 24x24)
-            return ImageLoader.LoadEmbeddedPngResized(item.Image, 128, 128); // Adjust size as needed
+            var resource = GetProviderConfiguration(provider).Icon;
+            return ImageLoader.LoadEmbeddedPngResized(resource, 128, 128);
         }
 
-        _logger.LogWarning("Could not get image for index {index}.", _selectedProviderIndex);
+        _logger.LogWarning("Could not get image for provider {provider}.", providerAsString);
 
         return null;
     }
 
-    public Bitmap? GetProviderMenuItemImage(IRibbonControl control)
+    public Bitmap? GetProviderImage(IRibbonControl control)
     {
-        // The 'tag' property of the menu button holds the index we stored.
-        if (int.TryParse(control.Tag, out var index))
+        if (Enum.TryParse<Provider>(control.Tag, out var provider))
         {
-            if (_providerItems.TryGetValue(index, out var item) && !string.IsNullOrEmpty(item.Image))
-            {
-                // Use smaller size for menu items (e.g., 16x16)
-                return ImageLoader.LoadEmbeddedPngResized(item.Image, 16, 16); // Adjust size as needed
-            }
+            var resource = GetProviderConfiguration(provider).Icon;
+            return ImageLoader.LoadEmbeddedPngResized(resource, 16, 16);
+        }
 
-            _logger.LogWarning("Could not get image for menu item index {index}.", index);
-        }
-        else
-        {
-            _logger.LogWarning("Could not parse index from tag '{tag}' for menu item '{id}'.", control.Tag, control.Id);
-        }
+        _logger.LogWarning("Could not parse index from tag '{tag}' for menu item '{id}'.", control.Tag, control.Id);
 
         return null; // Or a default placeholder image
     }
@@ -294,7 +217,6 @@ public partial class RibbonMain
         var provider = GetCurrentProvider();
         var configKey = $"{provider}Configuration:{nameof(CellmAddInConfiguration.DefaultModel)}";
         var currentModel = string.Empty;
-        var presetsAvailable = false;
 
         try
         {
@@ -311,35 +233,19 @@ public partial class RibbonMain
             return "Error"; // Fallback on error
         }
 
-        // Check if preset models (Small/Medium/Large) are configured
-        presetsAvailable = GetAvailableModelNamesForProvider(provider).Count > 0;
-
-
         if (!string.IsNullOrEmpty(currentModel))
         {
             // If a model is already configured (preset or custom), display it
             return currentModel;
         }
-        else
-        {
-            // No model is currently configured
-            if (presetsAvailable)
-            {
-                // Presets exist, prompt user to select from dropdown
-                return "[Select Model]";
-            }
-            else
-            {
-                // No presets exist (dropdown will be empty), prompt user to type
-                return "[Type model]";
-            }
-        }
+
+        return string.Empty;
     }
 
     public void OnModelComboBoxChange(IRibbonControl control, string text)
     {
         var provider = GetCurrentProvider();
-        var configKey = $"{provider}Configuration:{nameof(OpenAiConfiguration.DefaultModel)}"; // Using OpenAI as template name
+        var configKey = $"{provider}Configuration:{nameof(OpenAiConfiguration.DefaultModel)}";
 
 
         if (text == NoPresetsPlaceholder)
@@ -463,53 +369,30 @@ public partial class RibbonMain
     }
 
 
-    public void HandleProviderMenuSelection(IRibbonControl control)
+    public void OnProviderSelected(IRibbonControl control)
     {
-        // ... (parsing index and getting selectedProviderItem logic remains the same) ...
-        if (int.TryParse(control.Tag, out var index))
+        if (!Enum.TryParse<Provider>(control.Tag, out var newProvider))
         {
-            if (_providerItems.ContainsKey(index))
-            {
-                var selectedProviderItem = _providerItems[index];
-                if (_selectedProviderIndex != index) // Only update if selection actually changed
-                {
-                    _selectedProviderIndex = index;
-
-                    try
-                    {
-                        if (Enum.TryParse<Provider>(selectedProviderItem.Label, true, out var selectedProviderEnum))
-                        {
-                            SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}", selectedProviderEnum.ToString());
-                        }
-                        else
-                        {
-                            _logger.LogWarning("Could not parse '{label}' to Provider enum.", selectedProviderItem.Label);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogDebug("Error updating DefaultProvider setting: {message}", ex.Message);
-                    }
-
-                    // Invalidate controls that need updating
-                    if (_ribbonUi != null)
-                    {
-                        _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ProviderSplitButton));
-                        _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ProviderDisplayButton));
-                        _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ModelComboBox));
-                        _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ProviderSettingsButton));
-                    }
-                }
-            }
-            else
-            {
-                _logger.LogWarning("Invalid index from tag: {index}", index);
-            }
+            _logger.LogWarning("Could not parse provider tag {tag}.", control.Tag);
+            return;
         }
-        else
+
+        var oldProviderAsString = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}");
+
+        if (!Enum.TryParse<Provider>(oldProviderAsString, out var oldProvider))
         {
-            _logger.LogWarning("Could not parse index from tag '{tag}' for selected menu item '{id}'.", control.Tag, control.Id);
+            _logger.LogWarning("Could not parse provider {oldProviderAsString}.", oldProviderAsString);
+            return;
         }
+
+        if (oldProvider == newProvider)
+        {
+            return;
+        }
+
+        SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}", newProvider.ToString());
+
+        InvalidateModelControls();
     }
 
     public string GetSelectedModelLabel(IRibbonControl control)
@@ -575,12 +458,10 @@ public partial class RibbonMain
     /// </summary>
     public string GetProviderSettingsButtonLabel(IRibbonControl control)
     {
-        var providerName = "Unknown";
-        if (_providerItems.TryGetValue(_selectedProviderIndex, out var item))
-        {
-            providerName = item.Label;
-        }
-        return $"{providerName} Settings...";
+        var provider = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}");
+        var providerConfiguration = GetProviderConfiguration(provider);
+
+        return $"{providerConfiguration.Name} Settings...";
     }
 
     /// <summary>
@@ -846,5 +727,29 @@ public partial class RibbonMain
     public bool GetCachePressed(IRibbonControl control)
     {
         return bool.Parse(GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableCache)}"));
+    }
+
+    private void InvalidateModelControls()
+    {
+        if (_ribbonUi == null)
+        {
+            return;
+        }
+
+        _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ProviderMenu));
+
+        var ids = GetProviderConfigurations()
+            .Where(providerConfiguration => providerConfiguration != null && providerConfiguration.IsEnabled)
+            .Select(providerConfiguration => GetProviderMenuItemId(providerConfiguration.Id));
+
+        foreach (var id in ids)
+        {
+            _ribbonUi.InvalidateControl(id);
+        }
+
+        _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ModelComboBox));
+        _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ProviderSplitButton));
+        _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ProviderDisplayButton));
+        _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ProviderSettingsButton));
     }
 }

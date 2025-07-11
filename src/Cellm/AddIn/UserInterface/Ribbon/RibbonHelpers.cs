@@ -1,7 +1,18 @@
 ﻿using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Windows.Forms;
 using Cellm.Models.Providers;
+using Cellm.Models.Providers.Anthropic;
+using Cellm.Models.Providers.Aws;
+using Cellm.Models.Providers.Azure;
+using Cellm.Models.Providers.Cellm;
+using Cellm.Models.Providers.DeepSeek;
+using Cellm.Models.Providers.Google;
+using Cellm.Models.Providers.Mistral;
+using Cellm.Models.Providers.Ollama;
+using Cellm.Models.Providers.OpenAi;
+using Cellm.Models.Providers.OpenAiCompatible;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -18,6 +29,40 @@ public partial class RibbonMain
     private static T GetProviderConfiguration<T>()
     {
         return CellmAddIn.Services.GetRequiredService<IOptionsMonitor<T>>().CurrentValue;
+    }
+
+    private static IProviderConfiguration GetProviderConfiguration(Provider provider)
+    {
+        return GetProviderConfigurations().Single(providerConfigurations => providerConfigurations.Id == provider);
+    }
+
+    private static IProviderConfiguration GetProviderConfiguration(string providerAsString)
+    {
+        if (Enum.TryParse<Provider>(providerAsString, out var provider))
+        {
+            return GetProviderConfigurations().Single(providerConfigurations => providerConfigurations.Id == provider);
+        }
+
+        throw new ArgumentException($"Invalid provider: {providerAsString}");
+    }
+
+    private static IEnumerable<IProviderConfiguration> GetProviderConfigurations()
+    {
+        return
+        [
+            // Retrieve the current, up-to-date configuration for each provider
+            // Until we find a better way to inject up-to-date configuration
+            CellmAddIn.Services.GetRequiredService<IOptionsMonitor<AnthropicConfiguration>>().CurrentValue,
+            CellmAddIn.Services.GetRequiredService<IOptionsMonitor<AwsConfiguration>>().CurrentValue,
+            CellmAddIn.Services.GetRequiredService<IOptionsMonitor<AzureConfiguration>>().CurrentValue,
+            CellmAddIn.Services.GetRequiredService<IOptionsMonitor<CellmConfiguration>>().CurrentValue,
+            CellmAddIn.Services.GetRequiredService<IOptionsMonitor<DeepSeekConfiguration>>().CurrentValue,
+            CellmAddIn.Services.GetRequiredService<IOptionsMonitor<GeminiConfiguration>>().CurrentValue,
+            CellmAddIn.Services.GetRequiredService<IOptionsMonitor<MistralConfiguration>>().CurrentValue,
+            CellmAddIn.Services.GetRequiredService<IOptionsMonitor<OllamaConfiguration>>().CurrentValue,
+            CellmAddIn.Services.GetRequiredService<IOptionsMonitor<OpenAiConfiguration>>().CurrentValue,
+            CellmAddIn.Services.GetRequiredService<IOptionsMonitor<OpenAiCompatibleConfiguration>>().CurrentValue
+        ];
     }
 
     private static Provider GetProvider(string providerAndModel)

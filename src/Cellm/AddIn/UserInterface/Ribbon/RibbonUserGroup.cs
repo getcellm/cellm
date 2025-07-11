@@ -307,16 +307,10 @@ public partial class RibbonMain
             return;
         }
 
-        _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ProviderSelectionMenu));
-
-        foreach (var item in _providerItems)
-        {
-            _ribbonUi.InvalidateControl(item.Value.Id);
-        }
+        InvalidateModelControls();
 
         _ribbonUi.InvalidateControl(nameof(ToolsGroupControlIds.McpSplitButton));
     }
-
 
     public string GetAccountActionLabel(IRibbonControl control)
     {
