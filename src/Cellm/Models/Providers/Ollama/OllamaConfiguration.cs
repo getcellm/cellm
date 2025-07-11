@@ -11,7 +11,7 @@ internal class OllamaConfiguration : IProviderConfiguration
 
     public Entitlement Entitlement { get => Entitlement.EnableOllamaProvider; }
 
-    public string Icon { get => $"AddIn/UserInterface/Resources/{nameof(Provider.Mistral)}.png"; }
+    public string Icon { get => $"AddIn/UserInterface/Resources/{nameof(Provider.Ollama)}.png"; }
 
     public Uri BaseAddress => new("http://127.0.0.1:11434/");
 

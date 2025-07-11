@@ -36,6 +36,16 @@ public partial class RibbonMain
         return GetProviderConfigurations().Single(providerConfigurations => providerConfigurations.Id == provider);
     }
 
+    private static IProviderConfiguration GetProviderConfiguration(string providerAsString)
+    {
+        if (Enum.TryParse<Provider>(providerAsString, out var provider))
+        {
+            return GetProviderConfigurations().Single(providerConfigurations => providerConfigurations.Id == provider);
+        }
+
+        throw new ArgumentException($"Invalid provider: {providerAsString}");
+    }
+
     private static IEnumerable<IProviderConfiguration> GetProviderConfigurations()
     {
         return

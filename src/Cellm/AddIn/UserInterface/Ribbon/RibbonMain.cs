@@ -19,7 +19,6 @@ public partial class RibbonMain : ExcelRibbon
 
     public RibbonMain()
     {
-        InitializeSelectedProviderIndex();
         EnsureDefaultProvider();
         EnsureDefaultCache();
 
@@ -27,36 +26,20 @@ public partial class RibbonMain : ExcelRibbon
         _logger = loggerFactory.CreateLogger<RibbonMain>();
     }
 
-    private int EnsureDefaultProvider()
+    private void EnsureDefaultProvider()
     {
         try
         {
-            var providerName = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}");
-            var provider = Enum.Parse<Provider>(providerName, true);
-            var item = _providerItems.FirstOrDefault(kvp => kvp.Value.Label.Equals(provider.ToString(), StringComparison.OrdinalIgnoreCase));
-            if (item.Value != null)
-            {
-                return item.Key;
-            }
+            var defaultProviderName = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}");
 
-            // If provider exists in config but not in our _providerItems, fallback
-            throw new KeyNotFoundException("Provider found in config but not in UI list.");
+            if (!Enum.TryParse<Provider>(defaultProviderName, out var _))
+            {
+                throw new KeyNotFoundException();
+            }
         }
         catch (KeyNotFoundException)
         {
-            // Set default if missing 
-            var defaultProviderName = nameof(Provider.Ollama);
-            SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}", defaultProviderName);
-            var item = _providerItems.FirstOrDefault(kvp => kvp.Value.Label.Equals(defaultProviderName, StringComparison.OrdinalIgnoreCase));
-            return item.Value != null ? item.Key : 3; // Use 3 (Ollama's index) as a hard fallback
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError("Error in EnsureDefaultProvider: {message}. Falling back to index 0.", ex.Message);
-
-            // General fallback if parsing or other issues occur
-            SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}", _providerItems[3].Label);
-            return 0;
+            SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}", nameof(Provider.Ollama));
         }
     }
 
