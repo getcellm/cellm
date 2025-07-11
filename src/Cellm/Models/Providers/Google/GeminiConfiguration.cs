@@ -2,7 +2,7 @@
 
 namespace Cellm.Models.Providers.Google;
 
-internal class GeminiConfiguration :IProviderConfiguration
+internal class GeminiConfiguration : IProviderConfiguration
 {
     public Provider Id { get => Provider.Gemini; }
 

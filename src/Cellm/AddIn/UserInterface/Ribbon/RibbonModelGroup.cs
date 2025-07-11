@@ -120,7 +120,7 @@ public partial class RibbonMain
 
         var providerMenuItemsXml = GetProviderConfigurations()
             .Where(providerConfiguration => providerConfiguration != null && providerConfiguration.IsEnabled)
-            .Select(providerConfiguration => 
+            .Select(providerConfiguration =>
                 $@"<button id=""{GetProviderMenuItemId(providerConfiguration.Id)}""
                     label=""{providerConfiguration.Name}""
                     tag=""{providerConfiguration.Id}""
