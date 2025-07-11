@@ -31,8 +31,8 @@ public static class CellmFunctions
     /// </returns>
     [ExcelFunction(Name = "PROMPT", Description = "Send a prompt to the default model", IsThreadSafe = true, IsVolatile = false)]
     public static object Prompt(
-    [ExcelArgument(AllowReference = true, Name = "InstructionsOrContext", Description = "A string with instructions or a cell or range of cells with context")] object context,
-    [ExcelArgument(AllowReference = true, Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
+    [ExcelArgument(AllowReference = true, Name = "InstructionsOrCells", Description = "A string with instructions or a cell range with data (required)")] object context,
+    [ExcelArgument(AllowReference = true, Name = "InstructionsOrTemperature", Description = "A string with instructions, a cell range with instructions, or a temperature")] object instructionsOrTemperature,
     [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
     {
         var configuration = CellmAddIn.Services.GetRequiredService<IConfiguration>();
@@ -221,6 +221,11 @@ public static class CellmFunctions
         [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature,
         StructuredOutputShape outputShape)
     {
+        if (ExcelDnaUtil.IsInFunctionWizard())
+        {
+            return "Click OK to run prompt";
+        }
+        
         try
         {
             var wallClock = Stopwatch.StartNew();

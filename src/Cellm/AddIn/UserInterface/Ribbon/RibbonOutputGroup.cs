@@ -22,7 +22,7 @@ public partial class RibbonMain
             <box id="{nameof(OutputGroupControlIds.OutputGroupHorizontalContainer)}" boxStyle="horizontal">
                 <button id="{nameof(OutputGroupControlIds.OutputCell)}" 
                         size="large"
-                        label="Cell"
+                        label="Single"
                         imageMso="TableSelectCell"
                         onAction="{nameof(OnOutputCellClicked)}"
                         screentip="Output response in a single cell (default)" />
@@ -54,17 +54,17 @@ public partial class RibbonMain
 
     public void OnOutputCellClicked(IRibbonControl control)
     {
-        InsertFormula("PROMPT.SINGLE");
+        InsertFormula("PROMPTSINGLE");
     }
 
     public void OnOutputRowClicked(IRibbonControl control)
     {
-        InsertFormula("PROMPT.ROW");
+        InsertFormula("PROMPTROW");
     }
 
     public void OnOutputColumnClicked(IRibbonControl control)
     {
-        InsertFormula("PROMPT.COLUMN");
+        InsertFormula("PROMPTCOLUMN");
     }
 
     public void OnOutputTableClicked(IRibbonControl control)
@@ -76,43 +76,71 @@ public partial class RibbonMain
     {
         ExcelAsyncUtil.QueueAsMacro(() =>
         {
-            var selection = XlCall.Excel(XlCall.xlfSelection) as ExcelReference;
-            if (selection == null) return;
+            ExcelDnaUtil.Application.ActiveCell.NumberFormat = "@";
+            ExcelDnaUtil.Application.ActiveCell.Value = $"={functionName}()";
+            ExcelDnaUtil.Application.ActiveCell.NumberFormat = "General";
+            ExcelDnaUtil.Application.Dialogs[Microsoft.Office.Interop.Excel.XlBuiltInDialog.xlDialogFunctionWizard].Show();
 
-            var activeCell = XlCall.Excel(XlCall.xlfActiveCell) as ExcelReference;
-            if (activeCell == null) return;
-
-            string formula;
-            if (selection.RowFirst == selection.RowLast && selection.ColumnFirst == selection.ColumnLast)
-            {
-                formula = $"={functionName}(\"\")";
-                XlCall.Excel(XlCall.xlcFormula | XlCall.xlIntl, formula, selection);
-            }
-            else if (selection.RowFirst == selection.RowLast)  // Row selection, put formula in cell just below
-            {
-                var selectionAddress = XlCall.Excel(XlCall.xlfReftext, selection, true) as string;
-                formula = $"={functionName}({selectionAddress}, \"\")";
-                XlCall.Excel(XlCall.xlcFormula | XlCall.xlIntl, formula, new ExcelReference(selection.RowFirst, selection.ColumnLast + 1));
-            }
-            else if (selection.ColumnFirst == selection.ColumnLast)  // Column
-            {
-                var selectionAddress = XlCall.Excel(XlCall.xlfReftext, selection, true) as string;
-                formula = $"={functionName}({selectionAddress}, \"\")";
-                XlCall.Excel(XlCall.xlcFormula | XlCall.xlIntl, formula, new ExcelReference(selection.RowLast + 1, selection.ColumnFirst));
-            }
-            else // Block
-            {
-                var selectionAddress = XlCall.Excel(XlCall.xlfReftext, selection, true) as string;
-
-                for (var i = selection.ColumnFirst; i <= selection.ColumnLast; i++)
-                {
-                    formula = $"={functionName}({selectionAddress}, \"\")";
-                    XlCall.Excel(XlCall.xlcFormula | XlCall.xlIntl, formula, new ExcelReference(selection.RowLast + 1, i));
-                }
-
-            }
         });
+        //var selection = XlCall.Excel(XlCall.xlfSelection) as ExcelReference;
+        //if (selection == null)
+        //{
+        //    return;
+        //}
+
+        //var activeCell = XlCall.Excel(XlCall.xlfActiveCell) as ExcelReference;
+        //if (activeCell == null)
+        //{
+        //    return;
+        //}
+
+        //var app = ExcelDnaUtil.Application as Microsoft.Office.Interop.Excel.Application;
+        //var a = app.Selection;
+
+        //string formula;
+        //if (selection.RowFirst == selection.RowLast && selection.ColumnFirst == selection.ColumnLast)
+        //{
+        //    ExcelAsyncUtil.QueueAsMacro(() =>
+        //    {
+        //        app.ActiveCell.Formula = $"={functionName}(\"\")";
+        //    });
+        //}
+            //else if (selection.RowFirst == selection.RowLast)  // Row selection, put formula to the right of the selection
+            //{
+            //    var selectionAddress = XlCall.Excel(XlCall.xlfReftext, selection, true) as string;
+            //    formula = $"={functionName}({selectionAddress}, \"\")";
+            //    XlCall.Excel(XlCall.xlcFormula | XlCall.xlIntl, formula, new ExcelReference(selection.RowFirst, selection.ColumnLast + 1));
+            //}
+            //else if (selection.ColumnFirst == selection.ColumnLast)  // Column
+            //{
+            //    var selectionAddress = XlCall.Excel(XlCall.xlfReftext, selection, true) as string;
+            //    formula = $"={functionName}({selectionAddress}, \"\")";
+            //    XlCall.Excel(XlCall.xlcFormula | XlCall.xlIntl, formula, new ExcelReference(selection.RowLast + 1, selection.ColumnFirst));
+            //}
+            //else // Block
+            //{
+            //    var selectionAddress = XlCall.Excel(XlCall.xlfReftext, selection, true) as string;
+
+            //    for (var i = selection.ColumnFirst; i <= selection.ColumnLast; i++)
+            //    {
+            //        formula = $"={functionName}({selectionAddress}, \"\")";
+            //        XlCall.Excel(XlCall.xlcFormula | XlCall.xlIntl, formula, new ExcelReference(selection.RowLast + 1, i));
+            //    }
+
+            //}
     }
 
+    [ExcelCommand()]
+    public static void EnterEditModeHelper1()
+    {
+        SendKeys.Send("{F2}");
+        //ExcelDnaUtil.Application.OnTime(System.DateTime.Now, "EnterEditModeHelper2");
+    }
 
+    [ExcelCommand()]
+    public static void EnterEditModeHelper2()
+    {
+        SendKeys.SendWait("{ESCAPE}");
+        SendKeys.SendWait("{F2}");
+    }
 }
