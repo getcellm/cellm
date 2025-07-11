@@ -103,9 +103,6 @@ public partial class RibbonMain
         {
             var modelContenxtProtocolConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<ModelContextProtocolConfiguration>>().CurrentValue;
 
-            var numberOfStdioServers = modelContenxtProtocolConfiguration.StdioServers?.Count ?? 0;
-            var numberOfSseServers = modelContenxtProtocolConfiguration.SseServers?.Count ?? 0;
-
             var anyServers = false;
 
             var menuXml = new StringBuilder();
