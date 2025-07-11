@@ -1,14 +1,17 @@
-﻿using Microsoft.Extensions.AI;
+﻿using Cellm.Users;
+using Microsoft.Extensions.AI;
 
 namespace Cellm.Models.Providers.Ollama;
 
 internal class OllamaConfiguration : IProviderConfiguration
 {
-    public Provider Id { get => Provider.Mistral; }
+    public Provider Id { get => Provider.Ollama; }
 
     public string Name { get => "Ollama"; }
 
-    public string Icon { get => $"AddIn/UserInterface/Resources/{nameof(Provider.Mistral)}"; }
+    public Entitlement Entitlement { get => Entitlement.EnableOllamaProvider; }
+
+    public string Icon { get => $"AddIn/UserInterface/Resources/{nameof(Provider.Mistral)}.png"; }
 
     public Uri BaseAddress => new("http://127.0.0.1:11434/");
 

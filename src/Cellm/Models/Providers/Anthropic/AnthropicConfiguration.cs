@@ -1,4 +1,6 @@
-﻿namespace Cellm.Models.Providers.Anthropic;
+﻿using Cellm.Users;
+
+namespace Cellm.Models.Providers.Anthropic;
 
 internal class AnthropicConfiguration : IProviderConfiguration
 {
@@ -6,7 +8,9 @@ internal class AnthropicConfiguration : IProviderConfiguration
 
     public string Name { get => "Anthropic"; }
 
-    public string Icon { get => $"AddIn/UserInterface/Resources/{nameof(Provider.Anthropic)}"; }
+    public Entitlement Entitlement { get => Entitlement.EnableAnthropicProvider; }
+
+    public string Icon { get => $"AddIn/UserInterface/Resources/{nameof(Provider.Anthropic)}.png"; }
 
     public Uri BaseAddress => new("https://api.anthropic.com/v1");
 

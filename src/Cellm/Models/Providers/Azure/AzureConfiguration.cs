@@ -1,4 +1,6 @@
-﻿namespace Cellm.Models.Providers.Azure;
+﻿using Cellm.Users;
+
+namespace Cellm.Models.Providers.Azure;
 
 internal class AzureConfiguration : IProviderConfiguration
 {
@@ -6,7 +8,9 @@ internal class AzureConfiguration : IProviderConfiguration
 
     public string Name { get => "Azure"; }
 
-    public string Icon { get => $"AddIn/UserInterface/Resources/{nameof(Provider.Azure)}"; }
+    public Entitlement Entitlement { get => Entitlement.EnableAzureProvider; }
+
+    public string Icon { get => $"AddIn/UserInterface/Resources/{nameof(Provider.Azure)}.png"; }
 
     public Uri BaseAddress { get; set; } = default!;
 

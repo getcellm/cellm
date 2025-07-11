@@ -77,21 +77,20 @@ public partial class RibbonMain
         [8] = new ProviderItem { Id = $"{nameof(Provider)}.{nameof(Provider.OpenAiCompatible)}", Image = $"{ResourcesBasePath}/openai.png", Label = nameof(Provider.OpenAiCompatible) }
     };
 
-    internal int _selectedProviderIndex = 6; // Default to Ollama
+    internal Provider _selectedProvider = Provider.Ollama; // Default to Ollama
 
     private void InitializeSelectedProviderIndex()
     {
         try
         {
             var defaultProviderName = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}");
-            var defaultProvider = Enum.Parse<Provider>(defaultProviderName, true);
+            _selectedProvider = Enum.Parse<Provider>(defaultProviderName, true);
 
-            _selectedProviderIndex = _providerItems.FirstOrDefault(kvp => kvp.Value.Label.Equals(defaultProvider.ToString(), StringComparison.OrdinalIgnoreCase)).Key;
         }
         catch (Exception ex) when (ex is KeyNotFoundException || ex is ArgumentException)
         {
             SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}", nameof(Provider.Ollama));
-            _selectedProviderIndex = _providerItems.FirstOrDefault(kvp => kvp.Value.Label.Equals(nameof(Provider.Ollama), StringComparison.OrdinalIgnoreCase)).Key;
+            _selectedProvider = Provider.Ollama;
         }
         catch (Exception ex) // Catch other potential errors during init
         {
@@ -101,29 +100,6 @@ public partial class RibbonMain
 
     public string ModelGroup()
     {
-        var providerMenuItemsXml = new StringBuilder();
-
-        // Dynamic provider menu items (IDs generated here, not in enum)
-        foreach (var kvp in _providerItems.OrderBy(p => p.Value.Label))
-        {
-            var index = kvp.Key;
-            var item = kvp.Value;
-            var menuItemId = item.Id; // Dynamic ID
-            providerMenuItemsXml.AppendLine(
-                $@"<button id=""{menuItemId}""
-                     label=""{System.Security.SecurityElement.Escape(item.Label)}""
-                     getImage=""{nameof(GetProviderMenuItemImage)}""
-                     tag=""{index}""
-                     onAction=""{nameof(HandleProviderMenuSelection)}"" 
-                     getEnabled=""{nameof(IsProviderEnabled)}"" />");
-        }
-
-        providerMenuItemsXml.AppendLine($@"<menuSeparator id=""providerMenuSeparator"" />");
-        providerMenuItemsXml.AppendLine(
-            $@"<button id=""{nameof(ModelGroupControlIds.ProviderSettingsButton)}""
-                 getLabel=""{nameof(GetProviderSettingsButtonLabel)}""
-                 onAction=""{nameof(ShowProviderSettingsForm)}"" />");
-
         return $"""
             <group id="{nameof(ModelGroupControlIds.ModelProviderGroup)}" label="Model">
                 <splitButton id="{nameof(ModelGroupControlIds.ProviderSplitButton)}" size="large" showLabel="false">
@@ -134,8 +110,8 @@ public partial class RibbonMain
                             showLabel="true"
                             onAction="{nameof(ShowProviderSettingsForm)}"
                             />
-                    <dynamicMenu  id="{nameof(ModelGroupControlIds.ProviderMenu)}" itemSize="normal" getContent="GetProviderMenuItems">
-                        {providerMenuItemsXml}
+                    <menu id="{nameof(ModelGroupControlIds.ProviderMenu)}" itemSize="normal">
+                        {GetProviderMenuItems()}
                     </menu>
                 </splitButton>
                 <separator id="providerSeparator" />
@@ -173,19 +149,18 @@ public partial class RibbonMain
             """;
     }
 
-    public string GetProviderMenuItems(IRibbonControl control)
+    public string GetProviderMenuItems()
     {
-        var providerConfigurations = CellmAddIn.Services.GetRequiredService<IEnumerable<IOptionsMonitor<IProviderConfiguration>>>();
+        var providerConfigurations = GetProviderConfigurations();
 
-        var providerMenuItemsXml = CellmAddIn.Services.GetRequiredService<IEnumerable<IOptionsMonitor<IProviderConfiguration>>>()
-            .Select(providerConfiguration => providerConfiguration.CurrentValue)
+        var providerMenuItemsXml = providerConfigurations
             .Where(providerConfiguration => providerConfiguration != null && providerConfiguration.IsEnabled)
             .Select(providerConfiguration => 
                 $@"<button id=""{ModelGroupControlIds.ProviderMenu}-{providerConfiguration.Id}""
                     label=""{providerConfiguration.Name}""
                     tag=""{providerConfiguration.Id}""
-                    getImage=""{nameof(GetProviderMenuItemImage)}""
-                    onAction=""{nameof(HandleProviderMenuSelection)}"" 
+                    getImage=""{nameof(GetProviderImage)}""
+                    onAction=""{nameof(OnProviderSelected)}"" 
                     getEnabled=""{nameof(IsProviderEnabled)}"" />");
 
         var providerMenuItems = new StringBuilder();
@@ -222,83 +197,45 @@ public partial class RibbonMain
 
         var account = CellmAddIn.Services.GetRequiredService<Account>();
 
-        // The 'tag' property of the menu button holds the index we stored.
-
-        if (int.TryParse(control.Tag, out var index))
+        if (Enum.TryParse<Provider>(control.Tag, out var provider))
         {
-            if (_providerItems.TryGetValue(index, out var item) && !string.IsNullOrEmpty(item.Image))
-            {
-                // Use smaller size for menu items (e.g., 16x16)
-                return account.HasEntitlement(item.Entitlement); // Adjust size as needed
-            }
+            return account.HasEntitlement(GetProviderConfiguration(provider).Entitlement);
+        }
 
-            _logger.LogWarning("Could not get image for menu item index {index}.", index);
-        }
-        else
-        {
-            _logger.LogWarning("Could not parse index from tag '{tag}' for menu item '{id}'.", control.Tag, control.Id);
-        }
+        _logger.LogWarning("Could not parse index from tag '{tag}' for menu item '{id}'.", control.Tag, control.Id);
 
         return false; // Or a default placeholder image
     }
 
-    /// <summary>
-    /// Gets the image for a specific item in the dropdown list.
-    /// </summary>
-    public Bitmap? GetProviderItemImage(IRibbonControl control, int index)
-    {
-        if (_providerItems.TryGetValue(index, out var item) && !string.IsNullOrEmpty(item.Image))
-        {
-            return ImageLoader.LoadEmbeddedPngResized(item.Image, 64, 64);
-        }
-        return null;
-    }
-
-    /// <summary>
-    /// Gets the index of the currently selected provider.
-    /// </summary>
-    public int GetSelectedProviderIndex(IRibbonControl control)
-    {
-        return _selectedProviderIndex;
-    }
-
     public string GetSelectedProviderLabel(IRibbonControl control)
     {
-        // Ensure _selectedProviderIndex is valid before accessing _providerItems
-        if (_providerItems.TryGetValue(_selectedProviderIndex, out var item))
-        {
-            return item.Label;
-        }
+        var selectedProviderConfiguration = GetProviderConfigurations().Single(providerConfiguration => providerConfiguration.Id == _selectedProvider);
 
-        _logger.LogWarning("index {index} not found in _providerItems. Returning default label.", _selectedProviderIndex);
-
-        return "Select Provider"; // Fallback label
+        return selectedProviderConfiguration.Name;
     }
 
     public Bitmap? GetSelectedProviderImage(IRibbonControl control)
     {
-        if (_providerItems.TryGetValue(_selectedProviderIndex, out var item) && !string.IsNullOrEmpty(item.Image))
+        if (Enum.TryParse<Provider>(control.Tag, out var provider))
         {
-            // Use appropriate size for the main split button display (e.g., 32x32 or 24x24)
-            return ImageLoader.LoadEmbeddedPngResized(item.Image, 128, 128); // Adjust size as needed
+            var resource = GetProviderConfiguration(provider).Icon;
+            return ImageLoader.LoadEmbeddedPngResized(resource, 128, 128);
         }
 
-        _logger.LogWarning("Could not get image for index {index}.", _selectedProviderIndex);
+        _logger.LogWarning("Could not get image for provider {provider}.", _selectedProvider);
 
         return null;
     }
 
-    public Bitmap? GetProviderMenuItemImage(IRibbonControl control)
+    public Bitmap? GetProviderImage(IRibbonControl control)
     {
-        // The 'tag' property of the menu button holds the index we stored.
         if (Enum.TryParse<Provider>(control.Tag, out var provider))
         {
-            return ImageLoader.LoadEmbeddedPngResized(GetProviderConfiguration(provider).Icon, 16, 16);
+            var resource = GetProviderConfiguration(provider).Icon;
+            return ImageLoader.LoadEmbeddedPngResized(resource, 16, 16);
         }
-        else
-        {
-            _logger.LogWarning("Could not parse index from tag '{tag}' for menu item '{id}'.", control.Tag, control.Id);
-        }
+
+        _logger.LogWarning("Could not parse index from tag '{tag}' for menu item '{id}'.", control.Tag, control.Id);
 
         return null; // Or a default placeholder image
     }
@@ -484,9 +421,22 @@ public partial class RibbonMain
     }
 
 
-    public void HandleProviderMenuSelection(IRibbonControl control)
+    public void OnProviderSelected(IRibbonControl control)
     {
-        // ... (parsing index and getting selectedProviderItem logic remains the same) ...
+        if (!Enum.TryParse<Provider>(control.Tag, out var provider))
+        {
+            _logger.LogWarning("Could not parse provider tag {tag}.", control.Tag);
+            return;
+        }
+            
+        var selectedProvider = GetProviderConfiguration(provider);
+
+        if (selectedProvider.Id != _selectedProvider)
+        {
+
+        }
+
+        
         if (int.TryParse(control.Tag, out var index))
         {
             if (_providerItems.ContainsKey(index))

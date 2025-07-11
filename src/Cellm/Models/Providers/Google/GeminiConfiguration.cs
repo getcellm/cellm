@@ -1,4 +1,6 @@
-﻿namespace Cellm.Models.Providers.Google;
+﻿using Cellm.Users;
+
+namespace Cellm.Models.Providers.Google;
 
 internal class GeminiConfiguration :IProviderConfiguration
 {
@@ -6,7 +8,9 @@ internal class GeminiConfiguration :IProviderConfiguration
 
     public string Name { get => "Gemini"; }
 
-    public string Icon { get => $"AddIn/UserInterface/Resources/{nameof(Provider.Gemini)}"; }
+    public Entitlement Entitlement { get => Entitlement.EnableGeminiProvider; }
+
+    public string Icon { get => $"AddIn/UserInterface/Resources/{nameof(Provider.Gemini)}.png"; }
 
     public Uri BaseAddress => new("https://generativelanguage.googleapis.com/v1beta/openai/");
 

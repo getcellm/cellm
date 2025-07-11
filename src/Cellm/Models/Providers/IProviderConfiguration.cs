@@ -1,10 +1,14 @@
-﻿namespace Cellm.Models.Providers;
+﻿using Cellm.Users;
+
+namespace Cellm.Models.Providers;
 
 internal interface IProviderConfiguration
 {
     Provider Id { get; }
 
     string Name { get; }
+
+    Entitlement Entitlement { get; }
 
     string Icon { get; }
 

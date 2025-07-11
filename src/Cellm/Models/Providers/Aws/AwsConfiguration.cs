@@ -1,12 +1,16 @@
-﻿namespace Cellm.Models.Providers.Aws;
+﻿using Cellm.Users;
+
+namespace Cellm.Models.Providers.Aws;
 
 internal class AwsConfiguration : IProviderConfiguration
 {
     public Provider Id { get => Provider.Aws; }
 
-    public string Name { get => "AWS Bedrock"; }
+    public string Name { get => "AWS"; }
 
-    public string Icon { get => $"AddIn/UserInterface/Resources/{nameof(Provider.Aws)}"; }
+    public Entitlement Entitlement { get => Entitlement.EnableAwsProvider; }
+
+    public string Icon { get => $"AddIn/UserInterface/Resources/{nameof(Provider.Aws)}.png"; }
 
     public Uri BaseAddress { get; set; } = default!;
 

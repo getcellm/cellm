@@ -1,4 +1,6 @@
 ﻿
+using Cellm.Users;
+
 namespace Cellm.Models.Providers.DeepSeek;
 
 internal class DeepSeekConfiguration : IProviderConfiguration
@@ -7,7 +9,9 @@ internal class DeepSeekConfiguration : IProviderConfiguration
 
     public string Name { get => "DeepSeek"; }
 
-    public string Icon { get => $"AddIn/UserInterface/Resources/{nameof(Provider.DeepSeek)}"; }
+    public Entitlement Entitlement { get => Entitlement.EnableDeepSeekProvider; }
+
+    public string Icon { get => $"AddIn/UserInterface/Resources/{nameof(Provider.DeepSeek)}.png"; }
 
     public Uri BaseAddress => new("https://api.deepseek.com/v1");
 

@@ -1,4 +1,6 @@
-﻿namespace Cellm.Models.Providers.OpenAi;
+﻿using Cellm.Users;
+
+namespace Cellm.Models.Providers.OpenAi;
 
 internal class OpenAiConfiguration : IProviderConfiguration
 {
@@ -6,7 +8,9 @@ internal class OpenAiConfiguration : IProviderConfiguration
 
     public string Name { get => "OpenAI"; }
 
-    public string Icon { get => $"AddIn/UserInterface/Resources/{nameof(Provider.OpenAi)}"; }
+    public Entitlement Entitlement { get => Entitlement.EnableOpenAiProvider; }
+
+    public string Icon { get => $"AddIn/UserInterface/Resources/{nameof(Provider.OpenAi)}.png"; }
 
     public Uri BaseAddress => new("https://api.openai.com/v1");
 

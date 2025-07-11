@@ -1,4 +1,6 @@
-﻿namespace Cellm.Models.Providers.OpenAiCompatible;
+﻿using Cellm.Users;
+
+namespace Cellm.Models.Providers.OpenAiCompatible;
 
 internal class OpenAiCompatibleConfiguration : IProviderConfiguration
 {
@@ -6,7 +8,9 @@ internal class OpenAiCompatibleConfiguration : IProviderConfiguration
 
     public string Name { get => "OpenAI-compatible API"; }
 
-    public string Icon { get => $"AddIn/UserInterface/Resources/{nameof(Provider.OpenAi)}"; }
+    public Entitlement Entitlement { get => Entitlement.EnableOpenAiCompatibleProvider; }
+
+    public string Icon { get => $"AddIn/UserInterface/Resources/{nameof(Provider.OpenAi)}.png"; }
 
     public Uri BaseAddress { get; set; } = new Uri("https://api.openai.com/v1/");
 

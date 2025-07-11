@@ -1,4 +1,6 @@
 ﻿
+using Cellm.Users;
+
 namespace Cellm.Models.Providers.Mistral;
 
 internal class MistralConfiguration : IProviderConfiguration
@@ -7,7 +9,9 @@ internal class MistralConfiguration : IProviderConfiguration
 
     public string Name { get => "Mistral"; }
 
-    public string Icon { get => $"AddIn/UserInterface/Resources/{nameof(Provider.Mistral)}"; }
+    public Entitlement Entitlement { get => Entitlement.EnableMistralProvider; }
+
+    public string Icon { get => $"AddIn/UserInterface/Resources/{nameof(Provider.Mistral)}.png"; }
 
     public Uri BaseAddress => new("https://api.mistral.ai/v1/");
 
