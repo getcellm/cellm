@@ -1,12 +1,10 @@
 using System.Security;
 using System.Text;
-using Cellm.Models.Providers;
 using Cellm.Tools.FileReader;
 using Cellm.Tools.FileSearch;
 using Cellm.Tools.ModelContextProtocol;
 using Cellm.Users;
 using ExcelDna.Integration.CustomUI;
-using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -24,14 +22,17 @@ public partial class RibbonMain
         FunctionsMenu,
         FileSearchCheckBox,
         FileReaderCheckBox,
+        BrowserCheckBox,
 
         McpGroup,
         McpSplitButton,
         McpButton,
-        McpMenu
+        McpMenu,
+        McpAddNewButton,
+        McpEditOrRemoveButton,
     }
 
-    private const string McpCheckBoxIdPrefix = "McpCheckBox_"; // Prefix for dynamic IDs
+    private const string McpCheckBoxIdPrefix = "McpCheckBox_";
 
     public string ToolGroup()
     {
@@ -40,14 +41,18 @@ public partial class RibbonMain
             <splitButton id="{nameof(ToolsGroupControlIds.FunctionsSplitButton)}" size="large">
                 <button id="{nameof(ToolsGroupControlIds.FunctionsButton)}" label="Functions" imageMso="FunctionWizard" screentip="Enable/disable built-in functions" />
                 <menu id="{nameof(ToolsGroupControlIds.FunctionsMenu)}">
+                    <checkBox id="{nameof(ToolsGroupControlIds.BrowserCheckBox)}" label="Internet Browser"
+                         screentip="Let models browse the web"
+                         onAction="{nameof(OnBrowserToggled)}"
+                         getPressed="{nameof(GetBrowserPressed)}" />
                     <checkBox id="{nameof(ToolsGroupControlIds.FileSearchCheckBox)}" label="File Search"
-                         screentip="Lets a model specify glob patterns and get back matching file paths."
+                         screentip="Let models search for files on your computer"
                          onAction="{nameof(OnFileSearchToggled)}"
-                         getPressed="{nameof(OnGetFileSearchPressed)}" />
+                         getPressed="{nameof(GetFileSearchPressed)}" />
                     <checkBox id="{nameof(ToolsGroupControlIds.FileReaderCheckBox)}" label="File Reader"
-                         screentip="Lets a model specify a file path and get back its content as plain text. Supports PDF, Markdown, and common text formats."
+                         screentip="Let model read files on your computer. Supports PDF, Markdown, and common text formats"
                          onAction="{nameof(OnFileReaderToggled)}"
-                         getPressed="{nameof(OnGetFileReaderPressed)}" />
+                         getPressed="{nameof(GetFileReaderPressed)}" />
                  </menu>
             </splitButton>
             <splitButton id="{nameof(ToolsGroupControlIds.McpSplitButton)}" size="large" getEnabled="{nameof(GetMcpEnabled)}">
@@ -64,8 +69,7 @@ public partial class RibbonMain
     {
         SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableTools)}:{nameof(FileSearchRequest)}", pressed.ToString());
     }
-
-    public bool OnGetFileSearchPressed(IRibbonControl control)
+    public bool GetFileSearchPressed(IRibbonControl control)
     {
         var value = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableTools)}:{nameof(FileSearchRequest)}");
         return bool.Parse(value);
@@ -76,9 +80,20 @@ public partial class RibbonMain
         SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableTools)}:{nameof(FileReaderRequest)}", pressed.ToString());
     }
 
-    public bool OnGetFileReaderPressed(IRibbonControl control)
+    public bool GetFileReaderPressed(IRibbonControl control)
     {
         var value = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableTools)}:{nameof(FileReaderRequest)}");
+        return bool.Parse(value);
+    }
+
+    public void OnBrowserToggled(IRibbonControl control, bool pressed)
+    {
+        SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableModelContextProtocolServers)}:Playwright", pressed.ToString());
+    }
+
+    public bool GetBrowserPressed(IRibbonControl control)
+    {
+        var value = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableModelContextProtocolServers)}:Playwright");
         return bool.Parse(value);
     }
 
@@ -91,16 +106,22 @@ public partial class RibbonMain
             var numberOfStdioServers = modelContenxtProtocolConfiguration.StdioServers?.Count ?? 0;
             var numberOfSseServers = modelContenxtProtocolConfiguration.SseServers?.Count ?? 0;
 
-            if (numberOfStdioServers + numberOfSseServers == 0)
-            {
-                return @"<checkBox label=""(No MCP servers configured)"" enabled=""false"" />";
-            }
+            var anyServers = false;
 
             var menuXml = new StringBuilder();
             foreach (var server in modelContenxtProtocolConfiguration.StdioServers ?? [])
             {
                 // Skip servers without a valid name, as it's used for ID and config key
-                if (string.IsNullOrWhiteSpace(server.Name)) continue;
+                if (string.IsNullOrWhiteSpace(server.Name))
+                {
+                    continue;
+                }
+
+                // Skip Playwright, shown under built-in tools (functions)
+                if (server.Name == "Playwright")
+                {
+                    continue;
+                }
 
                 var checkBoxId = $"{McpCheckBoxIdPrefix}{server.Name}";
                 var label = server.Name;
@@ -112,6 +133,8 @@ public partial class RibbonMain
                                onAction="{nameof(OnMcpServerToggled)}"
                                getPressed="{nameof(OnGetMcpServerPressed)}" />
                      """);
+
+                anyServers = true;
             }
 
             foreach (var server in modelContenxtProtocolConfiguration.SseServers ?? [])
@@ -129,8 +152,24 @@ public partial class RibbonMain
                                onAction="{nameof(OnMcpServerToggled)}"
                                getPressed="{nameof(OnGetMcpServerPressed)}" />
                      """);
+
+                anyServers = true;
             }
 
+            if (anyServers)
+            {
+                menuXml.AppendLine(@"<menuSeparator id=""mcpMenuSeparator"" />");
+            }
+
+            menuXml.AppendLine(
+                $@"<button id=""{nameof(ToolsGroupControlIds.McpAddNewButton)}""
+                    label=""Add new ...""
+                    onAction=""{nameof(ShowProviderSettingsForm)}"" />");
+
+            menuXml.AppendLine(
+                $@"<button id=""{nameof(ToolsGroupControlIds.McpEditOrRemoveButton)}""
+                    label=""Edit or remove ...""
+                    onAction=""{nameof(ShowProviderSettingsForm)}"" />");
 
             return menuXml.ToString();
         }

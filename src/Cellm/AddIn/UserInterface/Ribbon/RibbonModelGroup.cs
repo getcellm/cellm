@@ -106,7 +106,7 @@ public partial class RibbonMain
                 <toggleButton id="{nameof(ModelGroupControlIds.CacheToggleButton)}" 
                     getLabel="{nameof(GetCacheLabel)}"
                     size="large" 
-                    imageMso="CustomAutoTextGallery"
+                    imageMso="TableAutoFormat"
                     screentip="Enable/disable local caching of model responses. Enabled: Return cached responses for identical prompts. Disabled: Always return new responses. Disabling memory will wipe saved responses."
                     onAction="{nameof(OnCacheToggled)}" 
                     getPressed="{nameof(GetCachePressed)}" />
