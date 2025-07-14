@@ -309,8 +309,8 @@ public static class CellmFunctions
             };
 
             var userMessage = new StringBuilder()
-                .AppendLine(ArgumentParser.AddInstructions(instructions))
-                .AppendLine(ArgumentParser.AddCells(cells))
+                .AppendLine(ArgumentParser.AddInstructionTags(instructions))
+                .AppendLine(ArgumentParser.AddCellTags(cells))
                 .ToString();
 
             var cellmAddInConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<CellmAddInConfiguration>>();
