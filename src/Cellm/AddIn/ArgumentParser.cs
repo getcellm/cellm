@@ -116,16 +116,16 @@ public class ArgumentParser(IConfiguration configuration)
         return arguments;
     }
 
-    internal static string AddCellTags(string context)
+    internal static string AddCells(string cells)
     {
         return new StringBuilder()
             .AppendLine(CellsBeginTag)
-            .AppendLine(context)
+            .AppendLine(cells)
             .AppendLine(CellsEndTag)
             .ToString();
     }
 
-    internal static string AddInstructionTags(string instructions)
+    internal static string AddInstructions(string instructions)
     {
         return new StringBuilder()
             .AppendLine(InstructionsBeginTag)
@@ -226,11 +226,13 @@ public class ArgumentParser(IConfiguration configuration)
             tableBuilder.Append(" |");
         }
 
-        tableBuilder.AppendLine();
+
 
         // Render cells
         for (var r = 1; r < numberOfRenderedRows; r++)
         {
+            tableBuilder.AppendLine();
+
             tableBuilder.Append('|');
 
             // Render row enumeration
@@ -245,8 +247,6 @@ public class ArgumentParser(IConfiguration configuration)
                 tableBuilder.Append(table[r, c].PadRight(maxColumnWidth[c]));
                 tableBuilder.Append(" |");
             }
-
-            tableBuilder.AppendLine();
         }
 
         if (tableIsEmpty)

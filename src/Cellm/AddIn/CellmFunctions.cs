@@ -226,7 +226,7 @@ public static class CellmFunctions
         {
             return "Click OK to send prompt";
         }
-        
+
         try
         {
             var wallClock = Stopwatch.StartNew();
@@ -309,8 +309,8 @@ public static class CellmFunctions
             };
 
             var userMessage = new StringBuilder()
-                .AppendLine(ArgumentParser.AddInstructionTags(instructions))
-                .AppendLine(ArgumentParser.AddCellTags(cells))
+                .AppendLine(ArgumentParser.AddInstructions(instructions))
+                .AppendLine(ArgumentParser.AddCells(cells))
                 .ToString();
 
             var cellmAddInConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<CellmAddInConfiguration>>();
