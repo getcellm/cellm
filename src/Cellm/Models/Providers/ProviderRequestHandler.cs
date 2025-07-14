@@ -14,7 +14,7 @@ internal class ProviderRequestHandler(IChatClientFactory chatClientFactory) : IR
 
         var chatResponse = request.Prompt.OutputShape switch
         {
-            StructuredOutputShape.Table =>
+            StructuredOutputShape.Dynamic =>
                 await chatClient.GetResponseAsync<string[][]>(
                     request.Prompt.Messages,
                     request.Prompt.Options,
