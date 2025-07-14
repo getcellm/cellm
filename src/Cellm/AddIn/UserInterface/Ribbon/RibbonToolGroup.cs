@@ -162,12 +162,12 @@ public partial class RibbonMain
             menuXml.AppendLine(
                 $@"<button id=""{nameof(ToolsGroupControlIds.McpAddNewButton)}""
                     label=""Add new ...""
-                    onAction=""{nameof(ShowMcpClientSettingsForm)}"" />");
+                    onAction=""{nameof(ShowAddMcpServerForm)}"" />");
 
             menuXml.AppendLine(
                 $@"<button id=""{nameof(ToolsGroupControlIds.McpEditOrRemoveButton)}""
                     label=""Edit or remove ...""
-                    onAction=""{nameof(ShowMcpClientSettingsForm)}"" />");
+                    onAction=""{nameof(ShowEditMcpServerForm)}"" />");
 
             return menuXml.ToString();
         }
@@ -251,19 +251,37 @@ public partial class RibbonMain
         return account.HasEntitlement(Entitlement.EnableModelContextProtocol);
     }
 
-    public void ShowMcpClientSettingsForm(IRibbonControl control)
+    public void ShowAddMcpServerForm(IRibbonControl control)
     {
         try
         {
-            var form = new McpClientSettingsForm();
-            form.ShowDialog();
-            
-            // Refresh the ribbon UI after the form is closed to update the MCP menu
-            _ribbonUi?.Invalidate();
+            var form = new AddMcpServerForm();
+            if (form.ShowDialog() == DialogResult.OK)
+            {
+                // Refresh the ribbon UI after the form is closed to update the MCP menu
+                _ribbonUi?.Invalidate();
+            }
         }
         catch (Exception ex)
         {
-            _logger.LogError("Error showing MCP client settings form: {message}", ex.Message);
+            _logger.LogError("Error showing Add MCP Server form: {message}", ex.Message);
+        }
+    }
+
+    public void ShowEditMcpServerForm(IRibbonControl control)
+    {
+        try
+        {
+            var form = new EditMcpServerForm();
+            if (form.ShowDialog() == DialogResult.OK)
+            {
+                // Refresh the ribbon UI after the form is closed to update the MCP menu
+                _ribbonUi?.Invalidate();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Error showing Edit MCP Server form: {message}", ex.Message);
         }
     }
 }

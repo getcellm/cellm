@@ -11,21 +11,23 @@ using ModelContextProtocol.Client;
 
 namespace Cellm.AddIn.UserInterface.Forms;
 
-public partial class McpClientSettingsForm : Form
+public partial class EditMcpServerForm : Form
 {
-    private readonly ILogger<McpClientSettingsForm> _logger;
+    private readonly ILogger<EditMcpServerForm> _logger;
     private readonly IConfiguration _configuration;
     private readonly IOptionsMonitor<ModelContextProtocolConfiguration> _mcpConfig;
     private readonly List<string> _existingStdioServers;
     private readonly List<string> _existingSseServers;
     private string? _editingServerName;
     private bool _isEditMode;
+    private Dictionary<string, string?> _environmentVariables;
+    private Dictionary<string, string> _headers;
 
-    public McpClientSettingsForm()
+    public EditMcpServerForm()
     {
         InitializeComponent();
         
-        _logger = CellmAddIn.Services.GetRequiredService<ILogger<McpClientSettingsForm>>();
+        _logger = CellmAddIn.Services.GetRequiredService<ILogger<EditMcpServerForm>>();
         _configuration = CellmAddIn.Services.GetRequiredService<IConfiguration>();
         _mcpConfig = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<ModelContextProtocolConfiguration>>();
         
@@ -38,17 +40,20 @@ public partial class McpClientSettingsForm : Form
 
     private void InitializeForm()
     {
-        transportTypeComboBox.Items.Add("Stdio");
-        transportTypeComboBox.Items.Add("SSE");
+        transportTypeComboBox.Items.Add("Standard I/O");
+        transportTypeComboBox.Items.Add("Streamable HTTP");
         transportTypeComboBox.SelectedIndex = 0;
         
         httpTransportModeComboBox.Items.Add("AutoDetect");
-        httpTransportModeComboBox.Items.Add("Sse");
-        httpTransportModeComboBox.Items.Add("StreamableHttp");
+        httpTransportModeComboBox.Items.Add("SSE");
+        httpTransportModeComboBox.Items.Add("Streamable HTTP");
         httpTransportModeComboBox.SelectedIndex = 0;
         
-        shutdownTimeoutNumericUpDown.Value = 5;
         connectionTimeoutNumericUpDown.Value = 30;
+        
+        // Initialize empty collections
+        _environmentVariables = new Dictionary<string, string?>();
+        _headers = new Dictionary<string, string>();
         
         PopulateServerList();
         UpdateFieldsVisibility();
@@ -60,12 +65,12 @@ public partial class McpClientSettingsForm : Form
         
         foreach (var server in _existingStdioServers)
         {
-            serverListBox.Items.Add($"[Stdio] {server}");
+            serverListBox.Items.Add($"[Standard I/O] {server}");
         }
         
         foreach (var server in _existingSseServers)
         {
-            serverListBox.Items.Add($"[SSE] {server}");
+            serverListBox.Items.Add($"[Streamable HTTP] {server}");
         }
     }
 
@@ -83,12 +88,8 @@ public partial class McpClientSettingsForm : Form
         commandTextBox.Visible = isStdio;
         argumentsLabel.Visible = isStdio;
         argumentsTextBox.Visible = isStdio;
-        workingDirectoryLabel.Visible = isStdio;
-        workingDirectoryTextBox.Visible = isStdio;
         environmentVariablesLabel.Visible = isStdio;
-        environmentVariablesTextBox.Visible = isStdio;
-        shutdownTimeoutLabel.Visible = isStdio;
-        shutdownTimeoutNumericUpDown.Visible = isStdio;
+        environmentVariablesButton.Visible = isStdio;
         
         // SSE fields
         endpointLabel.Visible = !isStdio;
@@ -98,46 +99,40 @@ public partial class McpClientSettingsForm : Form
         connectionTimeoutLabel.Visible = !isStdio;
         connectionTimeoutNumericUpDown.Visible = !isStdio;
         additionalHeadersLabel.Visible = !isStdio;
-        additionalHeadersTextBox.Visible = !isStdio;
+        additionalHeadersButton.Visible = !isStdio;
         
         // Adjust form height based on visible fields
         int baseHeight = 200;
-        int fieldHeight = isStdio ? 250 : 200;
+        int fieldHeight = isStdio ? 200 : 180;
         this.Height = baseHeight + fieldHeight;
+    }
+
+    private void environmentVariablesButton_Click(object sender, EventArgs e)
+    {
+        var form = new EnvironmentVariableEditorForm(_environmentVariables);
+        if (form.ShowDialog() == DialogResult.OK)
+        {
+            _environmentVariables = form.EnvironmentVariables;
+        }
+    }
+
+    private void additionalHeadersButton_Click(object sender, EventArgs e)
+    {
+        var form = new HeadersEditorForm(_headers);
+        if (form.ShowDialog() == DialogResult.OK)
+        {
+            _headers = form.Headers;
+        }
     }
 
     private void addButton_Click(object sender, EventArgs e)
     {
-        _isEditMode = false;
-        _editingServerName = null;
-        ClearFields();
-        addButton.Enabled = false;
-        editButton.Enabled = false;
-        removeButton.Enabled = false;
-        saveButton.Enabled = true;
-        cancelEditButton.Enabled = true;
-        serverListBox.Enabled = false;
+        // Not needed in edit form
     }
 
     private void editButton_Click(object sender, EventArgs e)
     {
-        if (serverListBox.SelectedItem == null) return;
-        
-        _isEditMode = true;
-        var selectedText = serverListBox.SelectedItem.ToString()!;
-        bool isStdio = selectedText.StartsWith("[Stdio]");
-        string serverName = selectedText.Substring(selectedText.IndexOf(']') + 2);
-        _editingServerName = serverName;
-        
-        transportTypeComboBox.SelectedIndex = isStdio ? 0 : 1;
-        LoadServerData(serverName, isStdio);
-        
-        addButton.Enabled = false;
-        editButton.Enabled = false;
-        removeButton.Enabled = false;
-        saveButton.Enabled = true;
-        cancelEditButton.Enabled = true;
-        serverListBox.Enabled = false;
+        // Not needed - properties are always visible
     }
 
     private void removeButton_Click(object sender, EventArgs e)
@@ -145,7 +140,7 @@ public partial class McpClientSettingsForm : Form
         if (serverListBox.SelectedItem == null) return;
         
         var selectedText = serverListBox.SelectedItem.ToString()!;
-        bool isStdio = selectedText.StartsWith("[Stdio]");
+        bool isStdio = selectedText.StartsWith("[Standard I/O]");
         string serverName = selectedText.Substring(selectedText.IndexOf(']') + 2);
         
         var result = MessageBox.Show($"Are you sure you want to remove the MCP server '{serverName}'?", 
@@ -158,7 +153,7 @@ public partial class McpClientSettingsForm : Form
         }
     }
 
-    private void saveButton_Click(object sender, EventArgs e)
+    private void okButton_Click(object sender, EventArgs e)
     {
         if (!ValidateForm()) return;
         
@@ -190,6 +185,9 @@ public partial class McpClientSettingsForm : Form
             
             MessageBox.Show($"MCP server '{serverName}' saved successfully.", "Success", 
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
+            
+            this.DialogResult = DialogResult.OK;
+            this.Close();
         }
         catch (Exception ex)
         {
@@ -199,9 +197,10 @@ public partial class McpClientSettingsForm : Form
         }
     }
 
-    private void cancelEditButton_Click(object sender, EventArgs e)
+    private void cancelButton_Click(object sender, EventArgs e)
     {
-        CancelEdit();
+        this.DialogResult = DialogResult.Cancel;
+        this.Close();
     }
 
     private void CancelEdit()
@@ -212,8 +211,8 @@ public partial class McpClientSettingsForm : Form
         addButton.Enabled = true;
         editButton.Enabled = true;
         removeButton.Enabled = true;
-        saveButton.Enabled = false;
-        cancelEditButton.Enabled = false;
+        okButton.Enabled = false;
+        cancelButton.Enabled = false;
         serverListBox.Enabled = true;
     }
 
@@ -222,13 +221,11 @@ public partial class McpClientSettingsForm : Form
         nameTextBox.Clear();
         commandTextBox.Clear();
         argumentsTextBox.Clear();
-        workingDirectoryTextBox.Clear();
-        environmentVariablesTextBox.Clear();
         endpointTextBox.Clear();
-        additionalHeadersTextBox.Clear();
-        shutdownTimeoutNumericUpDown.Value = 5;
         connectionTimeoutNumericUpDown.Value = 30;
         httpTransportModeComboBox.SelectedIndex = 0;
+        _environmentVariables.Clear();
+        _headers.Clear();
     }
 
     private void LoadServerData(string serverName, bool isStdio)
@@ -244,10 +241,8 @@ public partial class McpClientSettingsForm : Form
             {
                 commandTextBox.Text = server.Command;
                 argumentsTextBox.Text = server.Arguments != null ? string.Join(" ", server.Arguments) : "";
-                workingDirectoryTextBox.Text = server.WorkingDirectory ?? "";
-                environmentVariablesTextBox.Text = server.EnvironmentVariables != null ? 
-                    string.Join("\r\n", server.EnvironmentVariables.Select(kv => $"{kv.Key}={kv.Value}")) : "";
-                shutdownTimeoutNumericUpDown.Value = (decimal)server.ShutdownTimeout.TotalSeconds;
+                _environmentVariables = server.EnvironmentVariables != null ? 
+                    new Dictionary<string, string?>(server.EnvironmentVariables) : new Dictionary<string, string?>();
             }
         }
         else
@@ -258,8 +253,8 @@ public partial class McpClientSettingsForm : Form
                 endpointTextBox.Text = server.Endpoint.ToString();
                 httpTransportModeComboBox.SelectedIndex = (int)server.TransportMode;
                 connectionTimeoutNumericUpDown.Value = (decimal)server.ConnectionTimeout.TotalSeconds;
-                additionalHeadersTextBox.Text = server.AdditionalHeaders != null ? 
-                    string.Join("\r\n", server.AdditionalHeaders.Select(kv => $"{kv.Key}={kv.Value}")) : "";
+                _headers = server.AdditionalHeaders != null ? 
+                    new Dictionary<string, string>(server.AdditionalHeaders) : new Dictionary<string, string>();
             }
         }
     }
@@ -324,20 +319,6 @@ public partial class McpClientSettingsForm : Form
         // Remove existing server if editing
         servers.RemoveAll(s => s.Name == serverName);
         
-        var environmentVariables = new Dictionary<string, string?>();
-        if (!string.IsNullOrWhiteSpace(environmentVariablesTextBox.Text))
-        {
-            foreach (var line in environmentVariablesTextBox.Text.Split('\r', '\n'))
-            {
-                if (string.IsNullOrWhiteSpace(line)) continue;
-                var parts = line.Split('=', 2);
-                if (parts.Length == 2)
-                {
-                    environmentVariables[parts[0]] = parts[1];
-                }
-            }
-        }
-        
         var arguments = new List<string>();
         if (!string.IsNullOrWhiteSpace(argumentsTextBox.Text))
         {
@@ -349,9 +330,8 @@ public partial class McpClientSettingsForm : Form
             Name = serverName,
             Command = commandTextBox.Text.Trim(),
             Arguments = arguments.Any() ? arguments : null,
-            WorkingDirectory = string.IsNullOrWhiteSpace(workingDirectoryTextBox.Text) ? null : workingDirectoryTextBox.Text.Trim(),
-            EnvironmentVariables = environmentVariables.Any() ? environmentVariables : null,
-            ShutdownTimeout = TimeSpan.FromSeconds((double)shutdownTimeoutNumericUpDown.Value)
+            EnvironmentVariables = _environmentVariables.Any() ? _environmentVariables : null,
+            ShutdownTimeout = TimeSpan.FromSeconds(5) // Default value
         };
         
         servers.Add(newServer);
@@ -392,27 +372,13 @@ public partial class McpClientSettingsForm : Form
         // Remove existing server if editing
         servers.RemoveAll(s => s.Name == serverName);
         
-        var additionalHeaders = new Dictionary<string, string>();
-        if (!string.IsNullOrWhiteSpace(additionalHeadersTextBox.Text))
-        {
-            foreach (var line in additionalHeadersTextBox.Text.Split('\r', '\n'))
-            {
-                if (string.IsNullOrWhiteSpace(line)) continue;
-                var parts = line.Split('=', 2);
-                if (parts.Length == 2)
-                {
-                    additionalHeaders[parts[0]] = parts[1];
-                }
-            }
-        }
-        
         var newServer = new SseClientTransportOptions
         {
             Name = serverName,
             Endpoint = new Uri(endpointTextBox.Text.Trim()),
             TransportMode = (HttpTransportMode)httpTransportModeComboBox.SelectedIndex,
             ConnectionTimeout = TimeSpan.FromSeconds((double)connectionTimeoutNumericUpDown.Value),
-            AdditionalHeaders = additionalHeaders.Any() ? additionalHeaders : null
+            AdditionalHeaders = _headers.Any() ? _headers : null
         };
         
         servers.Add(newServer);
@@ -522,12 +488,26 @@ public partial class McpClientSettingsForm : Form
     private void serverListBox_SelectedIndexChanged(object sender, EventArgs e)
     {
         bool hasSelection = serverListBox.SelectedItem != null;
-        editButton.Enabled = hasSelection;
         removeButton.Enabled = hasSelection;
+        okButton.Enabled = hasSelection;
+        
+        if (hasSelection)
+        {
+            var selectedText = serverListBox.SelectedItem?.ToString()!;
+            bool isStdio = selectedText.StartsWith("[Standard I/O]");
+            string serverName = selectedText.Substring(selectedText.IndexOf(']') + 2);
+            _editingServerName = serverName;
+            _isEditMode = true;
+            
+            transportTypeComboBox.SelectedIndex = isStdio ? 0 : 1;
+            LoadServerData(serverName, isStdio);
+        }
+        else
+        {
+            ClearFields();
+            _isEditMode = false;
+            _editingServerName = null;
+        }
     }
 
-    private void closeButton_Click(object sender, EventArgs e)
-    {
-        this.Close();
-    }
 }

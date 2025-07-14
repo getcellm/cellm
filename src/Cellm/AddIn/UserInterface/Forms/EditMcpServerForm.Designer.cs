@@ -1,6 +1,6 @@
 namespace Cellm.AddIn.UserInterface.Forms;
 
-partial class McpClientSettingsForm
+partial class EditMcpServerForm
 {
     /// <summary>
     /// Required designer variable.
@@ -40,12 +40,8 @@ partial class McpClientSettingsForm
         commandTextBox = new TextBox();
         argumentsLabel = new Label();
         argumentsTextBox = new TextBox();
-        workingDirectoryLabel = new Label();
-        workingDirectoryTextBox = new TextBox();
         environmentVariablesLabel = new Label();
-        environmentVariablesTextBox = new TextBox();
-        shutdownTimeoutLabel = new Label();
-        shutdownTimeoutNumericUpDown = new NumericUpDown();
+        environmentVariablesButton = new Button();
         endpointLabel = new Label();
         endpointTextBox = new TextBox();
         transportModeLabel = new Label();
@@ -53,12 +49,10 @@ partial class McpClientSettingsForm
         connectionTimeoutLabel = new Label();
         connectionTimeoutNumericUpDown = new NumericUpDown();
         additionalHeadersLabel = new Label();
-        additionalHeadersTextBox = new TextBox();
-        saveButton = new Button();
-        cancelEditButton = new Button();
-        closeButton = new Button();
+        additionalHeadersButton = new Button();
+        okButton = new Button();
+        cancelButton = new Button();
         serverListLabel = new Label();
-        ((System.ComponentModel.ISupportInitialize)shutdownTimeoutNumericUpDown).BeginInit();
         ((System.ComponentModel.ISupportInitialize)connectionTimeoutNumericUpDown).BeginInit();
         SuspendLayout();
         // 
@@ -171,58 +165,24 @@ partial class McpClientSettingsForm
         argumentsTextBox.Size = new Size(200, 23);
         argumentsTextBox.TabIndex = 11;
         // 
-        // workingDirectoryLabel
-        // 
-        workingDirectoryLabel.AutoSize = true;
-        workingDirectoryLabel.Location = new Point(230, 231);
-        workingDirectoryLabel.Name = "workingDirectoryLabel";
-        workingDirectoryLabel.Size = new Size(104, 15);
-        workingDirectoryLabel.TabIndex = 12;
-        workingDirectoryLabel.Text = "Working Directory:";
-        // 
-        // workingDirectoryTextBox
-        // 
-        workingDirectoryTextBox.Location = new Point(230, 249);
-        workingDirectoryTextBox.Name = "workingDirectoryTextBox";
-        workingDirectoryTextBox.Size = new Size(200, 23);
-        workingDirectoryTextBox.TabIndex = 13;
-        // 
         // environmentVariablesLabel
         // 
         environmentVariablesLabel.AutoSize = true;
-        environmentVariablesLabel.Location = new Point(230, 282);
+        environmentVariablesLabel.Location = new Point(230, 231);
         environmentVariablesLabel.Name = "environmentVariablesLabel";
         environmentVariablesLabel.Size = new Size(139, 15);
-        environmentVariablesLabel.TabIndex = 14;
+        environmentVariablesLabel.TabIndex = 12;
         environmentVariablesLabel.Text = "Environment Variables:";
         // 
-        // environmentVariablesTextBox
+        // environmentVariablesButton
         // 
-        environmentVariablesTextBox.Location = new Point(230, 300);
-        environmentVariablesTextBox.Multiline = true;
-        environmentVariablesTextBox.Name = "environmentVariablesTextBox";
-        environmentVariablesTextBox.ScrollBars = ScrollBars.Vertical;
-        environmentVariablesTextBox.Size = new Size(200, 60);
-        environmentVariablesTextBox.TabIndex = 15;
-        // 
-        // shutdownTimeoutLabel
-        // 
-        shutdownTimeoutLabel.AutoSize = true;
-        shutdownTimeoutLabel.Location = new Point(230, 372);
-        shutdownTimeoutLabel.Name = "shutdownTimeoutLabel";
-        shutdownTimeoutLabel.Size = new Size(133, 15);
-        shutdownTimeoutLabel.TabIndex = 16;
-        shutdownTimeoutLabel.Text = "Shutdown Timeout (s):";
-        // 
-        // shutdownTimeoutNumericUpDown
-        // 
-        shutdownTimeoutNumericUpDown.Location = new Point(230, 390);
-        shutdownTimeoutNumericUpDown.Maximum = new decimal(new int[] { 300, 0, 0, 0 });
-        shutdownTimeoutNumericUpDown.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
-        shutdownTimeoutNumericUpDown.Name = "shutdownTimeoutNumericUpDown";
-        shutdownTimeoutNumericUpDown.Size = new Size(200, 23);
-        shutdownTimeoutNumericUpDown.TabIndex = 17;
-        shutdownTimeoutNumericUpDown.Value = new decimal(new int[] { 5, 0, 0, 0 });
+        environmentVariablesButton.Location = new Point(230, 249);
+        environmentVariablesButton.Name = "environmentVariablesButton";
+        environmentVariablesButton.Size = new Size(200, 23);
+        environmentVariablesButton.TabIndex = 13;
+        environmentVariablesButton.Text = "Edit...";
+        environmentVariablesButton.UseVisualStyleBackColor = true;
+        environmentVariablesButton.Click += environmentVariablesButton_Click;
         // 
         // endpointLabel
         // 
@@ -283,49 +243,39 @@ partial class McpClientSettingsForm
         additionalHeadersLabel.Location = new Point(230, 282);
         additionalHeadersLabel.Name = "additionalHeadersLabel";
         additionalHeadersLabel.Size = new Size(109, 15);
-        additionalHeadersLabel.TabIndex = 24;
+        additionalHeadersLabel.TabIndex = 14;
         additionalHeadersLabel.Text = "Additional Headers:";
         // 
-        // additionalHeadersTextBox
+        // additionalHeadersButton
         // 
-        additionalHeadersTextBox.Location = new Point(230, 300);
-        additionalHeadersTextBox.Multiline = true;
-        additionalHeadersTextBox.Name = "additionalHeadersTextBox";
-        additionalHeadersTextBox.ScrollBars = ScrollBars.Vertical;
-        additionalHeadersTextBox.Size = new Size(200, 60);
-        additionalHeadersTextBox.TabIndex = 25;
+        additionalHeadersButton.Location = new Point(230, 300);
+        additionalHeadersButton.Name = "additionalHeadersButton";
+        additionalHeadersButton.Size = new Size(200, 23);
+        additionalHeadersButton.TabIndex = 15;
+        additionalHeadersButton.Text = "Edit...";
+        additionalHeadersButton.UseVisualStyleBackColor = true;
+        additionalHeadersButton.Click += additionalHeadersButton_Click;
         // 
-        // saveButton
+        // okButton
         // 
-        saveButton.Enabled = false;
-        saveButton.Location = new Point(230, 420);
-        saveButton.Name = "saveButton";
-        saveButton.Size = new Size(75, 23);
-        saveButton.TabIndex = 26;
-        saveButton.Text = "Save";
-        saveButton.UseVisualStyleBackColor = true;
-        saveButton.Click += saveButton_Click;
+        okButton.Enabled = false;
+        okButton.Location = new Point(230, 340);
+        okButton.Name = "okButton";
+        okButton.Size = new Size(75, 23);
+        okButton.TabIndex = 16;
+        okButton.Text = "OK";
+        okButton.UseVisualStyleBackColor = true;
+        okButton.Click += okButton_Click;
         // 
-        // cancelEditButton
+        // cancelButton
         // 
-        cancelEditButton.Enabled = false;
-        cancelEditButton.Location = new Point(311, 420);
-        cancelEditButton.Name = "cancelEditButton";
-        cancelEditButton.Size = new Size(75, 23);
-        cancelEditButton.TabIndex = 27;
-        cancelEditButton.Text = "Cancel";
-        cancelEditButton.UseVisualStyleBackColor = true;
-        cancelEditButton.Click += cancelEditButton_Click;
-        // 
-        // closeButton
-        // 
-        closeButton.Location = new Point(355, 460);
-        closeButton.Name = "closeButton";
-        closeButton.Size = new Size(75, 23);
-        closeButton.TabIndex = 28;
-        closeButton.Text = "Close";
-        closeButton.UseVisualStyleBackColor = true;
-        closeButton.Click += closeButton_Click;
+        cancelButton.Location = new Point(311, 340);
+        cancelButton.Name = "cancelButton";
+        cancelButton.Size = new Size(75, 23);
+        cancelButton.TabIndex = 17;
+        cancelButton.Text = "Cancel";
+        cancelButton.UseVisualStyleBackColor = true;
+        cancelButton.Click += cancelButton_Click;
         // 
         // serverListLabel
         // 
@@ -336,16 +286,17 @@ partial class McpClientSettingsForm
         serverListLabel.TabIndex = 29;
         serverListLabel.Text = "MCP Servers:";
         // 
-        // McpClientSettingsForm
+        // EditMcpServerForm
         // 
+        AcceptButton = okButton;
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        ClientSize = new Size(442, 495);
+        CancelButton = cancelButton;
+        ClientSize = new Size(442, 375);
         Controls.Add(serverListLabel);
-        Controls.Add(closeButton);
-        Controls.Add(cancelEditButton);
-        Controls.Add(saveButton);
-        Controls.Add(additionalHeadersTextBox);
+        Controls.Add(cancelButton);
+        Controls.Add(okButton);
+        Controls.Add(additionalHeadersButton);
         Controls.Add(additionalHeadersLabel);
         Controls.Add(connectionTimeoutNumericUpDown);
         Controls.Add(connectionTimeoutLabel);
@@ -353,12 +304,8 @@ partial class McpClientSettingsForm
         Controls.Add(transportModeLabel);
         Controls.Add(endpointTextBox);
         Controls.Add(endpointLabel);
-        Controls.Add(shutdownTimeoutNumericUpDown);
-        Controls.Add(shutdownTimeoutLabel);
-        Controls.Add(environmentVariablesTextBox);
+        Controls.Add(environmentVariablesButton);
         Controls.Add(environmentVariablesLabel);
-        Controls.Add(workingDirectoryTextBox);
-        Controls.Add(workingDirectoryLabel);
         Controls.Add(argumentsTextBox);
         Controls.Add(argumentsLabel);
         Controls.Add(commandTextBox);
@@ -374,11 +321,10 @@ partial class McpClientSettingsForm
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
         MinimizeBox = false;
-        Name = "McpClientSettingsForm";
+        Name = "EditMcpServerForm";
         ShowInTaskbar = false;
         StartPosition = FormStartPosition.CenterParent;
-        Text = "MCP Client Settings";
-        ((System.ComponentModel.ISupportInitialize)shutdownTimeoutNumericUpDown).EndInit();
+        Text = "Edit MCP Server";
         ((System.ComponentModel.ISupportInitialize)connectionTimeoutNumericUpDown).EndInit();
         ResumeLayout(false);
         PerformLayout();
@@ -398,12 +344,8 @@ partial class McpClientSettingsForm
     private TextBox commandTextBox;
     private Label argumentsLabel;
     private TextBox argumentsTextBox;
-    private Label workingDirectoryLabel;
-    private TextBox workingDirectoryTextBox;
     private Label environmentVariablesLabel;
-    private TextBox environmentVariablesTextBox;
-    private Label shutdownTimeoutLabel;
-    private NumericUpDown shutdownTimeoutNumericUpDown;
+    private Button environmentVariablesButton;
     private Label endpointLabel;
     private TextBox endpointTextBox;
     private Label transportModeLabel;
@@ -411,9 +353,8 @@ partial class McpClientSettingsForm
     private Label connectionTimeoutLabel;
     private NumericUpDown connectionTimeoutNumericUpDown;
     private Label additionalHeadersLabel;
-    private TextBox additionalHeadersTextBox;
-    private Button saveButton;
-    private Button cancelEditButton;
-    private Button closeButton;
+    private Button additionalHeadersButton;
+    private Button okButton;
+    private Button cancelButton;
     private Label serverListLabel;
 }
