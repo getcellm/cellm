@@ -62,7 +62,7 @@ partial class LoginForm
         btnLogin.TabIndex = 6;
         btnLogin.Text = "Login";
         btnLogin.UseVisualStyleBackColor = true;
-        btnLogin.Click += btnLogin_Click;
+        btnLogin.Click += BtnLogin_Click;
         // 
         // btnCancel
         // 
@@ -124,6 +124,7 @@ partial class LoginForm
         ShowInTaskbar = false;
         StartPosition = FormStartPosition.CenterParent;
         Text = "Log in to Cellm";
+        Load += LoginForm_Load;
         ResumeLayout(false);
         PerformLayout();
     }

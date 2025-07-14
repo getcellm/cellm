@@ -1,5 +1,7 @@
 using System.Security;
 using System.Text;
+using System.Text.Json;
+using Cellm.AddIn.UserInterface.Forms;
 using Cellm.Tools.FileReader;
 using Cellm.Tools.FileSearch;
 using Cellm.Tools.ModelContextProtocol;
@@ -38,29 +40,23 @@ public partial class RibbonMain
     {
         return $"""
         <group id="{nameof(ToolsGroupControlIds.ToolsGroup)}" label="Tools">
-            <splitButton id="{nameof(ToolsGroupControlIds.FunctionsSplitButton)}" size="large">
-                <button id="{nameof(ToolsGroupControlIds.FunctionsButton)}" label="Functions" imageMso="FunctionWizard" screentip="Enable/disable built-in functions" />
-                <menu id="{nameof(ToolsGroupControlIds.FunctionsMenu)}">
+            <box id="boxasdf" boxStyle="horizontal">
+                <menu id="{nameof(ToolsGroupControlIds.FunctionsMenu)}" label="Functions" imageMso="FunctionWizard" screentip="Enable/disable built-in functions" size="large">
                     <checkBox id="{nameof(ToolsGroupControlIds.BrowserCheckBox)}" label="Internet Browser"
-                         screentip="Let models browse the web"
-                         onAction="{nameof(OnBrowserToggled)}"
-                         getPressed="{nameof(GetBrowserPressed)}" />
+                            screentip="Let models browse the web"
+                            onAction="{nameof(OnBrowserToggled)}"
+                            getPressed="{nameof(GetBrowserPressed)}" />
                     <checkBox id="{nameof(ToolsGroupControlIds.FileSearchCheckBox)}" label="File Search"
-                         screentip="Let models search for files on your computer"
-                         onAction="{nameof(OnFileSearchToggled)}"
-                         getPressed="{nameof(GetFileSearchPressed)}" />
+                            screentip="Let models search for files on your computer"
+                            onAction="{nameof(OnFileSearchToggled)}"
+                            getPressed="{nameof(GetFileSearchPressed)}" />
                     <checkBox id="{nameof(ToolsGroupControlIds.FileReaderCheckBox)}" label="File Reader"
-                         screentip="Let model read files on your computer. Supports PDF, Markdown, and common text formats"
-                         onAction="{nameof(OnFileReaderToggled)}"
-                         getPressed="{nameof(GetFileReaderPressed)}" />
-                 </menu>
-            </splitButton>
-            <splitButton id="{nameof(ToolsGroupControlIds.McpSplitButton)}" size="large" getEnabled="{nameof(GetMcpEnabled)}">
-                <button id="{nameof(ToolsGroupControlIds.McpButton)}" label="MCP" getImage="{nameof(GetMcpMenuImage)}" screentip="Enable/disable Model Context Protocol servers." />
-                <menu id="{nameof(ToolsGroupControlIds.McpMenu)}">
-                    {GetMcpMenuContent()}
+                            screentip="Let model read files on your computer. Supports PDF, Markdown, and common text formats"
+                            onAction="{nameof(OnFileReaderToggled)}"
+                            getPressed="{nameof(GetFileReaderPressed)}" />
                 </menu>
-            </splitButton>
+                <dynamicMenu id="{nameof(ToolsGroupControlIds.McpMenu)}" getContent="{nameof(GetMcpMenuContent)}" size="large" label="MCP" getImage="{nameof(GetMcpMenuImage)}" />
+            </box>
         </group>
         """;
     }
@@ -97,7 +93,7 @@ public partial class RibbonMain
         return bool.Parse(value);
     }
 
-    public string GetMcpMenuContent()
+    public string GetMcpMenuContent(IRibbonControl control)
     {
         try
         {
@@ -106,6 +102,8 @@ public partial class RibbonMain
             var anyServers = false;
 
             var menuXml = new StringBuilder();
+            menuXml.AppendLine(@"<menu xmlns=""http://schemas.microsoft.com/office/2006/01/customui"">");
+
             foreach (var server in modelContenxtProtocolConfiguration.StdioServers ?? [])
             {
                 // Skip servers without a valid name, as it's used for ID and config key
@@ -161,12 +159,14 @@ public partial class RibbonMain
             menuXml.AppendLine(
                 $@"<button id=""{nameof(ToolsGroupControlIds.McpAddNewButton)}""
                     label=""Add new ...""
-                    onAction=""{nameof(ShowProviderSettingsForm)}"" />");
+                    onAction=""{nameof(ShowAddMcpServerForm)}"" />");
 
             menuXml.AppendLine(
                 $@"<button id=""{nameof(ToolsGroupControlIds.McpEditOrRemoveButton)}""
                     label=""Edit or remove ...""
-                    onAction=""{nameof(ShowProviderSettingsForm)}"" />");
+                    onAction=""{nameof(ShowEditMcpServerForm)}"" />");
+
+            menuXml.AppendLine("</menu>");
 
             return menuXml.ToString();
         }
@@ -248,5 +248,69 @@ public partial class RibbonMain
         var account = CellmAddIn.Services.GetRequiredService<Account>();
 
         return account.HasEntitlement(Entitlement.EnableModelContextProtocol);
+    }
+
+    public void ShowAddMcpServerForm(IRibbonControl control)
+    {
+        try
+        {
+            var form = new AddMcpServerForm();
+            if (form.ShowDialog() == DialogResult.OK)
+            {
+                // Allow some time for configuration file changes to be processed
+                System.Threading.Thread.Sleep(100);
+
+                // Force configuration refresh and then refresh the ribbon UI
+                var _ = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<ModelContextProtocolConfiguration>>().CurrentValue;
+
+                // Refresh the ribbon UI after the form is closed to update the MCP menu
+                _ribbonUi?.Invalidate();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Error showing Add MCP Server form: {message}", ex.Message);
+        }
+    }
+
+    public void ShowEditMcpServerForm(IRibbonControl control)
+    {
+        try
+        {
+            var form = new EditMcpServerForm();
+            if (form.ShowDialog() == DialogResult.OK)
+            {
+                // Allow some time for configuration file changes to be processed
+                System.Threading.Thread.Sleep(100);
+
+                // Force configuration refresh and then refresh the ribbon UI
+                var _ = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<ModelContextProtocolConfiguration>>().CurrentValue;
+
+                // Refresh the ribbon UI after the form is closed to update the MCP menu
+                _ribbonUi?.Invalidate();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Error showing Edit MCP Server form: {message}", ex.Message);
+        }
+    }
+}
+public static class ObjectExtensions
+{
+    public static T Clone<T>(this T source)
+    {
+        if (source == null)
+        {
+            throw new ArgumentNullException(nameof(source));
+        }
+
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = true
+        };
+
+        string jsonString = JsonSerializer.Serialize(source, options);
+        return JsonSerializer.Deserialize<T>(jsonString, options) ?? throw new NullReferenceException(nameof(source));
     }
 }

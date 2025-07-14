@@ -1,7 +1,6 @@
 ﻿using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Windows.Forms;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
 using Cellm.Models.Providers.Aws;
@@ -13,7 +12,6 @@ using Cellm.Models.Providers.Mistral;
 using Cellm.Models.Providers.Ollama;
 using Cellm.Models.Providers.OpenAi;
 using Cellm.Models.Providers.OpenAiCompatible;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -113,7 +111,50 @@ public partial class RibbonMain
         File.WriteAllText(_appsettingsLocalPath, localNode.ToJsonString(options));
     }
 
+    public static void SetValue(string key, JsonNode value)
+    {
+        var keySegments = key.Split(':');
+        var localNode = File.Exists(_appsettingsLocalPath)
+            ? JsonNode.Parse(File.ReadAllText(_appsettingsLocalPath)) ?? new JsonObject()
+            : new JsonObject();
+
+        SetValueInNode(localNode.AsObject(), keySegments, value);
+
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
+
+        Directory.CreateDirectory(Path.GetDirectoryName(_appsettingsLocalPath)!);
+        File.WriteAllText(_appsettingsLocalPath, localNode.ToJsonString(options));
+    }
+
     private static void SetValueInNode(JsonObject node, string[] keySegments, string value)
+    {
+        var current = node;
+        for (var i = 0; i < keySegments.Length; i++)
+        {
+            var isLast = i == keySegments.Length - 1;
+            var segment = keySegments[i];
+
+            if (isLast)
+            {
+                current[segment] = value;
+            }
+            else
+            {
+                if (!current.TryGetPropertyValue(segment, out var nextNode))
+                {
+                    nextNode = new JsonObject();
+                    current[segment] = nextNode;
+                }
+                current = nextNode!.AsObject();
+            }
+        }
+    }
+
+    private static void SetValueInNode(JsonObject node, string[] keySegments, JsonNode value)
     {
         var current = node;
         for (var i = 0; i < keySegments.Length; i++)
@@ -158,6 +199,51 @@ public partial class RibbonMain
         }
 
         throw new KeyNotFoundException($"Key '{key}' not found in configuration files");
+    }
+
+    public static JsonNode? GetValueAsJsonNode(string key)
+    {
+        var keySegments = key.Split(':');
+
+        JsonNode? localValue = null;
+        JsonNode? baseValue = null;
+
+        // 1. Check local settings
+        if (File.Exists(_appsettingsLocalPath))
+        {
+            var localNode = JsonNode.Parse(File.ReadAllText(_appsettingsLocalPath));
+            localValue = GetValueFromNode(localNode, keySegments);
+        }
+
+        // 2. Check base settings
+        if (File.Exists(_appSettingsPath))
+        {
+            var baseNode = JsonNode.Parse(File.ReadAllText(_appSettingsPath));
+            baseValue = GetValueFromNode(baseNode, keySegments);
+        }
+
+        // 3. Merge arrays if both exist and are arrays
+        if (localValue is JsonArray localArray && baseValue is JsonArray baseArray)
+        {
+            var mergedArray = new JsonArray();
+
+            // Add base values first
+            foreach (var item in baseArray)
+            {
+                mergedArray.Add(item?.DeepClone());
+            }
+
+            // Add local values
+            foreach (var item in localArray)
+            {
+                mergedArray.Add(item?.DeepClone());
+            }
+
+            return mergedArray;
+        }
+
+        // 4. Return local value if it exists, otherwise base value
+        return localValue ?? baseValue;
     }
 
     private static JsonNode? GetValueFromNode(JsonNode? node, string[] keySegments)
