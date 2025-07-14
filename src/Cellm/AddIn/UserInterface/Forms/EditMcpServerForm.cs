@@ -62,16 +62,22 @@ public partial class EditMcpServerForm : Form
     {
         _logger.LogInformation($"PopulateServerList - Starting with {_existingStdioServers.Count} stdio and {_existingSseServers.Count} SSE servers");
 
-        serverListBox.Items.Clear();
+        serverListView.Items.Clear();
 
         foreach (var server in _existingStdioServers)
         {
-            serverListBox.Items.Add($"[Standard I/O] {server}");
+            var item = new ListViewItem("Standard I/O");
+            item.SubItems.Add(server);
+            item.Tag = new { Name = server, IsStdio = true };
+            serverListView.Items.Add(item);
         }
 
         foreach (var server in _existingSseServers)
         {
-            serverListBox.Items.Add($"[Streamable HTTP] {server}");
+            var item = new ListViewItem("Streamable HTTP");
+            item.SubItems.Add(server);
+            item.Tag = new { Name = server, IsStdio = false };
+            serverListView.Items.Add(item);
         }
     }
 
@@ -103,7 +109,7 @@ public partial class EditMcpServerForm : Form
         additionalHeadersButton.Visible = !isStdio;
 
         // Adjust form height based on visible fields
-        this.Height = 420;
+        this.Height = 620;
     }
 
     private void environmentVariablesButton_Click(object sender, EventArgs e)
@@ -141,11 +147,12 @@ public partial class EditMcpServerForm : Form
 
     private void RemoveButton_Click(object sender, EventArgs e)
     {
-        if (serverListBox.SelectedItem == null) return;
+        if (serverListView.SelectedItems.Count == 0) return;
 
-        var selectedText = serverListBox.SelectedItem.ToString()!;
-        var isStdio = selectedText.StartsWith("[Standard I/O]");
-        var serverName = selectedText.Substring(selectedText.IndexOf(']') + 2);
+        var selectedItem = serverListView.SelectedItems[0];
+        var serverInfo = (dynamic)selectedItem.Tag;
+        var serverName = serverInfo.Name;
+        var isStdio = serverInfo.IsStdio;
 
         var result = MessageBox.Show($"Are you sure you want to remove the MCP server '{serverName}'?",
             "Confirm Removal", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -243,7 +250,7 @@ public partial class EditMcpServerForm : Form
         removeButton.Enabled = true;
         okButton.Enabled = false;
         cancelButton.Enabled = false;
-        serverListBox.Enabled = true;
+        serverListView.Enabled = true;
     }
 
     private void ClearFields()
@@ -453,17 +460,19 @@ public partial class EditMcpServerForm : Form
         RibbonMain.SetValue("ModelContextProtocolConfiguration:SseServers", jsonNode!);
     }
 
-    private void serverListBox_SelectedIndexChanged(object sender, EventArgs e)
+    private void serverListView_SelectedIndexChanged(object sender, EventArgs e)
     {
-        bool hasSelection = serverListBox.SelectedItem != null;
+        bool hasSelection = serverListView.SelectedItems.Count > 0;
         removeButton.Enabled = hasSelection;
         okButton.Enabled = hasSelection;
 
         if (hasSelection)
         {
-            var selectedText = serverListBox.SelectedItem?.ToString()!;
-            bool isStdio = selectedText.StartsWith("[Standard I/O]");
-            string serverName = selectedText.Substring(selectedText.IndexOf(']') + 2);
+            var selectedItem = serverListView.SelectedItems[0];
+            var serverInfo = (dynamic)selectedItem.Tag;
+            var serverName = serverInfo.Name;
+            var isStdio = serverInfo.IsStdio;
+            
             _editingServerName = serverName;
             _isEditMode = true;
 
