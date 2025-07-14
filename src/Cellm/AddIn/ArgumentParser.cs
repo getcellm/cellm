@@ -116,7 +116,7 @@ public class ArgumentParser(IConfiguration configuration)
         return arguments;
     }
 
-    internal static string AddCellTags(string context)
+    internal static string AddCells(string context)
     {
         return new StringBuilder()
             .AppendLine(CellsBeginTag)
@@ -125,7 +125,7 @@ public class ArgumentParser(IConfiguration configuration)
             .ToString();
     }
 
-    internal static string AddInstructionTags(string instructions)
+    internal static string AddInstructions(string instructions)
     {
         return new StringBuilder()
             .AppendLine(InstructionsBeginTag)
