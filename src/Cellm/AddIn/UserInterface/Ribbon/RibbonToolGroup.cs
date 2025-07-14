@@ -39,29 +39,23 @@ public partial class RibbonMain
     {
         return $"""
         <group id="{nameof(ToolsGroupControlIds.ToolsGroup)}" label="Tools">
-            <splitButton id="{nameof(ToolsGroupControlIds.FunctionsSplitButton)}" size="large">
-                <button id="{nameof(ToolsGroupControlIds.FunctionsButton)}" label="Functions" imageMso="FunctionWizard" screentip="Enable/disable built-in functions" />
-                <menu id="{nameof(ToolsGroupControlIds.FunctionsMenu)}">
+            <box id="boxasdf" boxStyle="horizontal">
+                <menu id="{nameof(ToolsGroupControlIds.FunctionsMenu)}" label="Functions" imageMso="FunctionWizard" screentip="Enable/disable built-in functions" size="large">
                     <checkBox id="{nameof(ToolsGroupControlIds.BrowserCheckBox)}" label="Internet Browser"
-                         screentip="Let models browse the web"
-                         onAction="{nameof(OnBrowserToggled)}"
-                         getPressed="{nameof(GetBrowserPressed)}" />
+                            screentip="Let models browse the web"
+                            onAction="{nameof(OnBrowserToggled)}"
+                            getPressed="{nameof(GetBrowserPressed)}" />
                     <checkBox id="{nameof(ToolsGroupControlIds.FileSearchCheckBox)}" label="File Search"
-                         screentip="Let models search for files on your computer"
-                         onAction="{nameof(OnFileSearchToggled)}"
-                         getPressed="{nameof(GetFileSearchPressed)}" />
+                            screentip="Let models search for files on your computer"
+                            onAction="{nameof(OnFileSearchToggled)}"
+                            getPressed="{nameof(GetFileSearchPressed)}" />
                     <checkBox id="{nameof(ToolsGroupControlIds.FileReaderCheckBox)}" label="File Reader"
-                         screentip="Let model read files on your computer. Supports PDF, Markdown, and common text formats"
-                         onAction="{nameof(OnFileReaderToggled)}"
-                         getPressed="{nameof(GetFileReaderPressed)}" />
-                 </menu>
-            </splitButton>
-            <splitButton id="{nameof(ToolsGroupControlIds.McpSplitButton)}" size="large" getEnabled="{nameof(GetMcpEnabled)}">
-                <button id="{nameof(ToolsGroupControlIds.McpButton)}" label="MCP" getImage="{nameof(GetMcpMenuImage)}" screentip="Enable/disable Model Context Protocol servers." />
-                <menu id="{nameof(ToolsGroupControlIds.McpMenu)}">
-                    {GetMcpMenuContent()}
+                            screentip="Let model read files on your computer. Supports PDF, Markdown, and common text formats"
+                            onAction="{nameof(OnFileReaderToggled)}"
+                            getPressed="{nameof(GetFileReaderPressed)}" />
                 </menu>
-            </splitButton>
+                <dynamicMenu id="{nameof(ToolsGroupControlIds.McpMenu)}" getContent="{nameof(GetMcpMenuContent)}" size="large" label="MCP" getImage="{nameof(GetMcpMenuImage)}" />
+            </box>
         </group>
         """;
     }
@@ -98,7 +92,7 @@ public partial class RibbonMain
         return bool.Parse(value);
     }
 
-    public string GetMcpMenuContent()
+    public string GetMcpMenuContent(IRibbonControl control)
     {
         try
         {
@@ -107,6 +101,8 @@ public partial class RibbonMain
             var anyServers = false;
 
             var menuXml = new StringBuilder();
+            menuXml.AppendLine(@"<menu xmlns=""http://schemas.microsoft.com/office/2006/01/customui"">");
+
             foreach (var server in modelContenxtProtocolConfiguration.StdioServers ?? [])
             {
                 // Skip servers without a valid name, as it's used for ID and config key
@@ -168,6 +164,8 @@ public partial class RibbonMain
                 $@"<button id=""{nameof(ToolsGroupControlIds.McpEditOrRemoveButton)}""
                     label=""Edit or remove ...""
                     onAction=""{nameof(ShowEditMcpServerForm)}"" />");
+
+            menuXml.AppendLine("</menu>");
 
             return menuXml.ToString();
         }
