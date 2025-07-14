@@ -135,7 +135,7 @@ partial class AddMcpServerForm
         environmentVariablesButton.TabIndex = 9;
         environmentVariablesButton.Text = "Edit...";
         environmentVariablesButton.UseVisualStyleBackColor = true;
-        environmentVariablesButton.Click += environmentVariablesButton_Click;
+        environmentVariablesButton.Click += EnvironmentVariablesButton_Click;
         // 
         // endpointLabel
         // 
@@ -207,7 +207,7 @@ partial class AddMcpServerForm
         additionalHeadersButton.TabIndex = 15;
         additionalHeadersButton.Text = "Edit...";
         additionalHeadersButton.UseVisualStyleBackColor = true;
-        additionalHeadersButton.Click += additionalHeadersButton_Click;
+        additionalHeadersButton.Click += AdditionalHeadersButton_Click;
         // 
         // okButton
         // 
@@ -217,7 +217,7 @@ partial class AddMcpServerForm
         okButton.TabIndex = 16;
         okButton.Text = "OK";
         okButton.UseVisualStyleBackColor = true;
-        okButton.Click += okButton_Click;
+        okButton.Click += OkButton_Click;
         // 
         // cancelButton
         // 

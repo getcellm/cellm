@@ -1,12 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Windows.Forms;
 using Cellm.AddIn.UserInterface.Ribbon;
 using Cellm.Tools.ModelContextProtocol;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -94,7 +89,7 @@ public partial class AddMcpServerForm : Form
         this.Height = 300;
     }
 
-    private void environmentVariablesButton_Click(object sender, EventArgs e)
+    private void EnvironmentVariablesButton_Click(object sender, EventArgs e)
     {
         var form = new EnvironmentVariableEditorForm(_environmentVariables);
         if (form.ShowDialog() == DialogResult.OK)
@@ -103,7 +98,7 @@ public partial class AddMcpServerForm : Form
         }
     }
 
-    private void additionalHeadersButton_Click(object sender, EventArgs e)
+    private void AdditionalHeadersButton_Click(object sender, EventArgs e)
     {
         var form = new HeadersEditorForm(_headers);
         if (form.ShowDialog() == DialogResult.OK)
@@ -112,7 +107,7 @@ public partial class AddMcpServerForm : Form
         }
     }
 
-    private void okButton_Click(object sender, EventArgs e)
+    private void OkButton_Click(object sender, EventArgs e)
     {
         if (!ValidateForm()) return;
 

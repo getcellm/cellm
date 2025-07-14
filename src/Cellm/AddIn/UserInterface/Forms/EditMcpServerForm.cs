@@ -112,7 +112,7 @@ public partial class EditMcpServerForm : Form
         this.Height = 620;
     }
 
-    private void environmentVariablesButton_Click(object sender, EventArgs e)
+    private void EnvironmentVariablesButton_Click(object sender, EventArgs e)
     {
         var form = new EnvironmentVariableEditorForm(_environmentVariables);
         if (form.ShowDialog() == DialogResult.OK)
@@ -121,7 +121,7 @@ public partial class EditMcpServerForm : Form
         }
     }
 
-    private void additionalHeadersButton_Click(object sender, EventArgs e)
+    private void AdditionalHeadersButton_Click(object sender, EventArgs e)
     {
         var form = new HeadersEditorForm(_headers);
         if (form.ShowDialog() == DialogResult.OK)
@@ -130,7 +130,7 @@ public partial class EditMcpServerForm : Form
         }
     }
 
-    private void addButton_Click(object sender, EventArgs e)
+    private void AddButton_Click(object sender, EventArgs e)
     {
         var addForm = new AddMcpServerForm();
         if (addForm.ShowDialog() == DialogResult.OK)
@@ -150,9 +150,9 @@ public partial class EditMcpServerForm : Form
         if (serverListView.SelectedItems.Count == 0) return;
 
         var selectedItem = serverListView.SelectedItems[0];
-        var serverInfo = (dynamic)selectedItem.Tag;
-        var serverName = serverInfo.Name;
-        var isStdio = serverInfo.IsStdio;
+        var serverInfo = (dynamic?)selectedItem.Tag;
+        var serverName = serverInfo?.Name;
+        var isStdio = serverInfo?.IsStdio ?? throw new NullReferenceException(nameof(serverInfo));
 
         var result = MessageBox.Show($"Are you sure you want to remove the MCP server '{serverName}'?",
             "Confirm Removal", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -179,7 +179,7 @@ public partial class EditMcpServerForm : Form
         }
     }
 
-    private void okButton_Click(object sender, EventArgs e)
+    private void OkButton_Click(object sender, EventArgs e)
     {
         if (!ValidateForm()) return;
 
@@ -235,7 +235,7 @@ public partial class EditMcpServerForm : Form
         }
     }
 
-    private void cancelButton_Click(object sender, EventArgs e)
+    private void CancelButton_Click(object sender, EventArgs e)
     {
         this.DialogResult = DialogResult.Cancel;
         this.Close();
@@ -469,9 +469,9 @@ public partial class EditMcpServerForm : Form
         if (hasSelection)
         {
             var selectedItem = serverListView.SelectedItems[0];
-            var serverInfo = (dynamic)selectedItem.Tag;
-            var serverName = serverInfo.Name;
-            var isStdio = serverInfo.IsStdio;
+            var serverInfo = (dynamic?)selectedItem.Tag;
+            var serverName = serverInfo?.Name;
+            var isStdio = serverInfo?.IsStdio ?? throw new NullReferenceException(nameof(serverInfo));
 
             _editingServerName = serverName;
             _isEditMode = true;
