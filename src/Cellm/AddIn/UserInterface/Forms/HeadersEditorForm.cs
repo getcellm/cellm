@@ -9,9 +9,9 @@ public partial class HeadersEditorForm : Form
 {
     private Dictionary<string, string> _headers;
 
-    public Dictionary<string, string> Headers 
-    { 
-        get => _headers; 
+    public Dictionary<string, string> Headers
+    {
+        get => _headers;
     }
 
     public HeadersEditorForm(Dictionary<string, string> headers)
@@ -24,7 +24,7 @@ public partial class HeadersEditorForm : Form
     private void PopulateList()
     {
         headersListView.Items.Clear();
-        
+
         foreach (var kvp in _headers)
         {
             var item = new ListViewItem(kvp.Key);
@@ -40,14 +40,14 @@ public partial class HeadersEditorForm : Form
         {
             var name = form.HeaderName;
             var value = form.HeaderValue;
-            
+
             if (_headers.ContainsKey(name))
             {
-                MessageBox.Show($"Header '{name}' already exists.", "Duplicate Header", 
+                MessageBox.Show($"Header '{name}' already exists.", "Duplicate Header",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            
+
             _headers[name] = value;
             PopulateList();
         }
@@ -56,31 +56,31 @@ public partial class HeadersEditorForm : Form
     private void editButton_Click(object sender, EventArgs e)
     {
         if (headersListView.SelectedItems.Count == 0) return;
-        
+
         var selectedItem = headersListView.SelectedItems[0];
         var name = selectedItem.Text;
         var value = selectedItem.SubItems[1].Text;
-        
+
         var form = new HeaderEditForm(name, value);
         if (form.ShowDialog() == DialogResult.OK)
         {
             var newName = form.HeaderName;
             var newValue = form.HeaderValue;
-            
+
             // If name changed, check for duplicates
             if (name != newName && _headers.ContainsKey(newName))
             {
-                MessageBox.Show($"Header '{newName}' already exists.", "Duplicate Header", 
+                MessageBox.Show($"Header '{newName}' already exists.", "Duplicate Header",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            
+
             // Remove old entry if name changed
             if (name != newName)
             {
                 _headers.Remove(name);
             }
-            
+
             _headers[newName] = newValue;
             PopulateList();
         }
@@ -89,13 +89,13 @@ public partial class HeadersEditorForm : Form
     private void removeButton_Click(object sender, EventArgs e)
     {
         if (headersListView.SelectedItems.Count == 0) return;
-        
+
         var selectedItem = headersListView.SelectedItems[0];
         var name = selectedItem.Text;
-        
-        var result = MessageBox.Show($"Remove header '{name}'?", "Confirm Removal", 
+
+        var result = MessageBox.Show($"Remove header '{name}'?", "Confirm Removal",
             MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-        
+
         if (result == DialogResult.Yes)
         {
             _headers.Remove(name);

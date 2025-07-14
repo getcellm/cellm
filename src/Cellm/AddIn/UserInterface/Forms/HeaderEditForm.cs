@@ -19,7 +19,7 @@ public partial class HeaderEditForm : Form
     {
         if (string.IsNullOrWhiteSpace(nameTextBox.Text))
         {
-            MessageBox.Show("Please enter a header name.", "Validation Error", 
+            MessageBox.Show("Please enter a header name.", "Validation Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }

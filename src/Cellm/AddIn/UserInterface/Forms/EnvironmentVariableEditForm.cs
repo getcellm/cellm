@@ -19,7 +19,7 @@ public partial class EnvironmentVariableEditForm : Form
     {
         if (string.IsNullOrWhiteSpace(nameTextBox.Text))
         {
-            MessageBox.Show("Please enter a variable name.", "Validation Error", 
+            MessageBox.Show("Please enter a variable name.", "Validation Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }

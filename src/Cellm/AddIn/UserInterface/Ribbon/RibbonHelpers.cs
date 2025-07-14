@@ -1,7 +1,6 @@
 ﻿using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Windows.Forms;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
 using Cellm.Models.Providers.Aws;
@@ -13,7 +12,6 @@ using Cellm.Models.Providers.Mistral;
 using Cellm.Models.Providers.Ollama;
 using Cellm.Models.Providers.OpenAi;
 using Cellm.Models.Providers.OpenAiCompatible;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -228,19 +226,19 @@ public partial class RibbonMain
         if (localValue is JsonArray localArray && baseValue is JsonArray baseArray)
         {
             var mergedArray = new JsonArray();
-            
+
             // Add base values first
             foreach (var item in baseArray)
             {
                 mergedArray.Add(item?.DeepClone());
             }
-            
+
             // Add local values
             foreach (var item in localArray)
             {
                 mergedArray.Add(item?.DeepClone());
             }
-            
+
             return mergedArray;
         }
 

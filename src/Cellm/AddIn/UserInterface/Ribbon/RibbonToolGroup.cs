@@ -259,10 +259,10 @@ public partial class RibbonMain
             {
                 // Allow some time for configuration file changes to be processed
                 System.Threading.Thread.Sleep(100);
-                
+
                 // Force configuration refresh and then refresh the ribbon UI
                 var _ = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<ModelContextProtocolConfiguration>>().CurrentValue;
-                
+
                 // Refresh the ribbon UI after the form is closed to update the MCP menu
                 _ribbonUi?.Invalidate();
             }
@@ -282,10 +282,10 @@ public partial class RibbonMain
             {
                 // Allow some time for configuration file changes to be processed
                 System.Threading.Thread.Sleep(100);
-                
+
                 // Force configuration refresh and then refresh the ribbon UI
                 var _ = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<ModelContextProtocolConfiguration>>().CurrentValue;
-                
+
                 // Refresh the ribbon UI after the form is closed to update the MCP menu
                 _ribbonUi?.Invalidate();
             }

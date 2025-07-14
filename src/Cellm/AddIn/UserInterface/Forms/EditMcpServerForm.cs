@@ -472,7 +472,7 @@ public partial class EditMcpServerForm : Form
             var serverInfo = (dynamic)selectedItem.Tag;
             var serverName = serverInfo.Name;
             var isStdio = serverInfo.IsStdio;
-            
+
             _editingServerName = serverName;
             _isEditMode = true;
 
