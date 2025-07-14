@@ -28,13 +28,14 @@ public static class StructuredOutput
             // Maybe deserialize
             structuredOutput = shape switch
             {
+                // No-op
                 StructuredOutputShape.None => null,
                 // ["a", "b", "c"] becomes [ ["a", "b", "c"] ]
                 StructuredOutputShape.Row => ConvertRowToArray2d(JsonSerializer.Deserialize<Array1d>(message, _jsonOptions)?.Data ?? throw new JsonException($"Failed to deserialize row: {message}")),
                 // ["a", "b", "c"] becomes [ ["a"], ["b"], ["c"] ]
                 StructuredOutputShape.Column => ConvertColumnToArray2d(JsonSerializer.Deserialize<Array1d>(message, _jsonOptions)?.Data ?? throw new JsonException($"Failed to deserialize column: {message}")),
                 // [ ["a", "b"], ["c"] ] becomes [ ["a", "b"], ["c", ""] ]
-                StructuredOutputShape.Table => ConvertJaggedToArray2d(JsonSerializer.Deserialize<Array2d>(message, _jsonOptions)?.Data ?? throw new JsonException($"Failed to deserialize 2d array: {message}")),
+                StructuredOutputShape.Dynamic => ConvertJaggedToArray2d(JsonSerializer.Deserialize<Array2d>(message, _jsonOptions)?.Data ?? throw new JsonException($"Failed to deserialize 2d array: {message}")),
                 _ => null
             };
 
@@ -45,7 +46,7 @@ public static class StructuredOutput
         }
         catch (JsonException ex)
         {
-            // No-op
+            // Do nothing, response will be returned ina  single cell
             var loggerFactory = CellmAddIn.Services.GetRequiredService<ILoggerFactory>()
                 .CreateLogger(nameof(StructuredOutput));
 

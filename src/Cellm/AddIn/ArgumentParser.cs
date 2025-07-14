@@ -120,7 +120,7 @@ public class ArgumentParser(IConfiguration configuration)
     {
         return new StringBuilder()
             .AppendLine(CellsBeginTag)
-            .AppendLine(context)
+            .AppendLine(cells)
             .AppendLine(CellsEndTag)
             .ToString();
     }
@@ -226,11 +226,13 @@ public class ArgumentParser(IConfiguration configuration)
             tableBuilder.Append(" |");
         }
 
-        tableBuilder.AppendLine();
+
 
         // Render cells
         for (var r = 1; r < numberOfRenderedRows; r++)
         {
+            tableBuilder.AppendLine();
+
             tableBuilder.Append('|');
 
             // Render row enumeration
@@ -245,8 +247,6 @@ public class ArgumentParser(IConfiguration configuration)
                 tableBuilder.Append(table[r, c].PadRight(maxColumnWidth[c]));
                 tableBuilder.Append(" |");
             }
-
-            tableBuilder.AppendLine();
         }
 
         if (tableIsEmpty)
