@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Windows.Forms;
 using Cellm.AddIn.UserInterface.Ribbon;
 using Cellm.Tools.ModelContextProtocol;
@@ -226,41 +227,8 @@ public partial class AddMcpServerForm : Form
         
         servers.Add(newServer);
         
-        // Update configuration
-        var configPath = "ModelContextProtocolConfiguration:StdioServers";
-        for (int i = 0; i < servers.Count; i++)
-        {
-            var server = servers[i];
-            RibbonMain.SetValue($"{configPath}:{i}:Name", server.Name);
-            RibbonMain.SetValue($"{configPath}:{i}:Command", server.Command);
-            
-            if (server.Arguments != null && server.Arguments.Count > 0)
-            {
-                for (int j = 0; j < server.Arguments.Count; j++)
-                {
-                    RibbonMain.SetValue($"{configPath}:{i}:Arguments:{j}", server.Arguments[j]);
-                }
-            }
-            
-            if (server.WorkingDirectory != null)
-            {
-                RibbonMain.SetValue($"{configPath}:{i}:WorkingDirectory", server.WorkingDirectory);
-            }
-            
-            if (server.EnvironmentVariables != null && server.EnvironmentVariables.Count > 0)
-            {
-                foreach (var kv in server.EnvironmentVariables)
-                {
-                    RibbonMain.SetValue($"{configPath}:{i}:EnvironmentVariables:{kv.Key}", kv.Value ?? "");
-                }
-            }
-            
-            // Only set ShutdownTimeout if it's not the default value
-            if (server.ShutdownTimeout != TimeSpan.FromSeconds(5))
-            {
-                RibbonMain.SetValue($"{configPath}:{i}:ShutdownTimeout", server.ShutdownTimeout.ToString());
-            }
-        }
+        // Save the entire servers array as JSON
+        SaveStdioServersConfiguration(servers);
     }
 
     private void SaveSseServer(string serverName)
@@ -279,33 +247,31 @@ public partial class AddMcpServerForm : Form
         
         servers.Add(newServer);
         
-        // Update configuration
-        var configPath = "ModelContextProtocolConfiguration:SseServers";
-        for (int i = 0; i < servers.Count; i++)
+        // Save the entire servers array as JSON
+        SaveSseServersConfiguration(servers);
+    }
+
+    private void SaveStdioServersConfiguration(List<StdioClientTransportOptions> servers)
+    {
+        var jsonOptions = new JsonSerializerOptions
         {
-            var server = servers[i];
-            RibbonMain.SetValue($"{configPath}:{i}:Name", server.Name);
-            RibbonMain.SetValue($"{configPath}:{i}:Endpoint", server.Endpoint.ToString());
-            
-            // Only set TransportMode if it's not the default value
-            if (server.TransportMode != HttpTransportMode.AutoDetect)
-            {
-                RibbonMain.SetValue($"{configPath}:{i}:TransportMode", ((int)server.TransportMode).ToString());
-            }
-            
-            // Only set ConnectionTimeout if it's not the default value
-            if (server.ConnectionTimeout != TimeSpan.FromSeconds(30))
-            {
-                RibbonMain.SetValue($"{configPath}:{i}:ConnectionTimeout", server.ConnectionTimeout.ToString());
-            }
-            
-            if (server.AdditionalHeaders != null && server.AdditionalHeaders.Count > 0)
-            {
-                foreach (var kv in server.AdditionalHeaders)
-                {
-                    RibbonMain.SetValue($"{configPath}:{i}:AdditionalHeaders:{kv.Key}", kv.Value);
-                }
-            }
-        }
+            WriteIndented = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
+        
+        var json = JsonSerializer.Serialize(servers, jsonOptions);
+        RibbonMain.SetValue("ModelContextProtocolConfiguration:StdioServers", json);
+    }
+    
+    private void SaveSseServersConfiguration(List<SseClientTransportOptions> servers)
+    {
+        var jsonOptions = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
+        
+        var json = JsonSerializer.Serialize(servers, jsonOptions);
+        RibbonMain.SetValue("ModelContextProtocolConfiguration:SseServers", json);
     }
 }
