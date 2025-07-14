@@ -226,7 +226,7 @@ public class ArgumentParser(IConfiguration configuration)
             tableBuilder.Append(" |");
         }
 
-        
+
 
         // Render cells
         for (var r = 1; r < numberOfRenderedRows; r++)
