@@ -1,5 +1,6 @@
 using System.Security;
 using System.Text;
+using Cellm.AddIn.UserInterface.Forms;
 using Cellm.Tools.FileReader;
 using Cellm.Tools.FileSearch;
 using Cellm.Tools.ModelContextProtocol;
@@ -161,12 +162,12 @@ public partial class RibbonMain
             menuXml.AppendLine(
                 $@"<button id=""{nameof(ToolsGroupControlIds.McpAddNewButton)}""
                     label=""Add new ...""
-                    onAction=""{nameof(ShowProviderSettingsForm)}"" />");
+                    onAction=""{nameof(ShowMcpClientSettingsForm)}"" />");
 
             menuXml.AppendLine(
                 $@"<button id=""{nameof(ToolsGroupControlIds.McpEditOrRemoveButton)}""
                     label=""Edit or remove ...""
-                    onAction=""{nameof(ShowProviderSettingsForm)}"" />");
+                    onAction=""{nameof(ShowMcpClientSettingsForm)}"" />");
 
             return menuXml.ToString();
         }
@@ -248,5 +249,21 @@ public partial class RibbonMain
         var account = CellmAddIn.Services.GetRequiredService<Account>();
 
         return account.HasEntitlement(Entitlement.EnableModelContextProtocol);
+    }
+
+    public void ShowMcpClientSettingsForm(IRibbonControl control)
+    {
+        try
+        {
+            var form = new McpClientSettingsForm();
+            form.ShowDialog();
+            
+            // Refresh the ribbon UI after the form is closed to update the MCP menu
+            _ribbonUi?.Invalidate();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Error showing MCP client settings form: {message}", ex.Message);
+        }
     }
 }

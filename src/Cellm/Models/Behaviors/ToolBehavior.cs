@@ -85,10 +85,10 @@ internal class ToolBehavior<TRequest, TResponse>(
 
     private async Task<IList<McpClientTool>> GetOrFetchServerToolsAsync(StdioClientTransportOptions stdioClientTransportOptions, CancellationToken cancellationToken)
     {
-        if (_cache.ContainsKey(stdioClientTransportOptions.Name ?? throw new NullReferenceException(nameof(stdioClientTransportOptions))) && _cache[stdioClientTransportOptions.Name] is IList<McpClientTool> cachedTools)
+        if (_cache.ContainsKey(stdioClientTransportOptions.Name ?? throw new NullReferenceException(nameof(stdioClientTransportOptions))) && _cache[stdioClientTransportOptions.Name] is IList<McpClientTool> cachedMcpClientTool)
         {
             logger.LogDebug("Using cached tools for {ServerName}", stdioClientTransportOptions.Name);
-            return cachedTools;
+            return cachedMcpClientTool;
         }
 
         var clientTransport = new StdioClientTransport(stdioClientTransportOptions);
@@ -102,10 +102,10 @@ internal class ToolBehavior<TRequest, TResponse>(
 
     private async Task<IList<McpClientTool>> GetOrFetchServerToolsAsync(SseClientTransportOptions sseClientTransportOptions, CancellationToken cancellationToken)
     {
-        if (_cache.ContainsKey(sseClientTransportOptions.Name ?? throw new NullReferenceException(nameof(sseClientTransportOptions))) && _cache[sseClientTransportOptions.Name] is IList<McpClientTool> cachedTools)
+        if (_cache.ContainsKey(sseClientTransportOptions.Name ?? throw new NullReferenceException(nameof(sseClientTransportOptions))) && _cache[sseClientTransportOptions.Name] is IList<McpClientTool> cachedMcpClientTool)
         {
             logger.LogDebug("Using cached tools for {ServerName}", sseClientTransportOptions.Name);
-            return cachedTools;
+            return cachedMcpClientTool;
         }
 
         var clientTransport = new SseClientTransport(sseClientTransportOptions);
