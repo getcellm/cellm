@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using Cellm.AddIn.UserInterface.Ribbon;
 using Cellm.Tools.ModelContextProtocol;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -299,7 +300,7 @@ public partial class EditMcpServerForm : Form
     private void SaveServer(string serverName, bool isStdio)
     {
         string enabledConfigKey = $"CellmAddInConfiguration:EnableModelContextProtocolServers:{serverName}";
-        _configuration[enabledConfigKey] = "true";
+        RibbonMain.SetValue(enabledConfigKey, "true");
         
         if (isStdio)
         {
@@ -341,25 +342,34 @@ public partial class EditMcpServerForm : Form
         for (int i = 0; i < servers.Count; i++)
         {
             var server = servers[i];
-            _configuration[$"{configPath}:{i}:Name"] = server.Name;
-            _configuration[$"{configPath}:{i}:Command"] = server.Command;
-            _configuration[$"{configPath}:{i}:WorkingDirectory"] = server.WorkingDirectory;
-            _configuration[$"{configPath}:{i}:ShutdownTimeout"] = server.ShutdownTimeout.ToString();
+            RibbonMain.SetValue($"{configPath}:{i}:Name", server.Name);
+            RibbonMain.SetValue($"{configPath}:{i}:Command", server.Command);
             
-            if (server.Arguments != null)
+            if (server.Arguments != null && server.Arguments.Count > 0)
             {
                 for (int j = 0; j < server.Arguments.Count; j++)
                 {
-                    _configuration[$"{configPath}:{i}:Arguments:{j}"] = server.Arguments[j];
+                    RibbonMain.SetValue($"{configPath}:{i}:Arguments:{j}", server.Arguments[j]);
                 }
             }
             
-            if (server.EnvironmentVariables != null)
+            if (server.WorkingDirectory != null)
+            {
+                RibbonMain.SetValue($"{configPath}:{i}:WorkingDirectory", server.WorkingDirectory);
+            }
+            
+            if (server.EnvironmentVariables != null && server.EnvironmentVariables.Count > 0)
             {
                 foreach (var kv in server.EnvironmentVariables)
                 {
-                    _configuration[$"{configPath}:{i}:EnvironmentVariables:{kv.Key}"] = kv.Value;
+                    RibbonMain.SetValue($"{configPath}:{i}:EnvironmentVariables:{kv.Key}", kv.Value ?? "");
                 }
+            }
+            
+            // Only set ShutdownTimeout if it's not the default value
+            if (server.ShutdownTimeout != TimeSpan.FromSeconds(5))
+            {
+                RibbonMain.SetValue($"{configPath}:{i}:ShutdownTimeout", server.ShutdownTimeout.ToString());
             }
         }
     }
@@ -388,16 +398,26 @@ public partial class EditMcpServerForm : Form
         for (int i = 0; i < servers.Count; i++)
         {
             var server = servers[i];
-            _configuration[$"{configPath}:{i}:Name"] = server.Name;
-            _configuration[$"{configPath}:{i}:Endpoint"] = server.Endpoint.ToString();
-            _configuration[$"{configPath}:{i}:TransportMode"] = ((int)server.TransportMode).ToString();
-            _configuration[$"{configPath}:{i}:ConnectionTimeout"] = server.ConnectionTimeout.ToString();
+            RibbonMain.SetValue($"{configPath}:{i}:Name", server.Name);
+            RibbonMain.SetValue($"{configPath}:{i}:Endpoint", server.Endpoint.ToString());
             
-            if (server.AdditionalHeaders != null)
+            // Only set TransportMode if it's not the default value
+            if (server.TransportMode != HttpTransportMode.AutoDetect)
+            {
+                RibbonMain.SetValue($"{configPath}:{i}:TransportMode", ((int)server.TransportMode).ToString());
+            }
+            
+            // Only set ConnectionTimeout if it's not the default value
+            if (server.ConnectionTimeout != TimeSpan.FromSeconds(30))
+            {
+                RibbonMain.SetValue($"{configPath}:{i}:ConnectionTimeout", server.ConnectionTimeout.ToString());
+            }
+            
+            if (server.AdditionalHeaders != null && server.AdditionalHeaders.Count > 0)
             {
                 foreach (var kv in server.AdditionalHeaders)
                 {
-                    _configuration[$"{configPath}:{i}:AdditionalHeaders:{kv.Key}"] = kv.Value;
+                    RibbonMain.SetValue($"{configPath}:{i}:AdditionalHeaders:{kv.Key}", kv.Value);
                 }
             }
         }
@@ -407,7 +427,7 @@ public partial class EditMcpServerForm : Form
     {
         // Remove from enabled servers
         string enabledConfigKey = $"CellmAddInConfiguration:EnableModelContextProtocolServers:{serverName}";
-        _configuration[enabledConfigKey] = null;
+        RibbonMain.SetValue(enabledConfigKey, "");
         
         var currentConfig = _mcpConfig.CurrentValue;
         
@@ -423,25 +443,34 @@ public partial class EditMcpServerForm : Form
             for (int i = 0; i < servers.Count; i++)
             {
                 var server = servers[i];
-                _configuration[$"{configPath}:{i}:Name"] = server.Name;
-                _configuration[$"{configPath}:{i}:Command"] = server.Command;
-                _configuration[$"{configPath}:{i}:WorkingDirectory"] = server.WorkingDirectory;
-                _configuration[$"{configPath}:{i}:ShutdownTimeout"] = server.ShutdownTimeout.ToString();
+                RibbonMain.SetValue($"{configPath}:{i}:Name", server.Name);
+                RibbonMain.SetValue($"{configPath}:{i}:Command", server.Command);
                 
-                if (server.Arguments != null)
+                if (server.Arguments != null && server.Arguments.Count > 0)
                 {
                     for (int j = 0; j < server.Arguments.Count; j++)
                     {
-                        _configuration[$"{configPath}:{i}:Arguments:{j}"] = server.Arguments[j];
+                        RibbonMain.SetValue($"{configPath}:{i}:Arguments:{j}", server.Arguments[j]);
                     }
                 }
                 
-                if (server.EnvironmentVariables != null)
+                if (server.WorkingDirectory != null)
+                {
+                    RibbonMain.SetValue($"{configPath}:{i}:WorkingDirectory", server.WorkingDirectory);
+                }
+                
+                if (server.EnvironmentVariables != null && server.EnvironmentVariables.Count > 0)
                 {
                     foreach (var kv in server.EnvironmentVariables)
                     {
-                        _configuration[$"{configPath}:{i}:EnvironmentVariables:{kv.Key}"] = kv.Value;
+                        RibbonMain.SetValue($"{configPath}:{i}:EnvironmentVariables:{kv.Key}", kv.Value ?? "");
                     }
+                }
+                
+                // Only set ShutdownTimeout if it's not the default value
+                if (server.ShutdownTimeout != TimeSpan.FromSeconds(5))
+                {
+                    RibbonMain.SetValue($"{configPath}:{i}:ShutdownTimeout", server.ShutdownTimeout.ToString());
                 }
             }
         }
@@ -457,16 +486,26 @@ public partial class EditMcpServerForm : Form
             for (int i = 0; i < servers.Count; i++)
             {
                 var server = servers[i];
-                _configuration[$"{configPath}:{i}:Name"] = server.Name;
-                _configuration[$"{configPath}:{i}:Endpoint"] = server.Endpoint.ToString();
-                _configuration[$"{configPath}:{i}:TransportMode"] = ((int)server.TransportMode).ToString();
-                _configuration[$"{configPath}:{i}:ConnectionTimeout"] = server.ConnectionTimeout.ToString();
+                RibbonMain.SetValue($"{configPath}:{i}:Name", server.Name);
+                RibbonMain.SetValue($"{configPath}:{i}:Endpoint", server.Endpoint.ToString());
                 
-                if (server.AdditionalHeaders != null)
+                // Only set TransportMode if it's not the default value
+                if (server.TransportMode != HttpTransportMode.AutoDetect)
+                {
+                    RibbonMain.SetValue($"{configPath}:{i}:TransportMode", ((int)server.TransportMode).ToString());
+                }
+                
+                // Only set ConnectionTimeout if it's not the default value
+                if (server.ConnectionTimeout != TimeSpan.FromSeconds(30))
+                {
+                    RibbonMain.SetValue($"{configPath}:{i}:ConnectionTimeout", server.ConnectionTimeout.ToString());
+                }
+                
+                if (server.AdditionalHeaders != null && server.AdditionalHeaders.Count > 0)
                 {
                     foreach (var kv in server.AdditionalHeaders)
                     {
-                        _configuration[$"{configPath}:{i}:AdditionalHeaders:{kv.Key}"] = kv.Value;
+                        RibbonMain.SetValue($"{configPath}:{i}:AdditionalHeaders:{kv.Key}", kv.Value);
                     }
                 }
             }
@@ -480,7 +519,7 @@ public partial class EditMcpServerForm : Form
             var section = configRoot.GetSection(sectionPath);
             foreach (var child in section.GetChildren())
             {
-                _configuration[child.Path] = null;
+                RibbonMain.SetValue(child.Path, "");
             }
         }
     }

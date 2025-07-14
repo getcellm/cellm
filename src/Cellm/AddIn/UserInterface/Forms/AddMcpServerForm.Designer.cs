@@ -56,7 +56,7 @@ partial class AddMcpServerForm
         transportTypeLabel.AutoSize = true;
         transportTypeLabel.Location = new Point(12, 15);
         transportTypeLabel.Name = "transportTypeLabel";
-        transportTypeLabel.Size = new Size(87, 15);
+        transportTypeLabel.Size = new Size(86, 15);
         transportTypeLabel.TabIndex = 0;
         transportTypeLabel.Text = "Transport Type:";
         // 
@@ -64,9 +64,9 @@ partial class AddMcpServerForm
         // 
         transportTypeComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
         transportTypeComboBox.FormattingEnabled = true;
-        transportTypeComboBox.Location = new Point(105, 12);
+        transportTypeComboBox.Location = new Point(111, 12);
         transportTypeComboBox.Name = "transportTypeComboBox";
-        transportTypeComboBox.Size = new Size(200, 23);
+        transportTypeComboBox.Size = new Size(194, 23);
         transportTypeComboBox.TabIndex = 1;
         transportTypeComboBox.SelectedIndexChanged += transportTypeComboBox_SelectedIndexChanged;
         // 
@@ -81,9 +81,9 @@ partial class AddMcpServerForm
         // 
         // nameTextBox
         // 
-        nameTextBox.Location = new Point(105, 47);
+        nameTextBox.Location = new Point(111, 47);
         nameTextBox.Name = "nameTextBox";
-        nameTextBox.Size = new Size(200, 23);
+        nameTextBox.Size = new Size(194, 23);
         nameTextBox.TabIndex = 3;
         // 
         // commandLabel
@@ -97,9 +97,9 @@ partial class AddMcpServerForm
         // 
         // commandTextBox
         // 
-        commandTextBox.Location = new Point(105, 82);
+        commandTextBox.Location = new Point(111, 82);
         commandTextBox.Name = "commandTextBox";
-        commandTextBox.Size = new Size(200, 23);
+        commandTextBox.Size = new Size(194, 23);
         commandTextBox.TabIndex = 5;
         // 
         // argumentsLabel
@@ -107,15 +107,15 @@ partial class AddMcpServerForm
         argumentsLabel.AutoSize = true;
         argumentsLabel.Location = new Point(12, 120);
         argumentsLabel.Name = "argumentsLabel";
-        argumentsLabel.Size = new Size(70, 15);
+        argumentsLabel.Size = new Size(69, 15);
         argumentsLabel.TabIndex = 6;
         argumentsLabel.Text = "Arguments:";
         // 
         // argumentsTextBox
         // 
-        argumentsTextBox.Location = new Point(105, 117);
+        argumentsTextBox.Location = new Point(111, 117);
         argumentsTextBox.Name = "argumentsTextBox";
-        argumentsTextBox.Size = new Size(200, 23);
+        argumentsTextBox.Size = new Size(194, 23);
         argumentsTextBox.TabIndex = 7;
         // 
         // environmentVariablesLabel
@@ -123,7 +123,7 @@ partial class AddMcpServerForm
         environmentVariablesLabel.AutoSize = true;
         environmentVariablesLabel.Location = new Point(12, 155);
         environmentVariablesLabel.Name = "environmentVariablesLabel";
-        environmentVariablesLabel.Size = new Size(139, 15);
+        environmentVariablesLabel.Size = new Size(127, 15);
         environmentVariablesLabel.TabIndex = 8;
         environmentVariablesLabel.Text = "Environment Variables:";
         // 
@@ -148,9 +148,9 @@ partial class AddMcpServerForm
         // 
         // endpointTextBox
         // 
-        endpointTextBox.Location = new Point(105, 82);
+        endpointTextBox.Location = new Point(111, 82);
         endpointTextBox.Name = "endpointTextBox";
-        endpointTextBox.Size = new Size(200, 23);
+        endpointTextBox.Size = new Size(194, 23);
         endpointTextBox.TabIndex = 15;
         // 
         // transportModeLabel
@@ -158,7 +158,7 @@ partial class AddMcpServerForm
         transportModeLabel.AutoSize = true;
         transportModeLabel.Location = new Point(12, 120);
         transportModeLabel.Name = "transportModeLabel";
-        transportModeLabel.Size = new Size(94, 15);
+        transportModeLabel.Size = new Size(93, 15);
         transportModeLabel.TabIndex = 16;
         transportModeLabel.Text = "Transport Mode:";
         // 
@@ -166,9 +166,9 @@ partial class AddMcpServerForm
         // 
         httpTransportModeComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
         httpTransportModeComboBox.FormattingEnabled = true;
-        httpTransportModeComboBox.Location = new Point(112, 117);
+        httpTransportModeComboBox.Location = new Point(111, 117);
         httpTransportModeComboBox.Name = "httpTransportModeComboBox";
-        httpTransportModeComboBox.Size = new Size(193, 23);
+        httpTransportModeComboBox.Size = new Size(194, 23);
         httpTransportModeComboBox.TabIndex = 17;
         // 
         // connectionTimeoutLabel
@@ -176,7 +176,7 @@ partial class AddMcpServerForm
         connectionTimeoutLabel.AutoSize = true;
         connectionTimeoutLabel.Location = new Point(12, 155);
         connectionTimeoutLabel.Name = "connectionTimeoutLabel";
-        connectionTimeoutLabel.Size = new Size(138, 15);
+        connectionTimeoutLabel.Size = new Size(135, 15);
         connectionTimeoutLabel.TabIndex = 18;
         connectionTimeoutLabel.Text = "Connection Timeout (s):";
         // 
@@ -195,8 +195,8 @@ partial class AddMcpServerForm
         additionalHeadersLabel.AutoSize = true;
         additionalHeadersLabel.Location = new Point(12, 190);
         additionalHeadersLabel.Name = "additionalHeadersLabel";
-        additionalHeadersLabel.Size = new Size(109, 15);
-        additionalHeadersLabel.TabIndex = 20;
+        additionalHeadersLabel.Size = new Size(111, 15);
+        additionalHeadersLabel.TabIndex = 14;
         additionalHeadersLabel.Text = "Additional Headers:";
         // 
         // additionalHeadersButton
@@ -204,7 +204,7 @@ partial class AddMcpServerForm
         additionalHeadersButton.Location = new Point(127, 186);
         additionalHeadersButton.Name = "additionalHeadersButton";
         additionalHeadersButton.Size = new Size(178, 23);
-        additionalHeadersButton.TabIndex = 21;
+        additionalHeadersButton.TabIndex = 15;
         additionalHeadersButton.Text = "Edit...";
         additionalHeadersButton.UseVisualStyleBackColor = true;
         additionalHeadersButton.Click += additionalHeadersButton_Click;
@@ -214,7 +214,7 @@ partial class AddMcpServerForm
         okButton.Location = new Point(149, 230);
         okButton.Name = "okButton";
         okButton.Size = new Size(75, 23);
-        okButton.TabIndex = 22;
+        okButton.TabIndex = 16;
         okButton.Text = "OK";
         okButton.UseVisualStyleBackColor = true;
         okButton.Click += okButton_Click;
@@ -224,7 +224,7 @@ partial class AddMcpServerForm
         cancelButton.Location = new Point(230, 230);
         cancelButton.Name = "cancelButton";
         cancelButton.Size = new Size(75, 23);
-        cancelButton.TabIndex = 23;
+        cancelButton.TabIndex = 17;
         cancelButton.Text = "Cancel";
         cancelButton.UseVisualStyleBackColor = true;
         cancelButton.Click += cancelButton_Click;
@@ -235,7 +235,7 @@ partial class AddMcpServerForm
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         CancelButton = cancelButton;
-        ClientSize = new Size(317, 355);
+        ClientSize = new Size(317, 294);
         Controls.Add(cancelButton);
         Controls.Add(okButton);
         Controls.Add(additionalHeadersButton);

@@ -59,7 +59,6 @@ partial class EditMcpServerForm
         // serverListBox
         // 
         serverListBox.FormattingEnabled = true;
-        serverListBox.ItemHeight = 15;
         serverListBox.Location = new Point(12, 27);
         serverListBox.Name = "serverListBox";
         serverListBox.Size = new Size(200, 154);
@@ -101,9 +100,9 @@ partial class EditMcpServerForm
         // transportTypeLabel
         // 
         transportTypeLabel.AutoSize = true;
-        transportTypeLabel.Location = new Point(230, 27);
+        transportTypeLabel.Location = new Point(230, 26);
         transportTypeLabel.Name = "transportTypeLabel";
-        transportTypeLabel.Size = new Size(87, 15);
+        transportTypeLabel.Size = new Size(86, 15);
         transportTypeLabel.TabIndex = 4;
         transportTypeLabel.Text = "Transport Type:";
         // 
@@ -120,7 +119,7 @@ partial class EditMcpServerForm
         // nameLabel
         // 
         nameLabel.AutoSize = true;
-        nameLabel.Location = new Point(230, 78);
+        nameLabel.Location = new Point(230, 77);
         nameLabel.Name = "nameLabel";
         nameLabel.Size = new Size(42, 15);
         nameLabel.TabIndex = 6;
@@ -136,7 +135,7 @@ partial class EditMcpServerForm
         // commandLabel
         // 
         commandLabel.AutoSize = true;
-        commandLabel.Location = new Point(230, 129);
+        commandLabel.Location = new Point(230, 128);
         commandLabel.Name = "commandLabel";
         commandLabel.Size = new Size(67, 15);
         commandLabel.TabIndex = 8;
@@ -152,9 +151,9 @@ partial class EditMcpServerForm
         // argumentsLabel
         // 
         argumentsLabel.AutoSize = true;
-        argumentsLabel.Location = new Point(230, 180);
+        argumentsLabel.Location = new Point(230, 179);
         argumentsLabel.Name = "argumentsLabel";
-        argumentsLabel.Size = new Size(70, 15);
+        argumentsLabel.Size = new Size(69, 15);
         argumentsLabel.TabIndex = 10;
         argumentsLabel.Text = "Arguments:";
         // 
@@ -170,7 +169,7 @@ partial class EditMcpServerForm
         environmentVariablesLabel.AutoSize = true;
         environmentVariablesLabel.Location = new Point(230, 231);
         environmentVariablesLabel.Name = "environmentVariablesLabel";
-        environmentVariablesLabel.Size = new Size(139, 15);
+        environmentVariablesLabel.Size = new Size(127, 15);
         environmentVariablesLabel.TabIndex = 12;
         environmentVariablesLabel.Text = "Environment Variables:";
         // 
@@ -187,7 +186,7 @@ partial class EditMcpServerForm
         // endpointLabel
         // 
         endpointLabel.AutoSize = true;
-        endpointLabel.Location = new Point(230, 129);
+        endpointLabel.Location = new Point(230, 128);
         endpointLabel.Name = "endpointLabel";
         endpointLabel.Size = new Size(58, 15);
         endpointLabel.TabIndex = 18;
@@ -203,9 +202,9 @@ partial class EditMcpServerForm
         // transportModeLabel
         // 
         transportModeLabel.AutoSize = true;
-        transportModeLabel.Location = new Point(230, 180);
+        transportModeLabel.Location = new Point(230, 179);
         transportModeLabel.Name = "transportModeLabel";
-        transportModeLabel.Size = new Size(94, 15);
+        transportModeLabel.Size = new Size(93, 15);
         transportModeLabel.TabIndex = 20;
         transportModeLabel.Text = "Transport Mode:";
         // 
@@ -221,9 +220,9 @@ partial class EditMcpServerForm
         // connectionTimeoutLabel
         // 
         connectionTimeoutLabel.AutoSize = true;
-        connectionTimeoutLabel.Location = new Point(230, 231);
+        connectionTimeoutLabel.Location = new Point(230, 230);
         connectionTimeoutLabel.Name = "connectionTimeoutLabel";
-        connectionTimeoutLabel.Size = new Size(138, 15);
+        connectionTimeoutLabel.Size = new Size(135, 15);
         connectionTimeoutLabel.TabIndex = 22;
         connectionTimeoutLabel.Text = "Connection Timeout (s):";
         // 
@@ -242,7 +241,7 @@ partial class EditMcpServerForm
         additionalHeadersLabel.AutoSize = true;
         additionalHeadersLabel.Location = new Point(230, 282);
         additionalHeadersLabel.Name = "additionalHeadersLabel";
-        additionalHeadersLabel.Size = new Size(109, 15);
+        additionalHeadersLabel.Size = new Size(111, 15);
         additionalHeadersLabel.TabIndex = 14;
         additionalHeadersLabel.Text = "Additional Headers:";
         // 
