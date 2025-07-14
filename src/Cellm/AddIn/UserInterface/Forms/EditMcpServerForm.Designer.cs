@@ -83,7 +83,7 @@ partial class EditMcpServerForm
         removeButton.TabIndex = 3;
         removeButton.Text = "Remove";
         removeButton.UseVisualStyleBackColor = true;
-        removeButton.Click += removeButton_Click;
+        removeButton.Click += RemoveButton_Click;
         // 
         // transportTypeLabel
         // 
@@ -102,7 +102,7 @@ partial class EditMcpServerForm
         transportTypeComboBox.Name = "transportTypeComboBox";
         transportTypeComboBox.Size = new Size(200, 23);
         transportTypeComboBox.TabIndex = 5;
-        transportTypeComboBox.SelectedIndexChanged += transportTypeComboBox_SelectedIndexChanged;
+        transportTypeComboBox.SelectedIndexChanged += TransportTypeComboBox_SelectedIndexChanged;
         // 
         // nameLabel
         // 
@@ -311,6 +311,7 @@ partial class EditMcpServerForm
         ShowInTaskbar = false;
         StartPosition = FormStartPosition.CenterParent;
         Text = "Edit MCP Server";
+        Load += EditMcpServerForm_Load_1;
         ((System.ComponentModel.ISupportInitialize)connectionTimeoutNumericUpDown).EndInit();
         ResumeLayout(false);
         PerformLayout();

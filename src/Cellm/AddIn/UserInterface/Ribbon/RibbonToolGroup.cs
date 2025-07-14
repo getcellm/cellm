@@ -1,5 +1,6 @@
 using System.Security;
 using System.Text;
+using System.Text.Json;
 using Cellm.AddIn.UserInterface.Forms;
 using Cellm.Tools.FileReader;
 using Cellm.Tools.FileSearch;
@@ -293,5 +294,23 @@ public partial class RibbonMain
         {
             _logger.LogError("Error showing Edit MCP Server form: {message}", ex.Message);
         }
+    }
+}
+public static class ObjectExtensions
+{
+    public static T Clone<T>(this T source)
+    {
+        if (source == null)
+        {
+            throw new ArgumentNullException(nameof(source));
+        }
+
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = true
+        };
+
+        string jsonString = JsonSerializer.Serialize(source, options);
+        return JsonSerializer.Deserialize<T>(jsonString, options) ?? throw new NullReferenceException(nameof(source));
     }
 }

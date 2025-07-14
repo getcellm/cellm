@@ -16,7 +16,7 @@ public partial class LoginForm : Form
         InitializeComponent();
     }
 
-    private void btnLogin_Click(object sender, EventArgs e)
+    private void BtnLogin_Click(object sender, EventArgs e)
     {
         // Basic validation: Ensure fields are not empty
         if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
@@ -84,5 +84,10 @@ public partial class LoginForm : Form
                             MessageBoxButtons.OK,
                             MessageBoxIcon.Error);
         }
+    }
+
+    private void LoginForm_Load(object sender, EventArgs e)
+    {
+
     }
 }

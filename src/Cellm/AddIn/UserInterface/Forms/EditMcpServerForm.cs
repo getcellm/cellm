@@ -1,12 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Windows.Forms;
 using Cellm.AddIn.UserInterface.Ribbon;
 using Cellm.Tools.ModelContextProtocol;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -16,25 +11,17 @@ namespace Cellm.AddIn.UserInterface.Forms;
 
 public partial class EditMcpServerForm : Form
 {
-    private readonly ILogger<EditMcpServerForm> _logger;
-    private readonly IConfiguration _configuration;
-    private readonly List<string> _existingStdioServers;
-    private readonly List<string> _existingSseServers;
+    private readonly ILogger<EditMcpServerForm> _logger = CellmAddIn.Services.GetRequiredService<ILogger<EditMcpServerForm>>();
+    private readonly List<string> _existingStdioServers = [];
+    private readonly List<string> _existingSseServers = [];
     private string? _editingServerName;
     private bool _isEditMode;
-    private Dictionary<string, string?> _environmentVariables;
-    private Dictionary<string, string> _headers;
+    private Dictionary<string, string?> _environmentVariables = [];
+    private Dictionary<string, string> _headers = [];
 
     public EditMcpServerForm()
     {
         InitializeComponent();
-
-        _logger = CellmAddIn.Services.GetRequiredService<ILogger<EditMcpServerForm>>();
-        _configuration = CellmAddIn.Services.GetRequiredService<IConfiguration>();
-
-        _existingStdioServers = new List<string>();
-        _existingSseServers = new List<string>();
-
         InitializeForm();
     }
 
@@ -45,15 +32,11 @@ public partial class EditMcpServerForm : Form
         transportTypeComboBox.SelectedIndex = 0;
 
         httpTransportModeComboBox.Items.Add("AutoDetect");
-        httpTransportModeComboBox.Items.Add("SSE");
+        httpTransportModeComboBox.Items.Add("Server Sent Events (SSE)");
         httpTransportModeComboBox.Items.Add("Streamable HTTP");
         httpTransportModeComboBox.SelectedIndex = 0;
 
         connectionTimeoutNumericUpDown.Value = 30;
-
-        // Initialize empty collections
-        _environmentVariables = new Dictionary<string, string?>();
-        _headers = new Dictionary<string, string>();
 
         // Load current server lists
         RefreshServerLists();
@@ -64,16 +47,21 @@ public partial class EditMcpServerForm : Form
     private void RefreshServerLists()
     {
         var currentConfig = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<ModelContextProtocolConfiguration>>().CurrentValue;
-        
+
+        var stdioServers = currentConfig.StdioServers?.Where(s => !string.IsNullOrWhiteSpace(s.Name) && s.Name != "Playwright").Select(s => s.Name!).ToList() ?? new List<string>();
+        var sseServers = currentConfig.SseServers?.Where(s => !string.IsNullOrWhiteSpace(s.Name) && s.Name != "Playwright").Select(s => s.Name!).ToList() ?? new List<string>();
+
         _existingStdioServers.Clear();
-        _existingStdioServers.AddRange(currentConfig.StdioServers?.Where(s => !string.IsNullOrWhiteSpace(s.Name) && s.Name != "Playwright").Select(s => s.Name!) ?? new List<string>());
+        _existingStdioServers.AddRange(stdioServers);
 
         _existingSseServers.Clear();
-        _existingSseServers.AddRange(currentConfig.SseServers?.Where(s => !string.IsNullOrWhiteSpace(s.Name) && s.Name != "Playwright").Select(s => s.Name!) ?? new List<string>());
+        _existingSseServers.AddRange(sseServers);
     }
 
     private void PopulateServerList()
     {
+        _logger.LogInformation($"PopulateServerList - Starting with {_existingStdioServers.Count} stdio and {_existingSseServers.Count} SSE servers");
+
         serverListBox.Items.Clear();
 
         foreach (var server in _existingStdioServers)
@@ -87,14 +75,14 @@ public partial class EditMcpServerForm : Form
         }
     }
 
-    private void transportTypeComboBox_SelectedIndexChanged(object sender, EventArgs e)
+    private void TransportTypeComboBox_SelectedIndexChanged(object sender, EventArgs e)
     {
         UpdateFieldsVisibility();
     }
 
     private void UpdateFieldsVisibility()
     {
-        bool isStdio = transportTypeComboBox.SelectedIndex == 0;
+        var isStdio = transportTypeComboBox.SelectedIndex == 0;
 
         // Stdio fields
         commandLabel.Visible = isStdio;
@@ -142,8 +130,8 @@ public partial class EditMcpServerForm : Form
         if (addForm.ShowDialog() == DialogResult.OK)
         {
             // Allow some time for configuration file changes to be processed
-            System.Threading.Thread.Sleep(100);
-            
+            Thread.Sleep(500);
+
             // Refresh the server lists and repopulate the UI
             RefreshServerLists();
             PopulateServerList();
@@ -151,7 +139,7 @@ public partial class EditMcpServerForm : Form
     }
 
 
-    private void removeButton_Click(object sender, EventArgs e)
+    private void RemoveButton_Click(object sender, EventArgs e)
     {
         if (serverListBox.SelectedItem == null) return;
 
@@ -164,10 +152,12 @@ public partial class EditMcpServerForm : Form
 
         if (result == DialogResult.Yes)
         {
+            _logger.LogInformation($"About to remove server: {serverName}, isStdio: {isStdio}");
+
             RemoveServer(serverName, isStdio);
 
-            // Allow some time for configuration file changes to be processed
-            System.Threading.Thread.Sleep(100);
+            // Wait for file system changes to be processed
+            Thread.Sleep(500);
 
             // Refresh the server lists and repopulate the UI
             RefreshServerLists();
@@ -176,7 +166,7 @@ public partial class EditMcpServerForm : Form
             _isEditMode = false;
             _editingServerName = null;
             okButton.Enabled = false;
-            
+
             // Update the ribbon UI
             RibbonMain._ribbonUi?.Invalidate();
         }
@@ -217,10 +207,10 @@ public partial class EditMcpServerForm : Form
             }
 
             SaveServer(serverName, isStdio);
-            
+
             // Allow some time for configuration file changes to be processed
             System.Threading.Thread.Sleep(100);
-            
+
             // Refresh the server lists and repopulate the UI
             RefreshServerLists();
             PopulateServerList();
@@ -489,6 +479,11 @@ public partial class EditMcpServerForm : Form
     }
 
     private void EditMcpServerForm_Load(object sender, EventArgs e)
+    {
+
+    }
+
+    private void EditMcpServerForm_Load_1(object sender, EventArgs e)
     {
 
     }

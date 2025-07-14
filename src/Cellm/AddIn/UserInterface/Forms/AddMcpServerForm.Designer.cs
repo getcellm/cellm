@@ -263,6 +263,7 @@ partial class AddMcpServerForm
         ShowInTaskbar = false;
         StartPosition = FormStartPosition.CenterParent;
         Text = "Add MCP Server";
+        Load += AddMcpServerForm_Load;
         ((System.ComponentModel.ISupportInitialize)connectionTimeoutNumericUpDown).EndInit();
         ResumeLayout(false);
         PerformLayout();
