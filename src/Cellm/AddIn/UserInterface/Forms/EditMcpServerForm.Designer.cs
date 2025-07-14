@@ -30,7 +30,6 @@ partial class EditMcpServerForm
     {
         serverListBox = new ListBox();
         addButton = new Button();
-        editButton = new Button();
         removeButton = new Button();
         transportTypeLabel = new Label();
         transportTypeComboBox = new ComboBox();
@@ -75,21 +74,10 @@ partial class EditMcpServerForm
         addButton.UseVisualStyleBackColor = true;
         addButton.Click += addButton_Click;
         // 
-        // editButton
-        // 
-        editButton.Enabled = false;
-        editButton.Location = new Point(78, 190);
-        editButton.Name = "editButton";
-        editButton.Size = new Size(60, 23);
-        editButton.TabIndex = 2;
-        editButton.Text = "Edit";
-        editButton.UseVisualStyleBackColor = true;
-        editButton.Click += editButton_Click;
-        // 
         // removeButton
         // 
         removeButton.Enabled = false;
-        removeButton.Location = new Point(144, 190);
+        removeButton.Location = new Point(78, 190);
         removeButton.Name = "removeButton";
         removeButton.Size = new Size(68, 23);
         removeButton.TabIndex = 3;
@@ -314,7 +302,6 @@ partial class EditMcpServerForm
         Controls.Add(transportTypeComboBox);
         Controls.Add(transportTypeLabel);
         Controls.Add(removeButton);
-        Controls.Add(editButton);
         Controls.Add(addButton);
         Controls.Add(serverListBox);
         FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -333,7 +320,6 @@ partial class EditMcpServerForm
 
     private ListBox serverListBox;
     private Button addButton;
-    private Button editButton;
     private Button removeButton;
     private Label transportTypeLabel;
     private ComboBox transportTypeComboBox;

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Windows.Forms;
 using Cellm.AddIn.UserInterface.Ribbon;
 using Cellm.Tools.ModelContextProtocol;
@@ -34,8 +35,8 @@ public partial class EditMcpServerForm : Form
         _mcpConfig = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<ModelContextProtocolConfiguration>>();
         
         var currentConfig = _mcpConfig.CurrentValue;
-        _existingStdioServers = currentConfig.StdioServers?.Where(s => !string.IsNullOrWhiteSpace(s.Name)).Select(s => s.Name!).ToList() ?? new List<string>();
-        _existingSseServers = currentConfig.SseServers?.Where(s => !string.IsNullOrWhiteSpace(s.Name)).Select(s => s.Name!).ToList() ?? new List<string>();
+        _existingStdioServers = currentConfig.StdioServers?.Where(s => !string.IsNullOrWhiteSpace(s.Name) && s.Name != "Playwright").Select(s => s.Name!).ToList() ?? new List<string>();
+        _existingSseServers = currentConfig.SseServers?.Where(s => !string.IsNullOrWhiteSpace(s.Name) && s.Name != "Playwright").Select(s => s.Name!).ToList() ?? new List<string>();
         
         InitializeForm();
     }
@@ -104,9 +105,7 @@ public partial class EditMcpServerForm : Form
         additionalHeadersButton.Visible = !isStdio;
         
         // Adjust form height based on visible fields
-        int baseHeight = 200;
-        int fieldHeight = isStdio ? 200 : 180;
-        this.Height = baseHeight + fieldHeight;
+        this.Height = 420;
     }
 
     private void environmentVariablesButton_Click(object sender, EventArgs e)
@@ -129,21 +128,30 @@ public partial class EditMcpServerForm : Form
 
     private void addButton_Click(object sender, EventArgs e)
     {
-        // Not needed in edit form
+        var addForm = new AddMcpServerForm();
+        if (addForm.ShowDialog() == DialogResult.OK)
+        {
+            // Refresh the current configuration data
+            var currentConfig = _mcpConfig.CurrentValue;
+            _existingStdioServers.Clear();
+            _existingStdioServers.AddRange(currentConfig.StdioServers?.Where(s => !string.IsNullOrWhiteSpace(s.Name) && s.Name != "Playwright").Select(s => s.Name!) ?? new List<string>());
+            
+            _existingSseServers.Clear();
+            _existingSseServers.AddRange(currentConfig.SseServers?.Where(s => !string.IsNullOrWhiteSpace(s.Name) && s.Name != "Playwright").Select(s => s.Name!) ?? new List<string>());
+            
+            // Refresh the server list
+            PopulateServerList();
+        }
     }
 
-    private void editButton_Click(object sender, EventArgs e)
-    {
-        // Not needed - properties are always visible
-    }
 
     private void removeButton_Click(object sender, EventArgs e)
     {
         if (serverListBox.SelectedItem == null) return;
         
         var selectedText = serverListBox.SelectedItem.ToString()!;
-        bool isStdio = selectedText.StartsWith("[Standard I/O]");
-        string serverName = selectedText.Substring(selectedText.IndexOf(']') + 2);
+        var isStdio = selectedText.StartsWith("[Standard I/O]");
+        var serverName = selectedText.Substring(selectedText.IndexOf(']') + 2);
         
         var result = MessageBox.Show($"Are you sure you want to remove the MCP server '{serverName}'?", 
             "Confirm Removal", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -175,6 +183,14 @@ public partial class EditMcpServerForm : Form
                 }
             }
             
+            // Prevent saving Playwright server (it's handled specially)
+            if (serverName.Equals("Playwright", StringComparison.OrdinalIgnoreCase))
+            {
+                MessageBox.Show("The name 'Playwright' is reserved for the built-in MCP server.", "Reserved Name", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            
             if (_isEditMode && _editingServerName != null && _editingServerName != serverName)
             {
                 // Remove old server first
@@ -185,8 +201,6 @@ public partial class EditMcpServerForm : Form
             PopulateServerList();
             CancelEdit();
             
-            MessageBox.Show($"MCP server '{serverName}' saved successfully.", "Success", 
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
             
             this.DialogResult = DialogResult.OK;
             this.Close();
@@ -211,7 +225,6 @@ public partial class EditMcpServerForm : Form
         _editingServerName = null;
         ClearFields();
         addButton.Enabled = true;
-        editButton.Enabled = true;
         removeButton.Enabled = true;
         okButton.Enabled = false;
         cancelButton.Enabled = false;
@@ -300,7 +313,7 @@ public partial class EditMcpServerForm : Form
 
     private void SaveServer(string serverName, bool isStdio)
     {
-        string enabledConfigKey = $"CellmAddInConfiguration:EnableModelContextProtocolServers:{serverName}";
+        var enabledConfigKey = $"CellmAddInConfiguration:EnableModelContextProtocolServers:{serverName}";
         RibbonMain.SetValue(enabledConfigKey, "true");
         
         if (isStdio)
@@ -394,7 +407,8 @@ public partial class EditMcpServerForm : Form
         };
         
         var json = JsonSerializer.Serialize(servers, jsonOptions);
-        RibbonMain.SetValue("ModelContextProtocolConfiguration:StdioServers", json);
+        var jsonNode = JsonNode.Parse(json);
+        RibbonMain.SetValue("ModelContextProtocolConfiguration:StdioServers", jsonNode!);
     }
     
     private void SaveSseServersConfiguration(List<SseClientTransportOptions> servers)
@@ -406,7 +420,8 @@ public partial class EditMcpServerForm : Form
         };
         
         var json = JsonSerializer.Serialize(servers, jsonOptions);
-        RibbonMain.SetValue("ModelContextProtocolConfiguration:SseServers", json);
+        var jsonNode = JsonNode.Parse(json);
+        RibbonMain.SetValue("ModelContextProtocolConfiguration:SseServers", jsonNode!);
     }
 
     private void serverListBox_SelectedIndexChanged(object sender, EventArgs e)

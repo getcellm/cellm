@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Windows.Forms;
 using Cellm.AddIn.UserInterface.Ribbon;
 using Cellm.Tools.ModelContextProtocol;
@@ -35,12 +36,12 @@ public partial class AddMcpServerForm : Form
         
         if (currentConfig.StdioServers != null)
         {
-            _existingServerNames.AddRange(currentConfig.StdioServers.Where(s => !string.IsNullOrWhiteSpace(s.Name)).Select(s => s.Name!));
+            _existingServerNames.AddRange(currentConfig.StdioServers.Where(s => !string.IsNullOrWhiteSpace(s.Name) && s.Name != "Playwright").Select(s => s.Name!));
         }
         
         if (currentConfig.SseServers != null)
         {
-            _existingServerNames.AddRange(currentConfig.SseServers.Where(s => !string.IsNullOrWhiteSpace(s.Name)).Select(s => s.Name!));
+            _existingServerNames.AddRange(currentConfig.SseServers.Where(s => !string.IsNullOrWhiteSpace(s.Name) && s.Name != "Playwright").Select(s => s.Name!));
         }
         
         InitializeForm();
@@ -130,6 +131,14 @@ public partial class AddMcpServerForm : Form
             if (_existingServerNames.Contains(serverName))
             {
                 MessageBox.Show($"A server with the name '{serverName}' already exists.", "Duplicate Name", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            
+            // Prevent saving Playwright server (it's handled specially)
+            if (serverName.Equals("Playwright", StringComparison.OrdinalIgnoreCase))
+            {
+                MessageBox.Show("The name 'Playwright' is reserved for the built-in MCP server.", "Reserved Name", 
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
@@ -260,7 +269,8 @@ public partial class AddMcpServerForm : Form
         };
         
         var json = JsonSerializer.Serialize(servers, jsonOptions);
-        RibbonMain.SetValue("ModelContextProtocolConfiguration:StdioServers", json);
+        var jsonNode = JsonNode.Parse(json);
+        RibbonMain.SetValue("ModelContextProtocolConfiguration:StdioServers", jsonNode!);
     }
     
     private void SaveSseServersConfiguration(List<SseClientTransportOptions> servers)
@@ -272,6 +282,7 @@ public partial class AddMcpServerForm : Form
         };
         
         var json = JsonSerializer.Serialize(servers, jsonOptions);
-        RibbonMain.SetValue("ModelContextProtocolConfiguration:SseServers", json);
+        var jsonNode = JsonNode.Parse(json);
+        RibbonMain.SetValue("ModelContextProtocolConfiguration:SseServers", jsonNode!);
     }
 }
