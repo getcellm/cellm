@@ -18,7 +18,6 @@ public partial class EditMcpServerForm : Form
 {
     private readonly ILogger<EditMcpServerForm> _logger;
     private readonly IConfiguration _configuration;
-    private readonly IOptionsMonitor<ModelContextProtocolConfiguration> _mcpConfig;
     private readonly List<string> _existingStdioServers;
     private readonly List<string> _existingSseServers;
     private string? _editingServerName;
@@ -29,15 +28,13 @@ public partial class EditMcpServerForm : Form
     public EditMcpServerForm()
     {
         InitializeComponent();
-        
+
         _logger = CellmAddIn.Services.GetRequiredService<ILogger<EditMcpServerForm>>();
         _configuration = CellmAddIn.Services.GetRequiredService<IConfiguration>();
-        _mcpConfig = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<ModelContextProtocolConfiguration>>();
-        
-        var currentConfig = _mcpConfig.CurrentValue;
-        _existingStdioServers = currentConfig.StdioServers?.Where(s => !string.IsNullOrWhiteSpace(s.Name) && s.Name != "Playwright").Select(s => s.Name!).ToList() ?? new List<string>();
-        _existingSseServers = currentConfig.SseServers?.Where(s => !string.IsNullOrWhiteSpace(s.Name) && s.Name != "Playwright").Select(s => s.Name!).ToList() ?? new List<string>();
-        
+
+        _existingStdioServers = new List<string>();
+        _existingSseServers = new List<string>();
+
         InitializeForm();
     }
 
@@ -46,31 +43,44 @@ public partial class EditMcpServerForm : Form
         transportTypeComboBox.Items.Add("Standard I/O");
         transportTypeComboBox.Items.Add("Streamable HTTP");
         transportTypeComboBox.SelectedIndex = 0;
-        
+
         httpTransportModeComboBox.Items.Add("AutoDetect");
         httpTransportModeComboBox.Items.Add("SSE");
         httpTransportModeComboBox.Items.Add("Streamable HTTP");
         httpTransportModeComboBox.SelectedIndex = 0;
-        
+
         connectionTimeoutNumericUpDown.Value = 30;
-        
+
         // Initialize empty collections
         _environmentVariables = new Dictionary<string, string?>();
         _headers = new Dictionary<string, string>();
-        
+
+        // Load current server lists
+        RefreshServerLists();
         PopulateServerList();
         UpdateFieldsVisibility();
+    }
+
+    private void RefreshServerLists()
+    {
+        var currentConfig = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<ModelContextProtocolConfiguration>>().CurrentValue;
+        
+        _existingStdioServers.Clear();
+        _existingStdioServers.AddRange(currentConfig.StdioServers?.Where(s => !string.IsNullOrWhiteSpace(s.Name) && s.Name != "Playwright").Select(s => s.Name!) ?? new List<string>());
+
+        _existingSseServers.Clear();
+        _existingSseServers.AddRange(currentConfig.SseServers?.Where(s => !string.IsNullOrWhiteSpace(s.Name) && s.Name != "Playwright").Select(s => s.Name!) ?? new List<string>());
     }
 
     private void PopulateServerList()
     {
         serverListBox.Items.Clear();
-        
+
         foreach (var server in _existingStdioServers)
         {
             serverListBox.Items.Add($"[Standard I/O] {server}");
         }
-        
+
         foreach (var server in _existingSseServers)
         {
             serverListBox.Items.Add($"[Streamable HTTP] {server}");
@@ -85,7 +95,7 @@ public partial class EditMcpServerForm : Form
     private void UpdateFieldsVisibility()
     {
         bool isStdio = transportTypeComboBox.SelectedIndex == 0;
-        
+
         // Stdio fields
         commandLabel.Visible = isStdio;
         commandTextBox.Visible = isStdio;
@@ -93,7 +103,7 @@ public partial class EditMcpServerForm : Form
         argumentsTextBox.Visible = isStdio;
         environmentVariablesLabel.Visible = isStdio;
         environmentVariablesButton.Visible = isStdio;
-        
+
         // SSE fields
         endpointLabel.Visible = !isStdio;
         endpointTextBox.Visible = !isStdio;
@@ -103,7 +113,7 @@ public partial class EditMcpServerForm : Form
         connectionTimeoutNumericUpDown.Visible = !isStdio;
         additionalHeadersLabel.Visible = !isStdio;
         additionalHeadersButton.Visible = !isStdio;
-        
+
         // Adjust form height based on visible fields
         this.Height = 420;
     }
@@ -131,15 +141,11 @@ public partial class EditMcpServerForm : Form
         var addForm = new AddMcpServerForm();
         if (addForm.ShowDialog() == DialogResult.OK)
         {
-            // Refresh the current configuration data
-            var currentConfig = _mcpConfig.CurrentValue;
-            _existingStdioServers.Clear();
-            _existingStdioServers.AddRange(currentConfig.StdioServers?.Where(s => !string.IsNullOrWhiteSpace(s.Name) && s.Name != "Playwright").Select(s => s.Name!) ?? new List<string>());
+            // Allow some time for configuration file changes to be processed
+            System.Threading.Thread.Sleep(100);
             
-            _existingSseServers.Clear();
-            _existingSseServers.AddRange(currentConfig.SseServers?.Where(s => !string.IsNullOrWhiteSpace(s.Name) && s.Name != "Playwright").Select(s => s.Name!) ?? new List<string>());
-            
-            // Refresh the server list
+            // Refresh the server lists and repopulate the UI
+            RefreshServerLists();
             PopulateServerList();
         }
     }
@@ -148,67 +154,86 @@ public partial class EditMcpServerForm : Form
     private void removeButton_Click(object sender, EventArgs e)
     {
         if (serverListBox.SelectedItem == null) return;
-        
+
         var selectedText = serverListBox.SelectedItem.ToString()!;
         var isStdio = selectedText.StartsWith("[Standard I/O]");
         var serverName = selectedText.Substring(selectedText.IndexOf(']') + 2);
-        
-        var result = MessageBox.Show($"Are you sure you want to remove the MCP server '{serverName}'?", 
+
+        var result = MessageBox.Show($"Are you sure you want to remove the MCP server '{serverName}'?",
             "Confirm Removal", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-        
+
         if (result == DialogResult.Yes)
         {
             RemoveServer(serverName, isStdio);
+
+            // Allow some time for configuration file changes to be processed
+            System.Threading.Thread.Sleep(100);
+
+            // Refresh the server lists and repopulate the UI
+            RefreshServerLists();
             PopulateServerList();
+            ClearFields();
+            _isEditMode = false;
+            _editingServerName = null;
+            okButton.Enabled = false;
+            
+            // Update the ribbon UI
+            RibbonMain._ribbonUi?.Invalidate();
         }
     }
 
     private void okButton_Click(object sender, EventArgs e)
     {
         if (!ValidateForm()) return;
-        
+
         try
         {
-            bool isStdio = transportTypeComboBox.SelectedIndex == 0;
-            string serverName = nameTextBox.Text.Trim();
-            
+            var isStdio = transportTypeComboBox.SelectedIndex == 0;
+            var serverName = nameTextBox.Text.Trim();
+
             if (!_isEditMode)
             {
                 // Check for duplicate names
                 if ((_existingStdioServers.Contains(serverName) || _existingSseServers.Contains(serverName)))
                 {
-                    MessageBox.Show($"A server with the name '{serverName}' already exists.", "Duplicate Name", 
+                    MessageBox.Show($"A server with the name '{serverName}' already exists.", "Duplicate Name",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
             }
-            
+
             // Prevent saving Playwright server (it's handled specially)
             if (serverName.Equals("Playwright", StringComparison.OrdinalIgnoreCase))
             {
-                MessageBox.Show("The name 'Playwright' is reserved for the built-in MCP server.", "Reserved Name", 
+                MessageBox.Show("The name 'Playwright' is reserved for the built-in MCP server.", "Reserved Name",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            
+
             if (_isEditMode && _editingServerName != null && _editingServerName != serverName)
             {
                 // Remove old server first
                 RemoveServer(_editingServerName, isStdio);
             }
-            
+
             SaveServer(serverName, isStdio);
+            
+            // Allow some time for configuration file changes to be processed
+            System.Threading.Thread.Sleep(100);
+            
+            // Refresh the server lists and repopulate the UI
+            RefreshServerLists();
             PopulateServerList();
             CancelEdit();
-            
-            
+
+
             this.DialogResult = DialogResult.OK;
             this.Close();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error saving MCP server");
-            MessageBox.Show($"Error saving MCP server: {ex.Message}", "Error", 
+            MessageBox.Show($"Error saving MCP server: {ex.Message}", "Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -246,9 +271,9 @@ public partial class EditMcpServerForm : Form
     private void LoadServerData(string serverName, bool isStdio)
     {
         nameTextBox.Text = serverName;
-        
-        var currentConfig = _mcpConfig.CurrentValue;
-        
+
+        var currentConfig = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<ModelContextProtocolConfiguration>>().CurrentValue;
+
         if (isStdio)
         {
             var server = currentConfig.StdioServers?.FirstOrDefault(s => s.Name == serverName);
@@ -256,7 +281,7 @@ public partial class EditMcpServerForm : Form
             {
                 commandTextBox.Text = server.Command;
                 argumentsTextBox.Text = server.Arguments != null ? string.Join(" ", server.Arguments) : "";
-                _environmentVariables = server.EnvironmentVariables != null ? 
+                _environmentVariables = server.EnvironmentVariables != null ?
                     new Dictionary<string, string?>(server.EnvironmentVariables) : new Dictionary<string, string?>();
             }
         }
@@ -268,7 +293,7 @@ public partial class EditMcpServerForm : Form
                 endpointTextBox.Text = server.Endpoint.ToString();
                 httpTransportModeComboBox.SelectedIndex = (int)server.TransportMode;
                 connectionTimeoutNumericUpDown.Value = (decimal)server.ConnectionTimeout.TotalSeconds;
-                _headers = server.AdditionalHeaders != null ? 
+                _headers = server.AdditionalHeaders != null ?
                     new Dictionary<string, string>(server.AdditionalHeaders) : new Dictionary<string, string>();
             }
         }
@@ -281,9 +306,9 @@ public partial class EditMcpServerForm : Form
             MessageBox.Show("Please enter a server name.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return false;
         }
-        
+
         bool isStdio = transportTypeComboBox.SelectedIndex == 0;
-        
+
         if (isStdio)
         {
             if (string.IsNullOrWhiteSpace(commandTextBox.Text))
@@ -299,15 +324,15 @@ public partial class EditMcpServerForm : Form
                 MessageBox.Show("Please enter an endpoint.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
-            
-            if (!Uri.TryCreate(endpointTextBox.Text, UriKind.Absolute, out var uri) || 
+
+            if (!Uri.TryCreate(endpointTextBox.Text, UriKind.Absolute, out var uri) ||
                 (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
             {
                 MessageBox.Show("Please enter a valid HTTP or HTTPS endpoint.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
         }
-        
+
         return true;
     }
 
@@ -315,7 +340,7 @@ public partial class EditMcpServerForm : Form
     {
         var enabledConfigKey = $"CellmAddInConfiguration:EnableModelContextProtocolServers:{serverName}";
         RibbonMain.SetValue(enabledConfigKey, "true");
-        
+
         if (isStdio)
         {
             SaveStdioServer(serverName);
@@ -328,18 +353,18 @@ public partial class EditMcpServerForm : Form
 
     private void SaveStdioServer(string serverName)
     {
-        var currentConfig = _mcpConfig.CurrentValue;
+        var currentConfig = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<ModelContextProtocolConfiguration>>().CurrentValue;
         var servers = currentConfig.StdioServers?.ToList() ?? new List<StdioClientTransportOptions>();
-        
+
         // Remove existing server if editing
         servers.RemoveAll(s => s.Name == serverName);
-        
+
         var arguments = new List<string>();
         if (!string.IsNullOrWhiteSpace(argumentsTextBox.Text))
         {
             arguments.AddRange(argumentsTextBox.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries));
         }
-        
+
         var newServer = new StdioClientTransportOptions
         {
             Name = serverName,
@@ -348,21 +373,21 @@ public partial class EditMcpServerForm : Form
             EnvironmentVariables = _environmentVariables.Any() ? _environmentVariables : null,
             ShutdownTimeout = TimeSpan.FromSeconds(5) // Default value
         };
-        
+
         servers.Add(newServer);
-        
+
         // Save the entire servers array as JSON
         SaveStdioServersConfiguration(servers);
     }
 
     private void SaveSseServer(string serverName)
     {
-        var currentConfig = _mcpConfig.CurrentValue;
+        var currentConfig = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<ModelContextProtocolConfiguration>>().CurrentValue;
         var servers = currentConfig.SseServers?.ToList() ?? new List<SseClientTransportOptions>();
-        
+
         // Remove existing server if editing
         servers.RemoveAll(s => s.Name == serverName);
-        
+
         var newServer = new SseClientTransportOptions
         {
             Name = serverName,
@@ -371,30 +396,44 @@ public partial class EditMcpServerForm : Form
             ConnectionTimeout = TimeSpan.FromSeconds((double)connectionTimeoutNumericUpDown.Value),
             AdditionalHeaders = _headers.Any() ? _headers : null
         };
-        
+
         servers.Add(newServer);
-        
+
         // Save the entire servers array as JSON
         SaveSseServersConfiguration(servers);
     }
 
     private void RemoveServer(string serverName, bool isStdio)
     {
-        // Remove from enabled servers
-        string enabledConfigKey = $"CellmAddInConfiguration:EnableModelContextProtocolServers:{serverName}";
-        RibbonMain.SetValue(enabledConfigKey, "");
-        
-        var currentConfig = _mcpConfig.CurrentValue;
-        
-        if (isStdio)
+        try
         {
-            var servers = currentConfig.StdioServers?.Where(s => s.Name != serverName).ToList() ?? new List<StdioClientTransportOptions>();
-            SaveStdioServersConfiguration(servers);
+            _logger.LogInformation($"Removing {(isStdio ? "stdio" : "sse")} server: {serverName}");
+
+            // Remove from enabled servers
+            var enabledConfigKey = $"CellmAddInConfiguration:EnableModelContextProtocolServers:{serverName}";
+            RibbonMain.SetValue(enabledConfigKey, "");
+
+            var currentConfig = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<ModelContextProtocolConfiguration>>().CurrentValue;
+
+            if (isStdio)
+            {
+                var servers = currentConfig.StdioServers?.Where(s => s.Name != serverName).ToList() ?? new List<StdioClientTransportOptions>();
+                _logger.LogInformation($"Stdio servers before removal: {currentConfig.StdioServers?.Count ?? 0}, after removal: {servers.Count}");
+                SaveStdioServersConfiguration(servers);
+            }
+            else
+            {
+                var servers = currentConfig.SseServers?.Where(s => s.Name != serverName).ToList() ?? new List<SseClientTransportOptions>();
+                _logger.LogInformation($"SSE servers before removal: {currentConfig.SseServers?.Count ?? 0}, after removal: {servers.Count}");
+                SaveSseServersConfiguration(servers);
+            }
+
+            _logger.LogInformation($"Successfully removed server: {serverName}");
         }
-        else
+        catch (Exception ex)
         {
-            var servers = currentConfig.SseServers?.Where(s => s.Name != serverName).ToList() ?? new List<SseClientTransportOptions>();
-            SaveSseServersConfiguration(servers);
+            _logger.LogError(ex, $"Error removing server {serverName}");
+            throw;
         }
     }
 
@@ -405,12 +444,12 @@ public partial class EditMcpServerForm : Form
             WriteIndented = true,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
-        
+
         var json = JsonSerializer.Serialize(servers, jsonOptions);
         var jsonNode = JsonNode.Parse(json);
         RibbonMain.SetValue("ModelContextProtocolConfiguration:StdioServers", jsonNode!);
     }
-    
+
     private void SaveSseServersConfiguration(List<SseClientTransportOptions> servers)
     {
         var jsonOptions = new JsonSerializerOptions
@@ -418,7 +457,7 @@ public partial class EditMcpServerForm : Form
             WriteIndented = true,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
-        
+
         var json = JsonSerializer.Serialize(servers, jsonOptions);
         var jsonNode = JsonNode.Parse(json);
         RibbonMain.SetValue("ModelContextProtocolConfiguration:SseServers", jsonNode!);
@@ -429,7 +468,7 @@ public partial class EditMcpServerForm : Form
         bool hasSelection = serverListBox.SelectedItem != null;
         removeButton.Enabled = hasSelection;
         okButton.Enabled = hasSelection;
-        
+
         if (hasSelection)
         {
             var selectedText = serverListBox.SelectedItem?.ToString()!;
@@ -437,7 +476,7 @@ public partial class EditMcpServerForm : Form
             string serverName = selectedText.Substring(selectedText.IndexOf(']') + 2);
             _editingServerName = serverName;
             _isEditMode = true;
-            
+
             transportTypeComboBox.SelectedIndex = isStdio ? 0 : 1;
             LoadServerData(serverName, isStdio);
         }
@@ -449,4 +488,8 @@ public partial class EditMcpServerForm : Form
         }
     }
 
+    private void EditMcpServerForm_Load(object sender, EventArgs e)
+    {
+
+    }
 }
