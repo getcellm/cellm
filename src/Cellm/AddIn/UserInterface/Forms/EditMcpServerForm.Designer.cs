@@ -29,8 +29,8 @@ partial class EditMcpServerForm
     private void InitializeComponent()
     {
         serverListView = new ListView();
-        nameColumnHeader = new ColumnHeader();
         typeColumnHeader = new ColumnHeader();
+        nameColumnHeader = new ColumnHeader();
         addButton = new Button();
         removeButton = new Button();
         transportTypeLabel = new Label();
@@ -62,11 +62,10 @@ partial class EditMcpServerForm
         serverListView.Columns.AddRange(new ColumnHeader[] { typeColumnHeader, nameColumnHeader });
         serverListView.FullRowSelect = true;
         serverListView.GridLines = true;
-        serverListView.HideSelection = false;
-        serverListView.Location = new Point(12, 27);
+        serverListView.Location = new Point(12, 30);
         serverListView.MultiSelect = false;
         serverListView.Name = "serverListView";
-        serverListView.Size = new Size(516, 280);
+        serverListView.Size = new Size(516, 277);
         serverListView.TabIndex = 0;
         serverListView.UseCompatibleStateImageBehavior = false;
         serverListView.View = View.Details;
@@ -74,7 +73,7 @@ partial class EditMcpServerForm
         // 
         // typeColumnHeader
         // 
-        typeColumnHeader.Text = "Type";
+        typeColumnHeader.Text = "Transport Type";
         typeColumnHeader.Width = 120;
         // 
         // nameColumnHeader
