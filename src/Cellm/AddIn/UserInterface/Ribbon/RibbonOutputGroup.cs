@@ -173,7 +173,7 @@ public partial class RibbonMain
 
             var targetCell = ExcelDnaUtil.Application.ActiveSheet.Range[GetColumnName(columnStart + columnEnd) + GetRowName(rowStart + rowEnd + 1)];
             targetCell.NumberFormat = "@";  // Do not recalculate the formula immediately
-            
+
             try
             {
                 // Use array-aware Formula2 if it exists. This prevents array-aware Excel versions from prepending "@" to formula

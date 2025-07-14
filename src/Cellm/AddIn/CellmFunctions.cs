@@ -226,7 +226,7 @@ public static class CellmFunctions
         {
             return "Click OK to send prompt";
         }
-        
+
         try
         {
             var wallClock = Stopwatch.StartNew();
