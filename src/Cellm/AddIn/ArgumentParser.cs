@@ -116,11 +116,11 @@ public class ArgumentParser(IConfiguration configuration)
         return arguments;
     }
 
-    internal static string AddCells(string context)
+    internal static string AddCells(string cells)
     {
         return new StringBuilder()
             .AppendLine(CellsBeginTag)
-            .AppendLine(context)
+            .AppendLine(cells)
             .AppendLine(CellsEndTag)
             .ToString();
     }
