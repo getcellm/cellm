@@ -296,6 +296,7 @@ public partial class RibbonMain
         }
     }
 }
+                                   
 public static class ObjectExtensions
 {
     public static T Clone<T>(this T source)

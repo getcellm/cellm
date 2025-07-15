@@ -18,10 +18,6 @@ public partial class EditMcpServerForm : Form
     public EditMcpServerForm()
     {
         InitializeComponent();
-
-        _logger = CellmAddIn.Services.GetRequiredService<ILogger<EditMcpServerForm>>();
-        _mcpConfigurationService = CellmAddIn.Services.GetRequiredService<IMcpConfigurationService>();
-
         InitializeForm();
     }
 
@@ -46,7 +42,6 @@ public partial class EditMcpServerForm : Form
 
     private void RefreshServerLists()
     {
-        // This method is now simplified - the service handles the complexity
         PopulateServerList();
     }
 
@@ -282,6 +277,7 @@ public partial class EditMcpServerForm : Form
         else
         {
             var server = _mcpConfigurationService.GetSseServer(serverName);
+            
             if (server != null)
             {
                 endpointTextBox.Text = server.Endpoint.ToString();
@@ -401,6 +397,7 @@ public partial class EditMcpServerForm : Form
     private void ServerListView_SelectedIndexChanged(object sender, EventArgs e)
     {
         var hasSelection = serverListView.SelectedItems.Count > 0;
+
         removeButton.Enabled = hasSelection;
         okButton.Enabled = hasSelection;
 
