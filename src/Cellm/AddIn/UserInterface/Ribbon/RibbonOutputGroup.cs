@@ -218,7 +218,8 @@ public partial class RibbonMain
 
         if (currentOutputShape == targetOutputShape)
         {
-            // Do nothing;
+            // Just recalculate
+            ExcelDnaUtil.Application.ActiveCell.Calculate();
             return;
         }
 
