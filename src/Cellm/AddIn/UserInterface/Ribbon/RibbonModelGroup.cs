@@ -393,6 +393,11 @@ public partial class RibbonMain
         SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}", newProvider.ToString());
 
         InvalidateModelControls();
+
+        // Invalidate structured output buttons which enabled/disabled state depend on combination of provider and tool use
+        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRow));
+        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputColumn));
+        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputDynamic));
     }
 
     public string GetSelectedModelLabel(IRibbonControl control)
