@@ -83,11 +83,11 @@ partial class EditMcpServerForm
         // 
         // addButton
         // 
-        addButton.Location = new Point(394, 315);
+        addButton.Location = new Point(373, 315);
         addButton.Name = "addButton";
-        addButton.Size = new Size(60, 23);
+        addButton.Size = new Size(81, 23);
         addButton.TabIndex = 1;
-        addButton.Text = "Add";
+        addButton.Text = "Add new ...";
         addButton.UseVisualStyleBackColor = true;
         addButton.Click += AddButton_Click;
         // 
