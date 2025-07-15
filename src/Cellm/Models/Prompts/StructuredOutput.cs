@@ -39,21 +39,18 @@ public static class StructuredOutput
                 _ => null
             };
 
-            if (structuredOutput is not null)
-            {
-                return true;
-            }
+            return structuredOutput is not null;
         }
         catch (JsonException ex)
         {
-            // Do nothing, response will be returned ina  single cell
+            // Do nothing, response will be returned in a single cell
             var loggerFactory = CellmAddIn.Services.GetRequiredService<ILoggerFactory>()
                 .CreateLogger(nameof(StructuredOutput));
 
             loggerFactory.LogWarning("{message}", ex.Message);
-        }
 
-        return false;
+            return false;
+        }
     }
 
     private record Array2d(string[][] Data);
