@@ -39,10 +39,7 @@ public static class StructuredOutput
                 _ => null
             };
 
-            if (structuredOutput is not null)
-            {
-                return true;
-            }
+            return structuredOutput is not null;
         }
         catch (JsonException ex)
         {
@@ -51,9 +48,9 @@ public static class StructuredOutput
                 .CreateLogger(nameof(StructuredOutput));
 
             loggerFactory.LogWarning("{message}", ex.Message);
-        }
 
-        return false;
+            return false;
+        }
     }
 
     private record Array2d(string[][] Data);
