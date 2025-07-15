@@ -161,7 +161,8 @@ public class CellmAddIn : IExcelAddIn
             .AddSingleton<NativeTools>()
             .AddTools(
                 serviceProvider => AIFunctionFactory.Create(serviceProvider.GetRequiredService<NativeTools>().FileSearchRequest),
-                serviceProvider => AIFunctionFactory.Create(serviceProvider.GetRequiredService<NativeTools>().FileReaderRequest));
+                serviceProvider => AIFunctionFactory.Create(serviceProvider.GetRequiredService<NativeTools>().FileReaderRequest))
+            .AddSingleton<IMcpConfigurationService, McpConfigurationService>();
 
         // Workarounds
 

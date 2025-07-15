@@ -1,10 +1,6 @@
-using System.Text.Json;
-using System.Text.Json.Nodes;
-using Cellm.AddIn.UserInterface.Ribbon;
 using Cellm.Tools.ModelContextProtocol;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using ModelContextProtocol.Client;
 
 namespace Cellm.AddIn.UserInterface.Forms;
@@ -12,7 +8,7 @@ namespace Cellm.AddIn.UserInterface.Forms;
 public partial class AddMcpServerForm : Form
 {
     private readonly ILogger<AddMcpServerForm> _logger;
-    private readonly List<string> _existingServerNames = [];
+    private readonly IMcpConfigurationService _mcpConfigurationService;
     private Dictionary<string, string?> _environmentVariables = [];
     private Dictionary<string, string> _headers = [];
 
@@ -21,24 +17,7 @@ public partial class AddMcpServerForm : Form
         InitializeComponent();
 
         _logger = CellmAddIn.Services.GetRequiredService<ILogger<AddMcpServerForm>>();
-
-        var currentConfig = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<ModelContextProtocolConfiguration>>().CurrentValue;
-
-        if (currentConfig.StdioServers != null)
-        {
-            _existingServerNames
-                .AddRange(currentConfig.StdioServers
-                .Where(s => !string.IsNullOrWhiteSpace(s.Name) && s.Name != "Playwright")
-                .Select(s => s.Name!));
-        }
-
-        if (currentConfig.SseServers != null)
-        {
-            _existingServerNames
-                .AddRange(currentConfig.SseServers
-                .Where(s => !string.IsNullOrWhiteSpace(s.Name) && s.Name != "Playwright")
-                .Select(s => s.Name!));
-        }
+        _mcpConfigurationService = CellmAddIn.Services.GetRequiredService<IMcpConfigurationService>();
 
         InitializeForm();
     }
@@ -117,7 +96,7 @@ public partial class AddMcpServerForm : Form
             string serverName = nameTextBox.Text.Trim();
 
             // Check for duplicate names
-            if (_existingServerNames.Contains(serverName))
+            if (_mcpConfigurationService.ServerExists(serverName))
             {
                 MessageBox.Show($"A server with the name '{serverName}' already exists.", "Duplicate Name",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -190,8 +169,8 @@ public partial class AddMcpServerForm : Form
 
     private void SaveServer(string serverName, bool isStdio)
     {
-        string enabledConfigKey = $"CellmAddInConfiguration:EnableModelContextProtocolServers:{serverName}";
-        RibbonMain.SetValue(enabledConfigKey, "true");
+        // Enable the server
+        _mcpConfigurationService.SetServerEnabled(serverName, true);
 
         if (isStdio)
         {
@@ -205,9 +184,6 @@ public partial class AddMcpServerForm : Form
 
     private void SaveStdioServer(string serverName)
     {
-        var currentConfig = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<ModelContextProtocolConfiguration>>().CurrentValue;
-        var servers = currentConfig.StdioServers?.ToList() ?? new List<StdioClientTransportOptions>();
-
         var arguments = new List<string>();
         if (!string.IsNullOrWhiteSpace(argumentsTextBox.Text))
         {
@@ -219,21 +195,15 @@ public partial class AddMcpServerForm : Form
             Name = serverName,
             Command = commandTextBox.Text.Trim(),
             Arguments = arguments.Any() ? arguments : null,
-            EnvironmentVariables = _environmentVariables.Any() ? _environmentVariables : [],
+            EnvironmentVariables = _environmentVariables.Any() ? _environmentVariables : null,
             ShutdownTimeout = TimeSpan.FromSeconds(5) // Default value
         };
 
-        servers.Add(newServer);
-
-        // Save the entire servers array as JSON
-        SaveStdioServersConfiguration(servers);
+        _mcpConfigurationService.SaveUserServer(newServer);
     }
 
     private void SaveSseServer(string serverName)
     {
-        var currentConfig = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<ModelContextProtocolConfiguration>>().CurrentValue;
-        var servers = currentConfig.SseServers?.ToList() ?? new List<SseClientTransportOptions>();
-
         var newServer = new SseClientTransportOptions
         {
             Name = serverName,
@@ -243,36 +213,7 @@ public partial class AddMcpServerForm : Form
             AdditionalHeaders = _headers.Any() ? _headers : null
         };
 
-        servers.Add(newServer);
-
-        // Save the entire servers array as JSON
-        SaveSseServersConfiguration(servers);
-    }
-
-    private void SaveStdioServersConfiguration(List<StdioClientTransportOptions> servers)
-    {
-        var jsonOptions = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
-
-        var json = JsonSerializer.Serialize(servers, jsonOptions);
-        var jsonNode = JsonNode.Parse(json);
-        RibbonMain.SetValue("ModelContextProtocolConfiguration:StdioServers", jsonNode!);
-    }
-
-    private void SaveSseServersConfiguration(List<SseClientTransportOptions> servers)
-    {
-        var jsonOptions = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
-
-        var json = JsonSerializer.Serialize(servers, jsonOptions);
-        var jsonNode = JsonNode.Parse(json);
-        RibbonMain.SetValue("ModelContextProtocolConfiguration:SseServers", jsonNode!);
+        _mcpConfigurationService.SaveUserServer(newServer);
     }
 
     private void AddMcpServerForm_Load(object sender, EventArgs e)
