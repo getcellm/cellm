@@ -17,6 +17,9 @@ public partial class EditMcpServerForm : Form
 
     public EditMcpServerForm()
     {
+        _logger = CellmAddIn.Services.GetRequiredService<ILogger<EditMcpServerForm>>();
+        _mcpConfigurationService = CellmAddIn.Services.GetRequiredService<IMcpConfigurationService>();
+
         InitializeComponent();
         InitializeForm();
     }
@@ -420,5 +423,10 @@ public partial class EditMcpServerForm : Form
             _isEditMode = false;
             _editingServerName = null;
         }
+    }
+
+    private void EditMcpServerForm_Load(object sender, EventArgs e)
+    {
+
     }
 }

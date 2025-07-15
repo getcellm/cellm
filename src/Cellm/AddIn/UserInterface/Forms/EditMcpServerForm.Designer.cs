@@ -328,6 +328,7 @@ partial class EditMcpServerForm
         ShowInTaskbar = false;
         StartPosition = FormStartPosition.CenterParent;
         Text = "Edit MCP Servers";
+        Load += EditMcpServerForm_Load;
         ((System.ComponentModel.ISupportInitialize)connectionTimeoutNumericUpDown).EndInit();
         ResumeLayout(false);
         PerformLayout();
