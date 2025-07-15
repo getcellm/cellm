@@ -69,7 +69,7 @@ partial class EditMcpServerForm
         serverListView.TabIndex = 0;
         serverListView.UseCompatibleStateImageBehavior = false;
         serverListView.View = View.Details;
-        serverListView.SelectedIndexChanged += serverListView_SelectedIndexChanged;
+        serverListView.SelectedIndexChanged += ServerListView_SelectedIndexChanged;
         // 
         // typeColumnHeader
         // 
@@ -328,7 +328,7 @@ partial class EditMcpServerForm
         ShowInTaskbar = false;
         StartPosition = FormStartPosition.CenterParent;
         Text = "Edit MCP Servers";
-        Load += EditMcpServerForm_Load_1;
+        Load += EditMcpServerForm_Load;
         ((System.ComponentModel.ISupportInitialize)connectionTimeoutNumericUpDown).EndInit();
         ResumeLayout(false);
         PerformLayout();

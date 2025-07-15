@@ -130,6 +130,25 @@ public partial class RibbonMain
         File.WriteAllText(_appsettingsLocalPath, localNode.ToJsonString(options));
     }
 
+    public static void RemoveKey(string key)
+    {
+        var keySegments = key.Split(':');
+        var localNode = File.Exists(_appsettingsLocalPath)
+            ? JsonNode.Parse(File.ReadAllText(_appsettingsLocalPath)) ?? new JsonObject()
+            : new JsonObject();
+
+        RemoveKeyFromNode(localNode.AsObject(), keySegments);
+
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
+
+        Directory.CreateDirectory(Path.GetDirectoryName(_appsettingsLocalPath)!);
+        File.WriteAllText(_appsettingsLocalPath, localNode.ToJsonString(options));
+    }
+
     private static void SetValueInNode(JsonObject node, string[] keySegments, string value)
     {
         var current = node;
@@ -172,6 +191,29 @@ public partial class RibbonMain
                 {
                     nextNode = new JsonObject();
                     current[segment] = nextNode;
+                }
+                current = nextNode!.AsObject();
+            }
+        }
+    }
+
+    private static void RemoveKeyFromNode(JsonObject node, string[] keySegments)
+    {
+        var current = node;
+        for (var i = 0; i < keySegments.Length; i++)
+        {
+            var isLast = i == keySegments.Length - 1;
+            var segment = keySegments[i];
+
+            if (isLast)
+            {
+                current.Remove(segment);
+            }
+            else
+            {
+                if (!current.TryGetPropertyValue(segment, out var nextNode))
+                {
+                    return; // Key path doesn't exist, nothing to remove
                 }
                 current = nextNode!.AsObject();
             }

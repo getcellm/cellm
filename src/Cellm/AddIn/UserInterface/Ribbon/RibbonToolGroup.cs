@@ -215,7 +215,7 @@ public partial class RibbonMain
             return false;
         }
 
-        var serverName = control.Id.Substring(McpCheckBoxIdPrefix.Length);
+        var serverName = control.Id[McpCheckBoxIdPrefix.Length..];
         if (string.IsNullOrWhiteSpace(serverName))
         {
             return false;
@@ -258,7 +258,7 @@ public partial class RibbonMain
             if (form.ShowDialog() == DialogResult.OK)
             {
                 // Allow some time for configuration file changes to be processed
-                System.Threading.Thread.Sleep(100);
+                Thread.Sleep(100);
 
                 // Force configuration refresh and then refresh the ribbon UI
                 var _ = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<ModelContextProtocolConfiguration>>().CurrentValue;
@@ -281,7 +281,7 @@ public partial class RibbonMain
             if (form.ShowDialog() == DialogResult.OK)
             {
                 // Allow some time for configuration file changes to be processed
-                System.Threading.Thread.Sleep(100);
+                Thread.Sleep(100);
 
                 // Force configuration refresh and then refresh the ribbon UI
                 var _ = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<ModelContextProtocolConfiguration>>().CurrentValue;
@@ -296,6 +296,7 @@ public partial class RibbonMain
         }
     }
 }
+
 public static class ObjectExtensions
 {
     public static T Clone<T>(this T source)

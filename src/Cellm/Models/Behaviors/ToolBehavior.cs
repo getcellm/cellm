@@ -14,7 +14,7 @@ namespace Cellm.Models.Behaviors;
 internal class ToolBehavior<TRequest, TResponse>(
   Account account,
   IOptionsMonitor<CellmAddInConfiguration> cellmAddInConfiguration,
-  IOptionsMonitor<ModelContextProtocolConfiguration> modelContextProtocolConfiguration,
+  IMcpConfigurationService mcpConfigurationService,
   IEnumerable<AIFunction> functions,
   ILogger<ToolBehavior<TRequest, TResponse>> logger,
   ILoggerFactory loggerFactory)
@@ -56,13 +56,13 @@ internal class ToolBehavior<TRequest, TResponse>(
 
     private async IAsyncEnumerable<McpClientTool> GetMcpToolsAsync([EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var stdioToolTasks = modelContextProtocolConfiguration.CurrentValue.StdioServers
+        var stdioToolTasks = mcpConfigurationService.GetAllStdioServers()
             .Where(stdioClientTransportOptions => cellmAddInConfiguration.CurrentValue.EnableModelContextProtocolServers
                 .TryGetValue(stdioClientTransportOptions.Name ?? throw new NullReferenceException(nameof(stdioClientTransportOptions.Name)), out var isEnabled) && isEnabled)
             .Select(stdioClientTransportOptions => GetOrFetchServerToolsAsync(stdioClientTransportOptions, cancellationToken))
             .ToList();
 
-        var sseToolTasks = modelContextProtocolConfiguration.CurrentValue.SseServers
+        var sseToolTasks = mcpConfigurationService.GetAllSseServers()
             .Where(sseClientTransportOptions => cellmAddInConfiguration.CurrentValue.EnableModelContextProtocolServers
                 .TryGetValue(sseClientTransportOptions.Name ?? throw new NullReferenceException(nameof(sseClientTransportOptions.Name)), out var isEnabled) && isEnabled)
             .Select(sseClientTransportOptions => GetOrFetchServerToolsAsync(sseClientTransportOptions, cancellationToken))
