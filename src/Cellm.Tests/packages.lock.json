@@ -4,11 +4,11 @@
     "net9.0-windows7.0": {
       "ExcelDna.Testing": {
         "type": "Direct",
-        "requested": "[1.9.0-alpha3, )",
-        "resolved": "1.9.0-alpha3",
-        "contentHash": "1czKqjx7dzU59Ilt0Ewp06aM5wsOgGS+CodRdWumhpyrxz8Hqnp3HCVDsBWhgElEPn0bkcdQFxG+W7xyJBXLkQ==",
+        "requested": "[1.9.0-beta2, )",
+        "resolved": "1.9.0-beta2",
+        "contentHash": "2D8QaJVsPbmER45pMjE+S6m+HfU05Ehgj0n/wMfnzC3GL6qT4ZY5GJcNu/BujgePeaGkNvcyl7tX0NAHJPOl0A==",
         "dependencies": {
-          "ExcelDna.Integration": "[1.9.0-alpha3]",
+          "ExcelDna.Integration": "[1.9.0-beta2]",
           "ExcelDna.Interop": "[15.0.1]",
           "Microsoft.NET.Test.Sdk": "16.11.0",
           "Microsoft.VisualStudio.Interop": "17.1.32210.191",
@@ -34,8 +34,8 @@
       },
       "ExcelDna.Integration": {
         "type": "Transitive",
-        "resolved": "1.9.0-alpha3",
-        "contentHash": "vQZP+bXCXkiIx4bkntd2iWnMDS57ECcul2XFQvMSvgcTy6+2q81xI2Sp6FGXr9tU/t7eHfpG7vVv/7TZKOLnxA=="
+        "resolved": "1.9.0-beta2",
+        "contentHash": "Zk4JICXGXJY10Bh3hFVUmvMvhwcytQ4Zr46nEAyIpUJcStAhUatju8JyXGd8OhiyponPI5cighZOM31z4wVRSw=="
       },
       "ExcelDna.Interop": {
         "type": "Transitive",
