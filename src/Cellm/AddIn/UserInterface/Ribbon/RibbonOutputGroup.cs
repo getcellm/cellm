@@ -2,8 +2,6 @@ using System.Text.Json;
 using Cellm.Models.Providers;
 using ExcelDna.Integration;
 using ExcelDna.Integration.CustomUI;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace Cellm.AddIn.UserInterface.Ribbon;
 
