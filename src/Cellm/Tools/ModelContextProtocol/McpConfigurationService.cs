@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Cellm.AddIn;
 using Cellm.AddIn.UserInterface.Ribbon;
 using ExcelDna.Integration;
 using Microsoft.Extensions.Logging;
@@ -17,7 +18,8 @@ public class McpConfigurationService : IMcpConfigurationService
         _logger = logger;
         _jsonSerializerOptions = new JsonSerializerOptions
         {
-            WriteIndented = true
+            WriteIndented = true,
+            PropertyNamingPolicy = null
         };
     }
 
@@ -28,7 +30,7 @@ public class McpConfigurationService : IMcpConfigurationService
         try
         {
             // Use RibbonHelpers to get merged configuration (base + local)
-            var serversNode = RibbonMain.GetValueAsJsonNode("ModelContextProtocolConfiguration:StdioServers");
+            var serversNode = RibbonMain.GetValueAsJsonNode($"{nameof(ModelContextProtocolConfiguration)}:{nameof(ModelContextProtocolConfiguration.StdioServers)}");
             if (serversNode is JsonArray serversArray)
             {
                 foreach (var serverNode in serversArray)
@@ -59,7 +61,7 @@ public class McpConfigurationService : IMcpConfigurationService
         try
         {
             // Use RibbonHelpers to get merged configuration (base + local)
-            var serversNode = RibbonMain.GetValueAsJsonNode("ModelContextProtocolConfiguration:SseServers");
+            var serversNode = RibbonMain.GetValueAsJsonNode($"{nameof(ModelContextProtocolConfiguration)}:{nameof(ModelContextProtocolConfiguration.SseServers)}");
             if (serversNode is JsonArray serversArray)
             {
                 foreach (var serverNode in serversArray)
@@ -90,7 +92,7 @@ public class McpConfigurationService : IMcpConfigurationService
         try
         {
             // Only get servers from local configuration
-            var localServersNode = GetLocalConfigurationNode("ModelContextProtocolConfiguration:StdioServers");
+            var localServersNode = GetLocalConfigurationNode($"{nameof(ModelContextProtocolConfiguration)}:{nameof(ModelContextProtocolConfiguration.StdioServers)}");
             if (localServersNode is JsonArray serversArray)
             {
                 foreach (var serverNode in serversArray)
@@ -121,7 +123,7 @@ public class McpConfigurationService : IMcpConfigurationService
         try
         {
             // Only get servers from local configuration
-            var localServersNode = GetLocalConfigurationNode("ModelContextProtocolConfiguration:SseServers");
+            var localServersNode = GetLocalConfigurationNode($"{nameof(ModelContextProtocolConfiguration)}:{nameof(ModelContextProtocolConfiguration.SseServers)}");
             if (localServersNode is JsonArray serversArray)
             {
                 foreach (var serverNode in serversArray)
@@ -251,7 +253,7 @@ public class McpConfigurationService : IMcpConfigurationService
 
     public void SetServerEnabled(string name, bool enabled)
     {
-        var configKey = $"CellmAddInConfiguration:EnableModelContextProtocolServers:{name}";
+        var configKey = $"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableModelContextProtocolServers)}:{name}";
 
         if (enabled)
         {
@@ -307,13 +309,13 @@ public class McpConfigurationService : IMcpConfigurationService
     {
         var json = JsonSerializer.Serialize(servers, _jsonSerializerOptions);
         var jsonNode = JsonNode.Parse(json);
-        RibbonMain.SetValue("ModelContextProtocolConfiguration:StdioServers", jsonNode!);
+        RibbonMain.SetValue($"{nameof(ModelContextProtocolConfiguration)}:{nameof(ModelContextProtocolConfiguration.StdioServers)}", jsonNode!);
     }
 
     private void SaveUserSseServers(List<SseClientTransportOptions> servers)
     {
         var json = JsonSerializer.Serialize(servers, _jsonSerializerOptions);
         var jsonNode = JsonNode.Parse(json);
-        RibbonMain.SetValue("ModelContextProtocolConfiguration:SseServers", jsonNode!);
+        RibbonMain.SetValue($"{nameof(ModelContextProtocolConfiguration)}:{nameof(ModelContextProtocolConfiguration.SseServers)}", jsonNode!);
     }
 }
