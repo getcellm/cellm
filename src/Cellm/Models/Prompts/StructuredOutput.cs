@@ -46,7 +46,7 @@ public static class StructuredOutput
         }
         catch (JsonException ex)
         {
-            // Do nothing, response will be returned ina  single cell
+            // Do nothing, response will be returned in a single cell
             var loggerFactory = CellmAddIn.Services.GetRequiredService<ILoggerFactory>()
                 .CreateLogger(nameof(StructuredOutput));
 

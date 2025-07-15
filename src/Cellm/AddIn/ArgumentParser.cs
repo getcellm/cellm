@@ -116,11 +116,11 @@ public class ArgumentParser(IConfiguration configuration)
         return arguments;
     }
 
-    internal static string AddCells(string cells)
+    internal static string AddCells(string context)
     {
         return new StringBuilder()
             .AppendLine(CellsBeginTag)
-            .AppendLine(cells)
+            .AppendLine(context)
             .AppendLine(CellsEndTag)
             .ToString();
     }
@@ -150,14 +150,11 @@ public class ArgumentParser(IConfiguration configuration)
         var numberOfRenderedRows = numberOfRows + 1; // Includes the header row
         var numberOfRenderedColumns = numberOfColumns + 1; // Includes the row enumeration column
 
-        // We go over the table twice, once to fill it with values and once to build the final string
+        // We go over the table twice, once to parse values and once to build the final string
         var table = new string[numberOfRenderedRows, numberOfRenderedColumns];
-        var tableIsEmpty = true;
-
-        table[0, 0] = string.Empty;
-        var maxColumnWidth = new int[numberOfRenderedColumns];
 
         // The row enumeration column is always at least 9 characters wide (Row \ Col)
+        var maxColumnWidth = new int[numberOfRenderedColumns];
         maxColumnWidth[0] = 9;
 
         // Add header row
@@ -173,7 +170,10 @@ public class ArgumentParser(IConfiguration configuration)
             table[r + 1, 0] = GetRowName(cells.RowFirst + r);
         }
 
-        // Parse cells and track max column width along the way
+        // Parse cells and track empty rows, empty columns, and max column width along the way
+        var rowsWithValues = new List<int>();
+        var columnsWithValues = new List<int>();
+
         for (var r = 0; r < numberOfRows; r++)
         {
             for (var c = 0; c < numberOfColumns; c++)
@@ -190,9 +190,17 @@ public class ArgumentParser(IConfiguration configuration)
 
                 var value = values[r, c].ToString() ?? string.Empty;
 
-                if (tableIsEmpty && !string.IsNullOrEmpty(value))
+                if (!string.IsNullOrEmpty(value))
                 {
-                    tableIsEmpty = false;
+                    if (!rowsWithValues.Contains(r + 1))
+                    {
+                        rowsWithValues.Add(r + 1);
+                    }
+
+                    if (!columnsWithValues.Contains(c + 1))
+                    {
+                        columnsWithValues.Add(c + 1);
+                    }
                 }
 
                 maxColumnWidth[c + 1] = Math.Max(maxColumnWidth[c + 1], value.Length);
@@ -207,53 +215,56 @@ public class ArgumentParser(IConfiguration configuration)
         // Render header row
         tableBuilder.Append("| Row \\ Col |");
 
-        for (var c = 1; c < numberOfRenderedColumns; c++)
+        for (var c = 0; c < columnsWithValues.Count; c++)
         {
             tableBuilder.Append(' ');
-            tableBuilder.Append(table[0, c].PadRight(maxColumnWidth[c]));
+            tableBuilder.Append(table[0, columnsWithValues[c]].PadRight(maxColumnWidth[columnsWithValues[c]]));
             tableBuilder.Append(" |");
         }
 
         tableBuilder.AppendLine();
 
         // Render header separator
-        tableBuilder.Append('|');
+        tableBuilder.Append("| ");
+        tableBuilder.Append(new string('-', maxColumnWidth[0]));
+        tableBuilder.Append(" |");
 
-        for (var c = 0; c < numberOfRenderedColumns; c++)
+        for (var c = 0; c < columnsWithValues.Count; c++)
         {
             tableBuilder.Append(' ');
-            tableBuilder.Append(new string('-', maxColumnWidth[c]));
+            tableBuilder.Append(new string('-', maxColumnWidth[columnsWithValues[c]]));
             tableBuilder.Append(" |");
         }
 
-
+        tableBuilder.AppendLine();
 
         // Render cells
-        for (var r = 1; r < numberOfRenderedRows; r++)
+        for (var r = 0; r < rowsWithValues.Count; r++)
         {
-            tableBuilder.AppendLine();
-
             tableBuilder.Append('|');
 
             // Render row enumeration
             tableBuilder.Append(' ');
-            tableBuilder.Append(table[r, 0].PadRight(maxColumnWidth[0]));
+            tableBuilder.Append(table[rowsWithValues[r], 0].PadRight(maxColumnWidth[0]));
             tableBuilder.Append(" |");
 
             // Render row
-            for (var c = 1; c < numberOfRenderedColumns; c++)
+            for (var c = 0; c < columnsWithValues.Count; c++)
             {
                 tableBuilder.Append(' ');
-                tableBuilder.Append(table[r, c].PadRight(maxColumnWidth[c]));
+                tableBuilder.Append(table[rowsWithValues[r], columnsWithValues[c]].PadRight(maxColumnWidth[columnsWithValues[c]]));
                 tableBuilder.Append(" |");
             }
+
+            tableBuilder.AppendLine();
         }
 
-        if (tableIsEmpty)
+        if (rowsWithValues.Count == 0)
         {
-            throw new CellmException($"Empty cells " +
-                $"{GetColumnName(cells.ColumnFirst)}{GetRowName(cells.RowFirst)}:" +
-                $"{GetColumnName(cells.ColumnFirst + values.GetLength(0))}{GetRowName(cells.RowFirst + values.GetLength(1))}");
+            return $"The user has provided the cell range " +
+                   $"{GetColumnName(cells.ColumnFirst)}{GetRowName(cells.RowFirst)}:" +
+                   $"{GetColumnName(cells.ColumnFirst + values.GetLength(1) - 1)}{GetRowName(cells.RowFirst + values.GetLength(0) - 1)}, " +
+                   $"but all cells are empty.";
         }
 
         return tableBuilder.ToString();
