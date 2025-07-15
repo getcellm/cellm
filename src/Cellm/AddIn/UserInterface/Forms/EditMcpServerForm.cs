@@ -277,7 +277,7 @@ public partial class EditMcpServerForm : Form
         else
         {
             var server = _mcpConfigurationService.GetSseServer(serverName);
-            
+
             if (server != null)
             {
                 endpointTextBox.Text = server.Endpoint.ToString();
