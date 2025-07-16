@@ -72,17 +72,17 @@ public static class CellmFunctions
         var configuration = CellmAddIn.Services.GetRequiredService<IConfiguration>();
 
         var provider = configuration[$"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}"]
-          ?? throw new ArgumentException(nameof(CellmAddInConfiguration.DefaultProvider));
+            ?? throw new ArgumentException(nameof(CellmAddInConfiguration.DefaultProvider));
 
         var model = configuration[$"{provider}Configuration:{nameof(IProviderConfiguration.DefaultModel)}"]
-          ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
+            ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
 
         return Run(
-          $"{provider}/{model}",
-          instructionsOrCells,
-          instructionsOrTemperature,
-          temperature,
-          StructuredOutputShape.Dynamic);
+            $"{provider}/{model}",
+            instructionsOrCells,
+            instructionsOrTemperature,
+            temperature,
+            StructuredOutputShape.Dynamic);
     }
 
     /// <summary>
@@ -97,17 +97,17 @@ public static class CellmFunctions
         var configuration = CellmAddIn.Services.GetRequiredService<IConfiguration>();
 
         var provider = configuration[$"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}"]
-          ?? throw new ArgumentException(nameof(CellmAddInConfiguration.DefaultProvider));
+            ?? throw new ArgumentException(nameof(CellmAddInConfiguration.DefaultProvider));
 
         var model = configuration[$"{provider}Configuration:{nameof(IProviderConfiguration.DefaultModel)}"]
-          ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
+            ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
 
         return Run(
-          $"{provider}/{model}",
-          instructionsOrCells,
-          instructionsOrTemperature,
-          temperature,
-          StructuredOutputShape.Row);
+            $"{provider}/{model}",
+            instructionsOrCells,
+            instructionsOrTemperature,
+            temperature,
+            StructuredOutputShape.Row);
     }
 
     /// <summary>
@@ -122,17 +122,17 @@ public static class CellmFunctions
         var configuration = CellmAddIn.Services.GetRequiredService<IConfiguration>();
 
         var provider = configuration[$"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}"]
-          ?? throw new ArgumentException(nameof(CellmAddInConfiguration.DefaultProvider));
+            ?? throw new ArgumentException(nameof(CellmAddInConfiguration.DefaultProvider));
 
         var model = configuration[$"{provider}Configuration:{nameof(IProviderConfiguration.DefaultModel)}"]
-          ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
+            ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
 
         return Run(
-          $"{provider}/{model}",
-          instructionsOrCells,
-          instructionsOrTemperature,
-          temperature,
-          StructuredOutputShape.Column);
+            $"{provider}/{model}",
+            instructionsOrCells,
+            instructionsOrTemperature,
+            temperature,
+            StructuredOutputShape.Column);
     }
 
     /// <summary>
@@ -147,17 +147,17 @@ public static class CellmFunctions
         var configuration = CellmAddIn.Services.GetRequiredService<IConfiguration>();
 
         var provider = configuration[$"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}"]
-          ?? throw new ArgumentException(nameof(CellmAddInConfiguration.DefaultProvider));
+            ?? throw new ArgumentException(nameof(CellmAddInConfiguration.DefaultProvider));
 
         var model = configuration[$"{provider}Configuration:{nameof(IProviderConfiguration.DefaultModel)}"]
-          ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
+            ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
 
         return Run(
-          $"{provider}/{model}",
-          instructionsOrCells,
-          instructionsOrTemperature,
-          temperature,
-          StructuredOutputShape.None);
+            $"{provider}/{model}",
+            instructionsOrCells,
+            instructionsOrTemperature,
+            temperature,
+            StructuredOutputShape.None);
     }
 
     /// <summary>
@@ -185,11 +185,11 @@ public static class CellmFunctions
         [ExcelArgument(Name = _temperatureName, Description = _temperatureDescription)] object temperature)
     {
         return Run(
-          providerAndModel,
-          instructionsOrCells,
-          instructionsOrTemperature,
-          temperature,
-          StructuredOutputShape.Dynamic);
+            providerAndModel,
+            instructionsOrCells,
+            instructionsOrTemperature,
+            temperature,
+            StructuredOutputShape.Dynamic);
     }
 
     /// <summary>
@@ -203,11 +203,11 @@ public static class CellmFunctions
         [ExcelArgument(Name = _temperatureName, Description = _temperatureDescription)] object temperature)
     {
         return Run(
-          providerAndModel,
-          instructionsOrCells,
-          instructionsOrTemperature,
-          temperature,
-          StructuredOutputShape.Row);
+            providerAndModel,
+            instructionsOrCells,
+            instructionsOrTemperature,
+            temperature,
+            StructuredOutputShape.Row);
     }
 
     /// <summary>
@@ -221,11 +221,11 @@ public static class CellmFunctions
         [ExcelArgument(Name = _temperatureName, Description = _temperatureDescription)] object temperature)
     {
         return Run(
-          providerAndModel,
-          instructionsOrCells,
-          instructionsOrTemperature,
-          temperature,
-          StructuredOutputShape.Column);
+            providerAndModel,
+            instructionsOrCells,
+            instructionsOrTemperature,
+            temperature,
+            StructuredOutputShape.Column);
     }
 
     /// <summary>
@@ -239,11 +239,11 @@ public static class CellmFunctions
         [ExcelArgument(Name = _temperatureName, Description = _temperatureDescription)] object temperature)
     {
         return Run(
-          providerAndModel,
-          instructionsOrCells,
-          instructionsOrTemperature,
-          temperature,
-          StructuredOutputShape.None);
+            providerAndModel,
+            instructionsOrCells,
+            instructionsOrTemperature,
+            temperature,
+            StructuredOutputShape.None);
     }
 
     /// <summary>
@@ -263,21 +263,21 @@ public static class CellmFunctions
             // We must parse arguments on the main thread
             var argumentParser = CellmAddIn.Services.GetRequiredService<ArgumentParser>();
             var arguments = argumentParser
-              .AddProvider(providerAndModel)
-              .AddModel(providerAndModel)
-              .AddInstructionsOrCells(instructionsOrCells)
-              .AddInstructionsOrTemperature(instructionsOrTemperature)
-              .AddTemperature(temperature)
-              .AddOutputShape(outputShape)
-              .Parse();
+                .AddProvider(providerAndModel)
+                .AddModel(providerAndModel)
+                .AddInstructionsOrCells(instructionsOrCells)
+                .AddInstructionsOrTemperature(instructionsOrTemperature)
+                .AddTemperature(temperature)
+                .AddOutputShape(outputShape)
+                .Parse();
 
             var caller = XlCall.Excel(XlCall.xlfCaller) as ExcelReference;
             var callerCoordinates = $"{ArgumentParser.GetColumnName(caller?.ColumnFirst ?? 0)}{ArgumentParser.GetRowName(caller?.RowFirst ?? 0)}";
 
             var response = ExcelAsyncUtil.RunTaskWithCancellation(
-              nameof(Run),
-              new object[] { providerAndModel, instructionsOrCells, instructionsOrTemperature, temperature },
-              cancellationToken => GetResponseAsync(arguments, wallClock, callerCoordinates, cancellationToken));
+                nameof(Run),
+                new object[] { providerAndModel, instructionsOrCells, instructionsOrTemperature, temperature },
+                cancellationToken => GetResponseAsync(arguments, wallClock, callerCoordinates, cancellationToken));
 
             if (response is ExcelError.ExcelErrorNA)
             {
@@ -310,8 +310,8 @@ public static class CellmFunctions
         var requestClock = Stopwatch.StartNew();
 
         var logger = CellmAddIn.Services
-          .GetRequiredService<ILoggerFactory>()
-          .CreateLogger(nameof(GetResponseAsync));
+            .GetRequiredService<ILoggerFactory>()
+            .CreateLogger(nameof(GetResponseAsync));
 
         try
         {
@@ -338,20 +338,20 @@ public static class CellmFunctions
             };
 
             var userMessage = new StringBuilder()
-              .AppendLine(ArgumentParser.AddInstructions(instructions))
-              .AppendLine(ArgumentParser.AddCells(cells))
-              .ToString();
+                .AppendLine(ArgumentParser.AddInstructions(instructions))
+                .AppendLine(ArgumentParser.AddCells(cells))
+                .ToString();
 
             var cellmAddInConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<CellmAddInConfiguration>>();
 
             var prompt = new PromptBuilder()
-              .SetModel(arguments.Model)
-              .SetTemperature(arguments.Temperature)
-              .SetMaxOutputTokens(cellmAddInConfiguration.CurrentValue.MaxOutputTokens)
-              .SetOutputShape(arguments.OutputShape)
-              .AddSystemMessage(SystemMessages.SystemMessage(arguments.Provider, arguments.Model, DateTime.UtcNow))
-              .AddUserMessage(userMessage)
-              .Build();
+                .SetModel(arguments.Model)
+                .SetTemperature(arguments.Temperature)
+                .SetMaxOutputTokens(cellmAddInConfiguration.CurrentValue.MaxOutputTokens)
+                .SetOutputShape(arguments.OutputShape)
+                .AddSystemMessage(SystemMessages.SystemMessage(arguments.Provider, arguments.Model, DateTime.UtcNow))
+                .AddUserMessage(userMessage)
+                .Build();
 
             // Check for cancellation before sending request
             cancellationToken.ThrowIfCancellationRequested();
@@ -381,18 +381,18 @@ public static class CellmFunctions
         catch (OperationCanceledException)
         {
             CellmAddIn.Services
-              .GetRequiredService<ILoggerFactory>()
-              .CreateLogger(nameof(GetResponseAsync))
-              .LogInformation("Sending prompt to {}/{} ({}) ... Cancelled (elapsed time: {}ms, request time: {}ms)", arguments.Provider, arguments.Model, callerCoordinates, wallClock.ElapsedMilliseconds, requestClock.ElapsedMilliseconds);
+                .GetRequiredService<ILoggerFactory>()
+                .CreateLogger(nameof(GetResponseAsync))
+                .LogInformation("Sending prompt to {}/{} ({}) ... Cancelled (elapsed time: {}ms, request time: {}ms)", arguments.Provider, arguments.Model, callerCoordinates, wallClock.ElapsedMilliseconds, requestClock.ElapsedMilliseconds);
 
             return "Cancelled"; // Cancellation is not an error, just return _something_
         }
         catch (CellmException ex)
         {
             CellmAddIn.Services
-              .GetRequiredService<ILoggerFactory>()
-              .CreateLogger(nameof(GetResponseAsync))
-              .LogError(ex, "Sending prompt to {}/{} ({}) ... Failed: {message} (elapsed time: {}ms, request time: {}ms)", arguments.Provider, arguments.Model, callerCoordinates, ex.Message, wallClock.ElapsedMilliseconds, requestClock.ElapsedMilliseconds);
+                .GetRequiredService<ILoggerFactory>()
+                .CreateLogger(nameof(GetResponseAsync))
+                .LogError(ex, "Sending prompt to {}/{} ({}) ... Failed: {message} (elapsed time: {}ms, request time: {}ms)", arguments.Provider, arguments.Model, callerCoordinates, ex.Message, wallClock.ElapsedMilliseconds, requestClock.ElapsedMilliseconds);
 
             return ex.Message;
         }
