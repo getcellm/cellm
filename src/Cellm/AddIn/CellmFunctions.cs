@@ -14,26 +14,60 @@ namespace Cellm.AddIn;
 
 public static class CellmFunctions
 {
+    private const string _promptDescription = "Sends a prompt to the default model. Can be used with or without a cell range as context.";
+    private const string _promptModelDescription = "Sends a prompt to the specified model. Can be used with or without a cell range as context.";
+
+    private const string _structuredOutputShapeRowDescription = " Multiple output values spill into cells to the right.";
+    private const string _structuredOutputShapeColumnDescription = " Multiple output values spill into cells below.";
+    private const string _structuredOutputShapeDynamicDescription = " The model chooses whether multiple output values should spill into rows and/or columns or not.";
+
+    private const string _promptExample = $"""
+         Example:
+
+        =PROMPT(A1:B2, "Extract named entities", 0.7)
+        """;
+
+    private const string _promptModelExample = """
+        Example:
+
+        =PROMPT("openai/gpt-4.1", A1:B2, "Extract named entities", 0.7)
+        """;
+
+    private const string _instructionsOrCellsName = "Prompt or context";
+    private const string _instructionsOrCellsDescription = "A prompt (string) or context for the prompt in the next argument (a cell or cell range e.g., A1:B2).";
+
+    private const string _instructionsOrTemperatureName = "Prompt or temperature";
+    private const string _instructionsOrTemperatureDescription = "(Optional) A prompt when the first argument is a cell range with context (string, cell, or cell range e.g., A1:B2) else the model's temperature (0.0 - 1.0)";
+
+    private const string _temperatureName = "Temperature";
+    private const string _temperatureDescription = "(Optional) The model's temperature (0.0 - 1.0) when the second argument is a prompt.";
+
+    private const string _providerAndModelName = "Provider and model";
+    private const string _promptAndModelDescription = @"The provider and model on the form ""{provider}/{model}"" (e.g., openai/gpt-4.1)";
+
+
     /// <summary>
-    /// Sends a prompt to the default model configured in CellmConfiguration.
-    /// </summary>
-    /// <param name="context">A cell or range of cells containing the context for the prompt.</param>
-    /// <param name="instructionsOrTemperature">
-    /// A cell or range of cells with instructions, or a temperature value.
-    /// If omitted, any instructions found in the context will be used.
+    /// Sends a prompt to the default model configured in CellmConfiguration.
+    /// </summary>
+    /// <param name="instructionsOrCells">
+    /// A prompt (string) or context (cell or cell range).
     /// </param>
-    /// <param name="temperature">
-    /// A value between 0 and 1 that controls the randomness of the model's output.
-    /// Lower values make the output more deterministic, higher values make it more random.
-    /// </param>
-    /// <returns>
-    /// The model's response as a string. If an error occurs, it returns the error message.
-    /// </returns>
-    [ExcelFunction(Name = "PROMPT", Description = "Send a prompt to the default model", IsThreadSafe = true, IsVolatile = false)]
+    /// <param name="instructionsOrTemperature">
+    /// A prompt (string, cell, or cell range) or a temperature value.
+    /// If prompt is omitted, any instructions found in the cells of the first argument will be used as instructions.
+    /// </param>
+    /// <param name="temperature">
+    /// A value between 0 and 1 that controls the randomness of the model's output.
+    /// Lower values make the output more deterministic, higher values make it more random.
+    /// </param>
+    /// <returns>
+    /// The model's response as a string. If an error occurs, it returns the error message.
+    /// </returns>
+    [ExcelFunction(Name = "PROMPT", Description = _promptDescription + _structuredOutputShapeDynamicDescription + _promptExample, IsThreadSafe = true, IsVolatile = false)]
     public static object Prompt(
-    [ExcelArgument(AllowReference = true, Name = "InstructionsOrCells", Description = "A string with instructions or a cell range with data (required)")] object context,
-    [ExcelArgument(AllowReference = true, Name = "InstructionsOrTemperature", Description = "A string with instructions, a cell range with instructions, or a temperature")] object instructionsOrTemperature,
-    [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
+        [ExcelArgument(AllowReference = true, Name = _instructionsOrCellsName, Description = _instructionsOrCellsDescription)] object instructionsOrCells,
+        [ExcelArgument(AllowReference = true, Name = _instructionsOrTemperatureName, Description = _instructionsOrTemperatureDescription)] object instructionsOrTemperature,
+        [ExcelArgument(Name = _temperatureName, Description = _temperatureDescription)] object temperature)
     {
         var configuration = CellmAddIn.Services.GetRequiredService<IConfiguration>();
 
@@ -45,20 +79,20 @@ public static class CellmFunctions
 
         return Run(
             $"{provider}/{model}",
-            context,
+            instructionsOrCells,
             instructionsOrTemperature,
             temperature,
             StructuredOutputShape.Dynamic);
     }
 
-    /// <summary>
-    /// Same as Prompt, but multiple values spill into cells to the right.
-    /// </returns>
-    [ExcelFunction(Name = "PROMPT.TOROW", Description = "Send a prompt to the default model", IsThreadSafe = true, IsVolatile = false)]
+    /// <summary>
+    /// Same as Prompt, but multiple output values spill into cells to the right.
+    /// </returns>
+    [ExcelFunction(Name = "PROMPT.TOROW", Description = _promptDescription + _structuredOutputShapeRowDescription, IsThreadSafe = true, IsVolatile = false)]
     public static object PromptToRow(
-    [ExcelArgument(AllowReference = true, Name = "InstructionsOrCells", Description = "A string with instructions or a cell or range of cells with context")] object instructionsOrCells,
-    [ExcelArgument(AllowReference = true, Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
-    [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
+        [ExcelArgument(AllowReference = true, Name = _instructionsOrCellsName, Description = _instructionsOrCellsDescription)] object instructionsOrCells,
+        [ExcelArgument(AllowReference = true, Name = _instructionsOrTemperatureName, Description = _instructionsOrTemperatureDescription)] object instructionsOrTemperature,
+        [ExcelArgument(Name = _temperatureName, Description = _temperatureDescription)] object temperature)
     {
         var configuration = CellmAddIn.Services.GetRequiredService<IConfiguration>();
 
@@ -76,14 +110,14 @@ public static class CellmFunctions
             StructuredOutputShape.Row);
     }
 
-    /// <summary>
-    /// Same as Prompt, but multiple values spill into cells below.
-    /// </returns>
-    [ExcelFunction(Name = "PROMPT.TOCOLUMN", Description = "Send a prompt to the default model", IsThreadSafe = true, IsVolatile = false)]
+    /// <summary>
+    /// Same as Prompt, but multiple output values spill into cells below.
+    /// </returns>
+    [ExcelFunction(Name = "PROMPT.TOCOLUMN", Description = _promptDescription + _structuredOutputShapeColumnDescription, IsThreadSafe = true, IsVolatile = false)]
     public static object PromptToColumn(
-    [ExcelArgument(AllowReference = true, Name = "InstructionsOrCells", Description = "A string with instructions or a cell or range of cells with context")] object instructionsOrCells,
-    [ExcelArgument(AllowReference = true, Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
-    [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
+        [ExcelArgument(AllowReference = true, Name = _instructionsOrCellsName, Description = _instructionsOrCellsDescription)] object instructionsOrCells,
+        [ExcelArgument(AllowReference = true, Name = _instructionsOrTemperatureName, Description = _instructionsOrTemperatureDescription)] object instructionsOrTemperature,
+        [ExcelArgument(Name = _temperatureName, Description = _temperatureDescription)] object temperature)
     {
         var configuration = CellmAddIn.Services.GetRequiredService<IConfiguration>();
 
@@ -101,14 +135,14 @@ public static class CellmFunctions
             StructuredOutputShape.Column);
     }
 
-    /// <summary>
-    /// Same as Prompt, but multiple values spill into multiple rows/columns.
-    /// </returns>
-    [ExcelFunction(Name = "PROMPT.TOCELL", Description = "Send a prompt to the default model", IsThreadSafe = true, IsVolatile = false)]
+    /// <summary>
+    /// Same as Prompt, but outputs to a single cell.
+    /// </returns>
+    [ExcelFunction(Name = "PROMPT.TOCELL", Description = _promptDescription, IsThreadSafe = true, IsVolatile = false)]
     public static object PromptToCell(
-    [ExcelArgument(AllowReference = true, Name = "InstructionsOrCells", Description = "A string with instructions or a cell or range of cells with context")] object instructionsOrCells,
-    [ExcelArgument(AllowReference = true, Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
-    [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
+        [ExcelArgument(AllowReference = true, Name = _instructionsOrCellsName, Description = _instructionsOrCellsDescription)] object instructionsOrCells,
+        [ExcelArgument(AllowReference = true, Name = _instructionsOrTemperatureName, Description = _instructionsOrTemperatureDescription)] object instructionsOrTemperature,
+        [ExcelArgument(Name = _temperatureName, Description = _temperatureDescription)] object temperature)
     {
         var configuration = CellmAddIn.Services.GetRequiredService<IConfiguration>();
 
@@ -126,28 +160,29 @@ public static class CellmFunctions
             StructuredOutputShape.None);
     }
 
-    /// <summary>
-    /// Sends a prompt to the specified model.
-    /// </summary>
-    /// <param name="providerAndModel">The provider and model in the format "provider/model".</param>
-    /// <param name="instructionsOrCells">A string with instructions or a cell or range of cells with context.</param>
-    /// <param name="instructionsOrTemperature">
-    /// A cell or range of cells with instructions, or a temperature value.
-    /// If omitted, any instructions found in the context will be used.
+    /// <summary>
+    /// Sends a prompt to the specified model.
+    /// </summary>
+    /// <param name="instructionsOrCells">
+    /// A prompt (string) or context (cell or cell range).
     /// </param>
-    /// <param name="temperature">
-    /// A value between 0 and 1 that controls the randomness of the model's output.
-    /// Lower values make the output more deterministic, higher values make it more random.
-    /// </param>
-    /// <returns>
-    /// The model's response as a string. If an error occurs, it returns the error message.
-    /// </returns>
-    [ExcelFunction(Name = "PROMPTMODEL", Description = "Send a prompt to the specified specific model", IsThreadSafe = true, IsVolatile = false)]
+    /// <param name="instructionsOrTemperature">
+    /// A prompt (string, cell, or cell range) or a temperature value.
+    /// If prompt is omitted, any instructions found in the cells of the first argument will be used as instructions.
+    /// </param>
+    /// <param name="temperature">
+    /// A value between 0 and 1 that controls the randomness of the model's output.
+    /// Lower values make the output more deterministic, higher values make it more random.
+    /// </param>
+    /// <returns>
+    /// The model's response as a string. If an error occurs, it returns the error message.
+    /// </returns>
+    [ExcelFunction(Name = "PROMPTMODEL", Description = _promptModelDescription + _structuredOutputShapeDynamicDescription + _promptModelExample, IsThreadSafe = true, IsVolatile = false)]
     public static object PromptModel(
-        [ExcelArgument(AllowReference = true, Name = "Provider/Model")] object providerAndModel,
-        [ExcelArgument(AllowReference = true, Name = "InstructionsOrContext", Description = "A string with instructions or a cell or range of cells with context")] object instructionsOrCells,
-        [ExcelArgument(AllowReference = true, Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
-        [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
+        [ExcelArgument(AllowReference = true, Name = _providerAndModelName, Description = _promptAndModelDescription)] object providerAndModel,
+        [ExcelArgument(AllowReference = true, Name = _instructionsOrCellsName, Description = _instructionsOrCellsDescription)] object instructionsOrCells,
+        [ExcelArgument(AllowReference = true, Name = _instructionsOrTemperatureName, Description = _instructionsOrTemperatureDescription)] object instructionsOrTemperature,
+        [ExcelArgument(Name = _temperatureName, Description = _temperatureDescription)] object temperature)
     {
         return Run(
             providerAndModel,
@@ -158,14 +193,14 @@ public static class CellmFunctions
     }
 
     /// <summary>
-    /// Same as PromptModel, but multiple values spill into cells to the right.
+    /// Same as PromptModel, but multiple output values spill into cells to the right.
     /// </returns>
-    [ExcelFunction(Name = "PROMPTMODEL.TOROW", Description = "Send a prompt to a specific model", IsThreadSafe = true, IsVolatile = false)]
+    [ExcelFunction(Name = "PROMPTMODEL.TOROW", Description = _promptModelDescription + _structuredOutputShapeRowDescription, IsThreadSafe = true, IsVolatile = false)]
     public static object PromptModelToRow(
-    [ExcelArgument(AllowReference = true, Name = "Provider/Model")] object providerAndModel,
-    [ExcelArgument(AllowReference = true, Name = "InstructionsOrCells", Description = "A string with instructions or a cell or range of cells with context")] object instructionsOrCells,
-    [ExcelArgument(AllowReference = true, Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
-    [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
+        [ExcelArgument(AllowReference = true, Name = _providerAndModelName, Description = _promptAndModelDescription)] object providerAndModel,
+        [ExcelArgument(AllowReference = true, Name = _instructionsOrCellsName, Description = _instructionsOrCellsDescription)] object instructionsOrCells,
+        [ExcelArgument(AllowReference = true, Name = _instructionsOrTemperatureName, Description = _instructionsOrTemperatureDescription)] object instructionsOrTemperature,
+        [ExcelArgument(Name = _temperatureName, Description = _temperatureDescription)] object temperature)
     {
         return Run(
             providerAndModel,
@@ -175,15 +210,15 @@ public static class CellmFunctions
             StructuredOutputShape.Row);
     }
 
-    /// <summary>
-    /// Same as PromptModel, but multiple values spill into a column.
-    /// </returns>
-    [ExcelFunction(Name = "PROMPTMODEL.TOCOLUMN", Description = "Send a prompt to a specific model", IsThreadSafe = true, IsVolatile = false)]
+    /// <summary>
+    /// Same as PromptModel, but multiple output values spill into cells below.
+    /// </returns>
+    [ExcelFunction(Name = "PROMPTMODEL.TOCOLUMN", Description = _promptModelDescription + _structuredOutputShapeRowDescription, IsThreadSafe = true, IsVolatile = false)]
     public static object PromptModelToColumn(
-    [ExcelArgument(AllowReference = true, Name = "Provider/Model")] object providerAndModel,
-    [ExcelArgument(AllowReference = true, Name = "InstructionsOrCells", Description = "A string with instructions or a cell or range of cells with context")] object instructionsOrCells,
-    [ExcelArgument(AllowReference = true, Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
-    [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
+        [ExcelArgument(AllowReference = true, Name = _providerAndModelName, Description = _promptAndModelDescription)] object providerAndModel,
+        [ExcelArgument(AllowReference = true, Name = _instructionsOrCellsName, Description = _instructionsOrCellsDescription)] object instructionsOrCells,
+        [ExcelArgument(AllowReference = true, Name = _instructionsOrTemperatureName, Description = _instructionsOrTemperatureDescription)] object instructionsOrTemperature,
+        [ExcelArgument(Name = _temperatureName, Description = _temperatureDescription)] object temperature)
     {
         return Run(
             providerAndModel,
@@ -193,15 +228,15 @@ public static class CellmFunctions
             StructuredOutputShape.Column);
     }
 
-    /// <summary>
-    /// Same as PromptModel, but multiple values spill into a column.
-    /// </returns>
-    [ExcelFunction(Name = "PROMPTMODEL.TOCELL", Description = "Send a prompt to a specific model", IsThreadSafe = true, IsVolatile = false)]
+    /// <summary>
+    /// Same as PromptModel, but multiple values spill into a column.
+    /// </returns>
+    [ExcelFunction(Name = "PROMPTMODEL.TOCELL", Description = _promptModelDescription, IsThreadSafe = true, IsVolatile = false)]
     public static object PromptModelToCell(
-    [ExcelArgument(AllowReference = true, Name = "Provider/Model")] object providerAndModel,
-    [ExcelArgument(AllowReference = true, Name = "InstructionsOrCells", Description = "A string with instructions or a cell or range of cells with context")] object instructionsOrCells,
-    [ExcelArgument(AllowReference = true, Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
-    [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature)
+        [ExcelArgument(AllowReference = true, Name = _providerAndModelName, Description = _promptAndModelDescription)] object providerAndModel,
+        [ExcelArgument(AllowReference = true, Name = _instructionsOrCellsName, Description = _instructionsOrCellsDescription)] object instructionsOrCells,
+        [ExcelArgument(AllowReference = true, Name = _instructionsOrTemperatureName, Description = _instructionsOrTemperatureDescription)] object instructionsOrTemperature,
+        [ExcelArgument(Name = _temperatureName, Description = _temperatureDescription)] object temperature)
     {
         return Run(
             providerAndModel,
@@ -211,28 +246,22 @@ public static class CellmFunctions
             StructuredOutputShape.None);
     }
 
-    /// <summary>
-    /// Parses arguments on Excel's main thread and hands off the actual 
-    /// work to the async thread pool to avoid blocking the main thread.
-    /// </summary>
-    public static object Run(
-        [ExcelArgument(AllowReference = true, Name = "Provider/Model")] object providerAndModel,
-        [ExcelArgument(AllowReference = true, Name = "InstructionsOrContext", Description = "A string with instructions or a cell or range of cells with context")] object instructionsOrCells,
-        [ExcelArgument(AllowReference = true, Name = "InstructionsOrTemperature", Description = "A cell or range of cells with instructions or a temperature")] object instructionsOrTemperature,
-        [ExcelArgument(Name = "Temperature", Description = "Temperature")] object temperature,
-        StructuredOutputShape outputShape)
+    /// <summary>
+    /// Parses arguments on Excel's main thread and hands off the actual work to a background thread to avoid blocking Excel's main thread.
+    /// </summary>
+    public static object Run(object providerAndModel, object instructionsOrCells, object instructionsOrTemperature, object temperature, StructuredOutputShape outputShape)
     {
         if (ExcelDnaUtil.IsInFunctionWizard())
         {
-            return "Click OK to send prompt";
+            return "Click OK to generate result";
         }
 
         try
         {
             var wallClock = Stopwatch.StartNew();
 
-            // We must parse arguments on the main thread
-            var argumentParser = CellmAddIn.Services.GetRequiredService<ArgumentParser>();
+            // We must parse arguments on the main thread
+            var argumentParser = CellmAddIn.Services.GetRequiredService<ArgumentParser>();
             var arguments = argumentParser
                 .AddProvider(providerAndModel)
                 .AddModel(providerAndModel)
@@ -259,24 +288,24 @@ public static class CellmFunctions
         }
         catch (ExcelErrorException ex)
         {
-            // Short-circuit if any arguments were found to be #GETTING_DATA or contain other errors during argument parsing. 
-            // Excel will re-trigger this function (or already has) when inputs are updated with realized values.
-            return ex.GetExcelError();
+            // Short-circuit if any arguments were found to be #GETTING_DATA or contain other errors during argument parsing. 
+            // Excel will re-trigger this function (or already has) when inputs are updated with realized values.
+            return ex.GetExcelError();
         }
         catch (XlCallException)
         {
-            // Could be many things but the only thing observed in practice is XlReturnUncalced, meaning an
-            // ExcelReference's value wasn't ready yet
-            return ExcelError.ExcelErrorGettingData;
+            // Could be many things but the only thing observed in practice is XlReturnUncalced, meaning an
+            // ExcelReference's value wasn't ready yet
+            return ExcelError.ExcelErrorGettingData;
         }
 
-        // Deliberately omit catch (Exception ex) to let UnhandledExceptionHandler log unexpected exceptions
-    }
+        // Deliberately omit catch (Exception ex) to let UnhandledExceptionHandler log unexpected exceptions
+    }
 
-    /// <summary>
-    /// Builds a prompt, sends it to the model, and returns the response.
-    /// </summary>
-    internal static async Task<object> GetResponseAsync(Arguments arguments, Stopwatch wallClock, string callerCoordinates, CancellationToken cancellationToken)
+    /// <summary>
+    /// Builds a prompt, sends it to the model, and returns the response.
+    /// </summary>
+    internal static async Task<object> GetResponseAsync(Arguments arguments, Stopwatch wallClock, string callerCoordinates, CancellationToken cancellationToken)
     {
         var requestClock = Stopwatch.StartNew();
 
@@ -288,8 +317,8 @@ public static class CellmFunctions
         {
             logger.LogInformation("Sending prompt to {}/{} ({}) ... (elapsed time: {}ms)", arguments.Provider, arguments.Model, callerCoordinates, wallClock.ElapsedMilliseconds);
 
-            // Check for cancellation before doing any work
-            cancellationToken.ThrowIfCancellationRequested();
+            // Check for cancellation before doing any work
+            cancellationToken.ThrowIfCancellationRequested();
 
             var elapsedTaskStart = wallClock.ElapsedMilliseconds;
 
@@ -324,15 +353,15 @@ public static class CellmFunctions
                 .AddUserMessage(userMessage)
                 .Build();
 
-            // Check for cancellation before sending request
-            cancellationToken.ThrowIfCancellationRequested();
+            // Check for cancellation before sending request
+            cancellationToken.ThrowIfCancellationRequested();
 
             var client = CellmAddIn.Services.GetRequiredService<Client>();
             var response = await client.GetResponseAsync(prompt, arguments.Provider, cancellationToken).ConfigureAwait(false);
             var assistantMessage = response.Messages.LastOrDefault()?.Text ?? throw new InvalidOperationException("No text response");
 
-            // Check for cancellation before returning response
-            cancellationToken.ThrowIfCancellationRequested();
+            // Check for cancellation before returning response
+            cancellationToken.ThrowIfCancellationRequested();
 
             logger.LogInformation("Sending prompt to {}/{} ({}) ... Done (elapsed time: {}ms, request time: {}ms)", arguments.Provider, arguments.Model, callerCoordinates, wallClock.ElapsedMilliseconds, requestClock.ElapsedMilliseconds);
 
@@ -343,9 +372,9 @@ public static class CellmFunctions
 
             return assistantMessage;
         }
-        // Short-circuit if any cells were found to be #GETTING_DATA or contain other errors during cell parsing. 
-        // Excel will re-trigger this function (or already has) when inputs are updated with realized values.
-        catch (ExcelErrorException ex)
+        // Short-circuit if any cells were found to be #GETTING_DATA or contain other errors during cell parsing. 
+        // Excel will re-trigger this function (or already has) when inputs are updated with realized values.
+        catch (ExcelErrorException ex)
         {
             return ex.GetExcelError();
         }
@@ -357,7 +386,7 @@ public static class CellmFunctions
                 .LogInformation("Sending prompt to {}/{} ({}) ... Cancelled (elapsed time: {}ms, request time: {}ms)", arguments.Provider, arguments.Model, callerCoordinates, wallClock.ElapsedMilliseconds, requestClock.ElapsedMilliseconds);
 
             return "Cancelled"; // Cancellation is not an error, just return _something_
-        }
+        }
         catch (CellmException ex)
         {
             CellmAddIn.Services
@@ -368,6 +397,6 @@ public static class CellmFunctions
             return ex.Message;
         }
 
-        // Deliberately omit catch (Exception ex) to let UnhandledExceptionHandler log unexpected exceptions.
-    }
+        // Deliberately omit catch (Exception ex) to let UnhandledExceptionHandler log unexpected exceptions.
+    }
 }
