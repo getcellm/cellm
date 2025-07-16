@@ -1,3 +1,4 @@
+using System.Text.Json;
 using ExcelDna.Integration;
 using ExcelDna.Integration.CustomUI;
 
@@ -30,26 +31,57 @@ public partial class RibbonMain
                         size="large"
                         label="Row"
                         imageMso="TableRowSelect"
-                        onAction="{nameof(OnOutputRowClicked)}" 
+                        onAction="{nameof(OnOutputRowClicked)}"
+                        getEnabled="{nameof(GetStructuredOutputEnabled)}"
                         screentip="Output response in a row"
                         supertip="Spill multiple response values (if any) across cells to the right." />
                 <button id="{nameof(OutputGroupControlIds.OutputColumn)}"
                         size="large"
                         label="Column"
                         imageMso="TableColumnSelect" 
-                        onAction="{nameof(OnOutputColumnClicked)}" 
+                        onAction="{nameof(OnOutputColumnClicked)}"
+                        getEnabled="{nameof(GetStructuredOutputEnabled)}" 
                         screentip="Output response in a column"
                         supertip="Spill multiple response values (if any) across cells below" />
                 <button id="{nameof(OutputGroupControlIds.OutputDynamic)}"
                         size="large"
                         label="Dynamic"
                         imageMso="TableSelect"
-                        onAction="{nameof(OnOutputDynamicClicked)}" 
+                        onAction="{nameof(OnOutputDynamicClicked)}"
+                        getEnabled="{nameof(GetStructuredOutputEnabled)}"
                         screentip="Output response in cell, row, column, or table (default)"
                         supertip="Let model decide how to spill multiple response values (if any) or just tell it what you want" />
             </box>
         </group>
         """;
+    }
+    public bool GetStructuredOutputEnabled(IRibbonControl control)
+    {
+        var currentProviderConfiguration = GetProviderConfiguration(GetCurrentProvider());
+
+        if (currentProviderConfiguration.CanUseStructuredOutputWithTools)
+        {
+            return true;
+        }
+
+        // Have to access configuration the long way because updates happen too fast for IOptionsMonitor<CellmAddInConfiguration> to pick them up
+        var enableTools = JsonSerializer.Deserialize<Dictionary<string, string>>(GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableTools)}"));
+        var enableModelContextProtocolServers = JsonSerializer.Deserialize<Dictionary<string, string>>(GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableModelContextProtocolServers)}"));
+
+        if (enableTools is null || enableModelContextProtocolServers is null)
+        {
+            // Config is messed up, don't annoy the user any further
+            return false;
+        }
+
+        // Enable structured output buttons iff all tools are disabled
+        if (enableTools.Values.All(isToolEnabled => !bool.Parse(isToolEnabled)) &&
+            enableModelContextProtocolServers.Values.All(isServerEnabled => !bool.Parse(isServerEnabled)))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     private enum CellmFormula
@@ -231,7 +263,6 @@ public partial class RibbonMain
         ExcelAsyncUtil.QueueAsMacro(() =>
         {
             SetFormula($"={currentFunctionAsString.ToUpper()}{targetOutputShapeAsString}{arguments}");
-            var dynamicApp = (dynamic)ExcelDnaUtil.Application;
         });
     }
 

@@ -64,6 +64,10 @@ public partial class RibbonMain
     public void OnFileSearchToggled(IRibbonControl control, bool pressed)
     {
         SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableTools)}:{nameof(FileSearchRequest)}", pressed.ToString());
+
+        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRow));
+        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputColumn));
+        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputDynamic));
     }
     public bool GetFileSearchPressed(IRibbonControl control)
     {
@@ -74,6 +78,10 @@ public partial class RibbonMain
     public void OnFileReaderToggled(IRibbonControl control, bool pressed)
     {
         SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableTools)}:{nameof(FileReaderRequest)}", pressed.ToString());
+
+        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRow));
+        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputColumn));
+        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputDynamic));
     }
 
     public bool GetFileReaderPressed(IRibbonControl control)
@@ -85,6 +93,10 @@ public partial class RibbonMain
     public void OnBrowserToggled(IRibbonControl control, bool pressed)
     {
         SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableModelContextProtocolServers)}:Playwright", pressed.ToString());
+
+        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRow));
+        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputColumn));
+        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputDynamic));
     }
 
     public bool GetBrowserPressed(IRibbonControl control)
@@ -201,6 +213,11 @@ public partial class RibbonMain
 
             // Invalidate the control to trigger OnGetMcpServerPressed and refresh UI
             _ribbonUi?.InvalidateControl(control.Id);
+
+            // Invalidate structured output buttons which enabled/disabled state depend on combination of provider and tool use
+            _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRow));
+            _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputColumn));
+            _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputDynamic));
         }
         catch (Exception ex)
         {

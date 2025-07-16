@@ -24,5 +24,7 @@ internal class OpenAiConfiguration : IProviderConfiguration
 
     public string LargeModel { get; init; } = string.Empty;
 
+    public bool CanUseStructuredOutputWithTools { get; init; } = true;
+
     public bool IsEnabled { get; init; } = false;
 }
