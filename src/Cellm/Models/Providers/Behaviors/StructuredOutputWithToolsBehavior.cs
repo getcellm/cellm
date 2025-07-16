@@ -21,8 +21,8 @@ internal class StructuredOutputWithToolsBehavior(IEnumerable<IProviderConfigurat
 
         if (isStructuredOutputEnabled && isToolsEnabled)
         {
-             throw new CellmException("Provider does not support row, column, or dynamic output while tools are enabled. " +
-                 "Please use PROMPT.TOCELL, disable tools, or switch to a provider that supports structured output with tools.");
+            throw new CellmException("Provider does not support row, column, or dynamic output while tools are enabled. " +
+                "Please use PROMPT.TOCELL, disable tools, or switch to a provider that supports structured output with tools.");
         }
     }
 
