@@ -24,7 +24,7 @@ internal class GeminiTemperatureBehavior(IOptionsMonitor<CellmAddInConfiguration
         prompt.Options.Temperature = Math.Clamp(temperature, DefaultMinTemp, GeminiMaxTemperature);
     }
 
-    public void After(Prompt prompt) 
+    public void After(Prompt prompt)
     {
         if (prompt.Options.Temperature.HasValue)
         {
