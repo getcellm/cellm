@@ -24,5 +24,7 @@ internal class AwsConfiguration : IProviderConfiguration
 
     public string ApiKey { get; init; } = string.Empty;
 
+    public bool CanUseStructuredOutputWithTools { get; init; } = false;
+
     public bool IsEnabled { get; init; } = false;
 }

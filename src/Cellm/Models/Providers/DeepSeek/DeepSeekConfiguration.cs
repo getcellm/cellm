@@ -25,5 +25,7 @@ internal class DeepSeekConfiguration : IProviderConfiguration
 
     public string LargeModel { get; init; } = string.Empty;
 
+    public bool CanUseStructuredOutputWithTools { get; init; } = false;
+
     public bool IsEnabled { get; init; } = false;
 }

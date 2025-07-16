@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Cellm.Models.Providers;
 using ExcelDna.Integration;
 using ExcelDna.Integration.CustomUI;
 
@@ -58,9 +57,9 @@ public partial class RibbonMain
     }
     public bool GetStructuredOutputEnabled(IRibbonControl control)
     {
-        var currentProvider = GetCurrentProvider();
+        var currentProviderConfiguration = GetProviderConfiguration(GetCurrentProvider());
 
-        if (currentProvider == Provider.OpenAi || currentProvider == Provider.OpenAiCompatible)
+        if (currentProviderConfiguration.CanUseStructuredOutputWithTools)
         {
             return true;
         }
@@ -75,8 +74,7 @@ public partial class RibbonMain
             return false;
         }
 
-        // Disable structured output buttons if any tools are enabled. Applies to providers that can't receive structured output spec
-        // and tools at the same time (which everyone except for OpenAI)
+        // Enable structured output buttons iff all tools are disabled
         if (enableTools.Values.All(isToolEnabled => !bool.Parse(isToolEnabled)) &&
             enableModelContextProtocolServers.Values.All(isServerEnabled => !bool.Parse(isServerEnabled)))
         {
@@ -265,7 +263,6 @@ public partial class RibbonMain
         ExcelAsyncUtil.QueueAsMacro(() =>
         {
             SetFormula($"={currentFunctionAsString.ToUpper()}{targetOutputShapeAsString}{arguments}");
-            var dynamicApp = (dynamic)ExcelDnaUtil.Application;
         });
     }
 

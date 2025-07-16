@@ -20,5 +20,7 @@ internal interface IProviderConfiguration
 
     string LargeModel { get; init; }
 
+    bool CanUseStructuredOutputWithTools { get; init; }
+
     bool IsEnabled { get; init; }
 }
