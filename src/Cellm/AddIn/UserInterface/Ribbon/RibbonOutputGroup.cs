@@ -49,8 +49,8 @@ public partial class RibbonMain
                         imageMso="TableSelect"
                         onAction="{nameof(OnOutputDynamicClicked)}"
                         getEnabled="{nameof(GetStructuredOutputEnabled)}"
-                        screentip="Output response in cell, row, column, or table (default)"
-                        supertip="Let model decide how to spill multiple response values (if any) or just tell it what you want" />
+                        screentip="The model chooses output shape (or just tell it want you want)"
+                        supertip="The model chooses whether multiple output values should spill into rows and/or columns or not." />
             </box>
         </group>
         """;
