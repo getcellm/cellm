@@ -15,10 +15,10 @@ internal class ProviderRequestHandler(IChatClientFactory chatClientFactory) : IR
         var chatResponse = request.Prompt.OutputShape switch
         {
             StructuredOutputShape.None =>
-            await chatClient.GetResponseAsync(
-                request.Prompt.Messages,
-                request.Prompt.Options,
-                cancellationToken).ConfigureAwait(false),
+                await chatClient.GetResponseAsync(
+                    request.Prompt.Messages,
+                    request.Prompt.Options,
+                    cancellationToken).ConfigureAwait(false),
             StructuredOutputShape.Row or StructuredOutputShape.Column =>
                 await chatClient.GetResponseAsync<string[]>(
                     request.Prompt.Messages,
