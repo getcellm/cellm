@@ -5,5 +5,5 @@ public enum StructuredOutputShape
     None,
     Row,
     Column,
-    Dynamic
+    Range
 }

@@ -35,7 +35,7 @@ public static class StructuredOutput
                 // ["a", "b", "c"] becomes [ ["a"], ["b"], ["c"] ]
                 StructuredOutputShape.Column => ConvertColumnToArray2d(JsonSerializer.Deserialize<Array1d>(message, _jsonOptions)?.Data ?? throw new JsonException($"Failed to deserialize column: {message}")),
                 // [ ["a", "b"], ["c"] ] becomes [ ["a", "b"], ["c", ""] ]
-                StructuredOutputShape.Dynamic => ConvertJaggedToArray2d(JsonSerializer.Deserialize<Array2d>(message, _jsonOptions)?.Data ?? throw new JsonException($"Failed to deserialize 2d array: {message}")),
+                StructuredOutputShape.Range => ConvertJaggedToArray2d(JsonSerializer.Deserialize<Array2d>(message, _jsonOptions)?.Data ?? throw new JsonException($"Failed to deserialize 2d array: {message}")),
                 _ => null
             };
 
