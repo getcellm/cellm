@@ -45,9 +45,9 @@ public partial class RibbonMain
                         supertip="Spill multiple response values (if any) across cells below" />
                 <button id="{nameof(OutputGroupControlIds.OutputDynamic)}"
                         size="large"
-                        label="Dynamic"
+                        label="Range"
                         imageMso="TableSelect"
-                        onAction="{nameof(OnOutputDynamicClicked)}"
+                        onAction="{nameof(OnOutputRangeClicked)}"
                         getEnabled="{nameof(GetStructuredOutputEnabled)}"
                         screentip="The model chooses output shape (or just tell it want you want)"
                         supertip="The model chooses whether multiple output values should spill into rows and/or columns or not." />
@@ -96,7 +96,7 @@ public partial class RibbonMain
         ToCell,
         ToRow,
         ToColumn,
-        Dynamic,
+        ToRange,
     }
 
     private CellmFormula? GetCellmFunction()
@@ -145,7 +145,7 @@ public partial class RibbonMain
         if (startIndex < 0 || endIndex < 0 || startIndex >= endIndex)
         {
             // This is fine, it means the formula uses the default output shape
-            return CellmOutputShape.Dynamic;
+            return CellmOutputShape.ToCell;
         }
 
         var cellmOutputShapeAsString = formula.Substring(startIndex + 1, endIndex - startIndex + 1);
@@ -175,9 +175,9 @@ public partial class RibbonMain
         UpdateCell(CellmOutputShape.ToColumn);
     }
 
-    public void OnOutputDynamicClicked(IRibbonControl control)
+    public void OnOutputRangeClicked(IRibbonControl control)
     {
-        UpdateCell(CellmOutputShape.Dynamic);
+        UpdateCell(CellmOutputShape.ToRange);
     }
 
     private void UpdateCell(CellmOutputShape targetOutputShape)
@@ -190,7 +190,7 @@ public partial class RibbonMain
 
         var currentFunction = GetCellmFunction();
         var currentOutputShape = GetCellmOutputShape();
-        var targetOutputShapeAsString = targetOutputShape == CellmOutputShape.Dynamic ? string.Empty : $".{targetOutputShape.ToString().ToUpper()}";
+        var targetOutputShapeAsString = targetOutputShape == CellmOutputShape.ToCell ? string.Empty : $".{targetOutputShape.ToString().ToUpper()}";
 
         var selectedCells = ExcelDnaUtil.Application.Selection;
 

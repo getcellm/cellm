@@ -14,21 +14,21 @@ internal class ProviderRequestHandler(IChatClientFactory chatClientFactory) : IR
 
         var chatResponse = request.Prompt.OutputShape switch
         {
-            StructuredOutputShape.Dynamic =>
-                await chatClient.GetResponseAsync<string[][]>(
-                    request.Prompt.Messages,
-                    request.Prompt.Options,
-                    cancellationToken: cancellationToken).ConfigureAwait(false),
+            StructuredOutputShape.None =>
+            await chatClient.GetResponseAsync(
+                request.Prompt.Messages,
+                request.Prompt.Options,
+                cancellationToken).ConfigureAwait(false),
             StructuredOutputShape.Row or StructuredOutputShape.Column =>
                 await chatClient.GetResponseAsync<string[]>(
                     request.Prompt.Messages,
                     request.Prompt.Options,
                     cancellationToken: cancellationToken).ConfigureAwait(false),
-            StructuredOutputShape.None =>
-                await chatClient.GetResponseAsync(
+            StructuredOutputShape.Range =>
+                await chatClient.GetResponseAsync<string[][]>(
                     request.Prompt.Messages,
                     request.Prompt.Options,
-                    cancellationToken).ConfigureAwait(false),
+                    cancellationToken: cancellationToken).ConfigureAwait(false),
             _ => throw new CellmException($"Internal error: Unknown output shape ({request.Prompt.OutputShape})")
         };
 

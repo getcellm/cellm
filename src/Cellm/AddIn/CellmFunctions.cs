@@ -19,7 +19,7 @@ public static class CellmFunctions
 
     private const string _structuredOutputShapeRowDescription = " Multiple output values spill into cells to the right.";
     private const string _structuredOutputShapeColumnDescription = " Multiple output values spill into cells below.";
-    private const string _structuredOutputShapeDynamicDescription = " The model chooses whether multiple output values should spill into rows and/or columns or not.";
+    private const string _structuredOutputShapeRangeDescription = " The model chooses whether multiple output values should spill into rows and/or columns or not.";
 
     private const string _promptExample = $"""
          Example:
@@ -63,7 +63,7 @@ public static class CellmFunctions
     /// <returns>
     /// The model's response as a string. If an error occurs, it returns the error message.
     /// </returns>
-    [ExcelFunction(Name = "PROMPT", Description = _promptDescription + _structuredOutputShapeDynamicDescription + _promptExample, IsThreadSafe = true, IsVolatile = false)]
+    [ExcelFunction(Name = "PROMPT", Description = _promptDescription + _promptExample, IsThreadSafe = true, IsVolatile = false)]
     public static object Prompt(
         [ExcelArgument(AllowReference = true, Name = _instructionsOrCellsName, Description = _instructionsOrCellsDescription)] object instructionsOrCells,
         [ExcelArgument(AllowReference = true, Name = _instructionsOrTemperatureName, Description = _instructionsOrTemperatureDescription)] object instructionsOrTemperature,
@@ -82,7 +82,7 @@ public static class CellmFunctions
             instructionsOrCells,
             instructionsOrTemperature,
             temperature,
-            StructuredOutputShape.Dynamic);
+            StructuredOutputShape.None);
     }
 
     /// <summary>
@@ -138,8 +138,8 @@ public static class CellmFunctions
     /// <summary>
     /// Same as Prompt, but outputs to a single cell.
     /// </returns>
-    [ExcelFunction(Name = "PROMPT.TOCELL", Description = _promptDescription, IsThreadSafe = true, IsVolatile = false)]
-    public static object PromptToCell(
+    [ExcelFunction(Name = "PROMPT.TORANGE", Description = _promptDescription + _structuredOutputShapeRangeDescription, IsThreadSafe = true, IsVolatile = false)]
+    public static object PromptToRange(
         [ExcelArgument(AllowReference = true, Name = _instructionsOrCellsName, Description = _instructionsOrCellsDescription)] object instructionsOrCells,
         [ExcelArgument(AllowReference = true, Name = _instructionsOrTemperatureName, Description = _instructionsOrTemperatureDescription)] object instructionsOrTemperature,
         [ExcelArgument(Name = _temperatureName, Description = _temperatureDescription)] object temperature)
@@ -157,7 +157,7 @@ public static class CellmFunctions
             instructionsOrCells,
             instructionsOrTemperature,
             temperature,
-            StructuredOutputShape.None);
+            StructuredOutputShape.Range);
     }
 
     /// <summary>
@@ -177,7 +177,7 @@ public static class CellmFunctions
     /// <returns>
     /// The model's response as a string. If an error occurs, it returns the error message.
     /// </returns>
-    [ExcelFunction(Name = "PROMPTMODEL", Description = _promptModelDescription + _structuredOutputShapeDynamicDescription + _promptModelExample, IsThreadSafe = true, IsVolatile = false)]
+    [ExcelFunction(Name = "PROMPTMODEL", Description = _promptModelDescription + _promptModelExample, IsThreadSafe = true, IsVolatile = false)]
     public static object PromptModel(
         [ExcelArgument(AllowReference = true, Name = _providerAndModelName, Description = _promptAndModelDescription)] object providerAndModel,
         [ExcelArgument(AllowReference = true, Name = _instructionsOrCellsName, Description = _instructionsOrCellsDescription)] object instructionsOrCells,
@@ -189,7 +189,7 @@ public static class CellmFunctions
             instructionsOrCells,
             instructionsOrTemperature,
             temperature,
-            StructuredOutputShape.Dynamic);
+            StructuredOutputShape.None);
     }
 
     /// <summary>
@@ -231,7 +231,7 @@ public static class CellmFunctions
     /// <summary>
     /// Same as PromptModel, but multiple values spill into a column.
     /// </returns>
-    [ExcelFunction(Name = "PROMPTMODEL.TOCELL", Description = _promptModelDescription, IsThreadSafe = true, IsVolatile = false)]
+    [ExcelFunction(Name = "PROMPTMODEL.TORANGE", Description = _promptModelDescription, IsThreadSafe = true, IsVolatile = false)]
     public static object PromptModelToCell(
         [ExcelArgument(AllowReference = true, Name = _providerAndModelName, Description = _promptAndModelDescription)] object providerAndModel,
         [ExcelArgument(AllowReference = true, Name = _instructionsOrCellsName, Description = _instructionsOrCellsDescription)] object instructionsOrCells,
@@ -243,7 +243,7 @@ public static class CellmFunctions
             instructionsOrCells,
             instructionsOrTemperature,
             temperature,
-            StructuredOutputShape.None);
+            StructuredOutputShape.Range);
     }
 
     /// <summary>
