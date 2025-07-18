@@ -36,5 +36,5 @@ internal class AccountConfiguration
 
     public int CacheTimeoutInSeconds { get; init; }
 
-    public bool IsEnabled => true;
+    public bool IsEnabled => false;
 }

@@ -228,7 +228,7 @@ public static class CellmFunctions
             instructionsOrCells,
             instructionsOrTemperature,
             temperature,
-            StructuredOutputShape.Range);
+            outputShape);
     }
 
     /// <summary>

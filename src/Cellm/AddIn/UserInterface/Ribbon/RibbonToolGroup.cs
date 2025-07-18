@@ -67,7 +67,7 @@ public partial class RibbonMain
 
         _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRow));
         _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputColumn));
-        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputDynamic));
+        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRange));
     }
     public bool GetFileSearchPressed(IRibbonControl control)
     {
@@ -81,7 +81,7 @@ public partial class RibbonMain
 
         _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRow));
         _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputColumn));
-        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputDynamic));
+        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRange));
     }
 
     public bool GetFileReaderPressed(IRibbonControl control)
@@ -96,7 +96,7 @@ public partial class RibbonMain
 
         _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRow));
         _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputColumn));
-        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputDynamic));
+        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRange));
     }
 
     public bool GetBrowserPressed(IRibbonControl control)
@@ -217,7 +217,7 @@ public partial class RibbonMain
             // Invalidate structured output buttons which enabled/disabled state depend on combination of provider and tool use
             _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRow));
             _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputColumn));
-            _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputDynamic));
+            _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRange));
         }
         catch (Exception ex)
         {
