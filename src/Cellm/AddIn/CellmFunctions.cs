@@ -61,7 +61,7 @@ public static class CellmFunctions
     /// Lower values make the output more deterministic, higher values make it more random.
     /// </param>
     /// <returns>
-    /// The model's response as a string. If an error occurs, it returns the error message.
+    /// The model's response in a single cell. If an error occurs, it returns the error message.
     /// </returns>
     [ExcelFunction(Name = "PROMPT", Description = _promptDescription + _promptExample, IsThreadSafe = true, IsVolatile = false)]
     public static object Prompt(
@@ -69,16 +69,7 @@ public static class CellmFunctions
         [ExcelArgument(AllowReference = true, Name = _instructionsOrTemperatureName, Description = _instructionsOrTemperatureDescription)] object instructionsOrTemperature,
         [ExcelArgument(Name = _temperatureName, Description = _temperatureDescription)] object temperature)
     {
-        var configuration = CellmAddIn.Services.GetRequiredService<IConfiguration>();
-
-        var provider = configuration[$"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}"]
-            ?? throw new ArgumentException(nameof(CellmAddInConfiguration.DefaultProvider));
-
-        var model = configuration[$"{provider}Configuration:{nameof(IProviderConfiguration.DefaultModel)}"]
-            ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
-
         return Run(
-            $"{provider}/{model}",
             instructionsOrCells,
             instructionsOrTemperature,
             temperature,
@@ -94,16 +85,7 @@ public static class CellmFunctions
         [ExcelArgument(AllowReference = true, Name = _instructionsOrTemperatureName, Description = _instructionsOrTemperatureDescription)] object instructionsOrTemperature,
         [ExcelArgument(Name = _temperatureName, Description = _temperatureDescription)] object temperature)
     {
-        var configuration = CellmAddIn.Services.GetRequiredService<IConfiguration>();
-
-        var provider = configuration[$"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}"]
-            ?? throw new ArgumentException(nameof(CellmAddInConfiguration.DefaultProvider));
-
-        var model = configuration[$"{provider}Configuration:{nameof(IProviderConfiguration.DefaultModel)}"]
-            ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
-
         return Run(
-            $"{provider}/{model}",
             instructionsOrCells,
             instructionsOrTemperature,
             temperature,
@@ -119,16 +101,7 @@ public static class CellmFunctions
         [ExcelArgument(AllowReference = true, Name = _instructionsOrTemperatureName, Description = _instructionsOrTemperatureDescription)] object instructionsOrTemperature,
         [ExcelArgument(Name = _temperatureName, Description = _temperatureDescription)] object temperature)
     {
-        var configuration = CellmAddIn.Services.GetRequiredService<IConfiguration>();
-
-        var provider = configuration[$"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}"]
-            ?? throw new ArgumentException(nameof(CellmAddInConfiguration.DefaultProvider));
-
-        var model = configuration[$"{provider}Configuration:{nameof(IProviderConfiguration.DefaultModel)}"]
-            ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
-
         return Run(
-            $"{provider}/{model}",
             instructionsOrCells,
             instructionsOrTemperature,
             temperature,
@@ -136,7 +109,7 @@ public static class CellmFunctions
     }
 
     /// <summary>
-    /// Same as Prompt, but outputs to a single cell.
+    /// Same as Prompt, but multiple values spill into a rows and columns.
     /// </returns>
     [ExcelFunction(Name = "PROMPT.TORANGE", Description = _promptDescription + _structuredOutputShapeRangeDescription, IsThreadSafe = true, IsVolatile = false)]
     public static object PromptToRange(
@@ -144,16 +117,7 @@ public static class CellmFunctions
         [ExcelArgument(AllowReference = true, Name = _instructionsOrTemperatureName, Description = _instructionsOrTemperatureDescription)] object instructionsOrTemperature,
         [ExcelArgument(Name = _temperatureName, Description = _temperatureDescription)] object temperature)
     {
-        var configuration = CellmAddIn.Services.GetRequiredService<IConfiguration>();
-
-        var provider = configuration[$"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}"]
-            ?? throw new ArgumentException(nameof(CellmAddInConfiguration.DefaultProvider));
-
-        var model = configuration[$"{provider}Configuration:{nameof(IProviderConfiguration.DefaultModel)}"]
-            ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
-
         return Run(
-            $"{provider}/{model}",
             instructionsOrCells,
             instructionsOrTemperature,
             temperature,
@@ -175,7 +139,7 @@ public static class CellmFunctions
     /// Lower values make the output more deterministic, higher values make it more random.
     /// </param>
     /// <returns>
-    /// The model's response as a string. If an error occurs, it returns the error message.
+    /// The model's response in a single cell. If an error occurs, it returns the error message.
     /// </returns>
     [ExcelFunction(Name = "PROMPTMODEL", Description = _promptModelDescription + _promptModelExample, IsThreadSafe = true, IsVolatile = false)]
     public static object PromptModel(
@@ -229,7 +193,7 @@ public static class CellmFunctions
     }
 
     /// <summary>
-    /// Same as PromptModel, but multiple values spill into a column.
+    /// Same as PromptModel, but multiple values spill into a rows and columns.
     /// </returns>
     [ExcelFunction(Name = "PROMPTMODEL.TORANGE", Description = _promptModelDescription, IsThreadSafe = true, IsVolatile = false)]
     public static object PromptModelToCell(
@@ -246,10 +210,31 @@ public static class CellmFunctions
             StructuredOutputShape.Range);
     }
 
-    /// <summary>
-    /// Parses arguments on Excel's main thread and hands off the actual work to a background thread to avoid blocking Excel's main thread.
-    /// </summary>
-    public static object Run(object providerAndModel, object instructionsOrCells, object instructionsOrTemperature, object temperature, StructuredOutputShape outputShape)
+    /// <summary>
+    /// Forwards arguments along with the default provider and model.
+    /// </summary>
+    public static object Run(object instructionsOrCells, object instructionsOrTemperature, object temperature, StructuredOutputShape outputShape)
+    {
+        var configuration = CellmAddIn.Services.GetRequiredService<IConfiguration>();
+
+        var provider = configuration[$"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}"]
+            ?? throw new ArgumentException(nameof(CellmAddInConfiguration.DefaultProvider));
+
+        var model = configuration[$"{provider}Configuration:{nameof(IProviderConfiguration.DefaultModel)}"]
+            ?? throw new ArgumentException(nameof(IProviderConfiguration.DefaultModel));
+
+        return Run(
+            $"{provider}/{model}",
+            instructionsOrCells,
+            instructionsOrTemperature,
+            temperature,
+            StructuredOutputShape.Range);
+    }
+
+    /// <summary>
+    /// Parses arguments on Excel's main thread and hands off the actual work to a background thread to avoid blocking Excel's main thread.
+    /// </summary>
+    public static object Run(object providerAndModel, object instructionsOrCells, object instructionsOrTemperature, object temperature, StructuredOutputShape outputShape)
     {
         if (ExcelDnaUtil.IsInFunctionWizard())
         {
