@@ -62,10 +62,10 @@ partial class EditMcpServerForm
         serverListView.Columns.AddRange(new ColumnHeader[] { typeColumnHeader, nameColumnHeader });
         serverListView.FullRowSelect = true;
         serverListView.GridLines = true;
-        serverListView.Location = new Point(12, 30);
+        serverListView.Location = new Point(12, 42);
         serverListView.MultiSelect = false;
         serverListView.Name = "serverListView";
-        serverListView.Size = new Size(516, 277);
+        serverListView.Size = new Size(383, 277);
         serverListView.TabIndex = 0;
         serverListView.UseCompatibleStateImageBehavior = false;
         serverListView.View = View.Details;
@@ -79,13 +79,13 @@ partial class EditMcpServerForm
         // nameColumnHeader
         // 
         nameColumnHeader.Text = "Name";
-        nameColumnHeader.Width = 380;
+        nameColumnHeader.Width = 250;
         // 
         // addButton
         // 
-        addButton.Location = new Point(373, 315);
+        addButton.Location = new Point(239, 11);
         addButton.Name = "addButton";
-        addButton.Size = new Size(81, 23);
+        addButton.Size = new Size(83, 23);
         addButton.TabIndex = 1;
         addButton.Text = "Add new ...";
         addButton.UseVisualStyleBackColor = true;
@@ -94,7 +94,7 @@ partial class EditMcpServerForm
         // removeButton
         // 
         removeButton.Enabled = false;
-        removeButton.Location = new Point(462, 315);
+        removeButton.Location = new Point(328, 11);
         removeButton.Name = "removeButton";
         removeButton.Size = new Size(67, 23);
         removeButton.TabIndex = 3;
@@ -105,7 +105,7 @@ partial class EditMcpServerForm
         // transportTypeLabel
         // 
         transportTypeLabel.AutoSize = true;
-        transportTypeLabel.Location = new Point(12, 360);
+        transportTypeLabel.Location = new Point(12, 334);
         transportTypeLabel.Name = "transportTypeLabel";
         transportTypeLabel.Size = new Size(86, 15);
         transportTypeLabel.TabIndex = 4;
@@ -115,16 +115,16 @@ partial class EditMcpServerForm
         // 
         transportTypeComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
         transportTypeComboBox.FormattingEnabled = true;
-        transportTypeComboBox.Location = new Point(180, 357);
+        transportTypeComboBox.Location = new Point(180, 331);
         transportTypeComboBox.Name = "transportTypeComboBox";
-        transportTypeComboBox.Size = new Size(349, 23);
+        transportTypeComboBox.Size = new Size(215, 23);
         transportTypeComboBox.TabIndex = 5;
         transportTypeComboBox.SelectedIndexChanged += TransportTypeComboBox_SelectedIndexChanged;
         // 
         // nameLabel
         // 
         nameLabel.AutoSize = true;
-        nameLabel.Location = new Point(12, 390);
+        nameLabel.Location = new Point(12, 364);
         nameLabel.Name = "nameLabel";
         nameLabel.Size = new Size(42, 15);
         nameLabel.TabIndex = 6;
@@ -132,15 +132,15 @@ partial class EditMcpServerForm
         // 
         // nameTextBox
         // 
-        nameTextBox.Location = new Point(180, 387);
+        nameTextBox.Location = new Point(180, 361);
         nameTextBox.Name = "nameTextBox";
-        nameTextBox.Size = new Size(349, 23);
+        nameTextBox.Size = new Size(215, 23);
         nameTextBox.TabIndex = 7;
         // 
         // commandLabel
         // 
         commandLabel.AutoSize = true;
-        commandLabel.Location = new Point(12, 420);
+        commandLabel.Location = new Point(12, 394);
         commandLabel.Name = "commandLabel";
         commandLabel.Size = new Size(67, 15);
         commandLabel.TabIndex = 8;
@@ -148,15 +148,15 @@ partial class EditMcpServerForm
         // 
         // commandTextBox
         // 
-        commandTextBox.Location = new Point(180, 417);
+        commandTextBox.Location = new Point(180, 391);
         commandTextBox.Name = "commandTextBox";
-        commandTextBox.Size = new Size(349, 23);
+        commandTextBox.Size = new Size(215, 23);
         commandTextBox.TabIndex = 9;
         // 
         // argumentsLabel
         // 
         argumentsLabel.AutoSize = true;
-        argumentsLabel.Location = new Point(12, 450);
+        argumentsLabel.Location = new Point(12, 424);
         argumentsLabel.Name = "argumentsLabel";
         argumentsLabel.Size = new Size(69, 15);
         argumentsLabel.TabIndex = 10;
@@ -164,15 +164,15 @@ partial class EditMcpServerForm
         // 
         // argumentsTextBox
         // 
-        argumentsTextBox.Location = new Point(180, 447);
+        argumentsTextBox.Location = new Point(180, 421);
         argumentsTextBox.Name = "argumentsTextBox";
-        argumentsTextBox.Size = new Size(349, 23);
+        argumentsTextBox.Size = new Size(215, 23);
         argumentsTextBox.TabIndex = 11;
         // 
         // environmentVariablesLabel
         // 
         environmentVariablesLabel.AutoSize = true;
-        environmentVariablesLabel.Location = new Point(12, 480);
+        environmentVariablesLabel.Location = new Point(12, 454);
         environmentVariablesLabel.Name = "environmentVariablesLabel";
         environmentVariablesLabel.Size = new Size(127, 15);
         environmentVariablesLabel.TabIndex = 12;
@@ -180,18 +180,18 @@ partial class EditMcpServerForm
         // 
         // environmentVariablesButton
         // 
-        environmentVariablesButton.Location = new Point(180, 477);
+        environmentVariablesButton.Location = new Point(180, 451);
         environmentVariablesButton.Name = "environmentVariablesButton";
-        environmentVariablesButton.Size = new Size(350, 23);
+        environmentVariablesButton.Size = new Size(100, 23);
         environmentVariablesButton.TabIndex = 13;
-        environmentVariablesButton.Text = "Edit...";
+        environmentVariablesButton.Text = "Edit ...";
         environmentVariablesButton.UseVisualStyleBackColor = true;
         environmentVariablesButton.Click += EnvironmentVariablesButton_Click;
         // 
         // endpointLabel
         // 
         endpointLabel.AutoSize = true;
-        endpointLabel.Location = new Point(12, 420);
+        endpointLabel.Location = new Point(12, 394);
         endpointLabel.Name = "endpointLabel";
         endpointLabel.Size = new Size(58, 15);
         endpointLabel.TabIndex = 18;
@@ -199,15 +199,15 @@ partial class EditMcpServerForm
         // 
         // endpointTextBox
         // 
-        endpointTextBox.Location = new Point(180, 417);
+        endpointTextBox.Location = new Point(180, 391);
         endpointTextBox.Name = "endpointTextBox";
-        endpointTextBox.Size = new Size(349, 23);
+        endpointTextBox.Size = new Size(215, 23);
         endpointTextBox.TabIndex = 19;
         // 
         // transportModeLabel
         // 
         transportModeLabel.AutoSize = true;
-        transportModeLabel.Location = new Point(12, 450);
+        transportModeLabel.Location = new Point(12, 424);
         transportModeLabel.Name = "transportModeLabel";
         transportModeLabel.Size = new Size(93, 15);
         transportModeLabel.TabIndex = 20;
@@ -217,15 +217,15 @@ partial class EditMcpServerForm
         // 
         httpTransportModeComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
         httpTransportModeComboBox.FormattingEnabled = true;
-        httpTransportModeComboBox.Location = new Point(180, 447);
+        httpTransportModeComboBox.Location = new Point(180, 421);
         httpTransportModeComboBox.Name = "httpTransportModeComboBox";
-        httpTransportModeComboBox.Size = new Size(349, 23);
+        httpTransportModeComboBox.Size = new Size(215, 23);
         httpTransportModeComboBox.TabIndex = 21;
         // 
         // connectionTimeoutLabel
         // 
         connectionTimeoutLabel.AutoSize = true;
-        connectionTimeoutLabel.Location = new Point(12, 480);
+        connectionTimeoutLabel.Location = new Point(12, 454);
         connectionTimeoutLabel.Name = "connectionTimeoutLabel";
         connectionTimeoutLabel.Size = new Size(135, 15);
         connectionTimeoutLabel.TabIndex = 22;
@@ -233,18 +233,18 @@ partial class EditMcpServerForm
         // 
         // connectionTimeoutNumericUpDown
         // 
-        connectionTimeoutNumericUpDown.Location = new Point(180, 477);
+        connectionTimeoutNumericUpDown.Location = new Point(180, 451);
         connectionTimeoutNumericUpDown.Maximum = new decimal(new int[] { 300, 0, 0, 0 });
         connectionTimeoutNumericUpDown.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
         connectionTimeoutNumericUpDown.Name = "connectionTimeoutNumericUpDown";
-        connectionTimeoutNumericUpDown.Size = new Size(349, 23);
+        connectionTimeoutNumericUpDown.Size = new Size(215, 23);
         connectionTimeoutNumericUpDown.TabIndex = 23;
         connectionTimeoutNumericUpDown.Value = new decimal(new int[] { 30, 0, 0, 0 });
         // 
         // additionalHeadersLabel
         // 
         additionalHeadersLabel.AutoSize = true;
-        additionalHeadersLabel.Location = new Point(12, 510);
+        additionalHeadersLabel.Location = new Point(12, 484);
         additionalHeadersLabel.Name = "additionalHeadersLabel";
         additionalHeadersLabel.Size = new Size(111, 15);
         additionalHeadersLabel.TabIndex = 14;
@@ -252,18 +252,18 @@ partial class EditMcpServerForm
         // 
         // additionalHeadersButton
         // 
-        additionalHeadersButton.Location = new Point(180, 507);
+        additionalHeadersButton.Location = new Point(180, 481);
         additionalHeadersButton.Name = "additionalHeadersButton";
-        additionalHeadersButton.Size = new Size(350, 23);
+        additionalHeadersButton.Size = new Size(100, 23);
         additionalHeadersButton.TabIndex = 15;
-        additionalHeadersButton.Text = "Edit...";
+        additionalHeadersButton.Text = "Edit ...";
         additionalHeadersButton.UseVisualStyleBackColor = true;
         additionalHeadersButton.Click += AdditionalHeadersButton_Click;
         // 
         // okButton
         // 
         okButton.Enabled = false;
-        okButton.Location = new Point(373, 550);
+        okButton.Location = new Point(239, 524);
         okButton.Name = "okButton";
         okButton.Size = new Size(75, 23);
         okButton.TabIndex = 16;
@@ -273,7 +273,7 @@ partial class EditMcpServerForm
         // 
         // cancelButton
         // 
-        cancelButton.Location = new Point(454, 550);
+        cancelButton.Location = new Point(320, 524);
         cancelButton.Name = "cancelButton";
         cancelButton.Size = new Size(75, 23);
         cancelButton.TabIndex = 17;
@@ -284,7 +284,7 @@ partial class EditMcpServerForm
         // serverListLabel
         // 
         serverListLabel.AutoSize = true;
-        serverListLabel.Location = new Point(12, 9);
+        serverListLabel.Location = new Point(12, 19);
         serverListLabel.Name = "serverListLabel";
         serverListLabel.Size = new Size(76, 15);
         serverListLabel.TabIndex = 29;
@@ -296,7 +296,7 @@ partial class EditMcpServerForm
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         CancelButton = cancelButton;
-        ClientSize = new Size(540, 575);
+        ClientSize = new Size(408, 556);
         Controls.Add(serverListLabel);
         Controls.Add(cancelButton);
         Controls.Add(okButton);
