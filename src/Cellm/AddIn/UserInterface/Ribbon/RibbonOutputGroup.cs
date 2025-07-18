@@ -12,7 +12,7 @@ public partial class RibbonMain
 
         OutputCell,
         OutputRow,
-        OutputDynamic,
+        OutputRange,
         OutputColumn,
     }
 
@@ -43,7 +43,7 @@ public partial class RibbonMain
                         getEnabled="{nameof(GetStructuredOutputEnabled)}" 
                         screentip="Output response in a column"
                         supertip="Spill multiple response values (if any) across cells below" />
-                <button id="{nameof(OutputGroupControlIds.OutputDynamic)}"
+                <button id="{nameof(OutputGroupControlIds.OutputRange)}"
                         size="large"
                         label="Range"
                         imageMso="TableSelect"
