@@ -46,7 +46,7 @@
             "group": "Functions",
             "pages": [
               "api-reference/functions/prompt",
-              "api-reference/functions/prompt-with"
+              "api-reference/functions/prompt-model"
             ]
           },
           {

@@ -25,3 +25,9 @@ Example usage:
 - `=PROMPT(A1:D10, "Extract keywords", 0.7)` will use the selected range of cells as context, follow the instruction to extract keywords, and use a temperature of 0.7.
 - `=PROMPT(A1:D10)` will use the range of cells as context and follow instructions as long as they present _somewhere_ in the cells.
 - `=PROMPT(A1:D10, 0.7)` will use the selected range of cells as context, follow any instruction within the cells, and use a temperature of 0.7.
+
+Structured output variants:
+
+- `=PROMPT.TOROW()` will spill multiple output values (if any) into cells to the right.
+- `=PROMPT.TOCOLUMN()` will spill multiple output values (if any) into cells below.
+- `=PROMPT.TORANGE()` will spill multiple output values (if any) into a range.
