@@ -65,8 +65,8 @@ public partial class RibbonMain
         }
 
         // Have to access configuration the long way because updates happen too fast for IOptionsMonitor<CellmAddInConfiguration> to pick them up
-        var enableTools = JsonSerializer.Deserialize<Dictionary<string, string>>(GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableTools)}"));
-        var enableModelContextProtocolServers = JsonSerializer.Deserialize<Dictionary<string, string>>(GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableModelContextProtocolServers)}"));
+        var enableTools = JsonSerializer.Deserialize<Dictionary<string, bool>>(GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableTools)}"));
+        var enableModelContextProtocolServers = JsonSerializer.Deserialize<Dictionary<string, bool>>(GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableModelContextProtocolServers)}"));
 
         if (enableTools is null || enableModelContextProtocolServers is null)
         {
@@ -75,8 +75,8 @@ public partial class RibbonMain
         }
 
         // Enable structured output buttons iff all tools are disabled
-        if (enableTools.Values.All(isToolEnabled => !bool.Parse(isToolEnabled)) &&
-            enableModelContextProtocolServers.Values.All(isServerEnabled => !bool.Parse(isServerEnabled)))
+        if (enableTools.Values.All(isToolEnabled => !isToolEnabled) &&
+            enableModelContextProtocolServers.Values.All(isServerEnabled => !isServerEnabled))
         {
             return true;
         }
