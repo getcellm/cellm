@@ -334,7 +334,7 @@ public static class CellmFunctions
                 .SetTemperature(arguments.Temperature)
                 .SetMaxOutputTokens(cellmAddInConfiguration.CurrentValue.MaxOutputTokens)
                 .SetOutputShape(arguments.OutputShape)
-                .AddSystemMessage(SystemMessages.SystemMessage(arguments.Provider, arguments.Model, DateTime.Today)))
+                .AddSystemMessage(SystemMessages.SystemMessage(arguments.Provider, arguments.Model, DateTime.Today))
                 .AddUserMessage(userMessage)
                 .Build();
 
