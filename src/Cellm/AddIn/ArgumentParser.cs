@@ -18,8 +18,8 @@ public class ArgumentParser(IConfiguration configuration)
 
     public static readonly string CellsBeginTag = "<cells>";
     public static readonly string CellsEndTag = "</cells>";
-    public static readonly string InstructionsBeginTag = "<instructions>";
-    public static readonly string InstructionsEndTag = "<instructions>";
+    public static readonly string InstructionsBeginTag = "<user's instructions>";
+    public static readonly string InstructionsEndTag = "<user's instructions>";
 
     public ArgumentParser AddProvider(object providerAndModel)
     {
