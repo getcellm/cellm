@@ -92,14 +92,14 @@ public partial class RibbonMain
         return providerAndModel[(index + 1)..];
     }
 
-    public static void SetValue(string key, string value)
+    public static void SetValue(string key, object value)
     {
         var keySegments = key.Split(':');
         var localNode = File.Exists(_appsettingsLocalPath)
             ? JsonNode.Parse(File.ReadAllText(_appsettingsLocalPath)) ?? new JsonObject()
             : new JsonObject();
 
-        SetValueInNode(localNode.AsObject(), keySegments, value);
+        SetValueInNode(localNode.AsObject(), keySegments, JsonSerializer.SerializeToNode(value) ?? throw new JsonException(nameof(value)));
 
         var options = new JsonSerializerOptions
         {
@@ -147,30 +147,6 @@ public partial class RibbonMain
 
         Directory.CreateDirectory(Path.GetDirectoryName(_appsettingsLocalPath)!);
         File.WriteAllText(_appsettingsLocalPath, localNode.ToJsonString(options));
-    }
-
-    private static void SetValueInNode(JsonObject node, string[] keySegments, string value)
-    {
-        var current = node;
-        for (var i = 0; i < keySegments.Length; i++)
-        {
-            var isLast = i == keySegments.Length - 1;
-            var segment = keySegments[i];
-
-            if (isLast)
-            {
-                current[segment] = value;
-            }
-            else
-            {
-                if (!current.TryGetPropertyValue(segment, out var nextNode))
-                {
-                    nextNode = new JsonObject();
-                    current[segment] = nextNode;
-                }
-                current = nextNode!.AsObject();
-            }
-        }
     }
 
     private static void SetValueInNode(JsonObject node, string[] keySegments, JsonNode value)
