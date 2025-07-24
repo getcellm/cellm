@@ -725,7 +725,7 @@ public partial class RibbonMain
 
         }
 
-        SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableCache)}", enabled.ToString());
+        SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableCache)}", enabled);
         _ribbonUi?.InvalidateControl(control.Id);
     }
 

@@ -1,6 +1,4 @@
-﻿using Cellm.Models.Prompts;
-
-namespace Cellm.AddIn;
+﻿namespace Cellm.AddIn;
 
 public class CellmAddInConfiguration
 {

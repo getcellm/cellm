@@ -257,7 +257,7 @@ public class McpConfigurationService : IMcpConfigurationService
 
         if (enabled)
         {
-            RibbonMain.SetValue(configKey, "true");
+            RibbonMain.SetValue(configKey, true);
         }
         else
         {
