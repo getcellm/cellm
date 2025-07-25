@@ -205,6 +205,11 @@ public static class ServiceCollectionExtensions
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
                 resilientHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", account.GetBasicAuthCredentials());
 
+                if (!account.HasBasicAuthCredentials())
+                {
+                    throw new CellmException($"Empty {Provider.Cellm} username and password");
+                }
+
                 var openAiClient = new OpenAIClient(
                     new ApiKeyCredential(string.Empty),
                     new OpenAIClientOptions
