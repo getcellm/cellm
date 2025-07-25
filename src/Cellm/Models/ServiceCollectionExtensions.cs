@@ -282,7 +282,7 @@ public static class ServiceCollectionExtensions
                 var geminiConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<GeminiConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
-                if (string.IsNullOrWhiteSpace(geminiConfiguration.CurrentValue.ApiKey)) 
+                if (string.IsNullOrWhiteSpace(geminiConfiguration.CurrentValue.ApiKey))
                 {
                     throw new CellmException($"Empty {Provider.Gemini} {nameof(GeminiConfiguration.ApiKey)}");
                 }
