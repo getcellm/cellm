@@ -24,6 +24,7 @@ using Cellm.Models.Resilience;
 using Cellm.Users;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http.Diagnostics;
 using Microsoft.Extensions.Options;
 using Mistral.SDK;
 using OllamaSharp;
@@ -85,7 +86,7 @@ public static class ServiceCollectionExtensions
 
         services
             .AddRedaction()
-            .AddExtendedHttpClientLogging()
+            .AddExtendedHttpClientLogging(options => options.RequestPathParameterRedactionMode = HttpRouteParameterRedactionMode.None)
             .AddHttpClient("ResilientHttpClient", resilientHttpClient =>
             {
                 // Delegate timeout to resilience pipeline
