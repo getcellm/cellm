@@ -16,6 +16,7 @@ internal class ActiveEntitlements()
     [JsonIgnore]
     private readonly List<Entitlement> AnonymousEntitlements = [
         Entitlement.EnableOllamaProvider,
+        Entitlement.EnableOpenAiCompatibleProvider,
     ];
 
     [JsonIgnore]
