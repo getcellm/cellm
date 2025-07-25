@@ -400,64 +400,6 @@ public partial class RibbonMain
         _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRange));
     }
 
-    public string GetSelectedModelLabel(IRibbonControl control)
-    {
-        var provider = GetCurrentProvider();
-        var configKey = $"{provider}Configuration:{nameof(OpenAiConfiguration.DefaultModel)}"; // Using OpenAI as template name
-        try
-        {
-            var model = GetValue(configKey);
-            return model;
-        }
-        catch (KeyNotFoundException)
-        {
-            return "Select Model"; // Fallback
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError("Error reading model config '{configKey}': {message}", configKey, ex.Message);
-            return "Error"; // Fallback
-        }
-    }
-
-    public string OnGetSelectedModel(IRibbonControl control)
-    {
-        var provider = GetCurrentProvider();
-        var model = GetValue($"{provider}Configuration:{nameof(OpenAiConfiguration.DefaultModel)}");
-        return $"{provider.ToString().ToLower()}/{model}";
-    }
-
-    public string OnGetBaseAddress(IRibbonControl control)
-    {
-        var provider = GetCurrentProvider();
-
-        return provider switch
-        {
-            Provider.DeepSeek => GetProviderConfiguration<DeepSeekConfiguration>().BaseAddress.ToString(),
-            Provider.Mistral => GetProviderConfiguration<MistralConfiguration>().BaseAddress.ToString(),
-            Provider.Ollama => GetProviderConfiguration<OllamaConfiguration>().BaseAddress.ToString(),
-            Provider.OpenAiCompatible => GetProviderConfiguration<OpenAiCompatibleConfiguration>().BaseAddress.ToString(),
-            _ => "Built-in"
-        };
-    }
-
-    public string OnGetApiKey(IRibbonControl control)
-    {
-        var provider = GetCurrentProvider();
-        return GetValue($"{provider}Configuration:ApiKey");
-    }
-
-    public void OnModelChanged(IRibbonControl control, string providerAndModel)
-    {
-        var provider = GetProvider(providerAndModel);
-        var model = GetModel(providerAndModel);
-
-        SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}", provider.ToString());
-        SetValue($"{provider}Configuration:{nameof(OpenAiConfiguration.DefaultModel)}", model);
-
-        _ribbonUi?.Invalidate();
-    }
-
     /// <summary>
     /// Gets the label for the settings button in the provider dropdown menu.
     /// </summary>
@@ -503,6 +445,9 @@ public partial class RibbonMain
                 case Provider.Aws:
                     currentBaseAddress = GetProviderConfiguration<AwsConfiguration>()?.BaseAddress?.ToString() ?? "";
                     break;
+                case Provider.Cellm:
+                    currentBaseAddress = GetProviderConfiguration<CellmConfiguration>()?.BaseAddress?.ToString() ?? "";
+                    break;
                 case Provider.DeepSeek:
                     currentBaseAddress = GetProviderConfiguration<DeepSeekConfiguration>()?.BaseAddress?.ToString() ?? "";
                     break;
@@ -523,9 +468,6 @@ public partial class RibbonMain
                     break;
                 case Provider.OpenAiCompatible:
                     currentBaseAddress = GetProviderConfiguration<OpenAiCompatibleConfiguration>()?.BaseAddress?.ToString() ?? "";
-                    break;
-                case Provider.Cellm:
-                    currentBaseAddress = GetProviderConfiguration<CellmConfiguration>()?.BaseAddress?.ToString() ?? "";
                     break;
                 default:
                     break;

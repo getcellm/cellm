@@ -86,6 +86,11 @@ internal class Account(
         Task.Run(async () => await RequireEntitlementAsync(entitlement)).GetAwaiter().GetResult();
     }
 
+    public bool HasBasicAuthCredentials()
+    {
+        return string.IsNullOrWhiteSpace(accountConfiguration.CurrentValue.Username) && string.IsNullOrWhiteSpace(accountConfiguration.CurrentValue.Password);
+    }
+
     public string GetBasicAuthCredentials(string? username = null, string? password = null)
     {
         username ??= accountConfiguration.CurrentValue.Username;
