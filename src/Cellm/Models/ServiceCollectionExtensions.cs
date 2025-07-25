@@ -132,6 +132,11 @@ public static class ServiceCollectionExtensions
                 var anthropicConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<AnthropicConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
+                if (string.IsNullOrWhiteSpace(anthropicConfiguration.CurrentValue.ApiKey))
+                {
+                    throw new CellmException($"Empty {Provider.Anthropic} {nameof(AnthropicConfiguration.ApiKey)}");
+                }
+
                 return new AnthropicClient(anthropicConfiguration.CurrentValue.ApiKey, resilientHttpClient)
                     .Messages
                     .AsBuilder()
@@ -152,6 +157,11 @@ public static class ServiceCollectionExtensions
 
                 var awsConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<AwsConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
+
+                if (string.IsNullOrWhiteSpace(awsConfiguration.CurrentValue.ApiKey))
+                {
+                    throw new CellmException($"Empty {Provider.Aws} {nameof(AwsConfiguration.ApiKey)}");
+                }
 
                 var parts = awsConfiguration.CurrentValue.ApiKey.Split(':');
 
@@ -182,6 +192,11 @@ public static class ServiceCollectionExtensions
 
                 var azureConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<AzureConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
+
+                if (string.IsNullOrWhiteSpace(azureConfiguration.CurrentValue.ApiKey))
+                {
+                    throw new CellmException($"Empty {Provider.Azure} {nameof(AzureConfiguration.ApiKey)}");
+                }
 
                 return new ChatCompletionsClient(
                     azureConfiguration.CurrentValue.BaseAddress,
@@ -236,6 +251,11 @@ public static class ServiceCollectionExtensions
                 var deepSeekConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<DeepSeekConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
+                if (string.IsNullOrWhiteSpace(deepSeekConfiguration.CurrentValue.ApiKey))
+                {
+                    throw new CellmException($"Empty {Provider.DeepSeek} {nameof(DeepSeekConfiguration.ApiKey)}");
+                }
+
                 var openAiClient = new OpenAIClient(
                     new ApiKeyCredential(deepSeekConfiguration.CurrentValue.ApiKey),
                     new OpenAIClientOptions
@@ -262,6 +282,11 @@ public static class ServiceCollectionExtensions
                 var geminiConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<GeminiConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
+                if (string.IsNullOrWhiteSpace(geminiConfiguration.CurrentValue.ApiKey)) 
+                {
+                    throw new CellmException($"Empty {Provider.Gemini} {nameof(GeminiConfiguration.ApiKey)}");
+                }
+
                 var openAiClient = new OpenAIClient(
                     new ApiKeyCredential(geminiConfiguration.CurrentValue.ApiKey),
                     new OpenAIClientOptions
@@ -287,6 +312,11 @@ public static class ServiceCollectionExtensions
 
                 var mistralConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<MistralConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
+
+                if (string.IsNullOrWhiteSpace(mistralConfiguration.CurrentValue.ApiKey))
+                {
+                    throw new CellmException($"Empty {Provider.Mistral} {nameof(MistralConfiguration.ApiKey)}");
+                }
 
                 return new MistralClient(mistralConfiguration.CurrentValue.ApiKey, resilientHttpClient).Completions;
             }, ServiceLifetime.Transient)
@@ -323,6 +353,11 @@ public static class ServiceCollectionExtensions
                 account.ThrowIfNotEntitled(Entitlement.EnableOpenAiProvider);
 
                 var openAiConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<OpenAiConfiguration>>();
+
+                if (string.IsNullOrWhiteSpace(openAiConfiguration.CurrentValue.ApiKey))
+                {
+                    throw new CellmException($"Empty {Provider.OpenAi} {nameof(OpenAiConfiguration.ApiKey)}");
+                }
 
                 return new OpenAIClient(new ApiKeyCredential(openAiConfiguration.CurrentValue.ApiKey))
                     .GetChatClient(openAiConfiguration.CurrentValue.DefaultModel)
