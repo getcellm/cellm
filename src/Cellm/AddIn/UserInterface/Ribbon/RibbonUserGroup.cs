@@ -1,6 +1,4 @@
 using System.Diagnostics;
-using System.Net;
-using System.Net.Http.Headers;
 using Cellm.AddIn.UserInterface.Forms;
 using Cellm.Users;
 using ExcelDna.Integration.CustomUI;
@@ -265,7 +263,7 @@ public partial class RibbonMain
             return false;
         }
 
-            var account = CellmAddIn.Services.GetRequiredService<Account>();
+        var account = CellmAddIn.Services.GetRequiredService<Account>();
 
         return await account.HasValidCredentialsAsync(username, password);
     }

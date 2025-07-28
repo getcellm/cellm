@@ -86,7 +86,8 @@ public static class ServiceCollectionExtensions
 
         services
             .AddRedaction()
-            .AddExtendedHttpClientLogging(options => {
+            .AddExtendedHttpClientLogging(options =>
+            {
                 options.RequestPathParameterRedactionMode = HttpRouteParameterRedactionMode.None;
             })
             .AddHttpClient("ResilientHttpClient", resilientHttpClient =>
