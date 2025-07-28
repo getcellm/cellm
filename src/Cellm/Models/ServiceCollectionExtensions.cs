@@ -86,7 +86,10 @@ public static class ServiceCollectionExtensions
 
         services
             .AddRedaction()
-            .AddExtendedHttpClientLogging(options => options.RequestPathParameterRedactionMode = HttpRouteParameterRedactionMode.None)
+            .AddExtendedHttpClientLogging(options =>
+            {
+                options.RequestPathParameterRedactionMode = HttpRouteParameterRedactionMode.None;
+            })
             .AddHttpClient("ResilientHttpClient", resilientHttpClient =>
             {
                 // Delegate timeout to resilience pipeline
