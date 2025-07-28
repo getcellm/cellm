@@ -78,7 +78,7 @@ public partial class RibbonMain
             var password = loginForm.Password;
 
             // Perform the check immediately with the entered credentials
-            var checkTask = PerformServerLoginCheckAsync(username, password);
+            var checkTask = CheckCredentialsAsync(username, password);
 
             // Block and wait for the result (acceptable after modal dialog)
             var loginSuccess = checkTask.Result; // Use .Result here as we need the outcome now
@@ -87,7 +87,7 @@ public partial class RibbonMain
             {
                 _logger.LogInformation("Login successful for {username}, saving credentials.", username);
 
-                // Save credentials ONLY if server check passed
+                // Save password ONLY if server check passed
                 SetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.Username)}", username);
                 SetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.Password)}", password);
 
@@ -102,8 +102,9 @@ public partial class RibbonMain
             }
             else
             {
-                // DO NOT save credentials
-                _logger.LogInformation("Login failed for {username}, not saving credentials.", username);
+                // Save username, but clear password
+                SetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.Username)}", username);
+                SetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.Password)}", string.Empty);
 
                 // Show error message
                 MessageBox.Show("Login failed. Please check your username and password.", "Login Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -215,7 +216,7 @@ public partial class RibbonMain
             try
             {
                 // Perform check using SAVED credentials (no args passed)
-                var actualLoginState = await PerformServerLoginCheckAsync();
+                var actualLoginState = await CheckCredentialsAsync();
                 var stateChanged = !_cachedLoginState.HasValue || _cachedLoginState.Value != actualLoginState;
                 _cachedLoginState = actualLoginState;
                 _cacheExpiry = DateTime.UtcNow.Add(_cacheDuration);
@@ -234,12 +235,10 @@ public partial class RibbonMain
         });
     }
 
-    private async Task<bool> PerformServerLoginCheckAsync(string? usernameToCheck = null, string? passwordToCheck = null)
+    private async Task<bool> CheckCredentialsAsync(string? usernameToCheck = null, string? passwordToCheck = null)
     {
         var username = usernameToCheck;
         var password = passwordToCheck;
-
-        _logger.LogInformation("Performing server login check for user: {}", (string.IsNullOrWhiteSpace(username) ? "(Saved User)" : username));
 
         // If no credentials passed, try reading saved ones
         if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))

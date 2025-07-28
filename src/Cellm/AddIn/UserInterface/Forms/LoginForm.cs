@@ -88,6 +88,7 @@ public partial class LoginForm : Form
 
     private void LoginForm_Load(object sender, EventArgs e)
     {
-
+        var accountConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<AccountConfiguration>>().CurrentValue;
+        TextBoxUsername.Text = accountConfiguration.Username;
     }
 }
