@@ -265,23 +265,9 @@ public partial class RibbonMain
             return false;
         }
 
-        using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(20) };
-        try
-        {
             var account = CellmAddIn.Services.GetRequiredService<Account>();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", account.GetBasicAuthCredentials(username, password));
 
-            var accountConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<AccountConfiguration>>();
-            var response = await client.GetAsync($"{accountConfiguration.CurrentValue.BaseAddress}/up");
-            _logger.LogInformation("Authorization response: {statusCode}", response.StatusCode);
-
-            return response.StatusCode == HttpStatusCode.OK;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError("Error during login check HTTP request: {message}", ex.Message);
-            return false;
-        }
+        return await account.HasValidCredentialsAsync(username, password);
     }
 
 

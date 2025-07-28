@@ -22,12 +22,12 @@
 //
 // For more details, go to https://github.com/getcellm/cellm/blob/main/LICENSE.
 
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using Cellm.Users.Exceptions;
 using Cellm.Users.Models;
 using Microsoft.Extensions.Caching.Hybrid;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -36,7 +36,7 @@ namespace Cellm.Users;
 internal class Account(
     IOptionsMonitor<AccountConfiguration> accountConfiguration,
     HybridCache cache,
-    [FromKeyedServices("ResilientHttpClient")] HttpClient httpClient,
+    HttpClient httpClient,
     ILogger<Account> logger)
 {
     private static readonly List<string> Tags = [nameof(Account)];
@@ -103,6 +103,42 @@ internal class Account(
         return credentialsAsBase64;
     }
 
+    internal async Task<bool> HasValidCredentialsAsync(string username, string password)
+    {
+        return await cache.GetOrCreateAsync(
+            nameof(HasValidCredentialsAsync) + GetBasicAuthCredentials(username, password),
+            async innerCancellationToken => await CheckCredentialsAsync(username, password, innerCancellationToken),
+            options: _cacheEntryOptions,
+            Tags,
+            cancellationToken: CancellationToken.None
+        );
+    }
+
+    private async Task<bool> CheckCredentialsAsync(string username, string password, CancellationToken cancellationToken)
+    {
+        var uri = accountConfiguration.CurrentValue.BaseAddress;
+
+        if (!uri.AbsoluteUri.EndsWith('/'))
+        {
+            uri = new Uri(uri.AbsoluteUri + "/");
+        }
+
+        try
+        {
+            logger.LogInformation("Checking credentials for {username} ...", username);
+            var request = new HttpRequestMessage(HttpMethod.Get, new Uri(uri, "user/permissions"));
+            request.Headers.Authorization = new AuthenticationHeaderValue("Basic", GetBasicAuthCredentials(username, password));
+            var response = await httpClient.SendAsync(request, cancellationToken);
+            logger.LogInformation("Checking credentials for {username} ... {status}", username, response.StatusCode);
+
+            return response.StatusCode == System.Net.HttpStatusCode.OK;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
     private async Task<ActiveEntitlements> GetEntitlements(CancellationToken cancellationToken)
     {
         var uri = accountConfiguration.CurrentValue.BaseAddress;
@@ -112,11 +148,10 @@ internal class Account(
             uri = new Uri(uri.AbsoluteUri + "/");
         }
 
-        var request = new HttpRequestMessage(HttpMethod.Get, new Uri(uri, "user/permissions"));
-        request.Headers.Add("Authorization", $"Basic {GetBasicAuthCredentials()}");
-
         try
         {
+            var request = new HttpRequestMessage(HttpMethod.Get, new Uri(uri, "user/permissions"));
+            request.Headers.Authorization = new AuthenticationHeaderValue("Basic", GetBasicAuthCredentials());
             using var response = await httpClient.SendAsync(request, cancellationToken);
 
             // If anything goes wrong for ANY reason, we want to return default entitlements
