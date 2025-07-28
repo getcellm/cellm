@@ -37,7 +37,7 @@ public partial class LoginForm : Form
     private void ForgotPassword_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
     {
         var accountConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<AccountConfiguration>>();
-        var passwordResetUrl = $"{accountConfiguration.CurrentValue.Homepage}/account";
+        var passwordResetUrl = $"{accountConfiguration.CurrentValue.Homepage}/passwords/new";
 
         try
         {
