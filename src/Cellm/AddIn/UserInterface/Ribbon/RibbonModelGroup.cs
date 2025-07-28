@@ -172,7 +172,7 @@ public partial class RibbonMain
             return account.HasEntitlement(GetProviderConfiguration(provider).Entitlement);
         }
 
-        _logger.LogWarning("Could not parse index from tag '{tag}' for menu item '{id}'.", control.Tag, control.Id);
+        _logger.LogWarning("Could not parse tag '{tag}' for menu item '{id}'.", control.Tag, control.Id);
 
         return false; // Or a default placeholder image
     }
