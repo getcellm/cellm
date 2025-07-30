@@ -52,6 +52,8 @@ public partial class AddMcpServerForm : Form
         commandTextBox.Visible = isStdio;
         argumentsLabel.Visible = isStdio;
         argumentsTextBox.Visible = isStdio;
+        workingDirectoryLabel.Visible = isStdio;
+        workingDirectoryTextBox.Visible = isStdio;
         environmentVariablesLabel.Visible = isStdio;
         environmentVariablesButton.Visible = isStdio;
 
@@ -65,7 +67,7 @@ public partial class AddMcpServerForm : Form
         additionalHeadersLabel.Visible = !isStdio;
         additionalHeadersButton.Visible = !isStdio;
 
-        this.Height = 300;
+        this.Height = 335;
     }
 
     private void EnvironmentVariablesButton_Click(object sender, EventArgs e)
@@ -195,6 +197,7 @@ public partial class AddMcpServerForm : Form
             Name = serverName,
             Command = commandTextBox.Text.Trim(),
             Arguments = arguments.Any() ? arguments : null,
+            WorkingDirectory = !string.IsNullOrWhiteSpace(workingDirectoryTextBox.Text) ? workingDirectoryTextBox.Text.Trim() : null,
             EnvironmentVariables = _environmentVariables.Any() ? _environmentVariables : null,
             ShutdownTimeout = TimeSpan.FromSeconds(5) // Default value
         };
