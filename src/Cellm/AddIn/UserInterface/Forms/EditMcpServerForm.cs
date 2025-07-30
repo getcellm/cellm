@@ -108,9 +108,6 @@ public partial class EditMcpServerForm : Form
         connectionTimeoutNumericUpDown.Visible = !isStdio;
         additionalHeadersLabel.Visible = !isStdio;
         additionalHeadersButton.Visible = !isStdio;
-
-        // Adjust form height based on visible fields
-        this.Height = 650;
     }
 
     private void EnvironmentVariablesButton_Click(object sender, EventArgs e)

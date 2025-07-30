@@ -66,8 +66,6 @@ public partial class AddMcpServerForm : Form
         connectionTimeoutNumericUpDown.Visible = !isStdio;
         additionalHeadersLabel.Visible = !isStdio;
         additionalHeadersButton.Visible = !isStdio;
-
-        this.Height = 335;
     }
 
     private void EnvironmentVariablesButton_Click(object sender, EventArgs e)
