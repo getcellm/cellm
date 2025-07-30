@@ -300,7 +300,7 @@ namespace CustomActions
                     return ActionResult.Failure;
                 }
 
-                var arguments = "playwright install --with-deps chromium-headless-shell";
+                var arguments = "-y playwright install --with-deps --only-shell chrome";
 
                 session.Log($"Node.js Path: {nodeParentDir}");
                 session.Log($"Executing: {npxPath} {arguments}");
