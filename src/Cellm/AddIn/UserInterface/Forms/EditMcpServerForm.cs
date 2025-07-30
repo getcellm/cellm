@@ -94,6 +94,8 @@ public partial class EditMcpServerForm : Form
         commandTextBox.Visible = isStdio;
         argumentsLabel.Visible = isStdio;
         argumentsTextBox.Visible = isStdio;
+        workingDirectoryLabel.Visible = isStdio;
+        workingDirectoryTextBox.Visible = isStdio;
         environmentVariablesLabel.Visible = isStdio;
         environmentVariablesButton.Visible = isStdio;
 
@@ -106,9 +108,6 @@ public partial class EditMcpServerForm : Form
         connectionTimeoutNumericUpDown.Visible = !isStdio;
         additionalHeadersLabel.Visible = !isStdio;
         additionalHeadersButton.Visible = !isStdio;
-
-        // Adjust form height based on visible fields
-        this.Height = 620;
     }
 
     private void EnvironmentVariablesButton_Click(object sender, EventArgs e)
@@ -255,6 +254,7 @@ public partial class EditMcpServerForm : Form
         nameTextBox.Clear();
         commandTextBox.Clear();
         argumentsTextBox.Clear();
+        workingDirectoryTextBox.Clear();
         endpointTextBox.Clear();
         connectionTimeoutNumericUpDown.Value = 30;
         httpTransportModeComboBox.SelectedIndex = 0;
@@ -273,6 +273,7 @@ public partial class EditMcpServerForm : Form
             {
                 commandTextBox.Text = server.Command;
                 argumentsTextBox.Text = server.Arguments != null ? string.Join(" ", server.Arguments) : "";
+                workingDirectoryTextBox.Text = server.WorkingDirectory ?? "";
                 _environmentVariables = server.EnvironmentVariables != null ?
                     new Dictionary<string, string?>(server.EnvironmentVariables) : [];
             }
@@ -357,6 +358,7 @@ public partial class EditMcpServerForm : Form
             Name = serverName,
             Command = commandTextBox.Text.Trim(),
             Arguments = arguments.Count > 0 ? arguments : null,
+            WorkingDirectory = !string.IsNullOrWhiteSpace(workingDirectoryTextBox.Text) ? workingDirectoryTextBox.Text.Trim() : null,
             EnvironmentVariables = _environmentVariables.Count > 0 ? _environmentVariables : null,
             ShutdownTimeout = TimeSpan.FromSeconds(5) // Default value
         };

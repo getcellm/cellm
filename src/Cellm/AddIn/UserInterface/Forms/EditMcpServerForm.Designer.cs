@@ -41,6 +41,8 @@ partial class EditMcpServerForm
         commandTextBox = new TextBox();
         argumentsLabel = new Label();
         argumentsTextBox = new TextBox();
+        workingDirectoryLabel = new Label();
+        workingDirectoryTextBox = new TextBox();
         environmentVariablesLabel = new Label();
         environmentVariablesButton = new Button();
         endpointLabel = new Label();
@@ -169,21 +171,37 @@ partial class EditMcpServerForm
         argumentsTextBox.Size = new Size(215, 23);
         argumentsTextBox.TabIndex = 11;
         // 
+        // workingDirectoryLabel
+        // 
+        workingDirectoryLabel.AutoSize = true;
+        workingDirectoryLabel.Location = new Point(12, 454);
+        workingDirectoryLabel.Name = "workingDirectoryLabel";
+        workingDirectoryLabel.Size = new Size(106, 15);
+        workingDirectoryLabel.TabIndex = 12;
+        workingDirectoryLabel.Text = "Working Directory:";
+        // 
+        // workingDirectoryTextBox
+        // 
+        workingDirectoryTextBox.Location = new Point(180, 451);
+        workingDirectoryTextBox.Name = "workingDirectoryTextBox";
+        workingDirectoryTextBox.Size = new Size(215, 23);
+        workingDirectoryTextBox.TabIndex = 13;
+        // 
         // environmentVariablesLabel
         // 
         environmentVariablesLabel.AutoSize = true;
-        environmentVariablesLabel.Location = new Point(12, 454);
+        environmentVariablesLabel.Location = new Point(12, 484);
         environmentVariablesLabel.Name = "environmentVariablesLabel";
         environmentVariablesLabel.Size = new Size(127, 15);
-        environmentVariablesLabel.TabIndex = 12;
+        environmentVariablesLabel.TabIndex = 14;
         environmentVariablesLabel.Text = "Environment Variables:";
         // 
         // environmentVariablesButton
         // 
-        environmentVariablesButton.Location = new Point(180, 451);
+        environmentVariablesButton.Location = new Point(180, 481);
         environmentVariablesButton.Name = "environmentVariablesButton";
         environmentVariablesButton.Size = new Size(100, 23);
-        environmentVariablesButton.TabIndex = 13;
+        environmentVariablesButton.TabIndex = 15;
         environmentVariablesButton.Text = "Edit ...";
         environmentVariablesButton.UseVisualStyleBackColor = true;
         environmentVariablesButton.Click += EnvironmentVariablesButton_Click;
@@ -247,7 +265,7 @@ partial class EditMcpServerForm
         additionalHeadersLabel.Location = new Point(12, 484);
         additionalHeadersLabel.Name = "additionalHeadersLabel";
         additionalHeadersLabel.Size = new Size(111, 15);
-        additionalHeadersLabel.TabIndex = 14;
+        additionalHeadersLabel.TabIndex = 24;
         additionalHeadersLabel.Text = "Additional Headers:";
         // 
         // additionalHeadersButton
@@ -255,7 +273,7 @@ partial class EditMcpServerForm
         additionalHeadersButton.Location = new Point(180, 481);
         additionalHeadersButton.Name = "additionalHeadersButton";
         additionalHeadersButton.Size = new Size(100, 23);
-        additionalHeadersButton.TabIndex = 15;
+        additionalHeadersButton.TabIndex = 25;
         additionalHeadersButton.Text = "Edit ...";
         additionalHeadersButton.UseVisualStyleBackColor = true;
         additionalHeadersButton.Click += AdditionalHeadersButton_Click;
@@ -263,20 +281,20 @@ partial class EditMcpServerForm
         // okButton
         // 
         okButton.Enabled = false;
-        okButton.Location = new Point(239, 524);
+        okButton.Location = new Point(239, 536);
         okButton.Name = "okButton";
         okButton.Size = new Size(75, 23);
-        okButton.TabIndex = 16;
+        okButton.TabIndex = 26;
         okButton.Text = "OK";
         okButton.UseVisualStyleBackColor = true;
         okButton.Click += OkButton_Click;
         // 
         // cancelButton
         // 
-        cancelButton.Location = new Point(320, 524);
+        cancelButton.Location = new Point(320, 536);
         cancelButton.Name = "cancelButton";
         cancelButton.Size = new Size(75, 23);
-        cancelButton.TabIndex = 17;
+        cancelButton.TabIndex = 27;
         cancelButton.Text = "Cancel";
         cancelButton.UseVisualStyleBackColor = true;
         cancelButton.Click += CancelButton_Click;
@@ -293,10 +311,8 @@ partial class EditMcpServerForm
         // EditMcpServerForm
         // 
         AcceptButton = okButton;
-        AutoScaleDimensions = new SizeF(7F, 15F);
-        AutoScaleMode = AutoScaleMode.Font;
         CancelButton = cancelButton;
-        ClientSize = new Size(408, 556);
+        ClientSize = new Size(408, 569);
         Controls.Add(serverListLabel);
         Controls.Add(cancelButton);
         Controls.Add(okButton);
@@ -310,6 +326,8 @@ partial class EditMcpServerForm
         Controls.Add(endpointLabel);
         Controls.Add(environmentVariablesButton);
         Controls.Add(environmentVariablesLabel);
+        Controls.Add(workingDirectoryTextBox);
+        Controls.Add(workingDirectoryLabel);
         Controls.Add(argumentsTextBox);
         Controls.Add(argumentsLabel);
         Controls.Add(commandTextBox);
@@ -349,6 +367,8 @@ partial class EditMcpServerForm
     private TextBox commandTextBox;
     private Label argumentsLabel;
     private TextBox argumentsTextBox;
+    private Label workingDirectoryLabel;
+    private TextBox workingDirectoryTextBox;
     private Label environmentVariablesLabel;
     private Button environmentVariablesButton;
     private Label endpointLabel;
