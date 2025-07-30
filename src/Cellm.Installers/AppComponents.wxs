@@ -8,6 +8,7 @@
           <RegistryValue Type="string" Name="CellmInstalled" Value="yes" KeyPath="yes" />
         </RegistryKey>
         <RemoveFolder Id="RemoveInstallFolder" Directory="INSTALLFOLDER" On="uninstall" />
+        <Environment Id="PATH" Name="PATH" Value="[INSTALLFOLDER]node" Part="last" Action="set" />
       </Component>
 
       <Component Id="CellmAddInOffice12RegistryKey" Guid="A1126967-D155-4817-82D2-CC8D38DC7FB5" Condition="OFFICE12INSTALLED">
