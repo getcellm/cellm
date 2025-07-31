@@ -32,6 +32,7 @@ using OpenAI;
 using Polly;
 using Polly.Retry;
 using Polly.Telemetry;
+using Polly.Timeout;
 
 namespace Cellm.Models;
 
@@ -117,7 +118,10 @@ public static class ServiceCollectionExtensions
                         MaxRetryAttempts = resilienceConfiguration.Value.RetryConfiguration.MaxRetryAttempts,
                         Delay = TimeSpan.FromSeconds(resilienceConfiguration.Value.RetryConfiguration.DelayInSeconds),
                     })
-                    .AddTimeout(TimeSpan.FromSeconds(resilienceConfiguration.Value.RetryConfiguration.HttpTimeoutInSeconds))
+                    .AddTimeout(new TimeoutStrategyOptions
+                    {
+                        Timeout = TimeSpan.FromSeconds(resilienceConfiguration.Value.RetryConfiguration.HttpTimeoutInSeconds),
+                    })
                     .ConfigureTelemetry(telemetryOptions)
                     .Build();
             });
@@ -138,7 +142,7 @@ public static class ServiceCollectionExtensions
 
                 if (string.IsNullOrWhiteSpace(anthropicConfiguration.CurrentValue.ApiKey))
                 {
-                    throw new CellmException($"Empty {Provider.Anthropic} {nameof(AnthropicConfiguration.ApiKey)}");
+                    throw new CellmException($"Empty {nameof(AnthropicConfiguration.ApiKey)} for {Provider.Anthropic}");
                 }
 
                 return new AnthropicClient(anthropicConfiguration.CurrentValue.ApiKey, resilientHttpClient)
@@ -164,7 +168,7 @@ public static class ServiceCollectionExtensions
 
                 if (string.IsNullOrWhiteSpace(awsConfiguration.CurrentValue.ApiKey))
                 {
-                    throw new CellmException($"Empty {Provider.Aws} {nameof(AwsConfiguration.ApiKey)}");
+                    throw new CellmException($"Empty {nameof(AwsConfiguration.ApiKey)} {Provider.Aws}");
                 }
 
                 var parts = awsConfiguration.CurrentValue.ApiKey.Split(':');
@@ -199,7 +203,7 @@ public static class ServiceCollectionExtensions
 
                 if (string.IsNullOrWhiteSpace(azureConfiguration.CurrentValue.ApiKey))
                 {
-                    throw new CellmException($"Empty {Provider.Azure} {nameof(AzureConfiguration.ApiKey)}");
+                    throw new CellmException($"Empty {nameof(AzureConfiguration.ApiKey)} for {Provider.Azure}");
                 }
 
                 return new ChatCompletionsClient(
@@ -226,7 +230,7 @@ public static class ServiceCollectionExtensions
 
                 if (!account.HasBasicAuthCredentials())
                 {
-                    throw new CellmException($"Empty {Provider.Cellm} username and password");
+                    throw new CellmException($"Empty username and password for {Provider.Cellm}");
                 }
 
                 var openAiClient = new OpenAIClient(
@@ -257,7 +261,7 @@ public static class ServiceCollectionExtensions
 
                 if (string.IsNullOrWhiteSpace(deepSeekConfiguration.CurrentValue.ApiKey))
                 {
-                    throw new CellmException($"Empty {Provider.DeepSeek} {nameof(DeepSeekConfiguration.ApiKey)}");
+                    throw new CellmException($"Empty {nameof(DeepSeekConfiguration.ApiKey)} for {Provider.DeepSeek}");
                 }
 
                 var openAiClient = new OpenAIClient(
@@ -288,7 +292,7 @@ public static class ServiceCollectionExtensions
 
                 if (string.IsNullOrWhiteSpace(geminiConfiguration.CurrentValue.ApiKey))
                 {
-                    throw new CellmException($"Empty {Provider.Gemini} {nameof(GeminiConfiguration.ApiKey)}");
+                    throw new CellmException($"Empty {nameof(GeminiConfiguration.ApiKey)} for {Provider.Gemini}");
                 }
 
                 var openAiClient = new OpenAIClient(
@@ -319,7 +323,7 @@ public static class ServiceCollectionExtensions
 
                 if (string.IsNullOrWhiteSpace(mistralConfiguration.CurrentValue.ApiKey))
                 {
-                    throw new CellmException($"Empty {Provider.Mistral} {nameof(MistralConfiguration.ApiKey)}");
+                    throw new CellmException($"Empty {nameof(MistralConfiguration.ApiKey)} for {Provider.Mistral}");
                 }
 
                 return new MistralClient(mistralConfiguration.CurrentValue.ApiKey, resilientHttpClient).Completions;
@@ -360,7 +364,7 @@ public static class ServiceCollectionExtensions
 
                 if (string.IsNullOrWhiteSpace(openAiConfiguration.CurrentValue.ApiKey))
                 {
-                    throw new CellmException($"Empty {Provider.OpenAi} {nameof(OpenAiConfiguration.ApiKey)}");
+                    throw new CellmException($"Empty {nameof(OpenAiConfiguration.ApiKey)} for {Provider.OpenAi}");
                 }
 
                 return new OpenAIClient(new ApiKeyCredential(openAiConfiguration.CurrentValue.ApiKey))
