@@ -48,6 +48,4 @@ internal static class SystemMessages
         </output format>
         """;
     }
-
-    public const string InlineInstructions = "Analyze the cells carefully and follow any instructions within the table.";
 }
