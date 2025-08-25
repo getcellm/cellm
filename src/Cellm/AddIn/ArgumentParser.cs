@@ -11,8 +11,8 @@ public class ArgumentParser(IConfiguration configuration)
 {
     private object? _provider;
     private object? _model;
-    private object? _instructionsOrCells;
-    private object? _instructionsOrTemperature;
+    private object? _instructions;
+    private object? _cellsOrTemperature;
     private object? _temperature;
     private StructuredOutputShape _outputShape = StructuredOutputShape.None;
 
@@ -35,16 +35,16 @@ public class ArgumentParser(IConfiguration configuration)
         return this;
     }
 
-    public ArgumentParser AddInstructionsOrCells(object instructionsOrCells)
+    public ArgumentParser AddInstructions(object instructions)
     {
-        _instructionsOrCells = instructionsOrCells;
+        _instructions = instructions;
 
         return this;
     }
 
-    public ArgumentParser AddInstructionsOrTemperature(object instructionsOrTemperature)
+    public ArgumentParser AddCellsOrTemperature(object cellsOrTemperature)
     {
-        _instructionsOrTemperature = instructionsOrTemperature;
+        _cellsOrTemperature = cellsOrTemperature;
 
         return this;
     }
@@ -81,26 +81,26 @@ public class ArgumentParser(IConfiguration configuration)
         var defaultTemperature = configuration[$"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultTemperature)}"]
             ?? throw new ArgumentException(nameof(CellmAddInConfiguration.DefaultTemperature));
 
-        var arguments = (_instructionsOrCells, _instructionsOrTemperature, _temperature) switch
+        var arguments = (_instructions, _cellsOrTemperature, _temperature) switch
         {
-            // "=PROMPT("Hello world")
+            // =PROMPT("Hello world")
             (string instructions, ExcelMissing, ExcelMissing) => new Arguments(provider, model, string.Empty, instructions, ParseTemperature(Convert.ToDouble(defaultTemperature)), _outputShape),
-            // "=PROMPT("Hello world", 0.7)
+            // =PROMPT("Hello world", 0.7)
             (string instructions, double temperature, ExcelMissing) => new Arguments(provider, model, string.Empty, instructions, ParseTemperature(temperature), _outputShape),
-            // "=PROMPT(A1:B2)
-            (ExcelReference cells, ExcelMissing, ExcelMissing) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), SystemMessages.InlineInstructions, ParseTemperature(Convert.ToDouble(defaultTemperature)), _outputShape),
-            // "=PROMPT(A1:B2, 0.7)
-            (ExcelReference cells, double temperature, ExcelMissing) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), SystemMessages.InlineInstructions, ParseTemperature(Convert.ToDouble(defaultTemperature)), _outputShape),
-            // "=PROMPT(A1:B2, "Extract keywords")
-            (ExcelReference cells, string instructions, ExcelMissing) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), instructions, ParseTemperature(Convert.ToDouble(defaultTemperature)), _outputShape),
-            // "=PROMPT(A1:B2, "Extract keywords", 0.7)
-            (ExcelReference cells, string instructions, double temperature) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), instructions, ParseTemperature(temperature), _outputShape),
-            // "=PROMPT(A1:B2, C1:D2)
-            (ExcelReference cells, ExcelReference instructions, ExcelMissing) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), new Cells(instructions.RowFirst, instructions.RowLast, instructions.GetValue()), ParseTemperature(Convert.ToDouble(defaultTemperature)), _outputShape),
-            // "=PROMPT(A1:B2, C1:D2, 0.7)
-            (ExcelReference cells, ExcelReference instructions, double temperature) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), new Cells(instructions.RowFirst, instructions.RowLast, instructions.GetValue()), ParseTemperature(temperature), _outputShape),
+            // =PROMPT("Hello world", A1:B2)
+            (string instructions, ExcelReference cells, ExcelMissing) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), instructions, ParseTemperature(Convert.ToDouble(defaultTemperature)), _outputShape),
+            // =PROMPT("Hello world", A1:B2, 0.7)
+            (string instructions, ExcelReference cells, double temperature) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), instructions, ParseTemperature(temperature), _outputShape),
+            // =PROMPT(A1:B2)
+            (ExcelReference instructions, ExcelMissing, ExcelMissing) => new Arguments(provider, model, string.Empty, new Cells(instructions.RowFirst, instructions.ColumnFirst, instructions.GetValue()), ParseTemperature(Convert.ToDouble(defaultTemperature)), _outputShape),
+            // =PROMPT(A1:B2, 0.7)
+            (ExcelReference instructions, double temperature, ExcelMissing) => new Arguments(provider, model, string.Empty, new Cells(instructions.RowFirst, instructions.ColumnFirst, instructions.GetValue()), ParseTemperature(temperature), _outputShape),
+            // =PROMPT(A1:B2, C1:D2)
+            (ExcelReference instructions, ExcelReference cells, ExcelMissing) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), new Cells(instructions.RowFirst, instructions.ColumnFirst, instructions.GetValue()), ParseTemperature(Convert.ToDouble(defaultTemperature)), _outputShape),
+            // =PROMPT(A1:B2, C1:D2, 0.7)
+            (ExcelReference instructions, ExcelReference cells, double temperature) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), new Cells(instructions.RowFirst, instructions.ColumnFirst, instructions.GetValue()), ParseTemperature(temperature), _outputShape),
             // Anything else
-            _ => throw new ArgumentException($"Invalid arguments ({_instructionsOrCells?.GetType().Name}, {_instructionsOrTemperature?.GetType().Name}, {_temperature?.GetType().Name})")
+            _ => throw new ArgumentException($"Invalid arguments ({_instructions?.GetType().Name}, {_cellsOrTemperature?.GetType().Name}, {_temperature?.GetType().Name})")
         };
 
         if (arguments.Cells is Cells contextCells && contextCells.Values is ExcelError contextCellsError)
@@ -134,7 +134,7 @@ public class ArgumentParser(IConfiguration configuration)
             .ToString();
     }
 
-    // Render sheet as Markdown table because models have seen loads of those
+    // Render range as Markdown table because models have seen loads of those
     internal static string ParseCells(Cells cells)
     {
         var values = cells.Values switch
