@@ -10,7 +10,7 @@ internal class CellmConfiguration : IProviderConfiguration
 
     public Entitlement Entitlement { get => Entitlement.EnableCellmProvider; }
 
-    public string Icon { get => $"AddIn/UserInterface/Resources/{nameof(Provider.Cellm)}.png"; }
+    public string Icon { get => $"AddIn/UserInterface/Resources/{nameof(Provider.Cellm)}.svg"; }
 
     public Uri BaseAddress => new("https://getcellm.com/v1/");
 
@@ -24,5 +24,5 @@ internal class CellmConfiguration : IProviderConfiguration
 
     public bool CanUseStructuredOutputWithTools { get; init; } = false;
 
-    public bool IsEnabled { get; init; } = false;
+    public bool IsEnabled { get; init; } = true;
 }

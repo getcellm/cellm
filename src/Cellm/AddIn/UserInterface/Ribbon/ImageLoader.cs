@@ -34,8 +34,7 @@ public static class ImageLoader
             height = 16;
         }
 
-
-        string cacheKey = $"{relativePath.ToLowerInvariant()}_{width}x{height}"; // Include size in cache key
+        var cacheKey = $"{relativePath.ToLowerInvariant()}_{width}x{height}"; // Include size in cache key
 
         // 1. Check cache
         if (_imageCache.TryGetValue(cacheKey, out var cachedBitmap))
@@ -97,17 +96,15 @@ public static class ImageLoader
                 graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
                 // Use ImageAttributes to prevent potential border artifacts (optional but good)
-                using (var wrapMode = new ImageAttributes())
-                {
-                    wrapMode.SetWrapMode(WrapMode.TileFlipXY); // Prevents edge artifacts
+                using var wrapMode = new ImageAttributes();
+                wrapMode.SetWrapMode(WrapMode.TileFlipXY); // Prevents edge artifacts
 
-                    // Define source (entire original image) and destination rectangles
-                    var sourceRect = new Rectangle(0, 0, originalBitmap.Width, originalBitmap.Height);
-                    var destRect = new Rectangle(0, 0, width, height);
+                // Define source (entire original image) and destination rectangles
+                var sourceRect = new Rectangle(0, 0, originalBitmap.Width, originalBitmap.Height);
+                var destRect = new Rectangle(0, 0, width, height);
 
-                    // Draw the original image onto the new bitmap canvas using high-quality settings
-                    graphics.DrawImage(originalBitmap, destRect, sourceRect.X, sourceRect.Y, sourceRect.Width, sourceRect.Height, GraphicsUnit.Pixel, wrapMode);
-                }
+                // Draw the original image onto the new bitmap canvas using high-quality settings
+                graphics.DrawImage(originalBitmap, destRect, sourceRect.X, sourceRect.Y, sourceRect.Width, sourceRect.Height, GraphicsUnit.Pixel, wrapMode);
             } // Graphics object is disposed here
 
             // --- END: High-Quality Resizing Logic ---
