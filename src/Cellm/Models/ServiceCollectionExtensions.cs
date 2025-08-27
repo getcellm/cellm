@@ -387,7 +387,11 @@ public static class ServiceCollectionExtensions
                 var openAiCompatibleConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<OpenAiCompatibleConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
-                if (!openAiCompatibleConfiguration.CurrentValue.BaseAddress.IsLoopback)
+                if (openAiCompatibleConfiguration.CurrentValue.BaseAddress.IsLoopback)
+                {
+                    account.ThrowIfNotEntitled(Entitlement.EnableOpenAiCompatibleProviderLocalModels);
+                }
+                else
                 {
                     account.ThrowIfNotEntitled(Entitlement.EnableOpenAiCompatibleProviderHostedModels);
                 }

@@ -15,8 +15,10 @@ internal class ActiveEntitlements()
     // Entitlements for anonymous users
     [JsonIgnore]
     private readonly List<Entitlement> AnonymousEntitlements = [
-        Entitlement.EnableOllamaProvider,
-        Entitlement.EnableOpenAiCompatibleProvider,
+        Entitlement.EnableAnthropicProvider,
+        Entitlement.EnableDeepSeekProvider,
+        Entitlement.EnableMistralProvider,
+        Entitlement.EnableOpenAiProvider
     ];
 
     [JsonIgnore]

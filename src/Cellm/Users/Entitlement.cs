@@ -12,6 +12,7 @@ public enum Entitlement
     EnableOllamaProvider,
     EnableOpenAiProvider,
     EnableOpenAiCompatibleProvider,
+    EnableOpenAiCompatibleProviderLocalModels,
     EnableOpenAiCompatibleProviderHostedModels,
     EnableModelContextProtocol,
     DisableTelemetry
