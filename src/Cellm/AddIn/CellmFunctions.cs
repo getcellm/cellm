@@ -300,7 +300,7 @@ public static class CellmFunctions
 
         try
         {
-            logger.LogInformation("Sending prompt to {}/{} ({}) ... (elapsed time: {}ms)", arguments.Provider, arguments.Model, callerCoordinates, wallClock.ElapsedMilliseconds);
+            logger.LogInformation("Sending {} to {}/{} ... (elapsed time: {}ms)", callerCoordinates, arguments.Provider, arguments.Model, wallClock.ElapsedMilliseconds);
 
             // Check for cancellation before doing any work
             cancellationToken.ThrowIfCancellationRequested();
@@ -348,7 +348,7 @@ public static class CellmFunctions
             // Check for cancellation before returning response
             cancellationToken.ThrowIfCancellationRequested();
 
-            logger.LogInformation("Sending prompt to {}/{} ({}) ... Done (elapsed time: {}ms, request time: {}ms)", arguments.Provider, arguments.Model, callerCoordinates, wallClock.ElapsedMilliseconds, requestClock.ElapsedMilliseconds);
+            logger.LogInformation("Sending {} to {}/{} ... Done (elapsed time: {}ms, request time: {}ms, overhead: {}ms)", callerCoordinates, arguments.Provider, arguments.Model, wallClock.ElapsedMilliseconds, requestClock.ElapsedMilliseconds, wallClock.ElapsedMilliseconds - requestClock.ElapsedMilliseconds);
 
             if (StructuredOutput.TryParse(assistantMessage, response.OutputShape, out var structuredAssistantMessage) && structuredAssistantMessage is not null)
             {
@@ -368,7 +368,7 @@ public static class CellmFunctions
             CellmAddIn.Services
                 .GetRequiredService<ILoggerFactory>()
                 .CreateLogger(nameof(GetResponseAsync))
-                .LogInformation("Sending prompt to {}/{} ({}) ... Cancelled (elapsed time: {}ms, request time: {}ms)", arguments.Provider, arguments.Model, callerCoordinates, wallClock.ElapsedMilliseconds, requestClock.ElapsedMilliseconds);
+                .LogInformation("Sending {} to {}/{} ... Cancelled (elapsed time: {}ms, request time: {}ms)", callerCoordinates, arguments.Provider, arguments.Model, wallClock.ElapsedMilliseconds, requestClock.ElapsedMilliseconds);
 
             return "Cancelled"; // Cancellation is not an error, just return _something_
         }
@@ -377,7 +377,7 @@ public static class CellmFunctions
             CellmAddIn.Services
                 .GetRequiredService<ILoggerFactory>()
                 .CreateLogger(nameof(GetResponseAsync))
-                .LogError(ex, "Sending prompt to {}/{} ({}) ... Failed: {message} (elapsed time: {}ms, request time: {}ms)", arguments.Provider, arguments.Model, callerCoordinates, ex.Message, wallClock.ElapsedMilliseconds, requestClock.ElapsedMilliseconds);
+                .LogError(ex, "Sending {} to {}/{} ... Failed: {message} (elapsed time: {}ms, request time: {}ms)", callerCoordinates, arguments.Provider, arguments.Model, ex.Message, wallClock.ElapsedMilliseconds, requestClock.ElapsedMilliseconds);
 
             return ex.Message;
         }

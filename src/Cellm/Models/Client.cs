@@ -1,5 +1,4 @@
-﻿using System.ClientModel;
-using Cellm.AddIn.Exceptions;
+﻿using Cellm.AddIn.Exceptions;
 using Cellm.Models.Prompts;
 using Cellm.Models.Providers;
 using MediatR;
@@ -17,9 +16,9 @@ internal class Client(ISender sender, ResiliencePipelineProvider<string> resilie
 
         try
         {
-            return await retryPipeline.ExecuteAsync(async pipelineCancellationToken =>
+            return await retryPipeline.ExecuteAsync(async innerCancellationToken =>
             {
-                var response = await sender.Send(new ProviderRequest(prompt, provider), pipelineCancellationToken).ConfigureAwait(false);
+                var response = await sender.Send(new ProviderRequest(prompt, provider), innerCancellationToken).ConfigureAwait(false);
                 return response.Prompt;
             }, cancellationToken).ConfigureAwait(false);
         }

@@ -184,7 +184,16 @@ public partial class RibbonMain
         if (Enum.TryParse<Provider>(providerAsString, out var provider))
         {
             var resource = GetProviderConfiguration(provider).Icon;
-            return ImageLoader.LoadEmbeddedPngResized(resource, 128, 128);
+
+            if (resource.ToLower().EndsWith("png"))
+            {
+                return ImageLoader.LoadEmbeddedPngResized(resource, 128, 128);
+            }
+
+            if (resource.ToLower().EndsWith("svg"))
+            {
+                return ImageLoader.LoadEmbeddedSvgResized(resource, 128, 128);
+            }
         }
 
         _logger.LogWarning("Could not get image for provider {provider}.", providerAsString);
@@ -197,7 +206,16 @@ public partial class RibbonMain
         if (Enum.TryParse<Provider>(control.Tag, out var provider))
         {
             var resource = GetProviderConfiguration(provider).Icon;
-            return ImageLoader.LoadEmbeddedPngResized(resource, 16, 16);
+
+            if (resource.ToLower().EndsWith("png"))
+            {
+                return ImageLoader.LoadEmbeddedPngResized(resource, 128, 128);
+            }
+
+            if (resource.ToLower().EndsWith("svg"))
+            {
+                return ImageLoader.LoadEmbeddedSvgResized(resource, 128, 128);
+            }
         }
 
         _logger.LogWarning("Could not parse index from tag '{tag}' for menu item '{id}'.", control.Tag, control.Id);

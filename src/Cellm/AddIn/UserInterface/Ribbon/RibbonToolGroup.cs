@@ -254,7 +254,7 @@ public partial class RibbonMain
 
     public Bitmap? GetMcpMenuImage(IRibbonControl control)
     {
-        return ImageLoader.LoadEmbeddedPngResized($"{ResourcesBasePath}/mcp.png", 64, 64);
+        return ImageLoader.LoadEmbeddedPngResized($"{ResourcesBasePath}/MCP.png", 64, 64);
     }
 
 
