@@ -12,7 +12,7 @@ internal class CellmConfiguration : IProviderConfiguration
 
     public string Icon { get => $"AddIn/UserInterface/Resources/{nameof(Provider.Cellm)}.svg"; }
 
-    public Uri BaseAddress => new("https://getcellm.com/v1/");
+    public Uri BaseAddress { get; init; } = new("https://getcellm.com/v1/");
 
     public string DefaultModel { get; init; } = string.Empty;
 
