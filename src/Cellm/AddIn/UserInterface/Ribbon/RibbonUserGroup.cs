@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Cellm.AddIn.UserInterface.Forms;
 using Cellm.Users;
+using ExcelDna.Integration;
 using ExcelDna.Integration.CustomUI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -10,11 +11,6 @@ namespace Cellm.AddIn.UserInterface.Ribbon;
 
 public partial class RibbonMain
 {
-    private static bool? _cachedLoginState = null;
-    private static DateTime _cacheExpiry = DateTime.MinValue;
-    private static readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(5);
-    private static volatile bool _isLoginCheckRunning = false;
-
     private enum UserGroupControlIds
     {
         UserGroup,
@@ -75,60 +71,42 @@ public partial class RibbonMain
         // Note: ShowDialog() blocks until the form is closed.
         if (loginForm.ShowDialog() == DialogResult.OK)
         {
-            var username = loginForm.Username;
+            var username = loginForm.Email;
             var password = loginForm.Password;
 
-            // Perform the check immediately with the entered credentials
-            var checkTask = CheckCredentialsAsync(username, password);
+            Task.Factory.StartNew(async () => {
+                var account = CellmAddIn.Services.GetRequiredService<Account>();
 
-            // Block and wait for the result (acceptable after modal dialog)
-            var loginSuccess = checkTask.Result; // Use .Result here as we need the outcome now
+                try
+                {
+                    var token = await account.GetTokenAsync(username, password, CancellationToken.None);
 
-            if (loginSuccess)
-            {
-                _logger.LogInformation("Login successful for {username}, saving credentials.", username);
+                    SetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.Email)}", username);
+                    SetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.ApiKey)}", token);
 
-                // Save password ONLY if server check passed
-                SetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.Username)}", username);
-                SetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.Password)}", password);
+                    // TODO: Fix possible race condition. The message box blocks the worker thread and incidentally
+                    //   gives IOptionsMonitor<AccountConfiguration> time to pick up changes before UI is refreshed
+                    MessageBox.Show("Login successful", "Cellm", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                // Update cache immediately
-                _cachedLoginState = true;
-                _cacheExpiry = DateTime.UtcNow.Add(_cacheDuration);
+                    InvalidateUserControls();
+                    InvalidateEntitledControls();
+                }
+                catch (Exception)
+                {
+                    // Save username but clear token
+                    SetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.Email)}", username);
+                    SetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.ApiKey)}", string.Empty);
 
-                // Invalidate UI to reflect logged-in state
-                InvalidateUserControls();
-                InvalidateEntitledControls();
-                MessageBox.Show("Login successful!", "Cellm", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            else
-            {
-                // Save username, but clear password
-                SetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.Username)}", username);
-                SetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.Password)}", string.Empty);
-
-                // Show error message
-                MessageBox.Show("Login failed. Please check your username and password.", "Login Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-
-                // Explicitly set login state to false in case previous state was true
-                _cachedLoginState = false; // Ensure state reflects failure
-                _cacheExpiry = DateTime.UtcNow.Add(_cacheDuration);
-
-                InvalidateUserControls();
-                InvalidateEntitledControls();
-            }
+                    MessageBox.Show("Login failed. Please check your username and password.", "Login Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            });
         }
         // else: User cancelled, do nothing.
     }
 
     public void OnLogoutClicked(IRibbonControl control)
     {
-        SetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.Username)}", string.Empty);
-        SetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.Password)}", string.Empty);
-
-        _cachedLoginState = false;
-        _cacheExpiry = DateTime.UtcNow.Add(_cacheDuration);
+        SetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.ApiKey)}", string.Empty);
 
         InvalidateUserControls();
         InvalidateEntitledControls();
@@ -137,20 +115,15 @@ public partial class RibbonMain
     // Use cached state for enabling/disabling menu items
     public bool IsLoggedIn(IRibbonControl control)
     {
-        // If first run (not HasValue) or cached expired
-        if (!_cachedLoginState.HasValue || DateTime.UtcNow > _cacheExpiry)
+        var account = CellmAddIn.Services.GetRequiredService<Account>();
+        var accountConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<AccountConfiguration>>();
+        
+        if (string.IsNullOrWhiteSpace(accountConfiguration.CurrentValue.ApiKey))
         {
-            // Only trigger if not already running to avoid multiple checks
-            if (!_isLoginCheckRunning)
-            {
-                TriggerBackgroundLoginCheck();
-            }
-
-            // While check runs, return the cached value (or false if first run) 
-            return _cachedLoginState ?? false;
+            return false;
         }
 
-        return _cachedLoginState.Value;
+        return account.HasValidTokenAsync(accountConfiguration.CurrentValue.ApiKey).GetAwaiter().GetResult();
     }
 
     public bool IsLoggedOut(IRibbonControl control)
@@ -162,7 +135,7 @@ public partial class RibbonMain
     public Bitmap? GetAccountImage(IRibbonControl control)
     {
         // Use cached state directly
-        var svgPath = _cachedLoginState ?? false ? "AddIn/UserInterface/Resources/logged-in.svg" : "AddIn/UserInterface/Resources/logged-out.svg";
+        var svgPath = IsLoggedIn(control) ? "AddIn/UserInterface/Resources/logged-in.svg" : "AddIn/UserInterface/Resources/logged-out.svg";
 
         return ImageLoader.LoadEmbeddedSvgResized(svgPath, 128, 128);
     }
@@ -179,14 +152,12 @@ public partial class RibbonMain
 
     public string GetAccountScreentip(IRibbonControl control)
     {
-        var isLoggedIn = _cachedLoginState ?? false;
-
-        if (isLoggedIn)
+        if (IsLoggedIn(control))
         {
             try
             {
-                var username = GetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.Username)}");
-                return $"Account: {username}\nStatus: Logged In";
+                var email = GetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.Email)}");
+                return $"Account: {email}\nStatus: Logged In";
             }
             catch
             {
@@ -198,76 +169,6 @@ public partial class RibbonMain
             return "Status: Logged Out";
         }
     }
-    private void TriggerBackgroundLoginCheck(bool forceCheck = false)
-    {
-        if (_isLoginCheckRunning)
-        {
-            return;
-        }
-
-        if (!forceCheck && _cachedLoginState.HasValue && DateTime.UtcNow < _cacheExpiry)
-        {
-            return;
-        }
-
-        _isLoginCheckRunning = true;
-
-        Task.Run(async () =>
-        {
-            try
-            {
-                // Perform check using SAVED credentials (no args passed)
-                var actualLoginState = await CheckCredentialsAsync();
-                var stateChanged = !_cachedLoginState.HasValue || _cachedLoginState.Value != actualLoginState;
-                _cachedLoginState = actualLoginState;
-                _cacheExpiry = DateTime.UtcNow.Add(_cacheDuration);
-                if (stateChanged && _ribbonUi != null) InvalidateUserControls();
-            }
-            catch (Exception)
-            {
-                _cachedLoginState = false;
-                _cacheExpiry = DateTime.UtcNow.Add(_cacheDuration);
-                InvalidateUserControls();
-            }
-            finally
-            {
-                _isLoginCheckRunning = false;
-            }
-        });
-    }
-
-    private async Task<bool> CheckCredentialsAsync(string? usernameToCheck = null, string? passwordToCheck = null)
-    {
-        var username = usernameToCheck;
-        var password = passwordToCheck;
-
-        // If no credentials passed, try reading saved ones
-        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
-        {
-            try
-            {
-                username = GetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.Username)}");
-                password = GetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.Password)}");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("Error reading saved credentials for login check: {message}", ex.Message);
-                return false; // Cannot check without credentials
-            }
-        }
-
-        // If still no credentials (neither passed nor saved), definitely not logged in
-        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
-        {
-            _logger.LogInformation("No valid credentials found (passed or saved). Assuming logged out.");
-            return false;
-        }
-
-        var account = CellmAddIn.Services.GetRequiredService<Account>();
-
-        return await account.HasValidCredentialsAsync(username, password);
-    }
-
 
     // Helper to invalidate user-related controls
     private void InvalidateUserControls()
@@ -302,7 +203,7 @@ public partial class RibbonMain
         {
             try
             {
-                var username = GetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.Username)}");
+                var username = GetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.Email)}");
                 return username.Length > 6 ? string.Concat(username.AsSpan(0, 6), "…") : username;
             }
             catch
@@ -322,8 +223,8 @@ public partial class RibbonMain
         {
             try
             {
-                var username = GetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.Username)}");
-                return $"Logged in as {username}";
+                var email = GetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.Email)}");
+                return $"Logged in as {email}";
             }
             catch
             {
@@ -338,7 +239,7 @@ public partial class RibbonMain
 
     public string GetAccountActionLabel(IRibbonControl control)
     {
-        return IsLoggedIn(control) ? "Manage Account..." : "Sign up...";
+        return IsLoggedIn(control) ? "Manage Account..." : "Create account...";
     }
 
     public string GetAccountActionScreentip(IRibbonControl control)

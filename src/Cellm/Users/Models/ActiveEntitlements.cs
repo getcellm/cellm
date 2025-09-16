@@ -50,6 +50,7 @@ internal class ActiveEntitlements()
             return entitlements;
         }
     }
+
     public class RawEntitlement
     {
         public string Name { get; init; } = string.Empty;

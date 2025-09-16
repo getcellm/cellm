@@ -5,8 +5,8 @@ partial class LoginForm
 {
     private void InitializeComponent()
     {
-        LabelUsername = new Label();
-        TextBoxUsername = new TextBox();
+        LabelEmail = new Label();
+        TextBoxEmail = new TextBox();
         LabelPassword = new Label();
         TextBoxPassword = new TextBox();
         btnLogin = new Button();
@@ -15,23 +15,23 @@ partial class LoginForm
         lnkCreateAccount = new LinkLabel();
         SuspendLayout();
         // 
-        // LabelUsername
+        // LabelEmail
         // 
-        LabelUsername.AutoSize = true;
-        LabelUsername.Location = new Point(14, 17);
-        LabelUsername.Margin = new Padding(4, 0, 4, 0);
-        LabelUsername.Name = "LabelUsername";
-        LabelUsername.Size = new Size(63, 15);
-        LabelUsername.TabIndex = 0;
-        LabelUsername.Text = "Username:";
+        LabelEmail.AutoSize = true;
+        LabelEmail.Location = new Point(14, 17);
+        LabelEmail.Margin = new Padding(4, 0, 4, 0);
+        LabelEmail.Name = "LabelEmail";
+        LabelEmail.Size = new Size(63, 15);
+        LabelEmail.TabIndex = 0;
+        LabelEmail.Text = "Email:";
         // 
-        // TextBoxUsername
+        // TextBoxEmail
         // 
-        TextBoxUsername.Location = new Point(89, 14);
-        TextBoxUsername.Margin = new Padding(4, 3, 4, 3);
-        TextBoxUsername.Name = "TextBoxUsername";
-        TextBoxUsername.Size = new Size(228, 23);
-        TextBoxUsername.TabIndex = 1;
+        TextBoxEmail.Location = new Point(89, 14);
+        TextBoxEmail.Margin = new Padding(4, 3, 4, 3);
+        TextBoxEmail.Name = "TextBoxEmail";
+        TextBoxEmail.Size = new Size(228, 23);
+        TextBoxEmail.TabIndex = 1;
         // 
         // LabelPassword
         // 
@@ -113,8 +113,8 @@ partial class LoginForm
         Controls.Add(btnLogin);
         Controls.Add(TextBoxPassword);
         Controls.Add(LabelPassword);
-        Controls.Add(TextBoxUsername);
-        Controls.Add(LabelUsername);
+        Controls.Add(TextBoxEmail);
+        Controls.Add(LabelEmail);
         FormBorderStyle = FormBorderStyle.FixedDialog;
         Margin = new Padding(4, 3, 4, 3);
         MaximizeBox = false;
@@ -123,15 +123,15 @@ partial class LoginForm
         ShowIcon = false;
         ShowInTaskbar = false;
         StartPosition = FormStartPosition.CenterParent;
-        Text = "Log in to Cellm";
+        Text = "Login to Cellm";
         Load += LoginForm_Load;
         ResumeLayout(false);
         PerformLayout();
     }
 
     // Control Declarations
-    private Label LabelUsername;
-    private TextBox TextBoxUsername;
+    private Label LabelEmail;
+    private TextBox TextBoxEmail;
     private Label LabelPassword;
     private TextBox TextBoxPassword;
     private Button btnLogin;

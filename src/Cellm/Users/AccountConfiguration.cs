@@ -30,9 +30,9 @@ internal class AccountConfiguration
 
     public Uri Homepage { get; init; } = default!;
 
-    public string? Username { get; init; } = string.Empty;
+    public string? Email { get; init; } = string.Empty;
 
-    public string? Password { get; init; } = string.Empty;
+    public string? ApiKey = string.Empty;
 
     public int CacheTimeoutInSeconds { get; init; }
 

@@ -8,7 +8,7 @@ namespace Cellm.AddIn.UserInterface.Forms;
 
 public partial class LoginForm : Form
 {
-    public string Username => TextBoxUsername.Text;
+    public string Email => TextBoxEmail.Text;
     public string Password => TextBoxPassword.Text;
 
     public LoginForm()
@@ -19,11 +19,11 @@ public partial class LoginForm : Form
     private void BtnLogin_Click(object sender, EventArgs e)
     {
         // Basic validation: Ensure fields are not empty
-        if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
+        if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
         {
             MessageBox.Show("Please enter both username and password.", "Login Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             this.DialogResult = DialogResult.None; // Prevent the form from closing
-            TextBoxUsername.Focus();               // Set focus back to the username field
+            TextBoxEmail.Focus();               // Set focus back to the username field
             return;
         }
 
@@ -88,7 +88,7 @@ public partial class LoginForm : Form
 
     private void LoginForm_Load(object sender, EventArgs e)
     {
-        var accountConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<AccountConfiguration>>().CurrentValue;
-        TextBoxUsername.Text = accountConfiguration.Username;
+        var accountConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<AccountConfiguration>>();
+        TextBoxEmail.Text = accountConfiguration.CurrentValue.Email;
     }
 }
