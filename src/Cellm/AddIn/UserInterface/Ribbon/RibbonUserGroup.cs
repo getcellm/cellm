@@ -88,6 +88,9 @@ public partial class RibbonMain
                     {
                         MessageBox.Show("Login successful", "Cellm", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
+                        // Trigger token validation so the cache gets populated
+                        IsLoggedIn(control);
+
                         InvalidateUserControls();
                         InvalidateEntitledControls();
                     });

@@ -114,6 +114,7 @@ partial class ProviderSettingsForm
         ShowInTaskbar = false;
         StartPosition = FormStartPosition.CenterParent;
         Text = "Provider Settings";
+        Load += ProviderSettingsForm_Load;
         ResumeLayout(false);
         PerformLayout();
     }
