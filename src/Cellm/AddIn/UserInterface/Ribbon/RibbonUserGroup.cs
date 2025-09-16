@@ -67,8 +67,6 @@ public partial class RibbonMain
     {
         using var loginForm = new LoginForm();
 
-        // Show the form modally
-        // Note: ShowDialog() blocks until the form is closed.
         if (loginForm.ShowDialog() == DialogResult.OK)
         {
             var username = loginForm.Email;
@@ -86,10 +84,13 @@ public partial class RibbonMain
 
                     // TODO: Fix possible race condition. The message box blocks the worker thread and incidentally
                     //   gives IOptionsMonitor<AccountConfiguration> time to pick up changes before UI is refreshed
-                    MessageBox.Show("Login successful", "Cellm", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    ExcelAsyncUtil.QueueAsMacro(() =>
+                    {
+                        MessageBox.Show("Login successful", "Cellm", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                    InvalidateUserControls();
-                    InvalidateEntitledControls();
+                        InvalidateUserControls();
+                        InvalidateEntitledControls();
+                    });
                 }
                 catch (Exception)
                 {
@@ -97,7 +98,10 @@ public partial class RibbonMain
                     SetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.Email)}", username);
                     SetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.ApiKey)}", string.Empty);
 
-                    MessageBox.Show("Login failed. Please check your username and password.", "Login Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ExcelAsyncUtil.QueueAsMacro(() =>
+                    {
+                        MessageBox.Show("Login failed. Please check your username and password.", "Cellm", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    });
                 }
             });
         }
@@ -112,18 +116,18 @@ public partial class RibbonMain
         InvalidateEntitledControls();
     }
 
-    // Use cached state for enabling/disabling menu items
     public bool IsLoggedIn(IRibbonControl control)
     {
-        var account = CellmAddIn.Services.GetRequiredService<Account>();
         var accountConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<AccountConfiguration>>();
-        
+
         if (string.IsNullOrWhiteSpace(accountConfiguration.CurrentValue.ApiKey))
         {
             return false;
         }
 
-        return account.HasValidTokenAsync(accountConfiguration.CurrentValue.ApiKey).GetAwaiter().GetResult();
+        var account = CellmAddIn.Services.GetRequiredService<Account>();
+        
+        return account.HasValidToken(accountConfiguration.CurrentValue.ApiKey);
     }
 
     public bool IsLoggedOut(IRibbonControl control)
