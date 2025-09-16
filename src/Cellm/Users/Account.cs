@@ -88,7 +88,10 @@ internal class Account(
 
     public bool HasBasicAuthCredentials()
     {
-        return string.IsNullOrWhiteSpace(accountConfiguration.CurrentValue.Username) && string.IsNullOrWhiteSpace(accountConfiguration.CurrentValue.Password);
+        var username = accountConfiguration.CurrentValue.Username;
+        var password = accountConfiguration.CurrentValue.Password;
+
+        return !string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password);
     }
 
     public string GetBasicAuthCredentials(string? username = null, string? password = null)

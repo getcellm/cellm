@@ -40,11 +40,12 @@ public partial class RibbonMain
         <group id="{nameof(UserGroupControlIds.UserGroup)}" label="Account">
             <splitButton id="{nameof(UserGroupControlIds.UserAccountSplitButton)}" size="large">
                 <button id="{nameof(UserGroupControlIds.UserAccountButton)}"
-                        label="User"
-                        getImage="{nameof(GetUserAccountImage)}"
-                        getScreentip="{nameof(GetUserScreentip)}" />
+                        getLabel="{nameof(GetAccountButtonLabel)}"
+                        getImage="{nameof(GetAccountImage)}"
+                        getScreentip="{nameof(GetAccountScreentip)}" />
                 <menu id="{nameof(UserGroupControlIds.UserAccountMenu)}">
-                     <button id="{nameof(UserGroupControlIds.LoginButton)}" label="Login..."
+                     <button id="{nameof(UserGroupControlIds.LoginButton)}"
+                         getLabel="{nameof(GetLoginButtonLabel)}"
                          onAction="{nameof(OnLoginClicked)}"
                          getEnabled="{nameof(IsLoggedOut)}"
                          getImage="{nameof(GetUserLoginImage)}"
@@ -158,7 +159,7 @@ public partial class RibbonMain
     }
 
 
-    public Bitmap? GetUserAccountImage(IRibbonControl control)
+    public Bitmap? GetAccountImage(IRibbonControl control)
     {
         // Use cached state directly
         var svgPath = _cachedLoginState ?? false ? "AddIn/UserInterface/Resources/logged-in.svg" : "AddIn/UserInterface/Resources/logged-out.svg";
@@ -176,7 +177,7 @@ public partial class RibbonMain
         return ImageLoader.LoadEmbeddedSvgResized($"{ResourcesBasePath}/logout.svg", 64, 64);
     }
 
-    public string GetUserScreentip(IRibbonControl control)
+    public string GetAccountScreentip(IRibbonControl control)
     {
         var isLoggedIn = _cachedLoginState ?? false;
 
@@ -293,6 +294,46 @@ public partial class RibbonMain
         InvalidateModelControls();
 
         _ribbonUi.InvalidateControl(nameof(ToolsGroupControlIds.McpSplitButton));
+    }
+
+    public string GetAccountButtonLabel(IRibbonControl control)
+    {
+        if (IsLoggedIn(control))
+        {
+            try
+            {
+                var username = GetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.Username)}");
+                return username.Length > 6 ? string.Concat(username.AsSpan(0, 6), "…") : username;
+            }
+            catch
+            {
+                return "Account";
+            }
+        }
+        else
+        {
+            return "Login";
+        }
+    }
+
+    public string GetLoginButtonLabel(IRibbonControl control)
+    {
+        if (IsLoggedIn(control))
+        {
+            try
+            {
+                var username = GetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.Username)}");
+                return $"Logged in as {username}";
+            }
+            catch
+            {
+                return "Logged in";
+            }
+        }
+        else
+        {
+            return "Login...";
+        }
     }
 
     public string GetAccountActionLabel(IRibbonControl control)
