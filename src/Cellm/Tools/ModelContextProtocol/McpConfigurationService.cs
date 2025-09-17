@@ -253,17 +253,7 @@ public class McpConfigurationService : IMcpConfigurationService
 
     public void SetServerEnabled(string name, bool enabled)
     {
-        var configKey = $"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableModelContextProtocolServers)}:{name}";
-
-        if (enabled)
-        {
-            RibbonMain.SetValue(configKey, true);
-        }
-        else
-        {
-            RibbonMain.RemoveKey(configKey);
-        }
-
+        RibbonMain.SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableModelContextProtocolServers)}:{name}", enabled);
         _logger.LogInformation("Set server {ServerName} enabled: {Enabled}", name, enabled);
     }
 

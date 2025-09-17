@@ -32,7 +32,7 @@ public partial class RibbonMain : ExcelRibbon
         {
             var defaultProviderName = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}");
 
-            if (!Enum.TryParse<Provider>(defaultProviderName, out var _))
+            if (!Enum.TryParse<Provider>(defaultProviderName, true, out var _))
             {
                 SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}", nameof(Provider.Ollama));
             }
@@ -53,7 +53,7 @@ public partial class RibbonMain : ExcelRibbon
         catch (Exception)
         {
             // Default to false if missing
-            SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableCache)}", "False");
+            SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableCache)}", false);
         }
     }
 

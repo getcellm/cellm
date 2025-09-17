@@ -32,7 +32,7 @@ internal class AccountConfiguration
 
     public string? Email { get; init; } = string.Empty;
 
-    public string? ApiKey = string.Empty;
+    public string? ApiKey { get; init; } = string.Empty;
 
     public int CacheTimeoutInSeconds { get; init; }
 

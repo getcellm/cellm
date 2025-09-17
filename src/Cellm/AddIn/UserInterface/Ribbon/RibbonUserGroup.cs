@@ -115,6 +115,9 @@ public partial class RibbonMain
     {
         SetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.ApiKey)}", string.Empty);
 
+        var account = CellmAddIn.Services.GetRequiredService<Account>();
+        account.Clear();
+
         InvalidateUserControls();
         InvalidateEntitledControls();
     }
@@ -231,7 +234,7 @@ public partial class RibbonMain
             try
             {
                 var email = GetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.Email)}");
-                return $"Logged in as {email}";
+                return email;
             }
             catch
             {

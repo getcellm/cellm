@@ -36,12 +36,10 @@ using Polly.Timeout;
 
 namespace Cellm.Models;
 
-public static class ServiceCollectionExtensions
+internal static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddRateLimiter(this IServiceCollection services, IServiceProvider configurationProvider)
+    internal static IServiceCollection AddRateLimiter(this IServiceCollection services, ResilienceConfiguration resilienceConfiguration)
     {
-        var resilienceConfiguration = configurationProvider.GetRequiredService<IOptions<ResilienceConfiguration>>();
-
         return services.AddResiliencePipeline<string, Prompt>("RateLimiter", (builder, context) =>
         {
             // Decrease severity of most Polly events
@@ -57,15 +55,15 @@ public static class ServiceCollectionExtensions
             builder
                 .AddRateLimiter(new TokenBucketRateLimiter(new TokenBucketRateLimiterOptions
                 {
-                    QueueLimit = resilienceConfiguration.Value.RateLimiterConfiguration.RateLimiterQueueLimit,
-                    TokenLimit = resilienceConfiguration.Value.RateLimiterConfiguration.TokenLimit,
-                    ReplenishmentPeriod = TimeSpan.FromSeconds(resilienceConfiguration.Value.RateLimiterConfiguration.ReplenishmentPeriodInSeconds),
-                    TokensPerPeriod = resilienceConfiguration.Value.RateLimiterConfiguration.TokensPerPeriod,
+                    QueueLimit = resilienceConfiguration.RateLimiterConfiguration.RateLimiterQueueLimit,
+                    TokenLimit = resilienceConfiguration.RateLimiterConfiguration.TokenLimit,
+                    ReplenishmentPeriod = TimeSpan.FromSeconds(resilienceConfiguration.RateLimiterConfiguration.ReplenishmentPeriodInSeconds),
+                    TokensPerPeriod = resilienceConfiguration.RateLimiterConfiguration.TokensPerPeriod,
                 }))
                 .AddConcurrencyLimiter(new ConcurrencyLimiterOptions
                 {
-                    QueueLimit = resilienceConfiguration.Value.RateLimiterConfiguration.ConcurrencyLimiterQueueLimit,
-                    PermitLimit = resilienceConfiguration.Value.RateLimiterConfiguration.ConcurrencyLimit,
+                    QueueLimit = resilienceConfiguration.RateLimiterConfiguration.ConcurrencyLimiterQueueLimit,
+                    PermitLimit = resilienceConfiguration.RateLimiterConfiguration.ConcurrencyLimit,
 
                 })
                 .AddRetry(new RetryStrategyOptions<Prompt>
@@ -73,18 +71,16 @@ public static class ServiceCollectionExtensions
                     ShouldHandle = args => ValueTask.FromResult(RateLimiterHelpers.ShouldRetry(args.Outcome)),
                     BackoffType = DelayBackoffType.Exponential,
                     UseJitter = true,
-                    MaxRetryAttempts = resilienceConfiguration.Value.RetryConfiguration.MaxRetryAttempts,
-                    Delay = TimeSpan.FromSeconds(resilienceConfiguration.Value.RetryConfiguration.DelayInSeconds),
+                    MaxRetryAttempts = resilienceConfiguration.RetryConfiguration.MaxRetryAttempts,
+                    Delay = TimeSpan.FromSeconds(resilienceConfiguration.RetryConfiguration.DelayInSeconds),
                 })
                 .ConfigureTelemetry(telemetryOptions)
                 .Build();
         });
     }
 
-    public static IServiceCollection AddRetryHttpClient(this IServiceCollection services, IServiceProvider configurationProvider)
+    public static IServiceCollection AddRetryHttpClient(this IServiceCollection services, ResilienceConfiguration resilienceConfiguration)
     {
-        var resilienceConfiguration = configurationProvider.GetRequiredService<IOptions<ResilienceConfiguration>>();
-
         services
             .AddRedaction()
             .AddExtendedHttpClientLogging(options =>
@@ -115,12 +111,12 @@ public static class ServiceCollectionExtensions
                         ShouldHandle = args => ValueTask.FromResult(RetryHttpClientHelpers.ShouldRetry(args.Outcome)),
                         BackoffType = DelayBackoffType.Exponential,
                         UseJitter = true,
-                        MaxRetryAttempts = resilienceConfiguration.Value.RetryConfiguration.MaxRetryAttempts,
-                        Delay = TimeSpan.FromSeconds(resilienceConfiguration.Value.RetryConfiguration.DelayInSeconds),
+                        MaxRetryAttempts = resilienceConfiguration.RetryConfiguration.MaxRetryAttempts,
+                        Delay = TimeSpan.FromSeconds(resilienceConfiguration.RetryConfiguration.DelayInSeconds),
                     })
                     .AddTimeout(new TimeoutStrategyOptions
                     {
-                        Timeout = TimeSpan.FromSeconds(resilienceConfiguration.Value.RetryConfiguration.HttpTimeoutInSeconds),
+                        Timeout = TimeSpan.FromSeconds(resilienceConfiguration.RetryConfiguration.HttpTimeoutInSeconds),
                     })
                     .ConfigureTelemetry(telemetryOptions)
                     .Build();
