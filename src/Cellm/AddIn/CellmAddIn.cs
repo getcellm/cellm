@@ -87,7 +87,7 @@ public class CellmAddIn : IExcelAddIn
 
         // Logging
         // TODO: Replace "var sentryConfiguration = configurationProvider.GetRequiredService<IOptions<SentryConfiguration>>();" with this all over:
-        var sentryConfiguration = configuration.GetRequiredSection(nameof(SentryConfiguration)).Get<SentryConfiguration>() 
+        var sentryConfiguration = configuration.GetRequiredSection(nameof(SentryConfiguration)).Get<SentryConfiguration>()
             ?? throw new NullReferenceException(nameof(SentryConfiguration));
 
         services

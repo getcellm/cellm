@@ -103,7 +103,7 @@ internal class Account(
 
             response.EnsureSuccessStatusCode();
 
-            var tokenPayload = await response.Content.ReadFromJsonAsync<TokenPayload>(_jsonSerializerOptions, cancellationToken) 
+            var tokenPayload = await response.Content.ReadFromJsonAsync<TokenPayload>(_jsonSerializerOptions, cancellationToken)
                 ?? throw new NullReferenceException(nameof(TokenPayload));
 
             return tokenPayload.Token;
@@ -199,7 +199,7 @@ internal class Account(
                 throw new NullReferenceException(nameof(entitlements));
             }
 
-            logger.LogInformation("Deserializing entitlements for {email} ... {@entitlements}", 
+            logger.LogInformation("Deserializing entitlements for {email} ... {@entitlements}",
                 accountConfiguration.CurrentValue.Email, entitlements.AsEnumerable());
 
             return entitlements;

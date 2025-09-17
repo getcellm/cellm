@@ -72,7 +72,8 @@ public partial class RibbonMain
             var username = loginForm.Email;
             var password = loginForm.Password;
 
-            Task.Factory.StartNew(async () => {
+            Task.Factory.StartNew(async () =>
+            {
                 var account = CellmAddIn.Services.GetRequiredService<Account>();
 
                 try
@@ -132,7 +133,7 @@ public partial class RibbonMain
         }
 
         var account = CellmAddIn.Services.GetRequiredService<Account>();
-        
+
         return account.HasValidToken(accountConfiguration.CurrentValue.ApiKey);
     }
 
