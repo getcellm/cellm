@@ -1,4 +1,5 @@
 ﻿using Cellm.Users;
+using Microsoft.Extensions.Options;
 
 namespace Cellm.Models.Providers.Cellm;
 

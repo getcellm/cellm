@@ -17,8 +17,8 @@
 
     <UI>
       <ProgressText Action="InstallFiles" Message="Copying files ..." />
-      <ProgressText Action="CustomActionInstallNodeJs" Message="Installing third party dependencies (Node.js) ..." />
-      <ProgressText Action="CustomActionInstallPlaywright" Message="Installing third party dependencies (Playwright) ..." />
+      <ProgressText Action="CustomActionInstallNodeJs" Message="Installing third party dependencies (Node.js) ... This may take a while" />
+      <ProgressText Action="CustomActionInstallPlaywright" Message="Installing third party dependencies (Playwright) ... This may take a while" />
     </UI>
 
     <Property Id="OFFICE12INSTALLED">

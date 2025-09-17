@@ -36,12 +36,10 @@ using Polly.Timeout;
 
 namespace Cellm.Models;
 
-public static class ServiceCollectionExtensions
+internal static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddRateLimiter(this IServiceCollection services, IServiceProvider configurationProvider)
+    internal static IServiceCollection AddRateLimiter(this IServiceCollection services, ResilienceConfiguration resilienceConfiguration)
     {
-        var resilienceConfiguration = configurationProvider.GetRequiredService<IOptions<ResilienceConfiguration>>();
-
         return services.AddResiliencePipeline<string, Prompt>("RateLimiter", (builder, context) =>
         {
             // Decrease severity of most Polly events
@@ -57,15 +55,15 @@ public static class ServiceCollectionExtensions
             builder
                 .AddRateLimiter(new TokenBucketRateLimiter(new TokenBucketRateLimiterOptions
                 {
-                    QueueLimit = resilienceConfiguration.Value.RateLimiterConfiguration.RateLimiterQueueLimit,
-                    TokenLimit = resilienceConfiguration.Value.RateLimiterConfiguration.TokenLimit,
-                    ReplenishmentPeriod = TimeSpan.FromSeconds(resilienceConfiguration.Value.RateLimiterConfiguration.ReplenishmentPeriodInSeconds),
-                    TokensPerPeriod = resilienceConfiguration.Value.RateLimiterConfiguration.TokensPerPeriod,
+                    QueueLimit = resilienceConfiguration.RateLimiterConfiguration.RateLimiterQueueLimit,
+                    TokenLimit = resilienceConfiguration.RateLimiterConfiguration.TokenLimit,
+                    ReplenishmentPeriod = TimeSpan.FromSeconds(resilienceConfiguration.RateLimiterConfiguration.ReplenishmentPeriodInSeconds),
+                    TokensPerPeriod = resilienceConfiguration.RateLimiterConfiguration.TokensPerPeriod,
                 }))
                 .AddConcurrencyLimiter(new ConcurrencyLimiterOptions
                 {
-                    QueueLimit = resilienceConfiguration.Value.RateLimiterConfiguration.ConcurrencyLimiterQueueLimit,
-                    PermitLimit = resilienceConfiguration.Value.RateLimiterConfiguration.ConcurrencyLimit,
+                    QueueLimit = resilienceConfiguration.RateLimiterConfiguration.ConcurrencyLimiterQueueLimit,
+                    PermitLimit = resilienceConfiguration.RateLimiterConfiguration.ConcurrencyLimit,
 
                 })
                 .AddRetry(new RetryStrategyOptions<Prompt>
@@ -73,18 +71,16 @@ public static class ServiceCollectionExtensions
                     ShouldHandle = args => ValueTask.FromResult(RateLimiterHelpers.ShouldRetry(args.Outcome)),
                     BackoffType = DelayBackoffType.Exponential,
                     UseJitter = true,
-                    MaxRetryAttempts = resilienceConfiguration.Value.RetryConfiguration.MaxRetryAttempts,
-                    Delay = TimeSpan.FromSeconds(resilienceConfiguration.Value.RetryConfiguration.DelayInSeconds),
+                    MaxRetryAttempts = resilienceConfiguration.RetryConfiguration.MaxRetryAttempts,
+                    Delay = TimeSpan.FromSeconds(resilienceConfiguration.RetryConfiguration.DelayInSeconds),
                 })
                 .ConfigureTelemetry(telemetryOptions)
                 .Build();
         });
     }
 
-    public static IServiceCollection AddRetryHttpClient(this IServiceCollection services, IServiceProvider configurationProvider)
+    public static IServiceCollection AddRetryHttpClient(this IServiceCollection services, ResilienceConfiguration resilienceConfiguration)
     {
-        var resilienceConfiguration = configurationProvider.GetRequiredService<IOptions<ResilienceConfiguration>>();
-
         services
             .AddRedaction()
             .AddExtendedHttpClientLogging(options =>
@@ -115,12 +111,12 @@ public static class ServiceCollectionExtensions
                         ShouldHandle = args => ValueTask.FromResult(RetryHttpClientHelpers.ShouldRetry(args.Outcome)),
                         BackoffType = DelayBackoffType.Exponential,
                         UseJitter = true,
-                        MaxRetryAttempts = resilienceConfiguration.Value.RetryConfiguration.MaxRetryAttempts,
-                        Delay = TimeSpan.FromSeconds(resilienceConfiguration.Value.RetryConfiguration.DelayInSeconds),
+                        MaxRetryAttempts = resilienceConfiguration.RetryConfiguration.MaxRetryAttempts,
+                        Delay = TimeSpan.FromSeconds(resilienceConfiguration.RetryConfiguration.DelayInSeconds),
                     })
                     .AddTimeout(new TimeoutStrategyOptions
                     {
-                        Timeout = TimeSpan.FromSeconds(resilienceConfiguration.Value.RetryConfiguration.HttpTimeoutInSeconds),
+                        Timeout = TimeSpan.FromSeconds(resilienceConfiguration.RetryConfiguration.HttpTimeoutInSeconds),
                     })
                     .ConfigureTelemetry(telemetryOptions)
                     .Build();
@@ -142,7 +138,7 @@ public static class ServiceCollectionExtensions
 
                 if (string.IsNullOrWhiteSpace(anthropicConfiguration.CurrentValue.ApiKey))
                 {
-                    throw new CellmException($"Empty {nameof(AnthropicConfiguration.ApiKey)} for {Provider.Anthropic}");
+                    throw new CellmException($"No {nameof(AnthropicConfiguration.ApiKey)} for {Provider.Anthropic}. Please check your API key.");
                 }
 
                 return new AnthropicClient(anthropicConfiguration.CurrentValue.ApiKey, resilientHttpClient)
@@ -168,7 +164,7 @@ public static class ServiceCollectionExtensions
 
                 if (string.IsNullOrWhiteSpace(awsConfiguration.CurrentValue.ApiKey))
                 {
-                    throw new CellmException($"Empty {nameof(AwsConfiguration.ApiKey)} {Provider.Aws}");
+                    throw new CellmException($"No {nameof(AwsConfiguration.ApiKey)} {Provider.Aws}. Please check your API key.");
                 }
 
                 var parts = awsConfiguration.CurrentValue.ApiKey.Split(':');
@@ -203,7 +199,7 @@ public static class ServiceCollectionExtensions
 
                 if (string.IsNullOrWhiteSpace(azureConfiguration.CurrentValue.ApiKey))
                 {
-                    throw new CellmException($"Empty {nameof(AzureConfiguration.ApiKey)} for {Provider.Azure}");
+                    throw new CellmException($"No {nameof(AzureConfiguration.ApiKey)} for {Provider.Azure}. Please check your API key.");
                 }
 
                 return new ChatCompletionsClient(
@@ -224,20 +220,19 @@ public static class ServiceCollectionExtensions
                 var account = serviceProvider.GetRequiredService<Account>();
                 account.ThrowIfNotEntitled(Entitlement.EnableCellmProvider);
 
-                var cellmConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<CellmConfiguration>>();
-                var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
-                resilientHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", account.GetBasicAuthCredentials());
+                var accountConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<AccountConfiguration>>();
 
-                if (!account.HasBasicAuthCredentials())
+                if (string.IsNullOrWhiteSpace(accountConfiguration.CurrentValue.ApiKey))
                 {
-                    throw new CellmException($"Empty username and password for {Provider.Cellm}");
+                    throw new CellmException($"No {nameof(AccountConfiguration.ApiKey)} for {Provider.Cellm}. Please login again.");
                 }
 
+                var cellmConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<CellmConfiguration>>();
+
                 var openAiClient = new OpenAIClient(
-                    new ApiKeyCredential(string.Empty),
+                    new ApiKeyCredential(accountConfiguration.CurrentValue.ApiKey),
                     new OpenAIClientOptions
                     {
-                        Transport = new HttpClientPipelineTransport(resilientHttpClient),
                         Endpoint = cellmConfiguration.CurrentValue.BaseAddress
                     });
 
@@ -261,7 +256,7 @@ public static class ServiceCollectionExtensions
 
                 if (string.IsNullOrWhiteSpace(deepSeekConfiguration.CurrentValue.ApiKey))
                 {
-                    throw new CellmException($"Empty {nameof(DeepSeekConfiguration.ApiKey)} for {Provider.DeepSeek}");
+                    throw new CellmException($"No {nameof(DeepSeekConfiguration.ApiKey)} for {Provider.DeepSeek}. Please check your API key.");
                 }
 
                 var openAiClient = new OpenAIClient(
@@ -292,7 +287,7 @@ public static class ServiceCollectionExtensions
 
                 if (string.IsNullOrWhiteSpace(geminiConfiguration.CurrentValue.ApiKey))
                 {
-                    throw new CellmException($"Empty {nameof(GeminiConfiguration.ApiKey)} for {Provider.Gemini}");
+                    throw new CellmException($"No {nameof(GeminiConfiguration.ApiKey)} for {Provider.Gemini}. Please check your API key.");
                 }
 
                 var openAiClient = new OpenAIClient(
@@ -323,7 +318,7 @@ public static class ServiceCollectionExtensions
 
                 if (string.IsNullOrWhiteSpace(mistralConfiguration.CurrentValue.ApiKey))
                 {
-                    throw new CellmException($"Empty {nameof(MistralConfiguration.ApiKey)} for {Provider.Mistral}");
+                    throw new CellmException($"No {nameof(MistralConfiguration.ApiKey)} for {Provider.Mistral}. Please check your API key.");
                 }
 
                 return new MistralClient(mistralConfiguration.CurrentValue.ApiKey, resilientHttpClient).Completions;
@@ -364,7 +359,7 @@ public static class ServiceCollectionExtensions
 
                 if (string.IsNullOrWhiteSpace(openAiConfiguration.CurrentValue.ApiKey))
                 {
-                    throw new CellmException($"Empty {nameof(OpenAiConfiguration.ApiKey)} for {Provider.OpenAi}");
+                    throw new CellmException($"No {nameof(OpenAiConfiguration.ApiKey)} for {Provider.OpenAi}. Please check your API key.");
                 }
 
                 return new OpenAIClient(new ApiKeyCredential(openAiConfiguration.CurrentValue.ApiKey))
@@ -394,6 +389,11 @@ public static class ServiceCollectionExtensions
                 else
                 {
                     account.ThrowIfNotEntitled(Entitlement.EnableOpenAiCompatibleProviderHostedModels);
+                }
+
+                if (string.IsNullOrWhiteSpace(openAiCompatibleConfiguration.CurrentValue.ApiKey))
+                {
+                    throw new CellmException($"No {nameof(OpenAiCompatibleConfiguration.ApiKey)} for {Provider.OpenAiCompatible}. Please check your API key.");
                 }
 
                 var openAiClient = new OpenAIClient(

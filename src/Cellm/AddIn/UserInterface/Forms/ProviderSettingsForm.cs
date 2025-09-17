@@ -59,4 +59,8 @@ public partial class ProviderSettingsForm : Form
         this.Close();
     }
 
+    private void ProviderSettingsForm_Load(object sender, EventArgs e)
+    {
+
+    }
 }

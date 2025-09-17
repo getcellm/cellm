@@ -31,7 +31,7 @@ internal class ToolBehavior<TRequest, TResponse>(
             request.Prompt.Options.Tools = [.. functions.Where(f => cellmAddInConfiguration.CurrentValue.EnableTools[f.Name])];
         }
 
-        var enableModelContextProtocol = await account.HasEntitlementAsync(Entitlement.EnableModelContextProtocol).ConfigureAwait(false);
+        var enableModelContextProtocol = await account.HasEntitlementAsync(Entitlement.EnableModelContextProtocol, cancellationToken).ConfigureAwait(false);
 
         if (cellmAddInConfiguration.CurrentValue.EnableModelContextProtocolServers.Any(t => t.Value) && enableModelContextProtocol)
         {
