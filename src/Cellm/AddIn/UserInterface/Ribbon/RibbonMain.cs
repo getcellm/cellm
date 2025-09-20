@@ -32,13 +32,14 @@ public partial class RibbonMain : ExcelRibbon
         {
             var defaultProviderName = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}");
 
-            if (!Enum.TryParse<Provider>(defaultProviderName, out var _))
+            if (!Enum.TryParse<Provider>(defaultProviderName, true, out var _))
             {
-                throw new KeyNotFoundException();
+                SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}", nameof(Provider.Ollama));
             }
         }
-        catch (KeyNotFoundException)
+        catch (Exception)
         {
+            // Default to Ollama if missing
             SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}", nameof(Provider.Ollama));
         }
     }
@@ -47,13 +48,12 @@ public partial class RibbonMain : ExcelRibbon
     {
         try
         {
-            // Check if EnableCache exists
             GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableCache)}");
         }
-        catch (KeyNotFoundException)
+        catch (Exception)
         {
-            // Set default to false if missing
-            SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableCache)}", "False");
+            // Default to false if missing
+            SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableCache)}", false);
         }
     }
 

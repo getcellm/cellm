@@ -85,11 +85,10 @@ public class CellmAddIn : IExcelAddIn
             .Configure<ResilienceConfiguration>(configuration.GetRequiredSection(nameof(ResilienceConfiguration)))
             .Configure<SentryConfiguration>(configuration.GetRequiredSection(nameof(SentryConfiguration)));
 
-        // Build a temporary service provider to resolve the registered configurations while configuring services
-        var configurationProvider = services.BuildServiceProvider();
-
         // Logging
-        var sentryConfiguration = configurationProvider.GetRequiredService<IOptions<SentryConfiguration>>();
+        // TODO: Replace "var sentryConfiguration = configurationProvider.GetRequiredService<IOptions<SentryConfiguration>>();" with this all over:
+        var sentryConfiguration = configuration.GetRequiredSection(nameof(SentryConfiguration)).Get<SentryConfiguration>()
+            ?? throw new NullReferenceException(nameof(SentryConfiguration));
 
         services
           .AddLogging(loggingBuilder =>
@@ -100,14 +99,14 @@ public class CellmAddIn : IExcelAddIn
                   .AddDebug()
                   .AddSentry(sentryLoggingOptions =>
                   {
-                      sentryLoggingOptions.InitializeSdk = sentryConfiguration.Value.IsEnabled;
+                      sentryLoggingOptions.InitializeSdk = sentryConfiguration.IsEnabled;
                       sentryLoggingOptions.Release = GetReleaseVersion();
-                      sentryLoggingOptions.Environment = sentryConfiguration.Value.Environment;
-                      sentryLoggingOptions.Dsn = sentryConfiguration.Value.Dsn;
-                      sentryLoggingOptions.Debug = sentryConfiguration.Value.Debug;
-                      sentryLoggingOptions.TracesSampleRate = sentryConfiguration.Value.TracesSampleRate;
-                      sentryLoggingOptions.ProfilesSampleRate = sentryConfiguration.Value.ProfilesSampleRate;
-                      sentryLoggingOptions.Environment = sentryConfiguration.Value.Environment;
+                      sentryLoggingOptions.Environment = sentryConfiguration.Environment;
+                      sentryLoggingOptions.Dsn = sentryConfiguration.Dsn;
+                      sentryLoggingOptions.Debug = sentryConfiguration.Debug;
+                      sentryLoggingOptions.TracesSampleRate = sentryConfiguration.TracesSampleRate;
+                      sentryLoggingOptions.ProfilesSampleRate = sentryConfiguration.ProfilesSampleRate;
+                      sentryLoggingOptions.Environment = sentryConfiguration.Environment;
                       sentryLoggingOptions.AutoSessionTracking = true;
                       sentryLoggingOptions.AddIntegration(new ProfilingIntegration());
                   });
@@ -127,13 +126,16 @@ public class CellmAddIn : IExcelAddIn
             .AddSingleton<IProviderBehavior, StructuredOutputWithToolsBehavior>();
 
         // Internals
+        var resilienceConfiguration = configuration.GetRequiredSection(nameof(ResilienceConfiguration)).Get<ResilienceConfiguration>()
+            ?? throw new NullReferenceException(nameof(SentryConfiguration));
+
         services
             .AddSingleton(configuration)
             .AddTransient<ArgumentParser>()
             .AddSingleton<Account>()
             .AddSingleton<Client>()
-            .AddRateLimiter(configurationProvider)
-            .AddRetryHttpClient(configurationProvider);
+            .AddRateLimiter(resilienceConfiguration)
+            .AddRetryHttpClient(resilienceConfiguration);
 
 #pragma warning disable EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates.
         services

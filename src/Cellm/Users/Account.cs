@@ -23,8 +23,10 @@
 // For more details, go to https://github.com/getcellm/cellm/blob/main/LICENSE.
 
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using Cellm.AddIn.Exceptions;
 using Cellm.Users.Exceptions;
 using Cellm.Users.Models;
 using Microsoft.Extensions.Caching.Hybrid;
@@ -39,7 +41,7 @@ internal class Account(
     HttpClient httpClient,
     ILogger<Account> logger)
 {
-    private static readonly List<string> Tags = [nameof(Account)];
+    private static readonly List<string> _tag = [nameof(Account)];
 
     private readonly HybridCacheEntryOptions _cacheEntryOptions = new()
     {
@@ -48,7 +50,7 @@ internal class Account(
 
     private readonly JsonSerializerOptions _jsonSerializerOptions = new() { PropertyNameCaseInsensitive = true };
 
-    internal async Task<bool> HasEntitlementAsync(Entitlement entitlement)
+    internal async Task<bool> HasEntitlementAsync(Entitlement entitlement, CancellationToken cancellationToken)
     {
         if (!accountConfiguration.CurrentValue.IsEnabled)
         {
@@ -56,24 +58,24 @@ internal class Account(
         }
 
         var entitlements = await cache.GetOrCreateAsync(
-            nameof(GetEntitlements) + GetBasicAuthCredentials(),
+            nameof(GetEntitlements) + accountConfiguration.CurrentValue.ApiKey,
             async innerCancellationToken => await GetEntitlements(innerCancellationToken),
             options: _cacheEntryOptions,
-            Tags,
-            cancellationToken: CancellationToken.None
+            _tag,
+            cancellationToken: cancellationToken
         );
 
-        return entitlements?.Entitlements.Contains(entitlement) ?? false;
+        return entitlements?.AsEnumerable().Contains(entitlement) ?? false;
     }
 
     internal bool HasEntitlement(Entitlement entitlement)
     {
-        return Task.Run(async () => await HasEntitlementAsync(entitlement)).GetAwaiter().GetResult();
+        return Task.Run(async () => await HasEntitlementAsync(entitlement, CancellationToken.None)).GetAwaiter().GetResult();
     }
 
-    internal async Task RequireEntitlementAsync(Entitlement entitlement)
+    internal async Task ThrowIfNotEntitledAsync(Entitlement entitlement, CancellationToken cancellationToken)
     {
-        var hasEntitlement = await HasEntitlementAsync(entitlement);
+        var hasEntitlement = await HasEntitlementAsync(entitlement, cancellationToken);
 
         if (!hasEntitlement)
         {
@@ -83,56 +85,47 @@ internal class Account(
 
     internal void ThrowIfNotEntitled(Entitlement entitlement)
     {
-        Task.Run(async () => await RequireEntitlementAsync(entitlement)).GetAwaiter().GetResult();
+        Task.Run(async () => await ThrowIfNotEntitledAsync(entitlement, CancellationToken.None)).GetAwaiter().GetResult();
     }
 
-    public bool HasBasicAuthCredentials()
+    internal async Task<string> GetTokenAsync(string username, string password, CancellationToken cancellationToken)
     {
-        var username = accountConfiguration.CurrentValue.Username;
-        var password = accountConfiguration.CurrentValue.Password;
-
-        return !string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password);
-    }
-
-    public string GetBasicAuthCredentials(string? username = null, string? password = null)
-    {
-        username ??= accountConfiguration.CurrentValue.Username;
-        password ??= accountConfiguration.CurrentValue.Password;
-
-        var credentials = $"{username}:{password}";
-        var credentialsBytes = Encoding.UTF8.GetBytes(credentials);
-        var credentialsAsBase64 = Convert.ToBase64String(credentialsBytes);
-
-        return credentialsAsBase64;
-    }
-
-    internal async Task<bool> HasValidCredentialsAsync(string username, string password)
-    {
-        return await cache.GetOrCreateAsync(
-            nameof(HasValidCredentialsAsync) + GetBasicAuthCredentials(username, password),
-            async innerCancellationToken => await CheckCredentialsAsync(username, password, innerCancellationToken),
-            options: _cacheEntryOptions,
-            Tags,
-            cancellationToken: CancellationToken.None
-        );
-    }
-
-    private async Task<bool> CheckCredentialsAsync(string username, string password, CancellationToken cancellationToken)
-    {
-        var uri = accountConfiguration.CurrentValue.BaseAddress;
-
-        if (!uri.AbsoluteUri.EndsWith('/'))
-        {
-            uri = new Uri(uri.AbsoluteUri + "/");
-        }
+        var baseAddress = accountConfiguration.CurrentValue.BaseAddress.ToString().TrimEnd('/');
 
         try
         {
-            logger.LogInformation("Checking credentials for {username} ...", username);
-            var request = new HttpRequestMessage(HttpMethod.Get, new Uri(uri, "user/permissions"));
-            request.Headers.Authorization = new AuthenticationHeaderValue("Basic", GetBasicAuthCredentials(username, password));
+            logger.LogInformation("Getting token for {username} ...", username);
+            var request = new HttpRequestMessage(HttpMethod.Post, new Uri($"{baseAddress}/user/token"));
+            request.Headers.Authorization = new AuthenticationHeaderValue("Basic", GetBasicAuthBase64(username, password));
+
             var response = await httpClient.SendAsync(request, cancellationToken);
-            logger.LogInformation("Checking credentials for {username} ... {status}", username, response.StatusCode);
+            logger.LogInformation("Getting token for {username} ... {status}", username, response.StatusCode);
+
+            response.EnsureSuccessStatusCode();
+
+            var tokenPayload = await response.Content.ReadFromJsonAsync<TokenPayload>(_jsonSerializerOptions, cancellationToken)
+                ?? throw new NullReferenceException(nameof(TokenPayload));
+
+            return tokenPayload.Token;
+        }
+        catch (Exception ex)
+        {
+            throw new CellmException("Could not get token", ex);
+        }
+    }
+
+    private async Task<bool> CheckTokenAsync(string token, CancellationToken cancellationToken)
+    {
+        var baseAddress = accountConfiguration.CurrentValue.BaseAddress.ToString().TrimEnd('/');
+
+        try
+        {
+            logger.LogInformation("Checking token for {email} ...", accountConfiguration.CurrentValue.Email);
+            var request = new HttpRequestMessage(HttpMethod.Get, new Uri($"{baseAddress}/user/permissions"));
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            using var response = await httpClient.SendAsync(request, cancellationToken);
+            logger.LogInformation("Checking token for {email} ... {status}", accountConfiguration.CurrentValue.Email, response.StatusCode);
 
             return response.StatusCode == System.Net.HttpStatusCode.OK;
         }
@@ -142,50 +135,98 @@ internal class Account(
         }
     }
 
-    private async Task<ActiveEntitlements> GetEntitlements(CancellationToken cancellationToken)
+    internal async Task<bool> HasValidTokenAsync(string token)
     {
-        var uri = accountConfiguration.CurrentValue.BaseAddress;
-
-        if (!uri.AbsoluteUri.EndsWith("/"))
+        if (string.IsNullOrWhiteSpace(token))
         {
-            uri = new Uri(uri.AbsoluteUri + "/");
+            return false;
         }
+
+        return await cache.GetOrCreateAsync(
+            nameof(HasValidTokenAsync) + token,
+            async innerCancellationToken => await CheckTokenAsync(token, innerCancellationToken),
+            options: _cacheEntryOptions,
+            _tag,
+            cancellationToken: CancellationToken.None
+        );
+    }
+
+    internal bool HasValidToken(string token)
+    {
+        return Task.Run(() => HasValidTokenAsync(token)).GetAwaiter().GetResult();
+    }
+
+    internal async void ClearAsync(CancellationToken cancellationToken)
+    {
+        await cache.RemoveByTagAsync(_tag, cancellationToken);
+    }
+
+    internal void Clear()
+    {
+        Task.Run(() => ClearAsync(CancellationToken.None)).GetAwaiter().GetResult();
+    }
+
+    private async Task<Entitlements> GetEntitlements(CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(accountConfiguration.CurrentValue.ApiKey))
+        {
+            // API key is definitely not valid, immediately return default entitlements
+            return new Entitlements();
+        }
+
+        var baseAddress = accountConfiguration.CurrentValue.BaseAddress.ToString().TrimEnd('/');
 
         try
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, new Uri(uri, "user/permissions"));
-            request.Headers.Authorization = new AuthenticationHeaderValue("Basic", GetBasicAuthCredentials());
+            logger.LogInformation("Getting entitlements for {email} ...", accountConfiguration.CurrentValue.Email);
+            var request = new HttpRequestMessage(HttpMethod.Get, new Uri($"{baseAddress}/user/permissions"));
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accountConfiguration.CurrentValue.ApiKey);
+
             using var response = await httpClient.SendAsync(request, cancellationToken);
+            logger.LogInformation("Getting entitlements for {email} ... {status}", accountConfiguration.CurrentValue.Email, response.StatusCode);
 
             // If anything goes wrong for ANY reason, we want to return default entitlements
             // so anonymous users can use the application as intended. We help the user identify
-            // invalid credentials elsewhere
+            // that credentials are invalid elsewhere
             response.EnsureSuccessStatusCode();
 
+            logger.LogInformation("Deserializing entitlements for {email} ...", accountConfiguration.CurrentValue.Email);
             var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            var activeEntitlements = await JsonSerializer.DeserializeAsync<ActiveEntitlements>(contentStream, _jsonSerializerOptions, cancellationToken);
+            var entitlements = await JsonSerializer.DeserializeAsync<Entitlements>(contentStream, _jsonSerializerOptions, cancellationToken);
 
-            if (activeEntitlements is null)
+            if (entitlements is null)
             {
-                throw new NullReferenceException(nameof(activeEntitlements));
+                throw new NullReferenceException(nameof(entitlements));
             }
 
-            return activeEntitlements;
-        }
-        catch (JsonException ex)
-        {
-            logger.LogError("Failed to deserialize user entitlements: {message}", ex.Message);
-            return new ActiveEntitlements();
+            logger.LogInformation("Deserializing entitlements for {email} ... {@entitlements}",
+                accountConfiguration.CurrentValue.Email, entitlements.AsEnumerable());
+
+            return entitlements;
         }
         catch (HttpRequestException ex)
         {
-            logger.LogError("Failed to fetch entitlements: {message}", ex.Message);
-            return new ActiveEntitlements();
+            logger.LogError("Getting entitlements for {email} ... Failed: {message}", accountConfiguration.CurrentValue.Email, ex.Message);
+            return new Entitlements();
+        }
+        catch (JsonException ex)
+        {
+            logger.LogError("Deserializing entitlements for {email} ... Failed: {message}", accountConfiguration.CurrentValue.Email, ex.Message);
+            return new Entitlements();
         }
         catch (Exception ex)
         {
             logger.LogError("An unexpected error occurred while getting user entitlements: {message}", ex.Message);
-            return new ActiveEntitlements();
+            return new Entitlements();
         }
+    }
+
+    private static string GetBasicAuthBase64(string username, string password)
+    {
+        var credentials = $"{username}:{password}";
+        var credentialsBytes = Encoding.UTF8.GetBytes(credentials);
+        var credentialsAsBase64 = Convert.ToBase64String(credentialsBytes);
+
+        return credentialsAsBase64;
     }
 }

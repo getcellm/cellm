@@ -426,7 +426,7 @@ public partial class RibbonMain
         var provider = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}");
         var providerConfiguration = GetProviderConfiguration(provider);
 
-        return $"{providerConfiguration.Name} Settings...";
+        return $"{providerConfiguration.Name} settings...";
     }
 
     /// <summary>

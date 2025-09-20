@@ -170,12 +170,12 @@ public partial class RibbonMain
 
             menuXml.AppendLine(
                 $@"<button id=""{nameof(ToolsGroupControlIds.McpAddNewButton)}""
-                    label=""Add new ...""
+                    label=""Add new...""
                     onAction=""{nameof(ShowAddMcpServerForm)}"" />");
 
             menuXml.AppendLine(
                 $@"<button id=""{nameof(ToolsGroupControlIds.McpEditOrRemoveButton)}""
-                    label=""Edit or remove ...""
+                    label=""Edit or remove...""
                     onAction=""{nameof(ShowEditMcpServerForm)}"" />");
 
             menuXml.AppendLine("</menu>");
