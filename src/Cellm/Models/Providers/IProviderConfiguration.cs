@@ -1,4 +1,5 @@
 ﻿using Cellm.Users;
+using Microsoft.Extensions.AI;
 
 namespace Cellm.Models.Providers;
 
@@ -19,6 +20,8 @@ internal interface IProviderConfiguration
     string MediumModel { get; init; }
 
     string LargeModel { get; init; }
+
+    AdditionalPropertiesDictionary? AdditionalProperties { get; init; }
 
     bool CanUseStructuredOutputWithTools { get; init; }
 

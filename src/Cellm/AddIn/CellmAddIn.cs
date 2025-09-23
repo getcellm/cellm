@@ -123,6 +123,7 @@ public class CellmAddIn : IExcelAddIn
                 cfg.AddBehavior<CacheBehavior<ProviderRequest, ProviderResponse>>(ServiceLifetime.Singleton);
                 cfg.AddBehavior<UsageBehavior<ProviderRequest, ProviderResponse>>(ServiceLifetime.Singleton);
             })
+            .AddSingleton<IProviderBehavior, AdditionalPropertiesBehavior>()
             .AddSingleton<IProviderBehavior, GeminiTemperatureBehavior>()
             .AddSingleton<IProviderBehavior, StructuredOutputWithToolsBehavior>();
 

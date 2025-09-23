@@ -23,9 +23,7 @@ internal class OllamaConfiguration : IProviderConfiguration
 
     public string LargeModel { get; init; } = string.Empty;
 
-    public int MaxInputTokens { get; init; } = 16364;
-
-    public AdditionalPropertiesDictionary AdditionalProperties { get; init; } = [];
+    public AdditionalPropertiesDictionary? AdditionalProperties { get; init; } = [];
 
     public bool CanUseStructuredOutputWithTools { get; init; } = false;
 

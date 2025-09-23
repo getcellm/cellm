@@ -1,5 +1,6 @@
 ﻿
 using Cellm.Users;
+using Microsoft.Extensions.AI;
 
 namespace Cellm.Models.Providers.Mistral;
 
@@ -13,7 +14,7 @@ internal class MistralConfiguration : IProviderConfiguration
 
     public string Icon { get => $"AddIn/UserInterface/Resources/{nameof(Provider.Mistral)}.png"; }
 
-    public Uri BaseAddress => new("https://api.mistral.ai/v1/");
+    public Uri BaseAddress => new("https://api.mistral.ai/v1");
 
     public string DefaultModel { get; init; } = string.Empty;
 
@@ -24,6 +25,8 @@ internal class MistralConfiguration : IProviderConfiguration
     public string MediumModel { get; init; } = string.Empty;
 
     public string LargeModel { get; init; } = string.Empty;
+
+    public AdditionalPropertiesDictionary? AdditionalProperties { get; init; } = [];
 
     public bool CanUseStructuredOutputWithTools { get; init; } = false;
 
