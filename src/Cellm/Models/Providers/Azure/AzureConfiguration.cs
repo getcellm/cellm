@@ -1,4 +1,5 @@
 ﻿using Cellm.Users;
+using Microsoft.Extensions.AI;
 
 namespace Cellm.Models.Providers.Azure;
 
@@ -23,6 +24,8 @@ internal class AzureConfiguration : IProviderConfiguration
     public string LargeModel { get; init; } = string.Empty;
 
     public string ApiKey { get; init; } = string.Empty;
+
+    public AdditionalPropertiesDictionary? AdditionalProperties { get; init; } = [];
 
     public bool CanUseStructuredOutputWithTools { get; init; } = false;
 
