@@ -15,7 +15,7 @@ internal class GeminiTemperatureBehavior(IOptionsMonitor<CellmAddInConfiguration
         return provider == Provider.Gemini;
     }
 
-    public void Before(Prompt prompt)
+    public void Before(Provider provider, Prompt prompt)
     {
         var temperature = prompt.Options.Temperature ?? (float)cellmAddinConfiguration.CurrentValue.DefaultTemperature;
 
@@ -24,13 +24,13 @@ internal class GeminiTemperatureBehavior(IOptionsMonitor<CellmAddInConfiguration
         prompt.Options.Temperature = Math.Clamp(temperature, DefaultMinTemp, GeminiMaxTemperature);
     }
 
-    public void After(Prompt prompt)
+    public void After(Provider Provider, Prompt prompt)
     {
         if (prompt.Options.Temperature.HasValue)
         {
             var temperature = prompt.Options.Temperature.Value;
 
-            // Scale temperature from [0;2] back to [0;1]
+            // Scale temperature back from [0;2] to [0;1]
             temperature = (temperature / GeminiMaxTemperature) * DefaultMaxTemp;
             prompt.Options.Temperature = Math.Clamp(temperature, DefaultMinTemp, DefaultMaxTemp);
         }

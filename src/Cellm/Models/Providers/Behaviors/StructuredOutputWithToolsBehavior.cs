@@ -1,5 +1,8 @@
-﻿using Cellm.AddIn.Exceptions;
+﻿using System.Diagnostics;
+using Cellm.AddIn;
+using Cellm.AddIn.Exceptions;
 using Cellm.Models.Prompts;
+using Microsoft.Extensions.Options;
 
 namespace Cellm.Models.Providers.Behaviors;
 
@@ -7,14 +10,18 @@ namespace Cellm.Models.Providers.Behaviors;
 /// Shows pretty error message when provider does not support structured output with tools.
 /// </summary>
 /// <param name="providerConfigurations"></param>
-internal class StructuredOutputWithToolsBehavior(IEnumerable<IProviderConfiguration> providerConfigurations) : IProviderBehavior
+internal class StructuredOutputWithToolsBehavior : IProviderBehavior
 {
     public bool IsEnabled(Provider provider)
     {
-        return !providerConfigurations.Single(x => x.Id == provider).CanUseStructuredOutputWithTools;
+
+        return !CellmAddIn
+            .GetProviderConfigurations()
+            .Single(x => x.Id == provider)
+            .CanUseStructuredOutputWithTools;
     }
 
-    public void Before(Prompt prompt)
+    public void Before(Provider Provider, Prompt prompt)
     {
         var isStructuredOutputEnabled = prompt.OutputShape != StructuredOutputShape.None;
         var isToolsEnabled = prompt.Options.Tools?.Any() ?? false;
@@ -27,7 +34,7 @@ internal class StructuredOutputWithToolsBehavior(IEnumerable<IProviderConfigurat
     }
 
     // No-op
-    public void After(Prompt prompt) { }
+    public void After(Provider Provider, Prompt prompt) { }
 
     public UInt32 Order => 1;
 }

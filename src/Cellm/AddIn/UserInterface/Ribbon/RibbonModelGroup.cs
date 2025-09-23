@@ -116,9 +116,9 @@ public partial class RibbonMain
 
     public string GetProviderMenuItems()
     {
-        var providerConfigurations = GetProviderConfigurations();
+        var providerConfigurations = CellmAddIn.GetProviderConfigurations();
 
-        var providerMenuItemsXml = GetProviderConfigurations()
+        var providerMenuItemsXml = providerConfigurations
             .Where(providerConfiguration => providerConfiguration != null && providerConfiguration.IsEnabled)
             .Select(providerConfiguration =>
                 $@"<button id=""{GetProviderMenuItemId(providerConfiguration.Id)}""
@@ -167,9 +167,9 @@ public partial class RibbonMain
 
         var account = CellmAddIn.Services.GetRequiredService<Account>();
 
-        if (Enum.TryParse<Provider>(control.Tag, out var provider))
+        if (Enum.TryParse<Provider>(control.Tag, true, out var provider))
         {
-            return account.HasEntitlement(GetProviderConfiguration(provider).Entitlement);
+            return account.HasEntitlement(CellmAddIn.GetProviderConfiguration(provider).Entitlement);
         }
 
         _logger.LogWarning("Could not parse tag '{tag}' for menu item '{id}'.", control.Tag, control.Id);
@@ -181,9 +181,9 @@ public partial class RibbonMain
     {
         var providerAsString = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}");
 
-        if (Enum.TryParse<Provider>(providerAsString, out var provider))
+        if (Enum.TryParse<Provider>(providerAsString, true, out var provider))
         {
-            var resource = GetProviderConfiguration(provider).Icon;
+            var resource = CellmAddIn.GetProviderConfiguration(provider).Icon;
 
             if (resource.ToLower().EndsWith("png"))
             {
@@ -203,9 +203,9 @@ public partial class RibbonMain
 
     public Bitmap? GetProviderImage(IRibbonControl control)
     {
-        if (Enum.TryParse<Provider>(control.Tag, out var provider))
+        if (Enum.TryParse<Provider>(control.Tag, true, out var provider))
         {
-            var resource = GetProviderConfiguration(provider).Icon;
+            var resource = CellmAddIn.GetProviderConfiguration(provider).Icon;
 
             if (resource.ToLower().EndsWith("png"))
             {
@@ -389,7 +389,7 @@ public partial class RibbonMain
 
     public void OnProviderSelected(IRibbonControl control)
     {
-        if (!Enum.TryParse<Provider>(control.Tag, out var newProvider))
+        if (!Enum.TryParse<Provider>(control.Tag, true, out var newProvider))
         {
             _logger.LogWarning("Could not parse provider tag {tag}.", control.Tag);
             return;
@@ -397,7 +397,7 @@ public partial class RibbonMain
 
         var oldProviderAsString = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}");
 
-        if (!Enum.TryParse<Provider>(oldProviderAsString, out var oldProvider))
+        if (!Enum.TryParse<Provider>(oldProviderAsString, true, out var oldProvider))
         {
             _logger.LogWarning("Could not parse provider {oldProviderAsString}.", oldProviderAsString);
             return;
@@ -423,8 +423,15 @@ public partial class RibbonMain
     /// </summary>
     public string GetProviderSettingsButtonLabel(IRibbonControl control)
     {
-        var provider = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}");
-        var providerConfiguration = GetProviderConfiguration(provider);
+        var providerAsString = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}");
+
+        if (!Enum.TryParse<Provider>(providerAsString, true, out var provider))
+        {
+            _logger.LogWarning("Could not parse provider {provider}", provider);
+            throw new ArgumentException($"Invalid provider: {providerAsString}");
+        }
+
+        var providerConfiguration = CellmAddIn.GetProviderConfiguration(provider);
 
         return $"{providerConfiguration.Name} settings...";
     }
@@ -703,7 +710,7 @@ public partial class RibbonMain
 
         _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ProviderMenu));
 
-        var ids = GetProviderConfigurations()
+        var ids = CellmAddIn.GetProviderConfigurations()
             .Where(providerConfiguration => providerConfiguration != null && providerConfiguration.IsEnabled)
             .Select(providerConfiguration => GetProviderMenuItemId(providerConfiguration.Id));
 

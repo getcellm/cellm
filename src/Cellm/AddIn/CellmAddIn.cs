@@ -119,6 +119,7 @@ public class CellmAddIn : IExcelAddIn
                 cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
                 cfg.AddBehavior<SentryBehavior<ProviderRequest, ProviderResponse>>(ServiceLifetime.Singleton);
                 cfg.AddBehavior<ToolBehavior<ProviderRequest, ProviderResponse>>(ServiceLifetime.Singleton);
+                cfg.AddBehavior<ProviderBehavior<ProviderRequest, ProviderResponse>>(ServiceLifetime.Singleton);
                 cfg.AddBehavior<CacheBehavior<ProviderRequest, ProviderResponse>>(ServiceLifetime.Singleton);
                 cfg.AddBehavior<UsageBehavior<ProviderRequest, ProviderResponse>>(ServiceLifetime.Singleton);
             })
@@ -179,6 +180,30 @@ public class CellmAddIn : IExcelAddIn
         }
 
         return services;
+    }
+
+    internal static IProviderConfiguration GetProviderConfiguration(Provider provider)
+    {
+        return GetProviderConfigurations().Single(providerConfigurations => providerConfigurations.Id == provider);
+    }
+
+    internal static IEnumerable<IProviderConfiguration> GetProviderConfigurations()
+    {
+        return
+        [
+            // Retrieve the current, up-to-date configuration for each provider
+            // Until we find a better way to inject up-to-date configuration
+            Services.GetRequiredService<IOptionsMonitor<AnthropicConfiguration>>().CurrentValue,
+            Services.GetRequiredService<IOptionsMonitor<AwsConfiguration>>().CurrentValue,
+            Services.GetRequiredService<IOptionsMonitor<AzureConfiguration>>().CurrentValue,
+            Services.GetRequiredService<IOptionsMonitor<CellmConfiguration>>().CurrentValue,
+            Services.GetRequiredService<IOptionsMonitor<DeepSeekConfiguration>>().CurrentValue,
+            Services.GetRequiredService<IOptionsMonitor<GeminiConfiguration>>().CurrentValue,
+            Services.GetRequiredService<IOptionsMonitor<MistralConfiguration>>().CurrentValue,
+            Services.GetRequiredService<IOptionsMonitor<OllamaConfiguration>>().CurrentValue,
+            Services.GetRequiredService<IOptionsMonitor<OpenAiConfiguration>>().CurrentValue,
+            Services.GetRequiredService<IOptionsMonitor<OpenAiCompatibleConfiguration>>().CurrentValue
+        ];
     }
 
     public static string GetReleaseVersion()
