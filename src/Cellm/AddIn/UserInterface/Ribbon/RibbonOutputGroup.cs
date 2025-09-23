@@ -57,7 +57,7 @@ public partial class RibbonMain
     }
     public bool GetStructuredOutputEnabled(IRibbonControl control)
     {
-        var currentProviderConfiguration = GetProviderConfiguration(GetCurrentProvider());
+        var currentProviderConfiguration = CellmAddIn.GetProviderConfiguration(GetCurrentProvider());
 
         if (currentProviderConfiguration.CanUseStructuredOutputWithTools)
         {

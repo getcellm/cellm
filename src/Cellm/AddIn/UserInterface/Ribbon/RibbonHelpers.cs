@@ -29,40 +29,6 @@ public partial class RibbonMain
         return CellmAddIn.Services.GetRequiredService<IOptionsMonitor<T>>().CurrentValue;
     }
 
-    private static IProviderConfiguration GetProviderConfiguration(Provider provider)
-    {
-        return GetProviderConfigurations().Single(providerConfigurations => providerConfigurations.Id == provider);
-    }
-
-    private static IProviderConfiguration GetProviderConfiguration(string providerAsString)
-    {
-        if (Enum.TryParse<Provider>(providerAsString, out var provider))
-        {
-            return GetProviderConfigurations().Single(providerConfigurations => providerConfigurations.Id == provider);
-        }
-
-        throw new ArgumentException($"Invalid provider: {providerAsString}");
-    }
-
-    private static IEnumerable<IProviderConfiguration> GetProviderConfigurations()
-    {
-        return
-        [
-            // Retrieve the current, up-to-date configuration for each provider
-            // Until we find a better way to inject up-to-date configuration
-            CellmAddIn.Services.GetRequiredService<IOptionsMonitor<AnthropicConfiguration>>().CurrentValue,
-            CellmAddIn.Services.GetRequiredService<IOptionsMonitor<AwsConfiguration>>().CurrentValue,
-            CellmAddIn.Services.GetRequiredService<IOptionsMonitor<AzureConfiguration>>().CurrentValue,
-            CellmAddIn.Services.GetRequiredService<IOptionsMonitor<CellmConfiguration>>().CurrentValue,
-            CellmAddIn.Services.GetRequiredService<IOptionsMonitor<DeepSeekConfiguration>>().CurrentValue,
-            CellmAddIn.Services.GetRequiredService<IOptionsMonitor<GeminiConfiguration>>().CurrentValue,
-            CellmAddIn.Services.GetRequiredService<IOptionsMonitor<MistralConfiguration>>().CurrentValue,
-            CellmAddIn.Services.GetRequiredService<IOptionsMonitor<OllamaConfiguration>>().CurrentValue,
-            CellmAddIn.Services.GetRequiredService<IOptionsMonitor<OpenAiConfiguration>>().CurrentValue,
-            CellmAddIn.Services.GetRequiredService<IOptionsMonitor<OpenAiCompatibleConfiguration>>().CurrentValue
-        ];
-    }
-
     private static Provider GetProvider(string providerAndModel)
     {
         var index = providerAndModel.IndexOf('/');
