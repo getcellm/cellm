@@ -12,11 +12,11 @@ internal class Client(ISender sender, ResiliencePipelineProvider<string> resilie
 {
     public async Task<Prompt> GetResponseAsync(Prompt prompt, Provider provider, CancellationToken cancellationToken)
     {
-        var retryPipeline = resiliencePipelineProvider.GetPipeline<Prompt>("RateLimiter");
+        var resiliencePipeline = resiliencePipelineProvider.GetPipeline<Prompt>("RateLimiter");
 
         try
         {
-            return await retryPipeline.ExecuteAsync(async innerCancellationToken =>
+            return await resiliencePipeline.ExecuteAsync(async innerCancellationToken =>
             {
                 var response = await sender.Send(new ProviderRequest(prompt, provider), innerCancellationToken).ConfigureAwait(false);
                 return response.Prompt;

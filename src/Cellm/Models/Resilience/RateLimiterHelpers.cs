@@ -8,7 +8,13 @@ namespace Cellm.Models.Resilience;
 
 internal static class RateLimiterHelpers
 {
-    private static readonly List<int> retryableStatusCodes = [428, 429, 500, 501, 502, 503, 504];
+    private static readonly List<int> retryableStatusCodes = [
+        428,
+        429,
+        500,
+        501,
+        503
+    ];
 
     public static bool ShouldRetry(Outcome<Prompt> outcome) => outcome switch
     {
@@ -19,10 +25,8 @@ internal static class RateLimiterHelpers
 
     private static bool IsRetryableError(Prompt prompt) => false;
 
-
     private static bool IsRetryableException(Exception exception) => exception switch
     {
-        TimeoutRejectedException => true,
         ClientResultException clientResultException => retryableStatusCodes.Contains(clientResultException.Status),
         RateLimitsExceeded => true,
         _ => false
