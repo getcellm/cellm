@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using MediatR;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 
 namespace Cellm.Models.Behaviors;
@@ -8,7 +9,7 @@ internal class UsageBehavior<TRequest, TResponse>(
     IPublisher publisher,
     ILogger<UsageBehavior<TRequest, TResponse>> logger) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>, IGetProvider
-    where TResponse : IChatResponse
+    where TResponse : IChatResponse, IGetPrompt
 {
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
@@ -20,18 +21,25 @@ internal class UsageBehavior<TRequest, TResponse>(
         stopwatch.Stop();
         var elapsedTime = stopwatch.Elapsed;
 
-        if (response.ChatResponse?.Usage is null)
+        var usageDetails = response.ChatResponse?.Usage;
+
+        if (usageDetails is null)
         {
             logger.LogDebug(
-                "{provider} completed request in {ElapsedMilliseconds}ms. No token usage details found in response.",
-                request.Provider,
-                elapsedTime.TotalMilliseconds
+                "No token usage details found in {provider} response. Guesstimating values.",
+                request.Provider
             );
 
-            return response;
-        }
+            var systemTokenCount = response.Prompt.Messages.Where(x => x.Role == ChatRole.System).Sum(x => x.Text.Length) / 4;
+            var userTokenCount = response.Prompt.Messages.Where(x => x.Role == ChatRole.User).Sum(x => x.Text.Length) / 4;
+            var assistantTokenCount = response.Prompt.Messages.Where(x => x.Role == ChatRole.Assistant).Sum(x => x.Text.Length) / 4;
 
-        var requestType = typeof(TRequest).Name;
+            usageDetails = new UsageDetails
+            {
+                InputTokenCount = systemTokenCount + userTokenCount,
+                OutputTokenCount = assistantTokenCount
+            };
+        }
 
         logger.LogInformation(
             "{provider} completed request in {ElapsedMilliseconds}ms",
@@ -40,9 +48,9 @@ internal class UsageBehavior<TRequest, TResponse>(
         );
 
         var notification = new UsageNotification(
-            Usage: response.ChatResponse.Usage,
+            Usage: usageDetails,
             Provider: request.Provider,
-            Model: response.ChatResponse.ModelId,
+            Model: response.ChatResponse?.ModelId,
             ElapsedTime: elapsedTime
         );
 
