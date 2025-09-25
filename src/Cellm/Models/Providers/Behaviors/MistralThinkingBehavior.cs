@@ -45,8 +45,7 @@ internal class MistralThinkingBehavior : IProviderBehavior
                     type.GetString() == "text" &&
                     element.TryGetProperty("text", out var text))
                 {
-                    var extractedText = text.GetString();
-                    assistantMessage.Contents = [new TextContent(extractedText)];
+                    assistantMessage.Contents = [new TextContent(text.GetString())];
                     return;
                 }
             }
