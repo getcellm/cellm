@@ -12,7 +12,7 @@ internal class UsageNotificationHandler(ILogger<UsageNotificationHandler> logger
     {
         [nameof(UsageDetails.InputTokenCount)] = 0,
         [nameof(UsageDetails.OutputTokenCount)] = 0,
-        ["Prompts"] = 0
+        [nameof(GetTotalPrompts)] = 0
     };
 
     private static readonly ConcurrentDictionary<DateTime, (long, double)> _tokensPerSecond = new();
@@ -28,23 +28,25 @@ internal class UsageNotificationHandler(ILogger<UsageNotificationHandler> logger
 
         _tokenUsage[nameof(UsageDetails.InputTokenCount)] += notification.Usage.InputTokenCount ?? 0;
         _tokenUsage[nameof(UsageDetails.OutputTokenCount)] += notification.Usage.OutputTokenCount ?? 0;
-        _tokenUsage["Prompts"] += 1;
+        _tokenUsage[nameof(GetTotalPrompts)] += 1;
 
         _tokensPerSecond[DateTime.UtcNow] = (notification.Usage.OutputTokenCount ?? 0, notification.ElapsedTime.TotalSeconds);
 
-        // Limit measurements to recent ones
+        var oldestMeasurement = _tokensPerSecond.Keys.DefaultIfEmpty(DateTime.UtcNow).Min();
         var window = DateTime.UtcNow.AddSeconds(-30);
-        var keysOutsideWindow = _tokensPerSecond.Keys.Where(t => t < window).ToList();
 
-        foreach (var key in keysOutsideWindow)
+        // Limit measurements to the most recent ones
+        while (oldestMeasurement < window)
         {
-            _tokensPerSecond.TryRemove(key, out _);
+
+            _tokensPerSecond.TryRemove(oldestMeasurement, out _);
+            oldestMeasurement = _tokensPerSecond.Keys.DefaultIfEmpty(DateTime.UtcNow).Min();
         }
 
         // Hard limit on number of measurements
-        while (_tokensPerSecond.Count > _maxTokensPerSecondMeasurements)
+        while (_maxTokensPerSecondMeasurements < _tokensPerSecond.Count)
         {
-            var oldestMeasurement = _tokensPerSecond.Keys.Min();
+            oldestMeasurement = _tokensPerSecond.Keys.DefaultIfEmpty(DateTime.UtcNow).Min();
             _tokensPerSecond.TryRemove(oldestMeasurement, out _);
         }
 
@@ -58,7 +60,7 @@ internal class UsageNotificationHandler(ILogger<UsageNotificationHandler> logger
 
     private static long GetTotalOutputTokens() => _tokenUsage[nameof(UsageDetails.OutputTokenCount)];
 
-    private static long GetTotalPrompts() => _tokenUsage["Prompts"];
+    private static long GetTotalPrompts() => _tokenUsage[nameof(GetTotalPrompts)];
 
     private static double GetTokensPerSecond()
     {
@@ -119,7 +121,7 @@ internal class UsageNotificationHandler(ILogger<UsageNotificationHandler> logger
         // Add the duration of the last merged interval.
         busySeconds += (mergeIntervalEnd - mergeIntervalStart).TotalSeconds;
 
-        if (busySeconds < 0.1)
+        if (busySeconds < 0.01)
         {
             return 1;
         }
