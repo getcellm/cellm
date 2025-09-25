@@ -1,6 +1,5 @@
 ﻿using System.ClientModel;
 using System.ClientModel.Primitives;
-using System.Net.Http.Headers;
 using System.Threading.RateLimiting;
 using Amazon;
 using Amazon.BedrockRuntime;
@@ -26,7 +25,8 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http.Diagnostics;
 using Microsoft.Extensions.Options;
-using Mistral.SDK;
+using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Connectors.MistralAI;
 using OllamaSharp;
 using OpenAI;
 using Polly;
@@ -228,15 +228,13 @@ internal static class ServiceCollectionExtensions
                 }
 
                 var cellmConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<CellmConfiguration>>();
+                var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
-                var openAiClient = new OpenAIClient(
-                    new ApiKeyCredential(accountConfiguration.CurrentValue.ApiKey),
-                    new OpenAIClientOptions
-                    {
-                        Endpoint = cellmConfiguration.CurrentValue.BaseAddress
-                    });
-
-                return openAiClient.GetChatClient(cellmConfiguration.CurrentValue.DefaultModel).AsIChatClient();
+                return new MistralAIChatCompletionService(
+                    cellmConfiguration.CurrentValue.DefaultModel,
+                    accountConfiguration.CurrentValue.ApiKey,
+                    accountConfiguration.CurrentValue.BaseAddress,
+                    resilientHttpClient).AsChatClient();
             }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 
@@ -321,7 +319,11 @@ internal static class ServiceCollectionExtensions
                     throw new CellmException($"No {nameof(MistralConfiguration.ApiKey)} for {Provider.Mistral}. Please check your API key.");
                 }
 
-                return new MistralClient(mistralConfiguration.CurrentValue.ApiKey, resilientHttpClient).Completions;
+                return new MistralAIChatCompletionService(
+                    mistralConfiguration.CurrentValue.DefaultModel,
+                    mistralConfiguration.CurrentValue.ApiKey,
+                    mistralConfiguration.CurrentValue.BaseAddress, 
+                    resilientHttpClient).AsChatClient();
             }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 
