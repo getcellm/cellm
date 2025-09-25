@@ -38,32 +38,32 @@
     <PackageReference Include="ExcelDna.Addin" Version="1.9.0-beta2" />
     <PackageReference Include="ExcelDna.Interop" Version="15.0.1" />
     <PackageReference Include="MediatR" Version="13.0.0" />
-    <PackageReference Include="Microsoft.Extensions.AI" Version="9.7.0" />
-    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="9.7.0" />
+    <PackageReference Include="Microsoft.Extensions.AI" Version="9.9.0" />
+    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="9.9.0" />
     <PackageReference Include="Microsoft.Extensions.AI.AzureAIInference" Version="9.5.0-preview.1.25265.7" />
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="9.4.4-preview.1.25259.16" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="9.7.0" />
-    <PackageReference Include="Microsoft.Extensions.Compliance.Redaction" Version="9.7.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.7" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.7" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.7" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.7" />
-    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="9.0.7" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.7" />
-    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.7.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.7" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.7" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.7" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.7" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.7" />
-    <PackageReference Include="Mistral.SDK" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="9.9.0" />
+    <PackageReference Include="Microsoft.Extensions.Compliance.Redaction" Version="9.9.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.9.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.9" />
+    <PackageReference Include="Microsoft.SemanticKernel.Connectors.MistralAI" Version="1.65.0-alpha" />
     <PackageReference Include="ModelContextProtocol" Version="0.3.0-preview.2" />
     <PackageReference Include="OllamaSharp" Version="5.2.10" />
     <PackageReference Include="PdfPig" Version="0.1.10" />
     <PackageReference Include="Sentry.Extensions.Logging" Version="5.12.0" />
     <PackageReference Include="Sentry.Profiling" Version="5.12.0" />
     <PackageReference Include="Svg" Version="3.4.7" />
-    <PackageReference Include="System.Net.Http.Json" Version="9.0.7" />
+    <PackageReference Include="System.Net.Http.Json" Version="9.0.9" />
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

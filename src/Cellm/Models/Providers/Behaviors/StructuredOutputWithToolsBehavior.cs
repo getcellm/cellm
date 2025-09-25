@@ -36,5 +36,5 @@ internal class StructuredOutputWithToolsBehavior : IProviderBehavior
     // No-op
     public void After(Provider Provider, Prompt prompt) { }
 
-    public UInt32 Order => 1;
+    public UInt32 Order => 0;
 }
