@@ -322,7 +322,7 @@ internal static class ServiceCollectionExtensions
                 return new MistralAIChatCompletionService(
                     mistralConfiguration.CurrentValue.DefaultModel,
                     mistralConfiguration.CurrentValue.ApiKey,
-                    mistralConfiguration.CurrentValue.BaseAddress, 
+                    mistralConfiguration.CurrentValue.BaseAddress,
                     resilientHttpClient).AsChatClient();
             }, ServiceLifetime.Transient)
             .UseFunctionInvocation();

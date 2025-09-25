@@ -1,6 +1,6 @@
-﻿using Cellm.Models.Prompts;
+﻿using System.Text.Json;
+using Cellm.Models.Prompts;
 using Microsoft.Extensions.AI;
-using System.Text.Json;
 
 namespace Cellm.Models.Providers.Behaviors;
 
