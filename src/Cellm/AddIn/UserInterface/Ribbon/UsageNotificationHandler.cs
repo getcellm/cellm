@@ -34,13 +34,13 @@ internal class UsageNotificationHandler(ILogger<UsageNotificationHandler> logger
 
         var oldestMeasurement = _tokensPerSecond.Keys.DefaultIfEmpty(DateTime.UtcNow).Min();
         var window = DateTime.UtcNow.AddSeconds(-30);
-        
+
         // Limit measurements to the most recent ones
         while (oldestMeasurement < window)
         {
 
             _tokensPerSecond.TryRemove(oldestMeasurement, out _);
-            oldestMeasurement = _tokensPerSecond.Keys.DefaultIfEmpty(DateTime.UtcNow).Min();            
+            oldestMeasurement = _tokensPerSecond.Keys.DefaultIfEmpty(DateTime.UtcNow).Min();
         }
 
         // Hard limit on number of measurements
