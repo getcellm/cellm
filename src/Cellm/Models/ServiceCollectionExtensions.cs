@@ -224,7 +224,7 @@ internal static class ServiceCollectionExtensions
 
                 if (string.IsNullOrWhiteSpace(accountConfiguration.CurrentValue.ApiKey))
                 {
-                    throw new CellmException($"No {nameof(AccountConfiguration.ApiKey)} for {Provider.Cellm}. Please login again.");
+                    throw new CellmException($"Invalid {Provider.Cellm} credentials. Please login again.");
                 }
 
                 var cellmConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<CellmConfiguration>>();
@@ -233,7 +233,7 @@ internal static class ServiceCollectionExtensions
                 return new MistralAIChatCompletionService(
                     cellmConfiguration.CurrentValue.DefaultModel,
                     accountConfiguration.CurrentValue.ApiKey,
-                    accountConfiguration.CurrentValue.BaseAddress,
+                    cellmConfiguration.CurrentValue.BaseAddress,
                     resilientHttpClient).AsChatClient();
             }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
