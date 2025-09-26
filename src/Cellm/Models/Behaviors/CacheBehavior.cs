@@ -34,12 +34,13 @@ internal class CacheBehavior<TRequest, TResponse>(
 
         logger.LogDebug("Prompt caching enabled");
 
-        var promptAsJson = JsonSerializer.Serialize(request.Prompt);
+        var promptAsJsonString = JsonSerializer.Serialize(request.Prompt);
 
-        // Tools are explicitly [JsonIgnore]'d, but we want to send prompt if user added/removed tools
-        var toolsAsJson = JsonSerializer.Serialize(request.Prompt.Options.Tools);
+        // ChatOptions.Tools are explicitly [JsonIgnore]'d so we manually add
+        // them to the key to ensure cache miss if user adds/removes tools
+        var toolsAsJsonString = JsonSerializer.Serialize(request.Prompt.Options.Tools);
 
-        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(promptAsJson + toolsAsJson));
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(promptAsJsonString + toolsAsJsonString));
         var key = Convert.ToBase64String(hash);
 
         return await cache.GetOrCreateAsync(

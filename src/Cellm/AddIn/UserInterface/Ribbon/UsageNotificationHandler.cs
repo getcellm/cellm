@@ -46,8 +46,8 @@ internal class UsageNotificationHandler(ILogger<UsageNotificationHandler> logger
         // Hard limit on number of measurements
         while (_maxTokensPerSecondMeasurements < _tokensPerSecond.Count)
         {
-            oldestMeasurement = _tokensPerSecond.Keys.DefaultIfEmpty(DateTime.UtcNow).Min();
             _tokensPerSecond.TryRemove(oldestMeasurement, out _);
+            oldestMeasurement = _tokensPerSecond.Keys.DefaultIfEmpty(DateTime.UtcNow).Min();
         }
 
         RibbonMain.UpdateTokenStatistics(GetTotalInputTokens(), GetTotalOutputTokens(), GetTotalPrompts());
