@@ -28,18 +28,27 @@ internal class MistralThinkingBehavior : IProviderBehavior
             return;
         }
 
+        var assistantMessageText = assistantMessage.Text.Trim();
+
+        // Quick check to see if string is array-like
+        if (!assistantMessageText.StartsWith('[') || !assistantMessageText.EndsWith(']'))
+        {
+            return;
+        }
+
         try
         {
-            using var doc = JsonDocument.Parse(assistantMessage.Text);
+            using var doc = JsonDocument.Parse(assistantMessageText);
 
             if (doc.RootElement.ValueKind != JsonValueKind.Array)
             {
                 return;
             }
 
+            // Ignore thinking tokens and only return only the answer
             foreach (var element in doc.RootElement.EnumerateArray())
             {
-                // Ignore thinking tokens and only return only the answer
+                
                 if (element.ValueKind == JsonValueKind.Object &&
                     element.TryGetProperty("type", out var type) &&
                     type.GetString() == "text" &&
@@ -52,7 +61,7 @@ internal class MistralThinkingBehavior : IProviderBehavior
         }
         catch (JsonException)
         {
-            // Wasn't a thinking model
+            // Wasn't a thinking response, ignore
         }
     }
 
