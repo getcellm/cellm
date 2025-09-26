@@ -36,7 +36,7 @@ public static class CellmFunctions
     private const string _instructionsName = "Prompt";
     private const string _instructionsDescription = "The prompt to send to the model (string, cell, or cell range e.g., A1:B2).";
 
-    private const string _cellsOrTemperatureName = "Context or temperature";
+    private const string _cellsOrTemperatureName = "Cells or temperature";
     private const string _cellsOrTemperatureDescription = "(Optional) Context cells for the prompt (cell or cell range e.g., A1:B2) or the model's temperature (0.0 - 1.0) if no context is provided.";
 
     private const string _temperatureName = "Temperature";
@@ -77,7 +77,7 @@ public static class CellmFunctions
     }
 
     /// <summary>
-    /// Same as Prompt, but multiple output values spill into cells to the right.
+    /// Same as Prompt, but array response spill into cells to the right.
     /// </returns>
     [ExcelFunction(Name = "PROMPT.TOROW", Description = _promptDescription + _structuredOutputShapeRowDescription, IsThreadSafe = true, IsVolatile = false)]
     public static object PromptToRow(
@@ -93,7 +93,7 @@ public static class CellmFunctions
     }
 
     /// <summary>
-    /// Same as Prompt, but multiple output values spill into cells below.
+    /// Same as Prompt, but array response spill into cells below.
     /// </returns>
     [ExcelFunction(Name = "PROMPT.TOCOLUMN", Description = _promptDescription + _structuredOutputShapeColumnDescription, IsThreadSafe = true, IsVolatile = false)]
     public static object PromptToColumn(
@@ -109,7 +109,7 @@ public static class CellmFunctions
     }
 
     /// <summary>
-    /// Same as Prompt, but multiple values spill into a rows and columns.
+    /// Same as Prompt, but array response spill into a rows and columns.
     /// </returns>
     [ExcelFunction(Name = "PROMPT.TORANGE", Description = _promptDescription + _structuredOutputShapeRangeDescription, IsThreadSafe = true, IsVolatile = false)]
     public static object PromptToRange(
@@ -127,6 +127,9 @@ public static class CellmFunctions
     /// <summary>
     /// Sends a prompt to the specified model.
     /// </summary>
+    /// <param name="providerAndModel">
+    /// The model identifier.
+    /// </param>
     /// <param name="instructions">
     /// The prompt to send to the model (string, cell, or cell range).
     /// </param>
@@ -157,7 +160,7 @@ public static class CellmFunctions
     }
 
     /// <summary>
-    /// Same as PromptModel, but multiple output values spill into cells to the right.
+    /// Same as PromptModel, but array response spill into cells to the right.
     /// </returns>
     [ExcelFunction(Name = "PROMPTMODEL.TOROW", Description = _promptModelDescription + _structuredOutputShapeRowDescription, IsThreadSafe = true, IsVolatile = false)]
     public static object PromptModelToRow(
@@ -175,7 +178,7 @@ public static class CellmFunctions
     }
 
     /// <summary>
-    /// Same as PromptModel, but multiple output values spill into cells below.
+    /// Same as PromptModel, but array response spill into cells below.
     /// </returns>
     [ExcelFunction(Name = "PROMPTMODEL.TOCOLUMN", Description = _promptModelDescription + _structuredOutputShapeRowDescription, IsThreadSafe = true, IsVolatile = false)]
     public static object PromptModelToColumn(
@@ -193,7 +196,7 @@ public static class CellmFunctions
     }
 
     /// <summary>
-    /// Same as PromptModel, but multiple values spill into a rows and columns.
+    /// Same as PromptModel, but array responses spill into a rows and columns.
     /// </returns>
     [ExcelFunction(Name = "PROMPTMODEL.TORANGE", Description = _promptModelDescription, IsThreadSafe = true, IsVolatile = false)]
     public static object PromptModelToCell(
@@ -259,6 +262,7 @@ public static class CellmFunctions
             var caller = XlCall.Excel(XlCall.xlfCaller) as ExcelReference;
             var callerCoordinates = $"{ArgumentParser.GetColumnName(caller?.ColumnFirst ?? 0)}{ArgumentParser.GetRowName(caller?.RowFirst ?? 0)}";
 
+            // Do work on background thread, releasing Excel's main thread to keep UI responsive
             var response = ExcelAsyncUtil.RunTaskWithCancellation(
                 nameof(Run),
                 new object[] { providerAndModel, instructions, cellsOrTemperature, temperature },
