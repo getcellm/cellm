@@ -48,7 +48,7 @@ internal class MistralThinkingBehavior : IProviderBehavior
             // Ignore thinking tokens and only return only the answer
             foreach (var element in doc.RootElement.EnumerateArray())
             {
-                
+
                 if (element.ValueKind == JsonValueKind.Object &&
                     element.TryGetProperty("type", out var type) &&
                     type.GetString() == "text" &&
