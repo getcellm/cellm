@@ -65,9 +65,9 @@ public partial class RibbonMain
     {
         SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableTools)}:{nameof(FileSearchRequest)}", pressed);
 
-        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRow));
-        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputColumn));
-        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRange));
+        _ribbonUi?.InvalidateControl(nameof(InsertGroupControlIds.OutputRow));
+        _ribbonUi?.InvalidateControl(nameof(InsertGroupControlIds.OutputColumn));
+        _ribbonUi?.InvalidateControl(nameof(InsertGroupControlIds.OutputRange));
     }
     public bool GetFileSearchToggled(IRibbonControl control)
     {
@@ -79,9 +79,9 @@ public partial class RibbonMain
     {
         SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableTools)}:{nameof(FileReaderRequest)}", pressed);
 
-        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRow));
-        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputColumn));
-        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRange));
+        _ribbonUi?.InvalidateControl(nameof(InsertGroupControlIds.OutputRow));
+        _ribbonUi?.InvalidateControl(nameof(InsertGroupControlIds.OutputColumn));
+        _ribbonUi?.InvalidateControl(nameof(InsertGroupControlIds.OutputRange));
     }
 
     public bool GetFileReaderToggled(IRibbonControl control)
@@ -94,9 +94,9 @@ public partial class RibbonMain
     {
         SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableModelContextProtocolServers)}:Playwright", pressed);
 
-        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRow));
-        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputColumn));
-        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRange));
+        _ribbonUi?.InvalidateControl(nameof(InsertGroupControlIds.OutputRow));
+        _ribbonUi?.InvalidateControl(nameof(InsertGroupControlIds.OutputColumn));
+        _ribbonUi?.InvalidateControl(nameof(InsertGroupControlIds.OutputRange));
     }
 
     public bool GetBrowserToggled(IRibbonControl control)
@@ -213,9 +213,9 @@ public partial class RibbonMain
             _ribbonUi?.InvalidateControl(control.Id);
 
             // Invalidate structured output buttons which enabled/disabled state depend on combination of provider and tool use
-            _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRow));
-            _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputColumn));
-            _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRange));
+            _ribbonUi?.InvalidateControl(nameof(InsertGroupControlIds.OutputRow));
+            _ribbonUi?.InvalidateControl(nameof(InsertGroupControlIds.OutputColumn));
+            _ribbonUi?.InvalidateControl(nameof(InsertGroupControlIds.OutputRange));
         }
         catch (Exception ex)
         {

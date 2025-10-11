@@ -413,9 +413,9 @@ public partial class RibbonMain
         InvalidateModelControls();
 
         // Invalidate structured output buttons which enabled/disabled state depend on combination of provider and tool use
-        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRow));
-        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputColumn));
-        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRange));
+        _ribbonUi?.InvalidateControl(nameof(InsertGroupControlIds.OutputRow));
+        _ribbonUi?.InvalidateControl(nameof(InsertGroupControlIds.OutputColumn));
+        _ribbonUi?.InvalidateControl(nameof(InsertGroupControlIds.OutputRange));
     }
 
     /// <summary>
