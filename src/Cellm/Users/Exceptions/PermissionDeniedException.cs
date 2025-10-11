@@ -14,14 +14,16 @@ internal class PermissionDeniedException : CellmException
     {
         return entitlement switch
         {
-            Entitlement.EnableAnthropicProvider => $"You do not have permission to use models hosted by Anthropic.",
-            Entitlement.EnableAzureProvider => $"You do not have permission to use models hosted by Azure.",
-            Entitlement.EnableCellmProvider => $"You do not have permission to use models hosted by Cellm.",
-            Entitlement.EnableDeepSeekProvider => $"You do not have permission to use models hosted by DeepSeek.",
-            Entitlement.EnableMistralProvider => $"You do not have permission to use models hosted by Mistral.",
-            Entitlement.EnableOllamaProvider => $"You do not have permission to use models served by Ollama.",
-            Entitlement.EnableOpenAiProvider => $"You do not have permission to use models hosted by OpenAi.",
-            Entitlement.EnableOpenAiCompatibleProvider => $"You do not have permission to use OpenAI-compatible APIs.",
+            Entitlement.EnableAnthropicProvider => $"Sign in and subscribe to use Anthropic models.",
+            Entitlement.EnableAwsProvider => $"Sign in and subscribe to use models hosted by Azure.",
+            Entitlement.EnableAzureProvider => $"Sign in and subscribe to use models hosted by Azure.",
+            Entitlement.EnableCellmProvider => $"Sign in and subscribe to use models hosted by Cellm.",
+            Entitlement.EnableDeepSeekProvider => $"Sign in and subscribe to use models hosted by DeepSeek.",
+            Entitlement.EnableGeminiProvider => $"Sign in and subscribe to use models hosted by Azure.",
+            Entitlement.EnableMistralProvider => $"Sign in and subscribe to use models hosted by Mistral.",
+            Entitlement.EnableOllamaProvider => $"Sign in and subscribe to use models served by Ollama.",
+            Entitlement.EnableOpenAiProvider => $"Sign in and subscribe to use models hosted by OpenAi.",
+            Entitlement.EnableOpenAiCompatibleProvider => $"Sign in and subscribe to use OpenAI-compatible APIs.",
             _ => $"Unexpected error: You do not have the required permission \"{entitlement}\"",
         };
     }

@@ -65,7 +65,7 @@ public partial class RibbonMain : ExcelRibbon
         <tabs>
             <tab id="cellm" label="Cellm">
                 {UserGroup()}
-                {InsertGroup()}
+                {PromptGroup()}
                 {ModelGroup()}
                 {ToolGroup()}
             </tab>

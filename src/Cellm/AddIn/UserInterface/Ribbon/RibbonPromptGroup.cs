@@ -6,48 +6,48 @@ namespace Cellm.AddIn.UserInterface.Ribbon;
 
 public partial class RibbonMain
 {
-    private enum InsertGroupControlIds
+    private enum PromptGroupControlIds
     {
-        OutputGroupHorizontalContainer,
+        PromptGroupHorizontalContainer,
 
-        OutputCell,
-        OutputRow,
-        OutputRange,
-        OutputColumn,
+        PromptToCell,
+        PromptToRow,
+        PromptToRange,
+        PromptToColumn,
     }
 
-    public string InsertGroup()
+    public string PromptGroup()
     {
         return $"""
-        <group id="{nameof(InsertGroup)}" label="Prompt">
-            <box id="{nameof(InsertGroupControlIds.OutputGroupHorizontalContainer)}" boxStyle="horizontal">
-                <button id="{nameof(InsertGroupControlIds.OutputCell)}" 
+        <group id="{nameof(PromptGroup)}" label="Prompt">
+            <box id="{nameof(PromptGroupControlIds.PromptGroupHorizontalContainer)}" boxStyle="horizontal">
+                <button id="{nameof(PromptGroupControlIds.PromptToCell)}" 
                         size="large"
                         label="Cell"
                         imageMso="TableSelectCell"
-                        onAction="{nameof(OnInsertCellClicked)}"
+                        onAction="{nameof(OnPromptToCellClicked)}"
                         screentip="Output response in a single cell" />
-                <button id="{nameof(InsertGroupControlIds.OutputRow)}"
+                <button id="{nameof(PromptGroupControlIds.PromptToRow)}"
                         size="large"
                         label="Row"
                         imageMso="TableRowSelect"
-                        onAction="{nameof(OnInsertRowClicked)}"
+                        onAction="{nameof(OnPromptToRowClicked)}"
                         getEnabled="{nameof(GetStructuredOutputEnabled)}"
                         screentip="Output response in a row"
                         supertip="Spill multiple response values (if any) across cells to the right." />
-                <button id="{nameof(InsertGroupControlIds.OutputColumn)}"
+                <button id="{nameof(PromptGroupControlIds.PromptToColumn)}"
                         size="large"
                         label="Column"
                         imageMso="TableColumnSelect" 
-                        onAction="{nameof(OnInsertColumnClicked)}"
+                        onAction="{nameof(OnPromptToColumnClicked)}"
                         getEnabled="{nameof(GetStructuredOutputEnabled)}" 
                         screentip="Output response in a column"
                         supertip="Spill multiple response values (if any) across cells below" />
-                <button id="{nameof(InsertGroupControlIds.OutputRange)}"
+                <button id="{nameof(PromptGroupControlIds.PromptToRange)}"
                         size="large"
                         label="Range"
                         imageMso="TableSelect"
-                        onAction="{nameof(OnInsertRangeClicked)}"
+                        onAction="{nameof(OnPromptToRangeClicked)}"
                         getEnabled="{nameof(GetStructuredOutputEnabled)}"
                         screentip="The model chooses output shape"
                         supertip="The model chooses whether response should be a single cell or spill into rows and/or columns based on your data. You can also just tell it what you want." />
@@ -160,22 +160,22 @@ public partial class RibbonMain
         return null;
     }
 
-    public void OnInsertCellClicked(IRibbonControl control)
+    public void OnPromptToCellClicked(IRibbonControl control)
     {
         UpdateCell(CellmOutputShape.ToCell);
     }
 
-    public void OnInsertRowClicked(IRibbonControl control)
+    public void OnPromptToRowClicked(IRibbonControl control)
     {
         UpdateCell(CellmOutputShape.ToRow);
     }
 
-    public void OnInsertColumnClicked(IRibbonControl control)
+    public void OnPromptToColumnClicked(IRibbonControl control)
     {
         UpdateCell(CellmOutputShape.ToColumn);
     }
 
-    public void OnInsertRangeClicked(IRibbonControl control)
+    public void OnPromptToRangeClicked(IRibbonControl control)
     {
         UpdateCell(CellmOutputShape.ToRange);
     }
