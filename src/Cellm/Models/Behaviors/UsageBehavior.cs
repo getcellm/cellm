@@ -30,22 +30,28 @@ internal class UsageBehavior<TRequest, TResponse>(
                 request.Provider
             );
 
-            var systemTokenCount = response.Prompt.Messages.Where(x => x.Role == ChatRole.System).Sum(x => x.Text.Length) / 4;
-            var userTokenCount = response.Prompt.Messages.Where(x => x.Role == ChatRole.User).Sum(x => x.Text.Length) / 4;
-            var assistantTokenCount = response.Prompt.Messages.Where(x => x.Role == ChatRole.Assistant).Sum(x => x.Text.Length) / 4;
+            var systemTokenCount = response.Prompt.Messages
+                .Where(x => x.Role == ChatRole.System)
+                .Sum(x => x.Text?.Length ?? 0) / 4;
+
+            var userTokenCount = response.Prompt.Messages
+                .Where(x => x.Role == ChatRole.User)
+                .Sum(x => x.Text?.Length ?? 0) / 4;
+
+            var toolTokenCount = response.Prompt.Messages
+                .Where(x => x.Role == ChatRole.Tool)
+                .Sum(x => x.Text?.Length ?? 0) / 4;
+
+            var assistantTokenCount = response.Prompt.Messages
+                .Where(x => x.Role == ChatRole.Assistant)
+                .Sum(x => x.Text?.Length ?? 0) / 4;
 
             usageDetails = new UsageDetails
             {
-                InputTokenCount = systemTokenCount + userTokenCount,
+                InputTokenCount = systemTokenCount + userTokenCount + toolTokenCount,
                 OutputTokenCount = assistantTokenCount
             };
         }
-
-        logger.LogInformation(
-            "{provider} completed request in {ElapsedMilliseconds}ms",
-            request.Provider,
-            elapsedTime.TotalMilliseconds
-        );
 
         var notification = new UsageNotification(
             Usage: usageDetails,
