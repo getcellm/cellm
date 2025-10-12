@@ -1,8 +1,6 @@
-﻿using System.Diagnostics;
-using Cellm.AddIn;
+﻿using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.Models.Prompts;
-using Microsoft.Extensions.Options;
 
 namespace Cellm.Models.Providers.Behaviors;
 
@@ -29,7 +27,7 @@ internal class StructuredOutputWithToolsBehavior : IProviderBehavior
         if (isStructuredOutputEnabled && isToolsEnabled)
         {
             throw new CellmException("Provider does not support row, column, or dynamic output while tools are enabled. " +
-                "Please use PROMPT.TOCELL, disable tools, or switch to a provider that supports structured output with tools.");
+                "Please use PROMPT, disable tools, or switch to a provider that supports structured output with tools.");
         }
     }
 
