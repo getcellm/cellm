@@ -33,12 +33,12 @@ public partial class RibbonMain
     {
         return $"""
             <box id="{nameof(ModelGroupStatisticsControlIds.StatisticsTokensContainer)}" boxStyle="horizontal">
-                        <labelControl id="{nameof(ModelGroupStatisticsControlIds.TokensLabel)}" label="Usage:" />
-                        <labelControl id="{nameof(ModelGroupStatisticsControlIds.TokenStatistics)}" getLabel="{nameof(GetTokenStatisticsText)}" screentip="Total input and output token usage this session" />
-                    </box>
-                    <box id="{nameof(ModelGroupStatisticsControlIds.StatisticsSpeedContainer)}" boxStyle="horizontal">
-                        <labelControl id="{nameof(ModelGroupStatisticsControlIds.SpeedLabel)}" label="Speed:" />
-                        <labelControl id="{nameof(ModelGroupStatisticsControlIds.SpeedStatistics)}" getLabel="{nameof(GetSpeedStatisticsText)}" screentip="Average Tokens Per Second (TPS) per request and average Requests Per Second" />
+                <labelControl id="{nameof(ModelGroupStatisticsControlIds.TokensLabel)}" label="Usage:" />
+                <labelControl id="{nameof(ModelGroupStatisticsControlIds.TokenStatistics)}" getLabel="{nameof(GetTokenStatisticsText)}" screentip="Total input and output token usage this session" />
+            </box>
+            <box id="{nameof(ModelGroupStatisticsControlIds.StatisticsSpeedContainer)}" boxStyle="horizontal">
+                <labelControl id="{nameof(ModelGroupStatisticsControlIds.SpeedLabel)}" label="Speed:" />
+                <labelControl id="{nameof(ModelGroupStatisticsControlIds.SpeedStatistics)}" getLabel="{nameof(GetSpeedStatisticsText)}" screentip="Average Tokens Per Second (TPS) per request and average Requests Per Second" />
             </box>
             """;
     }
@@ -50,7 +50,7 @@ public partial class RibbonMain
 
     public string GetSpeedStatisticsText(IRibbonControl control)
     {
-        return $"{_statistics[nameof(ModelGroupStatisticsControlIds.TPS)]:F0} TPS x {_statistics[nameof(ModelGroupStatisticsControlIds.RPS)]:F1} RPS";
+        return $"{_statistics[nameof(ModelGroupStatisticsControlIds.TPS)]:F0} TPS / {_statistics[nameof(ModelGroupStatisticsControlIds.RPS)]:F1} RPS";
     }
 
     public static void UpdateTokenStatistics(long inputTokens, long outputTokens, long prompts)
