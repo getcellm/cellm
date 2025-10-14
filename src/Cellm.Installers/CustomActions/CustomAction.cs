@@ -283,37 +283,46 @@ namespace CustomActions
             {
                 // For deferred actions, read from CustomActionData
                 var nodeParentDir = session.CustomActionData["NODE_PARENT_DIR"];
+                var nodeDir = Path.Combine(nodeParentDir, "node");
 
-                // The rest of the function remains the same...
                 if (string.IsNullOrWhiteSpace(nodeParentDir))
                 {
                     session.Log("ERROR: Node directory from CustomActionData is not set.");
                     return ActionResult.Failure;
                 }
 
-                var npxPath = Path.Combine(nodeParentDir, "node", "npx.cmd");
+                session.Log($"Node.js Path: {nodeDir}");
 
-                if (!File.Exists(npxPath))
+                var nodeExePath = Path.Combine(nodeDir, "node.exe");
+                var npxCliPath = Path.Combine(nodeDir, "node_modules", "npm", "bin", "npx-cli.js");
+
+                if (!File.Exists(nodeExePath))
                 {
-                    session.Log($"ERROR: npx.cmd not found at {npxPath}. Ensure Node.js was installed correctly.");
+                    session.Log($"ERROR: node.exe not found at {nodeExePath}.");
                     return ActionResult.Failure;
                 }
 
-                var arguments = "-y playwright install --with-deps --only-shell chrome";
+                if (!File.Exists(npxCliPath))
+                {
+                    session.Log($"ERROR: npx-cli.js not found at {npxCliPath}.");
+                    return ActionResult.Failure;
+                }
 
-                session.Log($"Node.js Path: {nodeParentDir}");
-                session.Log($"Executing: {npxPath} {arguments}");
+                session.Log($"Using node.exe at: {nodeExePath}");
+                session.Log($"Using npx-cli.js at: {npxCliPath}");
+
+                // Use node.exe directly with npx-cli.js (instead of npm.cmd) - path resolution in npm.cmd doesn't work during installation
+                session.Log($"Executing: {nodeExePath} \"{npxCliPath}\" -y playwright install --with-deps --only-shell firefox");
 
                 var startInfo = new ProcessStartInfo
                 {
-                    FileName = npxPath,
-                    Arguments = arguments,
-                    WorkingDirectory = nodeParentDir,
+                    FileName = nodeExePath,
+                    Arguments = $"\"{npxCliPath}\" -y playwright install --with-deps --only-shell firefox",
+                    WorkingDirectory = nodeDir,
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     CreateNoWindow = true,
-                    Environment = { ["PATH"] = $"{nodeParentDir};{Environment.GetEnvironmentVariable("PATH")}" }
                 };
 
                 using (var process = Process.Start(startInfo))

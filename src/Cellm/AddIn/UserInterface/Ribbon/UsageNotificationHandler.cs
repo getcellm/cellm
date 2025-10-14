@@ -15,7 +15,7 @@ internal class UsageNotificationHandler(ILogger<UsageNotificationHandler> logger
         [nameof(GetTotalPrompts)] = 0
     };
 
-    private static readonly ConcurrentDictionary<DateTime, (long, double)> _tokensPerSecond = new();
+    private static readonly ConcurrentDictionary<DateTime, UsageNotification> _tokensPerSecond = new();
     private readonly int _maxTokensPerSecondMeasurements = 100;
 
     public Task Handle(UsageNotification notification, CancellationToken cancellationToken)
@@ -30,7 +30,7 @@ internal class UsageNotificationHandler(ILogger<UsageNotificationHandler> logger
         _tokenUsage[nameof(UsageDetails.OutputTokenCount)] += notification.Usage.OutputTokenCount ?? 0;
         _tokenUsage[nameof(GetTotalPrompts)] += 1;
 
-        _tokensPerSecond[DateTime.UtcNow] = (notification.Usage.OutputTokenCount ?? 0, notification.ElapsedTime.TotalSeconds);
+        _tokensPerSecond[notification.EndTime] = notification;
 
         var oldestMeasurement = _tokensPerSecond.Keys.DefaultIfEmpty(DateTime.UtcNow).Min();
         var window = DateTime.UtcNow.AddSeconds(-30);
@@ -69,7 +69,16 @@ internal class UsageNotificationHandler(ILogger<UsageNotificationHandler> logger
             return 0;
         }
 
-        return _tokensPerSecond.Sum(kvp => kvp.Value.Item1) / (_tokensPerSecond.Sum(kvp => kvp.Value.Item2) + 0.01);
+        var totalDuration = _tokensPerSecond.Sum(kvp => (kvp.Value.EndTime - kvp.Value.StartTime).TotalSeconds);
+
+        if (totalDuration < 0.01)
+        {
+            return 0;
+        }
+
+        var totalOutputTokens = _tokensPerSecond.Sum(kvp => kvp.Value.Usage.OutputTokenCount) ?? 0;
+
+        return totalOutputTokens / totalDuration;
     }
 
     private static double GetRequestsPerBusySecond()
@@ -81,13 +90,7 @@ internal class UsageNotificationHandler(ILogger<UsageNotificationHandler> logger
 
         // Create a list of time intervals [StartTime, EndTime] for each request.
         var intervals = _tokensPerSecond
-            .Select(kvp =>
-            {
-                var endTime = kvp.Key;
-                var duration = kvp.Value.Item2;
-                var startTime = endTime.AddSeconds(-duration);
-                return (StartTime: startTime, EndTime: endTime);
-            })
+            .Select(kvp => (kvp.Value.StartTime, kvp.Value.EndTime))
             .OrderBy(i => i.StartTime)
             .ToList();
 
@@ -121,9 +124,9 @@ internal class UsageNotificationHandler(ILogger<UsageNotificationHandler> logger
         // Add the duration of the last merged interval.
         busySeconds += (mergeIntervalEnd - mergeIntervalStart).TotalSeconds;
 
-        if (busySeconds < 0.01)
+        if (busySeconds < 0.1)
         {
-            return 1;
+            return 0.1;
         }
 
         // Calculate RPS using busy time

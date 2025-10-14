@@ -13,13 +13,11 @@ internal class UsageBehavior<TRequest, TResponse>(
 {
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
-        var stopwatch = Stopwatch.StartNew();
+        var startTime = DateTime.UtcNow;
 
-        // Let the rest of the pipeline (including the actual handler) run
         var response = await next().ConfigureAwait(false);
 
-        stopwatch.Stop();
-        var elapsedTime = stopwatch.Elapsed;
+        var endTime = DateTime.UtcNow;
 
         var usageDetails = response.ChatResponse?.Usage;
 
@@ -57,7 +55,8 @@ internal class UsageBehavior<TRequest, TResponse>(
             Usage: usageDetails,
             Provider: request.Provider,
             Model: response.ChatResponse?.ModelId,
-            ElapsedTime: elapsedTime
+            StartTime: startTime,
+            EndTime: endTime
         );
 
         await publisher.Publish(notification, cancellationToken).ConfigureAwait(false);
