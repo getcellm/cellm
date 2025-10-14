@@ -1,7 +1,9 @@
 ﻿using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Cellm.AddIn;
 using Cellm.Tools.ModelContextProtocol;
+using Cellm.Tools.ModelContextProtocol.Exceptions;
 using Cellm.Users;
 using MediatR;
 using Microsoft.Extensions.AI;
@@ -91,13 +93,31 @@ internal class ToolBehavior<TRequest, TResponse>(
             return cachedMcpClientTool;
         }
 
-        var clientTransport = new StdioClientTransport(stdioClientTransportOptions);
-        var mcpClient = await McpClientFactory.CreateAsync(clientTransport, loggerFactory: loggerFactory, cancellationToken: cancellationToken).ConfigureAwait(false);
-        var tools = await mcpClient.ListToolsAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+        try
+        {
+            var clientTransport = new StdioClientTransport(stdioClientTransportOptions);
+            var mcpClient = await McpClientFactory.CreateAsync(clientTransport, loggerFactory: loggerFactory, cancellationToken: cancellationToken).ConfigureAwait(false);
+            var tools = await mcpClient.ListToolsAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
-        _cache[stdioClientTransportOptions.Name ?? throw new NullReferenceException(nameof(stdioClientTransportOptions))] = tools;
+            _cache[stdioClientTransportOptions.Name ?? throw new NullReferenceException(nameof(stdioClientTransportOptions))] = tools;
 
-        return tools;
+            return tools;
+        }
+        catch (Win32Exception ex)
+        {
+            logger.LogError(ex, "MCP server '{ServerName}' failed to start. Command: {Command}", stdioClientTransportOptions.Name, stdioClientTransportOptions.Command);
+            throw new McpServerException($"The '{stdioClientTransportOptions.Name}' MCP server failed to start. The command '{stdioClientTransportOptions.Command}' requires Node.js to be installed.\n\nTo fix this, either:\n• Install Node.js from https://nodejs.org/ (see https://docs.getcellm.com/get-started/install for details)\n• Or disable the '{stdioClientTransportOptions.Name}' tool in the Cellm ribbon > Tools > MCP menu", ex);
+        }
+        catch (FileNotFoundException ex)
+        {
+            logger.LogError(ex, "MCP server '{ServerName}' failed to start. Command: {Command}", stdioClientTransportOptions.Name, stdioClientTransportOptions.Command);
+            throw new McpServerException($"The '{stdioClientTransportOptions.Name}' MCP server failed to start. The command '{stdioClientTransportOptions.Command}' requires Node.js to be installed.\n\nTo fix this, either:\n• Install Node.js from https://nodejs.org/ (see https://docs.getcellm.com/get-started/install for details)\n• Or disable the '{stdioClientTransportOptions.Name}' tool in the Cellm ribbon > Tools > MCP menu", ex);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            logger.LogError(ex, "MCP server '{ServerName}' failed to start. Command: {Command}", stdioClientTransportOptions.Name, stdioClientTransportOptions.Command);
+            throw new McpServerException($"The '{stdioClientTransportOptions.Name}' MCP server failed to start.\n\nPlease check https://docs.getcellm.com/get-started/install for troubleshooting or disable the '{stdioClientTransportOptions.Name}' tool in the Cellm ribbon > Tools > MCP menu", ex);
+        }
     }
 
     private async Task<IList<McpClientTool>> GetOrFetchServerToolsAsync(SseClientTransportOptions sseClientTransportOptions, CancellationToken cancellationToken)
@@ -108,13 +128,21 @@ internal class ToolBehavior<TRequest, TResponse>(
             return cachedMcpClientTool;
         }
 
-        var clientTransport = new SseClientTransport(sseClientTransportOptions);
-        var mcpClient = await McpClientFactory.CreateAsync(clientTransport, loggerFactory: loggerFactory, cancellationToken: cancellationToken).ConfigureAwait(false);
-        var tools = await mcpClient.ListToolsAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+        try
+        {
+            var clientTransport = new SseClientTransport(sseClientTransportOptions);
+            var mcpClient = await McpClientFactory.CreateAsync(clientTransport, loggerFactory: loggerFactory, cancellationToken: cancellationToken).ConfigureAwait(false);
+            var tools = await mcpClient.ListToolsAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
-        _cache[sseClientTransportOptions.Name ?? throw new NullReferenceException(nameof(sseClientTransportOptions))] = tools;
+            _cache[sseClientTransportOptions.Name ?? throw new NullReferenceException(nameof(sseClientTransportOptions))] = tools;
 
-        return tools;
+            return tools;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            logger.LogError(ex, "MCP server '{ServerName}' failed to connect. Endpoint: {Endpoint}", sseClientTransportOptions.Name, sseClientTransportOptions.Endpoint);
+            throw new McpServerException($"The '{sseClientTransportOptions.Name}' MCP server failed to connect to {sseClientTransportOptions.Endpoint}.\n\nPlease check https://docs.getcellm.com/get-started/install for troubleshooting or disable the '{sseClientTransportOptions.Name}' tool in the Cellm ribbon > Tools > MCP menu", ex);
+        }
     }
 }
 
