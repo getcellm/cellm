@@ -8,5 +8,6 @@ public record UsageNotification(
     UsageDetails Usage,
     Provider Provider,
     string? Model,
-    TimeSpan ElapsedTime
+    DateTime StartTime,
+    DateTime EndTime
 ) : INotification;
