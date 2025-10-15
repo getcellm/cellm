@@ -157,7 +157,7 @@ public partial class EditMcpServerForm : Form
 
         if (result == DialogResult.Yes)
         {
-            _logger.LogInformation("About to remove server: {serverName}, isStdio: {isStdio}", serverName, isStdio);
+            _logger.LogInformation("About to remove server: {serverName}, isStdio: {isStdio}", serverName, (bool)isStdio);
 
             RemoveServer(serverName, isStdio);
 
