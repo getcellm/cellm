@@ -265,7 +265,11 @@ public static class CellmFunctions
             // Do work on background thread, releasing Excel's main thread to keep UI responsive
             var response = ExcelAsyncUtil.RunTaskWithCancellation(
                 nameof(Run),
-                new object[] { providerAndModel, instructions, cellsOrTemperature, temperature },
+                // Add callerCoordinates to make task arguments unique, otherwise all concurrent calls
+                // with identical arguments will reuse the response from the first call that finishes.
+                // ExcelDNA calls this function twice. Once when invoked and once when result is ready
+                // at which point the list of arguments is used as key to pair result first call
+                new object[] { providerAndModel, instructions, cellsOrTemperature, temperature, callerCoordinates },
                 cancellationToken => GetResponseAsync(arguments, wallClock, callerCoordinates, cancellationToken));
 
             if (response is ExcelError.ExcelErrorNA)
