@@ -149,7 +149,7 @@ public partial class EditMcpServerForm : Form
 
         var selectedItem = serverListView.SelectedItems[0];
         var serverInfo = (dynamic?)selectedItem.Tag;
-        var serverName = serverInfo?.Name;
+        var serverName = serverInfo?.Name ?? throw new NullReferenceException(nameof(serverInfo));
         var isStdio = serverInfo?.IsStdio ?? throw new NullReferenceException(nameof(serverInfo));
 
         var result = MessageBox.Show($"Are you sure you want to remove the MCP server '{serverName}'?",
