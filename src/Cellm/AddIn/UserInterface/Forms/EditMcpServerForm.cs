@@ -61,7 +61,7 @@ public partial class EditMcpServerForm : Form
             .Where(s => !string.IsNullOrWhiteSpace(s.Name) && s.Name != "Playwright")
             .ToList();
 
-        _logger.LogInformation($"PopulateServerList - Found {stdioServers.Count} stdio and {sseServers.Count} SSE servers");
+        _logger.LogInformation("PopulateServerList - Found {stdioCount} stdio and {sseCount} SSE servers", stdioServers.Count, sseServers.Count);
 
         foreach (var server in stdioServers)
         {
@@ -157,7 +157,7 @@ public partial class EditMcpServerForm : Form
 
         if (result == DialogResult.Yes)
         {
-            _logger.LogInformation($"About to remove server: {serverName}, isStdio: {isStdio}");
+            _logger.LogInformation("About to remove server: {serverName}, isStdio: {isStdio}", serverName, isStdio);
 
             RemoveServer(serverName, isStdio);
 
