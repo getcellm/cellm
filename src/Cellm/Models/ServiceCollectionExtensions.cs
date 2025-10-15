@@ -138,7 +138,7 @@ internal static class ServiceCollectionExtensions
 
                 if (string.IsNullOrWhiteSpace(anthropicConfiguration.CurrentValue.ApiKey))
                 {
-                    throw new CellmException($"No {nameof(AnthropicConfiguration.ApiKey)} for {Provider.Anthropic}. Please check your API key.");
+                    throw new CellmException($"Empty {nameof(AnthropicConfiguration.ApiKey)} for {Provider.Anthropic}. Please set your API key.");
                 }
 
                 return new AnthropicClient(anthropicConfiguration.CurrentValue.ApiKey, resilientHttpClient)
@@ -164,7 +164,7 @@ internal static class ServiceCollectionExtensions
 
                 if (string.IsNullOrWhiteSpace(awsConfiguration.CurrentValue.ApiKey))
                 {
-                    throw new CellmException($"No {nameof(AwsConfiguration.ApiKey)} {Provider.Aws}. Please check your API key.");
+                    throw new CellmException($"Empty {nameof(AwsConfiguration.ApiKey)} {Provider.Aws}. Please set your API key.");
                 }
 
                 var parts = awsConfiguration.CurrentValue.ApiKey.Split(':');
@@ -199,7 +199,7 @@ internal static class ServiceCollectionExtensions
 
                 if (string.IsNullOrWhiteSpace(azureConfiguration.CurrentValue.ApiKey))
                 {
-                    throw new CellmException($"No {nameof(AzureConfiguration.ApiKey)} for {Provider.Azure}. Please check your API key.");
+                    throw new CellmException($"Empty {nameof(AzureConfiguration.ApiKey)} for {Provider.Azure}. Please set your API key.");
                 }
 
                 return new ChatCompletionsClient(
@@ -254,7 +254,7 @@ internal static class ServiceCollectionExtensions
 
                 if (string.IsNullOrWhiteSpace(deepSeekConfiguration.CurrentValue.ApiKey))
                 {
-                    throw new CellmException($"No {nameof(DeepSeekConfiguration.ApiKey)} for {Provider.DeepSeek}. Please check your API key.");
+                    throw new CellmException($"Empty {nameof(DeepSeekConfiguration.ApiKey)} for {Provider.DeepSeek}. Please set your API key.");
                 }
 
                 var openAiClient = new OpenAIClient(
@@ -285,7 +285,7 @@ internal static class ServiceCollectionExtensions
 
                 if (string.IsNullOrWhiteSpace(geminiConfiguration.CurrentValue.ApiKey))
                 {
-                    throw new CellmException($"No {nameof(GeminiConfiguration.ApiKey)} for {Provider.Gemini}. Please check your API key.");
+                    throw new CellmException($"Empty {nameof(GeminiConfiguration.ApiKey)} for {Provider.Gemini}. Please set your API key.");
                 }
 
                 var openAiClient = new OpenAIClient(
@@ -316,7 +316,7 @@ internal static class ServiceCollectionExtensions
 
                 if (string.IsNullOrWhiteSpace(mistralConfiguration.CurrentValue.ApiKey))
                 {
-                    throw new CellmException($"No {nameof(MistralConfiguration.ApiKey)} for {Provider.Mistral}. Please check your API key.");
+                    throw new CellmException($"Empty {nameof(MistralConfiguration.ApiKey)} for {Provider.Mistral}. Please set your API key.");
                 }
 
                 return new MistralAIChatCompletionService(
@@ -361,7 +361,7 @@ internal static class ServiceCollectionExtensions
 
                 if (string.IsNullOrWhiteSpace(openAiConfiguration.CurrentValue.ApiKey))
                 {
-                    throw new CellmException($"No {nameof(OpenAiConfiguration.ApiKey)} for {Provider.OpenAi}. Please check your API key.");
+                    throw new CellmException($"Empty {nameof(OpenAiConfiguration.ApiKey)} for {Provider.OpenAi}. Please set your API key.");
                 }
 
                 return new OpenAIClient(new ApiKeyCredential(openAiConfiguration.CurrentValue.ApiKey))
@@ -395,7 +395,7 @@ internal static class ServiceCollectionExtensions
 
                 if (string.IsNullOrWhiteSpace(openAiCompatibleConfiguration.CurrentValue.ApiKey))
                 {
-                    throw new CellmException($"No {nameof(OpenAiCompatibleConfiguration.ApiKey)} for {Provider.OpenAiCompatible}. Please check your API key.");
+                    throw new CellmException($"Empty {nameof(OpenAiCompatibleConfiguration.ApiKey)} for {Provider.OpenAiCompatible}. Please set your API key.");
                 }
 
                 var openAiClient = new OpenAIClient(

@@ -265,7 +265,11 @@ public static class CellmFunctions
             // Do work on background thread, releasing Excel's main thread to keep UI responsive
             var response = ExcelAsyncUtil.RunTaskWithCancellation(
                 nameof(Run),
-                new object[] { providerAndModel, instructions, cellsOrTemperature, temperature },
+                // Add callerCoordinates to make task arguments unique, otherwise all concurrent calls
+                // with identical arguments will reuse the response from the first call that finishes.
+                // ExcelDNA calls this function twice. Once when invoked and once when result is ready
+                // at which point the list of arguments is used as key to pair result first call
+                new object[] { providerAndModel, instructions, cellsOrTemperature, temperature, callerCoordinates },
                 cancellationToken => GetResponseAsync(arguments, wallClock, callerCoordinates, cancellationToken));
 
             if (response is ExcelError.ExcelErrorNA)
@@ -304,7 +308,7 @@ public static class CellmFunctions
 
         try
         {
-            logger.LogInformation("Sending {} to {}/{} ... (elapsed time: {}ms)", callerCoordinates, arguments.Provider, arguments.Model, wallClock.ElapsedMilliseconds);
+            logger.LogInformation("Sending {caller} to {provider}/{model} ... (elapsed time: {elapsedTime}ms)", callerCoordinates, arguments.Provider, arguments.Model, wallClock.ElapsedMilliseconds);
 
             // Check for cancellation before doing any work
             cancellationToken.ThrowIfCancellationRequested();
@@ -352,7 +356,7 @@ public static class CellmFunctions
             // Check for cancellation before returning response
             cancellationToken.ThrowIfCancellationRequested();
 
-            logger.LogInformation("Sending {} to {}/{} ... Done (elapsed time: {}ms, request time: {}ms, overhead: {}ms)", callerCoordinates, arguments.Provider, arguments.Model, wallClock.ElapsedMilliseconds, requestClock.ElapsedMilliseconds, wallClock.ElapsedMilliseconds - requestClock.ElapsedMilliseconds);
+            logger.LogInformation("Sending {caller} to {provider}/{model} ... Done (elapsed time: {elapsedTime}ms, request time: {requestTime}ms, overhead: {overhead}ms)", callerCoordinates, arguments.Provider, arguments.Model, wallClock.ElapsedMilliseconds, requestClock.ElapsedMilliseconds, wallClock.ElapsedMilliseconds - requestClock.ElapsedMilliseconds);
 
             if (StructuredOutput.TryParse(assistantMessage, response.OutputShape, out var structuredAssistantMessage) && structuredAssistantMessage is not null)
             {
@@ -372,7 +376,7 @@ public static class CellmFunctions
             CellmAddIn.Services
                 .GetRequiredService<ILoggerFactory>()
                 .CreateLogger(nameof(GetResponseAsync))
-                .LogInformation("Sending {} to {}/{} ... Cancelled (elapsed time: {}ms, request time: {}ms)", callerCoordinates, arguments.Provider, arguments.Model, wallClock.ElapsedMilliseconds, requestClock.ElapsedMilliseconds);
+                .LogInformation("Sending {caller} to {provider}/{model} ... Cancelled (elapsed time: {elapsedTime}ms, request time: {requestTime}ms)", callerCoordinates, arguments.Provider, arguments.Model, wallClock.ElapsedMilliseconds, requestClock.ElapsedMilliseconds);
 
             return "Cancelled"; // Cancellation is not an error, just return _something_
         }
@@ -381,7 +385,7 @@ public static class CellmFunctions
             CellmAddIn.Services
                 .GetRequiredService<ILoggerFactory>()
                 .CreateLogger(nameof(GetResponseAsync))
-                .LogError(ex, "Sending {} to {}/{} ... Failed: {message} (elapsed time: {}ms, request time: {}ms)", callerCoordinates, arguments.Provider, arguments.Model, ex.Message, wallClock.ElapsedMilliseconds, requestClock.ElapsedMilliseconds);
+                .LogError(ex, "Sending {caller} to {provider}/{model} ... Failed: {message} (elapsed time: {elapsedTime}ms, request time: {requestTime}ms)", callerCoordinates, arguments.Provider, arguments.Model, ex.Message, wallClock.ElapsedMilliseconds, requestClock.ElapsedMilliseconds);
 
             return ex.Message;
         }

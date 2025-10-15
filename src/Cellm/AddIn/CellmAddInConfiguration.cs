@@ -19,4 +19,10 @@ public class CellmAddInConfiguration
     public int CacheTimeoutInSeconds { get; init; } = 3600;
 
     public List<string> Models { get; init; } = [];
+
+    public bool EnableFileLogging { get; init; } = true;
+
+    public int LogFileSizeLimitMegabyte { get; init; } = 8;
+
+    public int LogFileRetainedCount { get; init; } = 2;
 }
