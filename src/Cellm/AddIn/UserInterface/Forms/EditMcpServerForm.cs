@@ -61,7 +61,7 @@ public partial class EditMcpServerForm : Form
             .Where(s => !string.IsNullOrWhiteSpace(s.Name) && s.Name != "Playwright")
             .ToList();
 
-        _logger.LogInformation($"PopulateServerList - Found {stdioServers.Count} stdio and {sseServers.Count} SSE servers");
+        _logger.LogInformation("PopulateServerList - Found {stdioCount} stdio and {sseCount} SSE servers", stdioServers.Count, sseServers.Count);
 
         foreach (var server in stdioServers)
         {
@@ -149,7 +149,7 @@ public partial class EditMcpServerForm : Form
 
         var selectedItem = serverListView.SelectedItems[0];
         var serverInfo = (dynamic?)selectedItem.Tag;
-        var serverName = serverInfo?.Name;
+        var serverName = serverInfo?.Name ?? throw new NullReferenceException(nameof(serverInfo));
         var isStdio = serverInfo?.IsStdio ?? throw new NullReferenceException(nameof(serverInfo));
 
         var result = MessageBox.Show($"Are you sure you want to remove the MCP server '{serverName}'?",
@@ -157,7 +157,7 @@ public partial class EditMcpServerForm : Form
 
         if (result == DialogResult.Yes)
         {
-            _logger.LogInformation($"About to remove server: {serverName}, isStdio: {isStdio}");
+            _logger.LogInformation("About to remove server: {serverName}, isStdio: {isStdio}", (string)serverName, (bool)isStdio);
 
             RemoveServer(serverName, isStdio);
 

@@ -26,6 +26,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Serilog;
 
 namespace Cellm.AddIn;
 
@@ -90,26 +91,48 @@ public class CellmAddIn : IExcelAddIn
         var sentryConfiguration = configuration.GetRequiredSection(nameof(SentryConfiguration)).Get<SentryConfiguration>()
             ?? throw new NullReferenceException(nameof(SentryConfiguration));
 
+        var cellmAddInConfiguration = configuration.GetRequiredSection(nameof(CellmAddInConfiguration)).Get<CellmAddInConfiguration>()
+            ?? throw new NullReferenceException(nameof(CellmAddInConfiguration));
+
         services
           .AddLogging(loggingBuilder =>
           {
               loggingBuilder
                   .AddConfiguration(configuration.GetSection("Logging"))
                   .AddConsole()
-                  .AddDebug()
-                  .AddSentry(sentryLoggingOptions =>
-                  {
-                      sentryLoggingOptions.InitializeSdk = sentryConfiguration.IsEnabled;
-                      sentryLoggingOptions.Release = GetReleaseVersion();
-                      sentryLoggingOptions.Environment = sentryConfiguration.Environment;
-                      sentryLoggingOptions.Dsn = sentryConfiguration.Dsn;
-                      sentryLoggingOptions.Debug = sentryConfiguration.Debug;
-                      sentryLoggingOptions.TracesSampleRate = sentryConfiguration.TracesSampleRate;
-                      sentryLoggingOptions.ProfilesSampleRate = sentryConfiguration.ProfilesSampleRate;
-                      sentryLoggingOptions.Environment = sentryConfiguration.Environment;
-                      sentryLoggingOptions.AutoSessionTracking = true;
-                      sentryLoggingOptions.AddIntegration(new ProfilingIntegration());
-                  });
+                  .AddDebug();
+
+              if (cellmAddInConfiguration.EnableFileLogging)
+              {
+                  var logPath = Path.Combine(ConfigurationPath, "logs", "cellm-.log");
+                  var serilogLogger = new LoggerConfiguration()
+                      .MinimumLevel.Debug()
+                      .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
+                      .MinimumLevel.Override("System", Serilog.Events.LogEventLevel.Warning)
+                      .WriteTo.File(
+                          path: logPath,
+                          rollingInterval: RollingInterval.Day,
+                          fileSizeLimitBytes: cellmAddInConfiguration.LogFileSizeLimitMegabyte * 1024 * 1024,
+                          retainedFileCountLimit: cellmAddInConfiguration.LogFileRetainedCount,
+                          rollOnFileSizeLimit: true)
+                      .CreateLogger();
+
+                  loggingBuilder.AddSerilog(serilogLogger);
+              }
+
+              loggingBuilder.AddSentry(sentryLoggingOptions =>
+              {
+                  sentryLoggingOptions.InitializeSdk = sentryConfiguration.IsEnabled;
+                  sentryLoggingOptions.Release = GetReleaseVersion();
+                  sentryLoggingOptions.Environment = sentryConfiguration.Environment;
+                  sentryLoggingOptions.Dsn = sentryConfiguration.Dsn;
+                  sentryLoggingOptions.Debug = sentryConfiguration.Debug;
+                  sentryLoggingOptions.TracesSampleRate = sentryConfiguration.TracesSampleRate;
+                  sentryLoggingOptions.ProfilesSampleRate = sentryConfiguration.ProfilesSampleRate;
+                  sentryLoggingOptions.Environment = sentryConfiguration.Environment;
+                  sentryLoggingOptions.AutoSessionTracking = true;
+                  sentryLoggingOptions.AddIntegration(new ProfilingIntegration());
+              });
           });
 
         // Mediatr
