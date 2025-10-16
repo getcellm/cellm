@@ -268,7 +268,7 @@ public static class CellmFunctions
                 // Add callerCoordinates to make task arguments unique, otherwise all concurrent calls
                 // with identical arguments will reuse the response from the first call that finishes.
                 // ExcelDNA calls this function twice. Once when invoked and once when result is ready
-                // at which point the list of arguments is used as key to pair result first call
+                // at which point the list of arguments is used as key to pair result with first call
                 new object[] { providerAndModel, instructions, cellsOrTemperature, temperature, callerCoordinates },
                 cancellationToken => GetResponseAsync(arguments, wallClock, callerCoordinates, cancellationToken));
 
@@ -378,7 +378,7 @@ public static class CellmFunctions
                 .CreateLogger(nameof(GetResponseAsync))
                 .LogInformation("Sending {caller} to {provider}/{model} ... Cancelled (elapsed time: {elapsedTime}ms, request time: {requestTime}ms)", callerCoordinates, arguments.Provider, arguments.Model, wallClock.ElapsedMilliseconds, requestClock.ElapsedMilliseconds);
 
-            return "Cancelled"; // Cancellation is not an error, just return _something_
+            return "Cancelled"; // We must return _something_
         }
         catch (CellmException ex)
         {

@@ -1,4 +1,3 @@
-using System.Text.Json;
 using ExcelDna.Integration;
 using ExcelDna.Integration.CustomUI;
 
@@ -32,7 +31,6 @@ public partial class RibbonMain
                         label="Row"
                         imageMso="TableRowSelect"
                         onAction="{nameof(OnPromptToRowClicked)}"
-                        getEnabled="{nameof(GetStructuredOutputEnabled)}"
                         screentip="Output response in a row"
                         supertip="Spill multiple response values (if any) across cells to the right." />
                 <button id="{nameof(PromptGroupControlIds.PromptToColumn)}"
@@ -40,7 +38,6 @@ public partial class RibbonMain
                         label="Column"
                         imageMso="TableColumnSelect" 
                         onAction="{nameof(OnPromptToColumnClicked)}"
-                        getEnabled="{nameof(GetStructuredOutputEnabled)}" 
                         screentip="Output response in a column"
                         supertip="Spill multiple response values (if any) across cells below" />
                 <button id="{nameof(PromptGroupControlIds.PromptToRange)}"
@@ -48,40 +45,11 @@ public partial class RibbonMain
                         label="Range"
                         imageMso="TableSelect"
                         onAction="{nameof(OnPromptToRangeClicked)}"
-                        getEnabled="{nameof(GetStructuredOutputEnabled)}"
                         screentip="The model chooses output shape"
                         supertip="The model chooses whether response should be a single cell or spill into rows and/or columns based on your data. You can also just tell it what you want." />
             </box>
         </group>
         """;
-    }
-    public bool GetStructuredOutputEnabled(IRibbonControl control)
-    {
-        var currentProviderConfiguration = CellmAddIn.GetProviderConfiguration(GetCurrentProvider());
-
-        if (currentProviderConfiguration.CanUseStructuredOutputWithTools)
-        {
-            return true;
-        }
-
-        // Have to access configuration the long way because updates happen too fast for IOptionsMonitor<CellmAddInConfiguration> to pick them up
-        var enableTools = JsonSerializer.Deserialize<Dictionary<string, bool>>(GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableTools)}"));
-        var enableModelContextProtocolServers = JsonSerializer.Deserialize<Dictionary<string, bool>>(GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableModelContextProtocolServers)}"));
-
-        if (enableTools is null || enableModelContextProtocolServers is null)
-        {
-            // Config is messed up, don't annoy the user any further
-            return false;
-        }
-
-        // Enable structured output buttons iff all tools are disabled
-        if (enableTools.Values.All(isToolEnabled => !isToolEnabled) &&
-            enableModelContextProtocolServers.Values.All(isServerEnabled => !isServerEnabled))
-        {
-            return true;
-        }
-
-        return false;
     }
 
     private enum CellmFormula

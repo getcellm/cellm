@@ -149,7 +149,6 @@ public class CellmAddIn : IExcelAddIn
             .AddSingleton<IProviderBehavior, AdditionalPropertiesBehavior>()
             .AddSingleton<IProviderBehavior, GeminiTemperatureBehavior>()
             .AddSingleton<IProviderBehavior, OpenAiTemperatureBehavior>()
-            .AddSingleton<IProviderBehavior, StructuredOutputWithToolsBehavior>()
             .AddSingleton<IProviderBehavior, MistralThinkingBehavior>();
 
         // Internals
