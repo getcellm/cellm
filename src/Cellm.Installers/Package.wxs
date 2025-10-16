@@ -17,8 +17,6 @@
 
     <UI>
       <ProgressText Action="InstallFiles" Message="Copying files ..." />
-      <ProgressText Action="CustomActionInstallNodeJs" Message="Installing third party dependencies (Node.js) ... This may take a while" />
-      <ProgressText Action="CustomActionInstallPlaywright" Message="Installing third party dependencies (Playwright) ... This may take a while" />
     </UI>
 
     <Property Id="OFFICE12INSTALLED">
@@ -34,26 +32,16 @@
       <RegistrySearch Id="Office16InstallRoot" Root="HKLM" Key="SOFTWARE\Microsoft\Office\16.0\Excel\InstallRoot" Name="Path" Type="raw" />
     </Property>
 
-    <Property Id="NODEJS_VERSION" Value="22.16.0" />
-    
     <Binary Id="CustomActions" SourceFile="$(var.CustomActions.TargetDir)Cellm.Installer.CustomActions.CA.dll" />
     <CustomAction Id="CustomActionGetOffice12NextOpen" DllEntry="GetOffice12NextOpen" BinaryRef="CustomActions" Execute="immediate" />
     <CustomAction Id="CustomActionGetOffice14NextOpen" DllEntry="GetOffice14NextOpen" BinaryRef="CustomActions" Execute="immediate" />
     <CustomAction Id="CustomActionGetOffice15NextOpen" DllEntry="GetOffice15NextOpen" BinaryRef="CustomActions" Execute="immediate" />
     <CustomAction Id="CustomActionGetOffice16NextOpen" DllEntry="GetOffice16NextOpen" BinaryRef="CustomActions" Execute="immediate" />
-    <CustomAction Id="CustomActionInstallNodeJsSetProperties" Return="check" Property="CustomActionInstallNodeJs" Value="NODE_PARENT_DIR=[INSTALLFOLDER];NODEJS_VERSION=[NODEJS_VERSION]" />  
-    <CustomAction Id="CustomActionInstallPlaywrightSetProperties" Property="CustomActionInstallPlaywright" Value="NODE_PARENT_DIR=[INSTALLFOLDER]" />
-    <CustomAction Id="CustomActionInstallNodeJs" Return="check" DllEntry="InstallNodeJs" BinaryRef="CustomActions" Execute="deferred" />
-    <CustomAction Id="CustomActionInstallPlaywright" Return="check" DllEntry="InstallPlaywright" BinaryRef="CustomActions" Execute="deferred" />
     <InstallExecuteSequence>
       <Custom Action="CustomActionGetOffice12NextOpen" Before="CostInitialize" Condition="NOT Installed AND OFFICE12INSTALLED" />
       <Custom Action="CustomActionGetOffice14NextOpen" Before="CostInitialize" Condition="NOT Installed AND OFFICE14INSTALLED" />
       <Custom Action="CustomActionGetOffice15NextOpen" Before="CostInitialize" Condition="NOT Installed AND OFFICE15INSTALLED" />
       <Custom Action="CustomActionGetOffice16NextOpen" Before="CostInitialize" Condition="NOT Installed AND OFFICE16INSTALLED" />
-      <Custom Action="CustomActionInstallNodeJsSetProperties" After="CostFinalize" Condition="NOT Installed" />
-      <Custom Action="CustomActionInstallPlaywrightSetProperties" After="CustomActionInstallNodeJsSetProperties" Condition="NOT Installed" />
-      <Custom Action="CustomActionInstallNodeJs" After="InstallFiles" Condition="NOT Installed" />
-      <Custom Action="CustomActionInstallPlaywright" After="CustomActionInstallNodeJs" Condition="NOT Installed" />
     </InstallExecuteSequence>
   </Package>
 </Wix>
