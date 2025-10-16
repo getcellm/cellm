@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace Cellm.Models.Logging;
+namespace Cellm.AddIn.Logging;
 
 internal class HttpBodyLoggingHandler : DelegatingHandler
 {

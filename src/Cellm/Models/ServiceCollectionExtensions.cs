@@ -8,7 +8,7 @@ using Azure;
 using Azure.AI.Inference;
 using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
-using Cellm.Models.Logging;
+using Cellm.AddIn.Logging;
 using Cellm.Models.Prompts;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
@@ -88,19 +88,19 @@ internal static class ServiceCollectionExtensions
             {
                 // Delegate timeout to resilience pipeline
                 resilientHttpClient.Timeout = Timeout.InfiniteTimeSpan;
-            });
+            })
+            .AddAsKeyed();
 
         // Only add the logging handler if body logging is enabled
         if (cellmAddInConfiguration.EnableHttpBodyLogging)
         {
-            httpClientBuilder.AddHttpMessageHandler(sp =>
+            httpClientBuilder.AddHttpMessageHandler(serviceProvider =>
                 new HttpBodyLoggingHandler(
-                    sp.GetRequiredService<ILogger<HttpBodyLoggingHandler>>(),
+                    serviceProvider.GetRequiredService<ILogger<HttpBodyLoggingHandler>>(),
                     cellmAddInConfiguration.HttpBodyLogMaxLengthBytes));
         }
 
         httpClientBuilder
-            .AddAsKeyed()
             .AddResilienceHandler("ResilientHttpClientHandler", (builder, context) =>
             {
                 // Decrease severity of most Polly events
