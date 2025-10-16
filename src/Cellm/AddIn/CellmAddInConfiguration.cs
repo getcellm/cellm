@@ -25,4 +25,6 @@ public class CellmAddInConfiguration
     public int LogFileSizeLimitMegabyte { get; init; } = 8;
 
     public int LogFileRetainedCount { get; init; } = 2;
+
+    public string MediatrLicenseKey { get; init; } = string.Empty;
 }

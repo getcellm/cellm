@@ -139,6 +139,7 @@ public class CellmAddIn : IExcelAddIn
         services
             .AddMediatR(cfg =>
             {
+                cfg.LicenseKey = cellmAddInConfiguration.MediatrLicenseKey;
                 cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
                 cfg.AddBehavior<SentryBehavior<ProviderRequest, ProviderResponse>>(ServiceLifetime.Singleton);
                 cfg.AddBehavior<ToolBehavior<ProviderRequest, ProviderResponse>>(ServiceLifetime.Singleton);
