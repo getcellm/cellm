@@ -87,7 +87,6 @@ public class CellmAddIn : IExcelAddIn
             .Configure<SentryConfiguration>(configuration.GetRequiredSection(nameof(SentryConfiguration)));
 
         // Logging
-        // TODO: Replace "var sentryConfiguration = configurationProvider.GetRequiredService<IOptions<SentryConfiguration>>();" with this all over:
         var sentryConfiguration = configuration.GetRequiredSection(nameof(SentryConfiguration)).Get<SentryConfiguration>()
             ?? throw new NullReferenceException(nameof(SentryConfiguration));
 
@@ -149,6 +148,7 @@ public class CellmAddIn : IExcelAddIn
             })
             .AddSingleton<IProviderBehavior, AdditionalPropertiesBehavior>()
             .AddSingleton<IProviderBehavior, GeminiTemperatureBehavior>()
+            .AddSingleton<IProviderBehavior, OpenAiTemperatureBehavior>()
             .AddSingleton<IProviderBehavior, StructuredOutputWithToolsBehavior>()
             .AddSingleton<IProviderBehavior, MistralThinkingBehavior>();
 
