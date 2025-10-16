@@ -45,16 +45,16 @@ internal class ProviderRequestHandler(IChatClientFactory chatClientFactory) : IR
     // to appending a JSON schema to the user message.
     private static bool UseJsonSchemaResponseFormat(Provider provider, Prompt prompt)
     {
-        // We assume all providers support structured output via JSON schema 
-        // when tools are disabled. If this is proven wrong, we need to encode this
-        // capability similar to how we encode CanUseStructuredOutputWithTools,
-        // check the current provider's capability, and return false if JSON schema 
-        // is requested but not supported.
         var providerConfiguration = CellmAddIn.GetProviderConfiguration(provider);
-        var isToolsEnabled = prompt.Options.Tools?.Any() ?? false;
+
+        if (!providerConfiguration.SupportsStructuredOutput)
+        {
+            return false;
+        }
 
         // Provider can interleave JSON schema responses and tool responses 
         // OR provider supports JSON schema responses iff tools are disabled
-        return providerConfiguration.CanUseStructuredOutputWithTools || !isToolsEnabled;
+        var isToolsEnabled = prompt.Options.Tools?.Any() ?? false;
+        return providerConfiguration.SupportsStructuredOutputWithTools || !isToolsEnabled;
     }
 }

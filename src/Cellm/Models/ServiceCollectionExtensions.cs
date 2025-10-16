@@ -6,7 +6,9 @@ using Amazon.BedrockRuntime;
 using Anthropic.SDK;
 using Azure;
 using Azure.AI.Inference;
+using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
+using Cellm.Models.Logging;
 using Cellm.Models.Prompts;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
@@ -23,7 +25,7 @@ using Cellm.Models.Resilience;
 using Cellm.Users;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Http.Diagnostics;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.MistralAI;
@@ -79,19 +81,25 @@ internal static class ServiceCollectionExtensions
         });
     }
 
-    public static IServiceCollection AddRetryHttpClient(this IServiceCollection services, ResilienceConfiguration resilienceConfiguration)
+    public static IServiceCollection AddRetryHttpClient(this IServiceCollection services, ResilienceConfiguration resilienceConfiguration, CellmAddInConfiguration cellmAddInConfiguration)
     {
-        services
-            .AddRedaction()
-            .AddExtendedHttpClientLogging(options =>
-            {
-                options.RequestPathParameterRedactionMode = HttpRouteParameterRedactionMode.None;
-            })
+        var httpClientBuilder = services
             .AddHttpClient("ResilientHttpClient", resilientHttpClient =>
             {
                 // Delegate timeout to resilience pipeline
                 resilientHttpClient.Timeout = Timeout.InfiniteTimeSpan;
-            })
+            });
+
+        // Only add the logging handler if body logging is enabled
+        if (cellmAddInConfiguration.EnableHttpBodyLogging)
+        {
+            httpClientBuilder.AddHttpMessageHandler(sp =>
+                new HttpBodyLoggingHandler(
+                    sp.GetRequiredService<ILogger<HttpBodyLoggingHandler>>(),
+                    cellmAddInConfiguration.HttpBodyLogMaxLengthBytes));
+        }
+
+        httpClientBuilder
             .AddAsKeyed()
             .AddResilienceHandler("ResilientHttpClientHandler", (builder, context) =>
             {

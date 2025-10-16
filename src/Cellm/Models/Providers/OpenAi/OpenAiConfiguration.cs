@@ -27,7 +27,9 @@ internal class OpenAiConfiguration : IProviderConfiguration
 
     public AdditionalPropertiesDictionary? AdditionalProperties { get; init; } = [];
 
-    public bool CanUseStructuredOutputWithTools { get; init; } = true;
+    public bool SupportsStructuredOutput { get; init; } = true;
+
+    public bool SupportsStructuredOutputWithTools { get; init; } = true;
 
     public bool IsEnabled { get; init; } = false;
 }

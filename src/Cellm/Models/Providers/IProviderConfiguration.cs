@@ -23,7 +23,9 @@ internal interface IProviderConfiguration
 
     AdditionalPropertiesDictionary? AdditionalProperties { get; init; }
 
-    bool CanUseStructuredOutputWithTools { get; init; }
+    bool SupportsStructuredOutput { get; init; }
+
+    bool SupportsStructuredOutputWithTools { get; init; }
 
     bool IsEnabled { get; init; }
 }

@@ -22,6 +22,7 @@ using Cellm.Tools.ModelContextProtocol;
 using Cellm.Users;
 using ExcelDna.Integration;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -158,10 +159,22 @@ public class CellmAddIn : IExcelAddIn
         services
             .AddSingleton(configuration)
             .AddTransient<ArgumentParser>()
-            .AddSingleton<Account>()
-            .AddSingleton<Client>()
             .AddRateLimiter(resilienceConfiguration)
-            .AddRetryHttpClient(resilienceConfiguration);
+            .AddRetryHttpClient(resilienceConfiguration, cellmAddInConfiguration);
+
+        // Register Account with the ResilientHttpClient
+        services.AddSingleton<Account>(sp =>
+        {
+            var factory = sp.GetRequiredService<IHttpClientFactory>();
+            var httpClient = factory.CreateClient("ResilientHttpClient");
+            var accountConfig = sp.GetRequiredService<IOptionsMonitor<AccountConfiguration>>();
+            var cache = sp.GetRequiredService<HybridCache>();
+            var logger = sp.GetRequiredService<ILogger<Account>>();
+            return new Account(accountConfig, cache, httpClient, logger);
+        });
+
+        services
+            .AddSingleton<Client>();
 
 #pragma warning disable EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates.
         services

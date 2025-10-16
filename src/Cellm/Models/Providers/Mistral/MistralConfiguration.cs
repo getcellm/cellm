@@ -28,7 +28,9 @@ internal class MistralConfiguration : IProviderConfiguration
 
     public AdditionalPropertiesDictionary? AdditionalProperties { get; init; } = [];
 
-    public bool CanUseStructuredOutputWithTools { get; init; } = false;
+    public bool SupportsStructuredOutput { get; init; } = false;
+
+    public bool SupportsStructuredOutputWithTools { get; init; } = false;
 
     public bool IsEnabled { get; init; } = false;
 }
