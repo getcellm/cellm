@@ -87,61 +87,51 @@ internal class ToolBehavior<TRequest, TResponse>(
 
     private async Task<IList<McpClientTool>> GetOrFetchServerToolsAsync(StdioClientTransportOptions stdioClientTransportOptions, CancellationToken cancellationToken)
     {
-        if (_cache.ContainsKey(stdioClientTransportOptions.Name ?? throw new NullReferenceException(nameof(stdioClientTransportOptions))) && _cache[stdioClientTransportOptions.Name] is IList<McpClientTool> cachedMcpClientTool)
+        if (_cache.ContainsKey(stdioClientTransportOptions.Name ?? throw new NullReferenceException(nameof(stdioClientTransportOptions))) && _cache[stdioClientTransportOptions.Name] is IList<McpClientTool> cachedMcpClientTools)
         {
             logger.LogDebug("Using cached tools for {ServerName}", stdioClientTransportOptions.Name);
-            return cachedMcpClientTool;
+            return cachedMcpClientTools;
         }
 
         try
         {
             var clientTransport = new StdioClientTransport(stdioClientTransportOptions);
             var mcpClient = await McpClientFactory.CreateAsync(clientTransport, loggerFactory: loggerFactory, cancellationToken: cancellationToken).ConfigureAwait(false);
-            var tools = await mcpClient.ListToolsAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var mcpClientTools = await mcpClient.ListToolsAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
-            _cache[stdioClientTransportOptions.Name ?? throw new NullReferenceException(nameof(stdioClientTransportOptions))] = tools;
+            _cache[stdioClientTransportOptions.Name ?? throw new NullReferenceException(nameof(stdioClientTransportOptions))] = mcpClientTools;
 
-            return tools;
-        }
-        catch (Win32Exception ex)
-        {
-            logger.LogError(ex, "MCP server '{ServerName}' failed to start. Command: {Command}", stdioClientTransportOptions.Name, stdioClientTransportOptions.Command);
-            throw new McpServerException($"The '{stdioClientTransportOptions.Name}' MCP server failed to start. The command '{stdioClientTransportOptions.Command}' requires Node.js to be installed.\n\nTo fix this, either:\n• Install Node.js from https://nodejs.org/ (see https://docs.getcellm.com/get-started/install for details)\n• Or disable the '{stdioClientTransportOptions.Name}' tool in the Cellm ribbon > Tools > MCP menu", ex);
-        }
-        catch (FileNotFoundException ex)
-        {
-            logger.LogError(ex, "MCP server '{ServerName}' failed to start. Command: {Command}", stdioClientTransportOptions.Name, stdioClientTransportOptions.Command);
-            throw new McpServerException($"The '{stdioClientTransportOptions.Name}' MCP server failed to start. The command '{stdioClientTransportOptions.Command}' requires Node.js to be installed.\n\nTo fix this, either:\n• Install Node.js from https://nodejs.org/ (see https://docs.getcellm.com/get-started/install for details)\n• Or disable the '{stdioClientTransportOptions.Name}' tool in the Cellm ribbon > Tools > MCP menu", ex);
+            return mcpClientTools;
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            logger.LogError(ex, "MCP server '{ServerName}' failed to start. Command: {Command}", stdioClientTransportOptions.Name, stdioClientTransportOptions.Command);
-            throw new McpServerException($"The '{stdioClientTransportOptions.Name}' MCP server failed to start.\n\nPlease check https://docs.getcellm.com/get-started/install for troubleshooting or disable the '{stdioClientTransportOptions.Name}' tool in the Cellm ribbon > Tools > MCP menu", ex);
+            logger.LogError(ex, "MCP server '{ServerName}' failed to start: {Message} ({Command})", stdioClientTransportOptions.Name, ex.Message, stdioClientTransportOptions.Command);
+            throw new McpServerException($"The MCP server '{stdioClientTransportOptions.Name}' failed to start. Please check https://docs.getcellm.com/get-started/install for troubleshooting or disable the '{stdioClientTransportOptions.Name}' tool in the Cellm > Tools > MCP menu. Error message: {ex.Message}", ex);
         }
     }
 
     private async Task<IList<McpClientTool>> GetOrFetchServerToolsAsync(SseClientTransportOptions sseClientTransportOptions, CancellationToken cancellationToken)
     {
-        if (_cache.ContainsKey(sseClientTransportOptions.Name ?? throw new NullReferenceException(nameof(sseClientTransportOptions))) && _cache[sseClientTransportOptions.Name] is IList<McpClientTool> cachedMcpClientTool)
+        if (_cache.ContainsKey(sseClientTransportOptions.Name ?? throw new NullReferenceException(nameof(sseClientTransportOptions))) && _cache[sseClientTransportOptions.Name] is IList<McpClientTool> cachedMcpClientTools)
         {
             logger.LogDebug("Using cached tools for {ServerName}", sseClientTransportOptions.Name);
-            return cachedMcpClientTool;
+            return cachedMcpClientTools;
         }
 
         try
         {
             var clientTransport = new SseClientTransport(sseClientTransportOptions);
             var mcpClient = await McpClientFactory.CreateAsync(clientTransport, loggerFactory: loggerFactory, cancellationToken: cancellationToken).ConfigureAwait(false);
-            var tools = await mcpClient.ListToolsAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var mcpClientTools = await mcpClient.ListToolsAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
-            _cache[sseClientTransportOptions.Name ?? throw new NullReferenceException(nameof(sseClientTransportOptions))] = tools;
+            _cache[sseClientTransportOptions.Name ?? throw new NullReferenceException(nameof(sseClientTransportOptions))] = mcpClientTools;
 
-            return tools;
+            return mcpClientTools;
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            logger.LogError(ex, "MCP server '{ServerName}' failed to connect. Endpoint: {Endpoint}", sseClientTransportOptions.Name, sseClientTransportOptions.Endpoint);
-            throw new McpServerException($"The '{sseClientTransportOptions.Name}' MCP server failed to connect to {sseClientTransportOptions.Endpoint}.\n\nPlease check https://docs.getcellm.com/get-started/install for troubleshooting or disable the '{sseClientTransportOptions.Name}' tool in the Cellm ribbon > Tools > MCP menu", ex);
+            logger.LogError(ex, "MCP server '{ServerName}' failed to connect to {Endpoint}: {Message}", sseClientTransportOptions.Name, sseClientTransportOptions.Endpoint, ex.Message);
+            throw new McpServerException($"The MCP server '{sseClientTransportOptions.Name}' failed to connect to {sseClientTransportOptions.Endpoint}. Please check https://docs.getcellm.com/get-started/install for troubleshooting or disable the '{sseClientTransportOptions.Name}' tool in the Cellm > Tools > MCP menu. Error message: {ex.Message}", ex);
         }
     }
 }
