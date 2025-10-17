@@ -23,7 +23,7 @@ internal interface IProviderConfiguration
 
     AdditionalPropertiesDictionary? AdditionalProperties { get; init; }
 
-    bool SupportsStructuredOutput { get; init; }
+    bool SupportsJsonSchemaResponses { get; init; }
 
     bool SupportsStructuredOutputWithTools { get; init; }
 

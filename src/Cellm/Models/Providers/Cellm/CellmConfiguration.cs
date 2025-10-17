@@ -25,7 +25,7 @@ internal class CellmConfiguration : IProviderConfiguration
 
     public AdditionalPropertiesDictionary? AdditionalProperties { get; init; } = [];
 
-    public bool SupportsStructuredOutput { get; init; } = false;
+    public bool SupportsJsonSchemaResponses { get; init; } = false;
 
     public bool SupportsStructuredOutputWithTools { get; init; } = false;
 

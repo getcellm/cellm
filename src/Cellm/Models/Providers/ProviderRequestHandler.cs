@@ -41,20 +41,27 @@ internal class ProviderRequestHandler(IChatClientFactory chatClientFactory) : IR
         return new ProviderResponse(prompt, chatResponse);
     }
 
-    // Determines if we should impose the JSON schema on the response or fallback
-    // to appending a JSON schema to the user message.
+    // Determines if we should impose the JSON schema on the response, fallback
+    // to appending a JSON schema to the user message, or throw a helpful error message
     private static bool UseJsonSchemaResponseFormat(Provider provider, Prompt prompt)
     {
         var providerConfiguration = CellmAddIn.GetProviderConfiguration(provider);
+        var supportsJsonSchemaResponses = providerConfiguration.SupportsJsonSchemaResponses;
+        var supportsStructuredOutputWithTools = providerConfiguration.SupportsStructuredOutputWithTools;
+        var isAnyToolEnabled = prompt.Options.Tools?.Any() ?? false;
 
-        if (!providerConfiguration.SupportsStructuredOutput)
+        return (supportsJsonSchemaResponses, supportsStructuredOutputWithTools, isAnyToolEnabled) switch
         {
-            return false;
-        }
-
-        // Provider can interleave JSON schema responses and tool responses 
-        // OR provider supports JSON schema responses iff tools are disabled
-        var isToolsEnabled = prompt.Options.Tools?.Any() ?? false;
-        return providerConfiguration.SupportsStructuredOutputWithTools || !isToolsEnabled;
+            // Provider can interleave JSON schema responses and tool responses
+            (true, true, _) => true,
+            // Provider supports JSON schema responses iff tools are disabled
+            (true, false, true) => throw new CellmException($"{provider} does not support {prompt.OutputShape} output when tools are enabled"),
+            (true, false, false) => true,
+            // Provider can interleave JSON prompt responses and tool responses
+            (false, true, _) => false,
+            // Provider supports JSON prompt responses iff tools are disabled
+            (false, false, true) => throw new CellmException($"{provider} does not support {prompt.OutputShape} output when tools are enabled"),
+            (false, false, false) => false,
+        };
     }
 }

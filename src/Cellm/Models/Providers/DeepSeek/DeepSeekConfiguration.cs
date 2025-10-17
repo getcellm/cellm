@@ -28,7 +28,7 @@ internal class DeepSeekConfiguration : IProviderConfiguration
 
     public AdditionalPropertiesDictionary? AdditionalProperties { get; init; } = [];
 
-    public bool SupportsStructuredOutput { get; init; } = true;
+    public bool SupportsJsonSchemaResponses { get; init; } = true;
 
     public bool SupportsStructuredOutputWithTools { get; init; } = false;
 
