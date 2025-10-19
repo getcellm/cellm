@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using Cellm.AddIn.Exceptions;
 using Cellm.Models.Prompts;
@@ -84,19 +85,19 @@ public class ArgumentParser(IConfiguration configuration)
         var arguments = (_instructions, _cellsOrTemperature, _temperature) switch
         {
             // =PROMPT("Hello world")
-            (string instructions, ExcelMissing, ExcelMissing) => new Arguments(provider, model, string.Empty, instructions, ParseTemperature(Convert.ToDouble(defaultTemperature)), _outputShape),
+            (string instructions, ExcelMissing, ExcelMissing) => new Arguments(provider, model, string.Empty, instructions, ParseTemperature(defaultTemperature), _outputShape),
             // =PROMPT("Hello world", 0.7)
             (string instructions, double temperature, ExcelMissing) => new Arguments(provider, model, string.Empty, instructions, ParseTemperature(temperature), _outputShape),
             // =PROMPT("Hello world", A1:B2)
-            (string instructions, ExcelReference cells, ExcelMissing) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), instructions, ParseTemperature(Convert.ToDouble(defaultTemperature)), _outputShape),
+            (string instructions, ExcelReference cells, ExcelMissing) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), instructions, ParseTemperature(defaultTemperature), _outputShape),
             // =PROMPT("Hello world", A1:B2, 0.7)
             (string instructions, ExcelReference cells, double temperature) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), instructions, ParseTemperature(temperature), _outputShape),
             // =PROMPT(A1:B2)
-            (ExcelReference instructions, ExcelMissing, ExcelMissing) => new Arguments(provider, model, string.Empty, new Cells(instructions.RowFirst, instructions.ColumnFirst, instructions.GetValue()), ParseTemperature(Convert.ToDouble(defaultTemperature)), _outputShape),
+            (ExcelReference instructions, ExcelMissing, ExcelMissing) => new Arguments(provider, model, string.Empty, new Cells(instructions.RowFirst, instructions.ColumnFirst, instructions.GetValue()), ParseTemperature(defaultTemperature), _outputShape),
             // =PROMPT(A1:B2, 0.7)
             (ExcelReference instructions, double temperature, ExcelMissing) => new Arguments(provider, model, string.Empty, new Cells(instructions.RowFirst, instructions.ColumnFirst, instructions.GetValue()), ParseTemperature(temperature), _outputShape),
             // =PROMPT(A1:B2, C1:D2)
-            (ExcelReference instructions, ExcelReference cells, ExcelMissing) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), new Cells(instructions.RowFirst, instructions.ColumnFirst, instructions.GetValue()), ParseTemperature(Convert.ToDouble(defaultTemperature)), _outputShape),
+            (ExcelReference instructions, ExcelReference cells, ExcelMissing) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), new Cells(instructions.RowFirst, instructions.ColumnFirst, instructions.GetValue()), ParseTemperature(defaultTemperature), _outputShape),
             // =PROMPT(A1:B2, C1:D2, 0.7)
             (ExcelReference instructions, ExcelReference cells, double temperature) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), new Cells(instructions.RowFirst, instructions.ColumnFirst, instructions.GetValue()), ParseTemperature(temperature), _outputShape),
             // Anything else
@@ -268,6 +269,17 @@ public class ArgumentParser(IConfiguration configuration)
         }
 
         return tableBuilder.ToString();
+    }
+
+    private static double ParseTemperature(string temperatureAsString)
+    {
+        if (double.TryParse(temperatureAsString.Replace(',', '.'), NumberStyles.Any, CultureInfo.GetCultureInfo("en-US"), out var temperature))
+        {
+            return ParseTemperature(temperature);
+        }
+
+        // Fallback
+        return 0.0;
     }
 
     private static double ParseTemperature(double temperature)
