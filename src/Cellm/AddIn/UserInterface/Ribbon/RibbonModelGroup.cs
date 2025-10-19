@@ -559,44 +559,44 @@ public partial class RibbonMain
     {
         try
         {
-            var temperature = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultTemperature)}");
+            var temperatureAsString = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultTemperature)}");
 
-            if (temperature == "Consistent")
+            if (temperatureAsString == "Consistent")
             {
-                return temperature;
+                return temperatureAsString;
             }
 
-            if (temperature == "Neutral")
+            if (temperatureAsString == "Neutral")
             {
-                return temperature;
+                return temperatureAsString;
             }
 
-            if (temperature == "Creative")
+            if (temperatureAsString == "Creative")
             {
-                return temperature;
+                return temperatureAsString;
             }
-
-            if (double.TryParse(temperature, out var tempVal))
+            
+            if (double.TryParse(temperatureAsString.Replace(',', '.'), NumberStyles.Any, CultureInfo.GetCultureInfo("en-US"), out var temperature))
             {
-                if (tempVal == 0)
+                if (temperature == 0)
                 {
                     return "Consistent";
                 }
 
-                if (tempVal == 0.3)
+                if (temperature == 0.3)
                 {
                     return "Neutral";
                 }
 
-                if (tempVal == 0.7)
+                if (temperature == 0.7)
                 {
                     return "Creative";
                 }
 
-                return tempVal.ToString("0.0");
+                return temperature.ToString("0.0");
             }
 
-            return "Deterministic";
+            return "0.0";
         }
         catch (KeyNotFoundException)
         {
@@ -636,7 +636,7 @@ public partial class RibbonMain
         }
 
         // Validate that the input is a valid temperature (between 0 and 1)
-        if (double.TryParse(temperatureAsString.Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out var temperature))
+        if (double.TryParse(temperatureAsString.Replace(',', '.'), NumberStyles.Any, CultureInfo.GetCultureInfo("en-US"), out var temperature))
         {
             if (temperature < 0 || temperature > 1)
             {
