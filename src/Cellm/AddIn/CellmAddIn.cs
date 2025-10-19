@@ -149,7 +149,6 @@ public class CellmAddIn : IExcelAddIn
             .AddSingleton<IProviderBehavior, AdditionalPropertiesBehavior>()
             .AddSingleton<IProviderBehavior, GeminiTemperatureBehavior>()
             .AddSingleton<IProviderBehavior, OpenAiTemperatureBehavior>()
-            .AddSingleton<IProviderBehavior, StructuredOutputWithToolsBehavior>()
             .AddSingleton<IProviderBehavior, MistralThinkingBehavior>();
 
         // Internals
@@ -162,7 +161,7 @@ public class CellmAddIn : IExcelAddIn
             .AddSingleton<Account>()
             .AddSingleton<Client>()
             .AddRateLimiter(resilienceConfiguration)
-            .AddRetryHttpClient(resilienceConfiguration);
+            .AddRetryHttpClient(resilienceConfiguration, cellmAddInConfiguration);
 
 #pragma warning disable EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates.
         services

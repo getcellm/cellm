@@ -25,7 +25,9 @@ internal class OllamaConfiguration : IProviderConfiguration
 
     public AdditionalPropertiesDictionary? AdditionalProperties { get; init; } = [];
 
-    public bool CanUseStructuredOutputWithTools { get; init; } = false;
+    public bool SupportsJsonSchemaResponses { get; init; } = true;
+
+    public bool SupportsStructuredOutputWithTools { get; init; } = false;
 
     public bool IsEnabled { get; init; } = false;
 }

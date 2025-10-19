@@ -40,7 +40,7 @@ public partial class RibbonMain
                         label="Column"
                         imageMso="TableColumnSelect" 
                         onAction="{nameof(OnPromptToColumnClicked)}"
-                        getEnabled="{nameof(GetStructuredOutputEnabled)}" 
+                        getEnabled="{nameof(GetStructuredOutputEnabled)}"
                         screentip="Output response in a column"
                         supertip="Spill multiple response values (if any) across cells below" />
                 <button id="{nameof(PromptGroupControlIds.PromptToRange)}"
@@ -55,11 +55,12 @@ public partial class RibbonMain
         </group>
         """;
     }
+
     public bool GetStructuredOutputEnabled(IRibbonControl control)
     {
         var currentProviderConfiguration = CellmAddIn.GetProviderConfiguration(GetCurrentProvider());
 
-        if (currentProviderConfiguration.CanUseStructuredOutputWithTools)
+        if (currentProviderConfiguration.SupportsStructuredOutputWithTools)
         {
             return true;
         }

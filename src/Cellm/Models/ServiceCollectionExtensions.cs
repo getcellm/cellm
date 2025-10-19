@@ -6,7 +6,9 @@ using Amazon.BedrockRuntime;
 using Anthropic.SDK;
 using Azure;
 using Azure.AI.Inference;
+using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
+using Cellm.AddIn.Logging;
 using Cellm.Models.Prompts;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
@@ -23,10 +25,9 @@ using Cellm.Models.Resilience;
 using Cellm.Users;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Http.Diagnostics;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Connectors.MistralAI;
+using Mistral.SDK;
 using OllamaSharp;
 using OpenAI;
 using Polly;
@@ -79,20 +80,26 @@ internal static class ServiceCollectionExtensions
         });
     }
 
-    public static IServiceCollection AddRetryHttpClient(this IServiceCollection services, ResilienceConfiguration resilienceConfiguration)
+    public static IServiceCollection AddRetryHttpClient(this IServiceCollection services, ResilienceConfiguration resilienceConfiguration, CellmAddInConfiguration cellmAddInConfiguration)
     {
-        services
-            .AddRedaction()
-            .AddExtendedHttpClientLogging(options =>
-            {
-                options.RequestPathParameterRedactionMode = HttpRouteParameterRedactionMode.None;
-            })
+        var httpClientBuilder = services
             .AddHttpClient("ResilientHttpClient", resilientHttpClient =>
             {
                 // Delegate timeout to resilience pipeline
                 resilientHttpClient.Timeout = Timeout.InfiniteTimeSpan;
             })
-            .AddAsKeyed()
+            .AddAsKeyed();
+
+        // Only add the logging handler if body logging is enabled
+        if (cellmAddInConfiguration.EnableHttpBodyLogging)
+        {
+            httpClientBuilder.AddHttpMessageHandler(serviceProvider =>
+                new HttpBodyLoggingHandler(
+                    serviceProvider.GetRequiredService<ILogger<HttpBodyLoggingHandler>>(),
+                    cellmAddInConfiguration.HttpBodyLogMaxLengthBytes));
+        }
+
+        httpClientBuilder
             .AddResilienceHandler("ResilientHttpClientHandler", (builder, context) =>
             {
                 // Decrease severity of most Polly events
@@ -230,11 +237,13 @@ internal static class ServiceCollectionExtensions
                 var cellmConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<CellmConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
-                return new MistralAIChatCompletionService(
-                    cellmConfiguration.CurrentValue.DefaultModel,
-                    accountConfiguration.CurrentValue.ApiKey,
-                    cellmConfiguration.CurrentValue.BaseAddress,
-                    resilientHttpClient).AsChatClient();
+                var apiAuthentication = new Mistral.SDK.APIAuthentication(accountConfiguration.CurrentValue.ApiKey);
+                var cellmClient = new MistralClient(apiAuthentication, resilientHttpClient)
+                {
+                    ApiUrlFormat = $"{cellmConfiguration.CurrentValue.BaseAddress.ToString().TrimEnd('/')}/{{1}}"
+                };
+
+                return cellmClient.Completions;
             }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 
@@ -319,11 +328,9 @@ internal static class ServiceCollectionExtensions
                     throw new CellmException($"Empty {nameof(MistralConfiguration.ApiKey)} for {Provider.Mistral}. Please set your API key.");
                 }
 
-                return new MistralAIChatCompletionService(
-                    mistralConfiguration.CurrentValue.DefaultModel,
-                    mistralConfiguration.CurrentValue.ApiKey,
-                    mistralConfiguration.CurrentValue.BaseAddress,
-                    resilientHttpClient).AsChatClient();
+                var apiAuthentication = new Mistral.SDK.APIAuthentication(mistralConfiguration.CurrentValue.ApiKey);
+                var mistralClient = new MistralClient(apiAuthentication, resilientHttpClient);
+                return mistralClient.Completions;
             }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 

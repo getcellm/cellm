@@ -26,5 +26,9 @@ public class CellmAddInConfiguration
 
     public int LogFileRetainedCount { get; init; } = 2;
 
+    public bool EnableHttpBodyLogging { get; init; } = false;
+
+    public int HttpBodyLogMaxLengthBytes { get; init; } = 32768;
+
     public string MediatrLicenseKey { get; init; } = string.Empty;
 }
