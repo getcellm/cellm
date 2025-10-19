@@ -11,9 +11,11 @@
       <ComponentRef Id="CellmAddInOffice16RegistryKey" />
     </Feature>
     
-    <ui:WixUI 
-      Id="WixUI_InstallDir" 
+    <ui:WixUI
+      Id="WixUI_InstallDir"
       InstallDirectory="INSTALLFOLDER" />
+
+    <WixVariable Id="WixUILicenseRtf" Value="license.rtf" />
 
     <UI>
       <ProgressText Action="InstallFiles" Message="Copying files ..." />
