@@ -575,7 +575,7 @@ public partial class RibbonMain
             {
                 return temperatureAsString;
             }
-            
+
             if (double.TryParse(temperatureAsString.Replace(',', '.'), NumberStyles.Any, CultureInfo.GetCultureInfo("en-US"), out var temperature))
             {
                 if (temperature == 0)
