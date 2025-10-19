@@ -27,8 +27,7 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Connectors.MistralAI;
+using Mistral.SDK;
 using OllamaSharp;
 using OpenAI;
 using Polly;
@@ -238,11 +237,13 @@ internal static class ServiceCollectionExtensions
                 var cellmConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<CellmConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
-                return new MistralAIChatCompletionService(
-                    cellmConfiguration.CurrentValue.DefaultModel,
-                    accountConfiguration.CurrentValue.ApiKey,
-                    cellmConfiguration.CurrentValue.BaseAddress,
-                    resilientHttpClient).AsChatClient();
+                var apiAuthentication = new Mistral.SDK.APIAuthentication(accountConfiguration.CurrentValue.ApiKey);
+                var cellmClient = new MistralClient(apiAuthentication, resilientHttpClient)
+                {
+                    ApiUrlFormat = $"{cellmConfiguration.CurrentValue.BaseAddress.ToString().TrimEnd('/')}/{{1}}"
+                };
+
+                return cellmClient.Completions;
             }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 
@@ -327,11 +328,9 @@ internal static class ServiceCollectionExtensions
                     throw new CellmException($"Empty {nameof(MistralConfiguration.ApiKey)} for {Provider.Mistral}. Please set your API key.");
                 }
 
-                return new MistralAIChatCompletionService(
-                    mistralConfiguration.CurrentValue.DefaultModel,
-                    mistralConfiguration.CurrentValue.ApiKey,
-                    mistralConfiguration.CurrentValue.BaseAddress,
-                    resilientHttpClient).AsChatClient();
+                var apiAuthentication = new Mistral.SDK.APIAuthentication(mistralConfiguration.CurrentValue.ApiKey);
+                var mistralClient = new MistralClient(apiAuthentication, resilientHttpClient);
+                return mistralClient.Completions;
             }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 
