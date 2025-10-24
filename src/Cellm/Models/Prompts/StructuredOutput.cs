@@ -53,9 +53,9 @@ public static class StructuredOutput
         }
     }
 
-    private record Array2d(string[][] Data);
+    public record Array1d(string[] Data);
 
-    private record Array1d(string[] Data);
+    public record Array2d(string[][] Data);
 
     private static string[,] ConvertRowToArray2d(string[] data)
     {
