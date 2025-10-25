@@ -199,7 +199,7 @@ internal class Account(
                 throw new NullReferenceException(nameof(entitlements));
             }
 
-            logger.LogInformation("Deserializing entitlements for {email} ... {@entitlements}",
+            logger.LogInformation("Deserializing entitlements for {email} ... Done: {@entitlements}",
                 accountConfiguration.CurrentValue.Email, entitlements.AsEnumerable());
 
             return entitlements;
