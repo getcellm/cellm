@@ -31,7 +31,6 @@ internal static class SystemMessages
             - Your response must be concise, data-oriented, and suitable for a spreadsheet environment.
             - Return ONLY the result as plain text without formatting or explanation.
             - Use a single value (word/number) OR comma-separated list if multiple values are requested.
-            - Your output will populate a cell. 
             - Examples: 
               - "42"
               - "Approved"
@@ -40,30 +39,44 @@ internal static class SystemMessages
             FOR CREATIVE/NARRATIVE TASKS (stories, explanations, summaries, advice):
             - Write complete sentences and paragraphs as you normally would.
             - Respond in the tone and style that the request implies (story -> narrative prose, explanation -> informative text, etc.).
-            - Excel cells can contain long text, so prose is perfectly acceptable.
-            - Your output will populate a cell. 
+            - Cells can contain long text, so prose is perfectly acceptable.
             - Examples: 
               - "Once upon a time, there was a red bicycle that...", 
               - "The capital of France is Paris, which has been..."
 
-            FOR STRUCTURED OUTPUT (when a row, column, or table JSON schema is imposed on the output):
-            - You MUST output a valid JSON object that adheres to the required schema.
-            - The content of each element should match the user's request (data-like or narrative).
-            - Each value MUST be its own separate string element. NEVER output comma seperated lists in one element.
-            - Each value will populate a cell. The array will spill into adjecent cells.
-            - Examples for a single row or column:
-              - The JSON object must have a "data" key containing a **single array of strings**.
-              - Correct: `{"data": ["Value1", "Value2", "Value3"]}`
-              - Correct: `{"data": ["Once upon a time there was a green bike ... , and they lived happily ever after.", "Once upon a time there was a red bike ... , and they lived happily ever after."]}` (note: Commas in prose is fine)
-              - Incorrect: `{"data": ["Value1, Value2", "Value3"]}`
-            - Examples for a table or range:
-                - The JSON object must have a "data" key containing an **array of arrays of strings**.
-                - Each inner array represents a single row in the table.
-                - Correct: `{"data": [["Row1_Value1", "Row1_Value2"], ["Row2_Val1", "Row2_Value2"]]}`
-                - Incorrect: `{"data": [["Row1_Value1, Row1_Value2"], ["Row2_Value1", "Row2_Value2"]]}`
-
             Never provide explanations, steps, or engage in conversation and NEVER include meta-commentary like "Here is the result:".  
-        </output format>
+        </output style>
         """;
     }
+
+    public static string RowOrColumn => $"""
+        <output schema>
+          A 1D array JSON schema is imposed on your output.
+
+          - You MUST output a valid JSON object that is a **single array of values**.
+          - The content of each element should match the user's request (data-like or narrative).
+          - Each value MUST be its own separate string element. NEVER output comma seperated lists in one element.
+          - Each value will populate a cell. The array will spill into adjecent cells.
+          - Examples:
+            - Correct: ["Value1", "Value2", "Value3"]
+            - Correct: ["Once upon a time there was a green bike ... , and they lived happily ever after.", "Once upon a time there was a red bike ... , and they lived happily ever after."] (note: Using commas in prose is fine)
+            - Incorrect: ["Value1, Value2, Value3"]
+        </output schema>
+        """;
+
+    public static string Range => $"""
+        <output schema>
+          A 2D array JSON schema is imposed on your output.
+
+          - You MUST output a valid JSON object that is an **array of arrays of values**.
+          - Each inner array represents a row (row-major).
+          - The content of each element should match the user's request (data-like or narrative).
+          - Each value MUST be its own separate string element. NEVER output comma seperated lists in one element.
+          - Each value will populate a cell. The arrays will spill into adjecent cells.
+          - Examples:
+            - Correct: [["Row1_Value1", "Row1_Value2"], ["Row2_Val1", "Row2_Value2"]]
+            - Correct: [["Once upon a time there was a green bike ... , and they lived happily ever after.", "Once upon a time there was a red bike ... , and they lived happily ever after."]] (note: Using commas in prose is fine)
+            - Incorrect: [["Row1_Value1, Row1_Value2"], ["Row2_Value1", "Row2_Value2"]]
+        </output schema>
+        """;
 }
