@@ -1,6 +1,6 @@
 ﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
-  <Package 
-    Id="TokenFactory.Cellm" Name="Cellm" Manufacturer="Token Factory ApS" Version="0.3.0" Scope="perUser" InstallerVersion="500" Language="1033">
+  <Package
+    Id="TokenFactoryApSCellm" Name="Cellm" Manufacturer="Token Factory ApS" Version="0.3.0" Scope="perUser" InstallerVersion="500" Language="1033">
     <MajorUpgrade DowngradeErrorMessage="!(loc.DowngradeError)" />
     <Media  Id="1"  Cabinet="Cellm.cab"  EmbedCab="yes" />
     <Feature Id="Main">
@@ -39,11 +39,13 @@
     <CustomAction Id="CustomActionGetOffice14NextOpen" DllEntry="GetOffice14NextOpen" BinaryRef="CustomActions" Execute="immediate" />
     <CustomAction Id="CustomActionGetOffice15NextOpen" DllEntry="GetOffice15NextOpen" BinaryRef="CustomActions" Execute="immediate" />
     <CustomAction Id="CustomActionGetOffice16NextOpen" DllEntry="GetOffice16NextOpen" BinaryRef="CustomActions" Execute="immediate" />
+    <CustomAction Id="CustomActionRemoveOfficeRegistryKeys" DllEntry="RemoveOfficeRegistryKeys" BinaryRef="CustomActions" Execute="deferred" Impersonate="yes" />
     <InstallExecuteSequence>
       <Custom Action="CustomActionGetOffice12NextOpen" Before="CostInitialize" Condition="NOT Installed AND OFFICE12INSTALLED" />
       <Custom Action="CustomActionGetOffice14NextOpen" Before="CostInitialize" Condition="NOT Installed AND OFFICE14INSTALLED" />
       <Custom Action="CustomActionGetOffice15NextOpen" Before="CostInitialize" Condition="NOT Installed AND OFFICE15INSTALLED" />
       <Custom Action="CustomActionGetOffice16NextOpen" Before="CostInitialize" Condition="NOT Installed AND OFFICE16INSTALLED" />
+      <Custom Action="CustomActionRemoveOfficeRegistryKeys" Before="RemoveFiles" Condition="(NOT UPGRADINGPRODUCTCODE) AND (REMOVE=&quot;ALL&quot;)" />
     </InstallExecuteSequence>
   </Package>
 </Wix>

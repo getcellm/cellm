@@ -133,7 +133,7 @@ namespace CustomActions
                 return "OPEN";
             }
 
-            // Find first unused slot in sequence (if any) 
+            // Find first unused slot in sequence (if any)
             for (var i = 1; i <= maxOpenNumber; i++)
             {
                 var openKey = $"OPEN{i}";
@@ -145,6 +145,60 @@ namespace CustomActions
 
             // Get next incremented key
             return $"OPEN{maxOpenNumber + 1}";
+        }
+
+        [CustomAction]
+        public static ActionResult RemoveOfficeRegistryKeys(Session session)
+        {
+            try
+            {
+                session.Log($"Begin {nameof(RemoveOfficeRegistryKeys)}");
+
+                RemoveOfficeKeysContainingPath(session, "12.0", "Cellm-AddIn64-packed.xll");
+                RemoveOfficeKeysContainingPath(session, "14.0", "Cellm-AddIn64-packed.xll");
+                RemoveOfficeKeysContainingPath(session, "15.0", "Cellm-AddIn64-packed.xll");
+                RemoveOfficeKeysContainingPath(session, "16.0", "Cellm-AddIn64-packed.xll");
+
+                session.Log($"End {nameof(RemoveOfficeRegistryKeys)}");
+                return ActionResult.Success;
+            }
+            catch (Exception ex)
+            {
+                session.Log($"Error in RemoveOfficeRegistryKeys: {ex.Message}");
+                // Don't fail uninstall if cleanup fails
+                return ActionResult.Success;
+            }
+        }
+
+        private static void RemoveOfficeKeysContainingPath(Session session, string version, string xllFileName)
+        {
+            var optionsPath = $@"Software\Microsoft\Office\{version}\Excel\Options";
+
+            try
+            {
+                var optionsKey = Registry.CurrentUser.OpenSubKey(optionsPath, true);
+
+                if (optionsKey == null)
+                {
+                    session.Log($"Registry key not found: {optionsPath}");
+                    return;
+                }
+
+                var valueNames = optionsKey.GetValueNames();
+                foreach (var valueName in valueNames)
+                {
+                    var value = optionsKey.GetValue(valueName)?.ToString();
+                    if (value != null && value.IndexOf(xllFileName, StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        optionsKey.DeleteValue(valueName, throwOnMissingValue: false);
+                        session.Log($"Removed registry value '{valueName}' from Office {version}: {value}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                session.Log($"Error removing registry keys from Office {version}: {ex.Message}");
+            }
         }
 
     }
