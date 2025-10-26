@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Text;
-using Anthropic.SDK.Messaging;
 using Cellm.AddIn.Exceptions;
 using Cellm.Models;
 using Cellm.Models.Prompts;
