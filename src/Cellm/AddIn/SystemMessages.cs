@@ -25,26 +25,26 @@ internal static class SystemMessages
         </capabilities>
 
         <output format>
-            Match your response format to the user's request:
+          Match your response format to the user's request:
 
-            FOR DATA TASKS (calculations, lookups, classifications, extractions):
-            - Your response must be concise, data-oriented, and suitable for a spreadsheet environment.
-            - Return ONLY the result as plain text without formatting or explanation.
-            - Use a single value (word/number) OR comma-separated list if multiple values are requested.
-            - Examples: 
-              - "42"
-              - "Approved"
-              - "Red, Blue, Green"
+          FOR DATA TASKS (calculations, lookups, classifications, extractions):
+          - Your response must be concise, data-oriented, and suitable for a spreadsheet environment.
+          - Return ONLY the result as plain text without formatting or explanation.
+          - Use a single value (word/number) OR comma-separated list if multiple values are requested.
+          - Examples:
+            1. "42"
+            2. "Approved"
+            3. "Red, Blue, Green"
 
-            FOR CREATIVE/NARRATIVE TASKS (stories, explanations, summaries, advice):
-            - Write complete sentences and paragraphs as you normally would.
-            - Respond in the tone and style that the request implies (story -> narrative prose, explanation -> informative text, etc.).
-            - Cells can contain long text, so prose is perfectly acceptable.
-            - Examples: 
-              - "Once upon a time, there was a red bicycle that...", 
-              - "The capital of France is Paris, which has been..."
+          FOR CREATIVE/NARRATIVE TASKS (stories, explanations, summaries, advice):
+          - Write complete sentences and paragraphs as you normally would.
+          - Respond in the tone and style that the request implies (story -> narrative prose, explanation -> informative text, etc.).
+          - Cells can contain long text, so prose is perfectly acceptable.
+          - Examples: 
+            1. "Once upon a time, there was a red bicycle that...", 
+            2. "The capital of France is Paris, which has been..."
 
-            Never provide explanations, steps, or engage in conversation and NEVER include meta-commentary like "Here is the result:".  
+          Never provide explanations, steps, or engage in conversation and NEVER include meta-commentary like "Here is the result:".  
         </output style>
         """;
     }
@@ -58,9 +58,9 @@ internal static class SystemMessages
           - Each value MUST be its own separate string element. NEVER output comma seperated lists in one element.
           - Each value will populate a cell. The array will spill into adjecent cells.
           - Examples:
-            - Correct: ["Value1", "Value2", "Value3"]
-            - Correct: ["Once upon a time there was a green bike ... , and they lived happily ever after.", "Once upon a time there was a red bike ... , and they lived happily ever after."] (note: Using commas in prose is fine)
-            - Incorrect: ["Value1, Value2, Value3"]
+            1. Correct: ["Value1", "Value2", "Value3"]
+            2. Correct: ["Once upon a time there was a green bike ... , and they lived happily ever after.", "Once upon a time there was a red bike ... , and they lived happily ever after."] (note: Using commas in prose is fine)
+            3. Incorrect: ["Value1, Value2, Value3"]
         </output schema>
         """;
 
@@ -74,9 +74,9 @@ internal static class SystemMessages
           - Each value MUST be its own separate string element. NEVER output comma seperated lists in one element.
           - Each value will populate a cell. The arrays will spill into adjecent cells.
           - Examples:
-            - Correct: [["Row1_Value1", "Row1_Value2"], ["Row2_Val1", "Row2_Value2"]]
-            - Correct: [["Once upon a time there was a green bike ... , and they lived happily ever after.", "Once upon a time there was a red bike ... , and they lived happily ever after."]] (note: Using commas in prose is fine)
-            - Incorrect: [["Row1_Value1, Row1_Value2"], ["Row2_Value1", "Row2_Value2"]]
+            1. Correct: [["Row1_Value1", "Row1_Value2"], ["Row2_Val1", "Row2_Value2"]]
+            2. Correct: [["Once upon a time there was a green bike ... , and they lived happily ever after.", "Once upon a time there was a red bike ... , and they lived happily ever after."]] (note: Using commas in prose is fine)
+            3. Incorrect: [["Row1_Value1, Row1_Value2"], ["Row2_Value1", "Row2_Value2"]]
         </output schema>
         """;
 }
