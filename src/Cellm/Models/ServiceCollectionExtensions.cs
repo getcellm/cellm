@@ -80,10 +80,10 @@ internal static class ServiceCollectionExtensions
         });
     }
 
-    public static IServiceCollection AddRetryHttpClient(this IServiceCollection services, ResilienceConfiguration resilienceConfiguration, CellmAddInConfiguration cellmAddInConfiguration)
+    public static IServiceCollection AddResilientHttpClient(this IServiceCollection services, ResilienceConfiguration resilienceConfiguration, CellmAddInConfiguration cellmAddInConfiguration, Provider provider)
     {
         var httpClientBuilder = services
-            .AddHttpClient("ResilientHttpClient", resilientHttpClient =>
+            .AddHttpClient(provider.ToString(), resilientHttpClient =>
             {
                 // Delegate timeout to resilience pipeline
                 resilientHttpClient.Timeout = Timeout.InfiniteTimeSpan;
@@ -132,6 +132,12 @@ internal static class ServiceCollectionExtensions
         return services;
     }
 
+    public static HttpClient GetResilientHttpClient(this IServiceProvider serviceProvider, Provider provider)
+    {
+        return serviceProvider.GetKeyedService<HttpClient>(provider.ToString())
+            ?? throw new InvalidOperationException($"No HttpClient registered for {provider}. Ensure AddRetryHttpClient was called for this provider.");
+    }
+
     public static IServiceCollection AddAnthropicChatClient(this IServiceCollection services)
     {
         services
@@ -141,7 +147,7 @@ internal static class ServiceCollectionExtensions
                 account.ThrowIfNotEntitled(Entitlement.EnableAzureProvider);
 
                 var anthropicConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<AnthropicConfiguration>>();
-                var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
+                var resilientHttpClient = serviceProvider.GetResilientHttpClient(Provider.Anthropic);
 
                 if (string.IsNullOrWhiteSpace(anthropicConfiguration.CurrentValue.ApiKey))
                 {
@@ -167,7 +173,6 @@ internal static class ServiceCollectionExtensions
                 account.ThrowIfNotEntitled(Entitlement.EnableAwsProvider);
 
                 var awsConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<AwsConfiguration>>();
-                var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
                 if (string.IsNullOrWhiteSpace(awsConfiguration.CurrentValue.ApiKey))
                 {
@@ -202,7 +207,6 @@ internal static class ServiceCollectionExtensions
                 account.ThrowIfNotEntitled(Entitlement.EnableAzureProvider);
 
                 var azureConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<AzureConfiguration>>();
-                var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
 
                 if (string.IsNullOrWhiteSpace(azureConfiguration.CurrentValue.ApiKey))
                 {
@@ -235,7 +239,7 @@ internal static class ServiceCollectionExtensions
                 }
 
                 var cellmConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<CellmConfiguration>>();
-                var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
+                var resilientHttpClient = serviceProvider.GetResilientHttpClient(Provider.Cellm);
 
                 var apiAuthentication = new Mistral.SDK.APIAuthentication(accountConfiguration.CurrentValue.ApiKey);
                 var cellmClient = new MistralClient(apiAuthentication, resilientHttpClient)
@@ -259,7 +263,7 @@ internal static class ServiceCollectionExtensions
                 account.ThrowIfNotEntitled(Entitlement.EnableDeepSeekProvider);
 
                 var deepSeekConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<DeepSeekConfiguration>>();
-                var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
+                var resilientHttpClient = serviceProvider.GetResilientHttpClient(Provider.DeepSeek);
 
                 if (string.IsNullOrWhiteSpace(deepSeekConfiguration.CurrentValue.ApiKey))
                 {
@@ -290,7 +294,7 @@ internal static class ServiceCollectionExtensions
                 account.ThrowIfNotEntitled(Entitlement.EnableGeminiProvider);
 
                 var geminiConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<GeminiConfiguration>>();
-                var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
+                var resilientHttpClient = serviceProvider.GetResilientHttpClient(Provider.Gemini);
 
                 if (string.IsNullOrWhiteSpace(geminiConfiguration.CurrentValue.ApiKey))
                 {
@@ -321,7 +325,7 @@ internal static class ServiceCollectionExtensions
                 account.ThrowIfNotEntitled(Entitlement.EnableMistralProvider);
 
                 var mistralConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<MistralConfiguration>>();
-                var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
+                var resilientHttpClient = serviceProvider.GetResilientHttpClient(Provider.Mistral);
 
                 if (string.IsNullOrWhiteSpace(mistralConfiguration.CurrentValue.ApiKey))
                 {
@@ -389,7 +393,7 @@ internal static class ServiceCollectionExtensions
                 account.ThrowIfNotEntitled(Entitlement.EnableOpenAiCompatibleProvider);
 
                 var openAiCompatibleConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<OpenAiCompatibleConfiguration>>();
-                var resilientHttpClient = serviceProvider.GetKeyedService<HttpClient>("ResilientHttpClient") ?? throw new NullReferenceException("ResilientHttpClient");
+                var resilientHttpClient = serviceProvider.GetResilientHttpClient(Provider.OpenAiCompatible);
 
                 if (openAiCompatibleConfiguration.CurrentValue.BaseAddress.IsLoopback)
                 {
