@@ -80,7 +80,7 @@ internal static class ServiceCollectionExtensions
         });
     }
 
-    public static IServiceCollection AddRetryHttpClient(this IServiceCollection services, ResilienceConfiguration resilienceConfiguration, CellmAddInConfiguration cellmAddInConfiguration, Provider provider)
+    public static IServiceCollection AddResilientHttpClient(this IServiceCollection services, ResilienceConfiguration resilienceConfiguration, CellmAddInConfiguration cellmAddInConfiguration, Provider provider)
     {
         var httpClientBuilder = services
             .AddHttpClient(provider.ToString(), resilientHttpClient =>
