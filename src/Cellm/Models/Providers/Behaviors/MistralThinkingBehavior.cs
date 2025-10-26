@@ -19,7 +19,7 @@ internal class MistralThinkingBehavior : IProviderBehavior
 
     public void After(Provider provider, Prompt prompt)
     {
-        var assistantMessage = prompt.Messages.LastOrDefault();
+      var assistantMessage = prompt.Messages.LastOrDefault();
 
         if (assistantMessage is null ||
             assistantMessage.Role != ChatRole.Assistant ||

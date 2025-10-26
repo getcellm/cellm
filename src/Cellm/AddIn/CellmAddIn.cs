@@ -161,7 +161,12 @@ public class CellmAddIn : IExcelAddIn
             .AddSingleton<Account>()
             .AddSingleton<Client>()
             .AddRateLimiter(resilienceConfiguration)
-            .AddRetryHttpClient(resilienceConfiguration, cellmAddInConfiguration);
+            .AddRetryHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.Anthropic)
+            .AddRetryHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.Cellm)
+            .AddRetryHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.DeepSeek)
+            .AddRetryHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.Gemini)
+            .AddRetryHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.Mistral)
+            .AddRetryHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.OpenAiCompatible);
 
 #pragma warning disable EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates.
         services
