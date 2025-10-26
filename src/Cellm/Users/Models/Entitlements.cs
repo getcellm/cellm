@@ -17,8 +17,12 @@ internal class Entitlements()
     private readonly List<Entitlement> AnonymousEntitlements = [
         Entitlement.EnableAnthropicProvider,
         Entitlement.EnableDeepSeekProvider,
+        Entitlement.EnableGeminiProvider,
         Entitlement.EnableMistralProvider,
-        Entitlement.EnableOpenAiProvider
+        Entitlement.EnableOllamaProvider,
+        Entitlement.EnableOpenAiProvider,
+        Entitlement.EnableOpenAiCompatibleProvider,
+        Entitlement.EnableOpenAiCompatibleProviderLocalModels
     ];
 
     public IEnumerable<Entitlement> AsEnumerable()

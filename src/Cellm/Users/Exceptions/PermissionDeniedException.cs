@@ -24,6 +24,8 @@ internal class PermissionDeniedException : CellmException
             Entitlement.EnableOllamaProvider => $"Sign in and subscribe to use models served by Ollama.",
             Entitlement.EnableOpenAiProvider => $"Sign in and subscribe to use models hosted by OpenAi.",
             Entitlement.EnableOpenAiCompatibleProvider => $"Sign in and subscribe to use OpenAI-compatible APIs.",
+            Entitlement.EnableOpenAiCompatibleProviderHostedModels => $"Sign in and subscribe to use online OpenAI-compatible APIs.",
+            Entitlement.EnableOpenAiCompatibleProviderLocalModels => $"Sign in and subscribe to use offline OpenAI-compatible APIs.",
             _ => $"Unexpected error: You do not have the required permission \"{entitlement}\"",
         };
     }
