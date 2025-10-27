@@ -1,20 +1,21 @@
 [![CI](https://github.com/getcellm/cellm/actions/workflows/ci.yml/badge.svg)](https://github.com/getcellm/cellm/actions/workflows/ci.yml)
 
 # Cellm
-Use AI in Excel formulas to run your prompt on thousands of rows of tasks in minutes.
+Use AI in Excel formulas to run your prompt on thousands of rows of data in minutes.
+
+[Website](https://www.getcellm.com) | [Documentation](https://docs.getcellm.com) | [Releases](https://github.com/getcellm/cellm/releases) | ⭐ **Star this repo** to help others discover Cellm!
 
 ## What is Cellm?
 Cellm is an Excel extension that lets you use Large Language Models (LLMs) like ChatGPT in cell formulas. Cellm's `=PROMPT()` function outputs AI responses to a range of text, similar to how Excel's `=SUM()` function outputs the sum of a range of numbers.  
 
-For example, you can write `=PROMPT(A1, "Extract all person names mentioned in the text.")` in a cell's formula and drag the cell to apply the prompt to many rows. Cellm is useful when you want to use AI for repetitive tasks that would normally require copy-pasting data in and out of a chat window many times.
-
-Read more in our [documentation](https://docs.getcellm.com).
+For example, you can write `=PROMPT("Extract all person names mentioned in the text.", A1)` in a cell's formula and drag the cell to apply the prompt to many rows. Cellm is useful when you want to use AI for repetitive tasks that would normally require copy-pasting data in and out of a chat window many times.
 
 ## Why use Cellm?
 - Make quick work of data cleaning, classification, and extraction tasks.
 - Enable marketing, finance, sales, operations and other teams to automate everyday tasks without depending on developers.
 - Immediately free yourself and your team from repetitive manual work with the spreadsheet they already master.
 - Bypass lengthy rollouts of specialized AI apps. Your team already have Excel on their computers.
+- Create your own web scraper via MCP servers. Monitor your competitor's blogs, prices, and social media everyday before your daily 09:00 meeting. 
 
 > “I love feeding data to ChatGPT, one copy-paste at a time”
 > — no one who’s run the same prompt 5 times
@@ -40,21 +41,24 @@ Just remember that the models do make mistakes at times. They might misunderstan
 
 ### Install
 
-1. Go to the [Release page](https://github.com/getcellm/cellm/releases) and download `Cellm-AddIn64-packed.xll` and `appsettings.json`. Put them in the _same_ folder.
+1. Go to the [Release page](https://github.com/getcellm/cellm/releases) and download `Cellm-AddIn-Release-x64.msi`.
 
-2. Double-click on `Cellm-AddIn64-packed.xll` and click on "Enable this add-in for this session only" when Excel opens.
+2. Run the installer.
 
-3. Download and install [Ollama](https://ollama.com/).
+3. Open Excel, choose a provider from the drop-down menu in the Cellm tab, and plug in your API key.
 
-4. Download a model, e.g. Gemma 2 2B: Open Windows Terminal (open start menu, type `Windows Terminal`, and click `OK`), type `ollama pull gemma2:2b`, and wait for the download to finish.
+You can also use local models, e.g., via [Ollama](https://ollama.com/). Download and install [Ollama](https://ollama.com/), open Windows Terminal (open start menu, type `Windows Terminal`, and click `OK`), type `ollama pull gemma3:4b`, and wait for the download to finish. Open Excel, choose the Ollama provider from the drop-down menu in the Cellm tab, and you are good to go.
 
-For permanent installation and more options, see our [installation guide](https://docs.getcellm.com/get-started/install).
+## Pricing
+- **Free tier:** Use local models or your own API keys 
+- **Paid tiers:** Available for teams needing managed infrastructure and EU data processing
+- [View pricing →](https://getcellm.com/pricing)
 
 ## Basic usage
 
 Select a cell and type `=PROMPT("What model are you and who made you?")`. For Gemma 3 4B, it will tell you that it's called "Gemma" and made by Google DeepMind.
 
-You can also use cell references. For example, copy a news article into cell A1 and type in cell B1: `=PROMPT(A1, "Extract all person names mentioned in the text")`. You can reference many cells using standard Excel notation, e.g. `=PROMPT(A1:F10, "Extract all person names in the cells")`
+You can also use cell references. For example, copy a news article into cell A1 and type in cell B1: `=PROMPT("Extract all person names mentioned in the text", A1)`. You can reference many cells using standard Excel notation, e.g. `=PROMPT("Extract all person names in the cells", A1:F10)`
 
 For more advanced usage, including function calling and configuration, see our [documentation](https://docs.getcellm.com).
 
@@ -70,11 +74,13 @@ For detailed information about configuring different models, see our documentati
 
 Cellm is useful for repetitive tasks on both structured and unstructured data:
 
-1. **Text classification:** Categorize survey responses, support tickets, etc.
-2. **Model comparison:** Compare results from different LLMs side by side
-3. **Data cleaning:** Standardize names, fix formatting issues
-4. **Content summarization:** Condense articles, papers, or reports
-5. **Entity recognition:** Pull out names, locations, dates from text
+1. **Competitive monitoring:** Track competitor pricing across 50 websites daily
+2. **Multi-language support:** Analyze customer feedback in 10+ languages
+3. **Text classification:** Categorize survey responses, support tickets, etc.
+4. **Model comparison:** Compare results from different LLMs side by side
+5. **Data cleaning:** Standardize names, fix formatting issues
+6. **Content summarization:** Condense articles, papers, or reports
+7. **Entity recognition:** Pull out names, locations, dates from text
 
 For more use cases and examples, see our [Prompting Guide](https://docs.getcellm.com/usage/prompting).
 
@@ -97,7 +103,7 @@ To help us improve Cellm, we collect limited, anonymous telemetry data:
 
 We do not collect any data from your spreadsheet and we have no way of associating your prompts with you. You can see for yourself at [src/Cellm/Models/Behaviors/SentryBehavior.cs](src/Cellm/Models/Behaviors/SentryBehavior.cs).
 
-You can disable telemetry at any time by adding the following contents to your `appsettings.json` file in the same folder as `Cellm-AddIn64-packed.xll`:
+You can disable telemetry at any time by adding the following contents to the `appsettings.Local.json` file in installation directory `C:\Users\{username}\AppData\Roaming\Cellm`:
 
 ```json
 {
