@@ -45,15 +45,15 @@ public partial class RibbonMain
                     <checkBox id="{nameof(ToolsGroupControlIds.BrowserCheckBox)}" label="Internet Browser"
                             screentip="Let models browse the web"
                             onAction="{nameof(OnBrowserToggled)}"
-                            getPressed="{nameof(GetBrowserPressed)}" />
+                            getPressed="{nameof(GetBrowserToggled)}" />
                     <checkBox id="{nameof(ToolsGroupControlIds.FileSearchCheckBox)}" label="File Search"
                             screentip="Let models search for files on your computer"
                             onAction="{nameof(OnFileSearchToggled)}"
-                            getPressed="{nameof(GetFileSearchPressed)}" />
+                            getPressed="{nameof(GetFileSearchToggled)}" />
                     <checkBox id="{nameof(ToolsGroupControlIds.FileReaderCheckBox)}" label="File Reader"
                             screentip="Let model read files on your computer. Supports PDF, Markdown, and common text formats"
                             onAction="{nameof(OnFileReaderToggled)}"
-                            getPressed="{nameof(GetFileReaderPressed)}" />
+                            getPressed="{nameof(GetFileReaderToggled)}" />
                 </menu>
                 <dynamicMenu id="{nameof(ToolsGroupControlIds.McpMenu)}" getContent="{nameof(GetMcpMenuContent)}" size="large" label="MCP" getImage="{nameof(GetMcpMenuImage)}" />
             </box>
@@ -63,13 +63,13 @@ public partial class RibbonMain
 
     public void OnFileSearchToggled(IRibbonControl control, bool pressed)
     {
-        SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableTools)}:{nameof(FileSearchRequest)}", pressed.ToString());
+        SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableTools)}:{nameof(FileSearchRequest)}", pressed);
 
-        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRow));
-        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputColumn));
-        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRange));
+        _ribbonUi?.InvalidateControl(nameof(PromptGroupControlIds.PromptToRow));
+        _ribbonUi?.InvalidateControl(nameof(PromptGroupControlIds.PromptToColumn));
+        _ribbonUi?.InvalidateControl(nameof(PromptGroupControlIds.PromptToRange));
     }
-    public bool GetFileSearchPressed(IRibbonControl control)
+    public bool GetFileSearchToggled(IRibbonControl control)
     {
         var value = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableTools)}:{nameof(FileSearchRequest)}");
         return bool.Parse(value);
@@ -77,14 +77,14 @@ public partial class RibbonMain
 
     public void OnFileReaderToggled(IRibbonControl control, bool pressed)
     {
-        SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableTools)}:{nameof(FileReaderRequest)}", pressed.ToString());
+        SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableTools)}:{nameof(FileReaderRequest)}", pressed);
 
-        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRow));
-        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputColumn));
-        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRange));
+        _ribbonUi?.InvalidateControl(nameof(PromptGroupControlIds.PromptToRow));
+        _ribbonUi?.InvalidateControl(nameof(PromptGroupControlIds.PromptToColumn));
+        _ribbonUi?.InvalidateControl(nameof(PromptGroupControlIds.PromptToRange));
     }
 
-    public bool GetFileReaderPressed(IRibbonControl control)
+    public bool GetFileReaderToggled(IRibbonControl control)
     {
         var value = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableTools)}:{nameof(FileReaderRequest)}");
         return bool.Parse(value);
@@ -92,14 +92,14 @@ public partial class RibbonMain
 
     public void OnBrowserToggled(IRibbonControl control, bool pressed)
     {
-        SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableModelContextProtocolServers)}:Playwright", pressed.ToString());
+        SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableModelContextProtocolServers)}:Playwright", pressed);
 
-        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRow));
-        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputColumn));
-        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRange));
+        _ribbonUi?.InvalidateControl(nameof(PromptGroupControlIds.PromptToRow));
+        _ribbonUi?.InvalidateControl(nameof(PromptGroupControlIds.PromptToColumn));
+        _ribbonUi?.InvalidateControl(nameof(PromptGroupControlIds.PromptToRange));
     }
 
-    public bool GetBrowserPressed(IRibbonControl control)
+    public bool GetBrowserToggled(IRibbonControl control)
     {
         var value = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableModelContextProtocolServers)}:Playwright");
         return bool.Parse(value);
@@ -138,7 +138,7 @@ public partial class RibbonMain
                      <checkBox id="{EncodeXmlAttribute(checkBoxId)}" label="{EncodeXmlAttribute(label)}"
                                screentip="{EncodeXmlAttribute(screentip)}"
                                onAction="{nameof(OnMcpServerToggled)}"
-                               getPressed="{nameof(OnGetMcpServerPressed)}" />
+                               getPressed="{nameof(OnGetMcpServerToggled)}" />
                      """);
 
                 anyServers = true;
@@ -157,7 +157,7 @@ public partial class RibbonMain
                      <checkBox id="{EncodeXmlAttribute(checkBoxId)}" label="{EncodeXmlAttribute(label)}"
                                screentip="{EncodeXmlAttribute(screentip)}"
                                onAction="{nameof(OnMcpServerToggled)}"
-                               getPressed="{nameof(OnGetMcpServerPressed)}" />
+                               getPressed="{nameof(OnGetMcpServerToggled)}" />
                      """);
 
                 anyServers = true;
@@ -170,12 +170,12 @@ public partial class RibbonMain
 
             menuXml.AppendLine(
                 $@"<button id=""{nameof(ToolsGroupControlIds.McpAddNewButton)}""
-                    label=""Add new ...""
+                    label=""Add new...""
                     onAction=""{nameof(ShowAddMcpServerForm)}"" />");
 
             menuXml.AppendLine(
                 $@"<button id=""{nameof(ToolsGroupControlIds.McpEditOrRemoveButton)}""
-                    label=""Edit or remove ...""
+                    label=""Edit or remove...""
                     onAction=""{nameof(ShowEditMcpServerForm)}"" />");
 
             menuXml.AppendLine("</menu>");
@@ -208,16 +208,14 @@ public partial class RibbonMain
 
         try
         {
-            // Update the configuration value using the SetValue helper
-            SetValue(configKey, pressed.ToString());
+            SetValue(configKey, pressed);
 
-            // Invalidate the control to trigger OnGetMcpServerPressed and refresh UI
             _ribbonUi?.InvalidateControl(control.Id);
 
             // Invalidate structured output buttons which enabled/disabled state depend on combination of provider and tool use
-            _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRow));
-            _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputColumn));
-            _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRange));
+            _ribbonUi?.InvalidateControl(nameof(PromptGroupControlIds.PromptToRow));
+            _ribbonUi?.InvalidateControl(nameof(PromptGroupControlIds.PromptToColumn));
+            _ribbonUi?.InvalidateControl(nameof(PromptGroupControlIds.PromptToRange));
         }
         catch (Exception ex)
         {
@@ -225,7 +223,7 @@ public partial class RibbonMain
         }
     }
 
-    public bool OnGetMcpServerPressed(IRibbonControl control)
+    public bool OnGetMcpServerToggled(IRibbonControl control)
     {
         if (!control.Id.StartsWith(McpCheckBoxIdPrefix))
         {
@@ -256,7 +254,7 @@ public partial class RibbonMain
 
     public Bitmap? GetMcpMenuImage(IRibbonControl control)
     {
-        return ImageLoader.LoadEmbeddedPngResized($"{ResourcesBasePath}/mcp.png", 64, 64);
+        return ImageLoader.LoadEmbeddedPngResized($"{ResourcesBasePath}/MCP.png", 64, 64);
     }
 
 

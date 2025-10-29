@@ -85,7 +85,7 @@ public partial class RibbonMain
                         <comboBox id="{nameof(ModelGroupControlIds.ModelComboBox)}"
                                   label="Model"
                                   showLabel="false"
-                                  sizeString="WWWWWWWWWWWW"
+                                  sizeString="WWWWWWWWWWWWW"
                                   getText="{nameof(GetSelectedModelText)}"
                                   onChange="{nameof(OnModelComboBoxChange)}"
                                   getItemCount="{nameof(GetModelComboBoxItemCount)}"
@@ -116,9 +116,9 @@ public partial class RibbonMain
 
     public string GetProviderMenuItems()
     {
-        var providerConfigurations = GetProviderConfigurations();
+        var providerConfigurations = CellmAddIn.GetProviderConfigurations();
 
-        var providerMenuItemsXml = GetProviderConfigurations()
+        var providerMenuItemsXml = providerConfigurations
             .Where(providerConfiguration => providerConfiguration != null && providerConfiguration.IsEnabled)
             .Select(providerConfiguration =>
                 $@"<button id=""{GetProviderMenuItemId(providerConfiguration.Id)}""
@@ -167,12 +167,12 @@ public partial class RibbonMain
 
         var account = CellmAddIn.Services.GetRequiredService<Account>();
 
-        if (Enum.TryParse<Provider>(control.Tag, out var provider))
+        if (Enum.TryParse<Provider>(control.Tag, true, out var provider))
         {
-            return account.HasEntitlement(GetProviderConfiguration(provider).Entitlement);
+            return account.HasEntitlement(CellmAddIn.GetProviderConfiguration(provider).Entitlement);
         }
 
-        _logger.LogWarning("Could not parse index from tag '{tag}' for menu item '{id}'.", control.Tag, control.Id);
+        _logger.LogWarning("Could not parse tag '{tag}' for menu item '{id}'.", control.Tag, control.Id);
 
         return false; // Or a default placeholder image
     }
@@ -181,10 +181,19 @@ public partial class RibbonMain
     {
         var providerAsString = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}");
 
-        if (Enum.TryParse<Provider>(providerAsString, out var provider))
+        if (Enum.TryParse<Provider>(providerAsString, true, out var provider))
         {
-            var resource = GetProviderConfiguration(provider).Icon;
-            return ImageLoader.LoadEmbeddedPngResized(resource, 128, 128);
+            var resource = CellmAddIn.GetProviderConfiguration(provider).Icon;
+
+            if (resource.ToLower().EndsWith("png"))
+            {
+                return ImageLoader.LoadEmbeddedPngResized(resource, 128, 128);
+            }
+
+            if (resource.ToLower().EndsWith("svg"))
+            {
+                return ImageLoader.LoadEmbeddedSvgResized(resource, 128, 128);
+            }
         }
 
         _logger.LogWarning("Could not get image for provider {provider}.", providerAsString);
@@ -194,10 +203,19 @@ public partial class RibbonMain
 
     public Bitmap? GetProviderImage(IRibbonControl control)
     {
-        if (Enum.TryParse<Provider>(control.Tag, out var provider))
+        if (Enum.TryParse<Provider>(control.Tag, true, out var provider))
         {
-            var resource = GetProviderConfiguration(provider).Icon;
-            return ImageLoader.LoadEmbeddedPngResized(resource, 16, 16);
+            var resource = CellmAddIn.GetProviderConfiguration(provider).Icon;
+
+            if (resource.ToLower().EndsWith("png"))
+            {
+                return ImageLoader.LoadEmbeddedPngResized(resource, 128, 128);
+            }
+
+            if (resource.ToLower().EndsWith("svg"))
+            {
+                return ImageLoader.LoadEmbeddedSvgResized(resource, 128, 128);
+            }
         }
 
         _logger.LogWarning("Could not parse index from tag '{tag}' for menu item '{id}'.", control.Tag, control.Id);
@@ -371,7 +389,7 @@ public partial class RibbonMain
 
     public void OnProviderSelected(IRibbonControl control)
     {
-        if (!Enum.TryParse<Provider>(control.Tag, out var newProvider))
+        if (!Enum.TryParse<Provider>(control.Tag, true, out var newProvider))
         {
             _logger.LogWarning("Could not parse provider tag {tag}.", control.Tag);
             return;
@@ -379,7 +397,7 @@ public partial class RibbonMain
 
         var oldProviderAsString = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}");
 
-        if (!Enum.TryParse<Provider>(oldProviderAsString, out var oldProvider))
+        if (!Enum.TryParse<Provider>(oldProviderAsString, true, out var oldProvider))
         {
             _logger.LogWarning("Could not parse provider {oldProviderAsString}.", oldProviderAsString);
             return;
@@ -395,67 +413,9 @@ public partial class RibbonMain
         InvalidateModelControls();
 
         // Invalidate structured output buttons which enabled/disabled state depend on combination of provider and tool use
-        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRow));
-        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputColumn));
-        _ribbonUi?.InvalidateControl(nameof(OutputGroupControlIds.OutputRange));
-    }
-
-    public string GetSelectedModelLabel(IRibbonControl control)
-    {
-        var provider = GetCurrentProvider();
-        var configKey = $"{provider}Configuration:{nameof(OpenAiConfiguration.DefaultModel)}"; // Using OpenAI as template name
-        try
-        {
-            var model = GetValue(configKey);
-            return model;
-        }
-        catch (KeyNotFoundException)
-        {
-            return "Select Model"; // Fallback
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError("Error reading model config '{configKey}': {message}", configKey, ex.Message);
-            return "Error"; // Fallback
-        }
-    }
-
-    public string OnGetSelectedModel(IRibbonControl control)
-    {
-        var provider = GetCurrentProvider();
-        var model = GetValue($"{provider}Configuration:{nameof(OpenAiConfiguration.DefaultModel)}");
-        return $"{provider.ToString().ToLower()}/{model}";
-    }
-
-    public string OnGetBaseAddress(IRibbonControl control)
-    {
-        var provider = GetCurrentProvider();
-
-        return provider switch
-        {
-            Provider.DeepSeek => GetProviderConfiguration<DeepSeekConfiguration>().BaseAddress.ToString(),
-            Provider.Mistral => GetProviderConfiguration<MistralConfiguration>().BaseAddress.ToString(),
-            Provider.Ollama => GetProviderConfiguration<OllamaConfiguration>().BaseAddress.ToString(),
-            Provider.OpenAiCompatible => GetProviderConfiguration<OpenAiCompatibleConfiguration>().BaseAddress.ToString(),
-            _ => "Built-in"
-        };
-    }
-
-    public string OnGetApiKey(IRibbonControl control)
-    {
-        var provider = GetCurrentProvider();
-        return GetValue($"{provider}Configuration:ApiKey");
-    }
-
-    public void OnModelChanged(IRibbonControl control, string providerAndModel)
-    {
-        var provider = GetProvider(providerAndModel);
-        var model = GetModel(providerAndModel);
-
-        SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}", provider.ToString());
-        SetValue($"{provider}Configuration:{nameof(OpenAiConfiguration.DefaultModel)}", model);
-
-        _ribbonUi?.Invalidate();
+        _ribbonUi?.InvalidateControl(nameof(PromptGroupControlIds.PromptToRow));
+        _ribbonUi?.InvalidateControl(nameof(PromptGroupControlIds.PromptToColumn));
+        _ribbonUi?.InvalidateControl(nameof(PromptGroupControlIds.PromptToRange));
     }
 
     /// <summary>
@@ -463,10 +423,17 @@ public partial class RibbonMain
     /// </summary>
     public string GetProviderSettingsButtonLabel(IRibbonControl control)
     {
-        var provider = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}");
-        var providerConfiguration = GetProviderConfiguration(provider);
+        var providerAsString = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}");
 
-        return $"{providerConfiguration.Name} Settings...";
+        if (!Enum.TryParse<Provider>(providerAsString, true, out var provider))
+        {
+            _logger.LogWarning("Could not parse provider {provider}", provider);
+            throw new ArgumentException($"Invalid provider: {providerAsString}");
+        }
+
+        var providerConfiguration = CellmAddIn.GetProviderConfiguration(provider);
+
+        return $"{providerConfiguration.Name} settings...";
     }
 
     /// <summary>
@@ -503,6 +470,9 @@ public partial class RibbonMain
                 case Provider.Aws:
                     currentBaseAddress = GetProviderConfiguration<AwsConfiguration>()?.BaseAddress?.ToString() ?? "";
                     break;
+                case Provider.Cellm:
+                    currentBaseAddress = GetProviderConfiguration<CellmConfiguration>()?.BaseAddress?.ToString() ?? "";
+                    break;
                 case Provider.DeepSeek:
                     currentBaseAddress = GetProviderConfiguration<DeepSeekConfiguration>()?.BaseAddress?.ToString() ?? "";
                     break;
@@ -523,9 +493,6 @@ public partial class RibbonMain
                     break;
                 case Provider.OpenAiCompatible:
                     currentBaseAddress = GetProviderConfiguration<OpenAiCompatibleConfiguration>()?.BaseAddress?.ToString() ?? "";
-                    break;
-                case Provider.Cellm:
-                    currentBaseAddress = GetProviderConfiguration<CellmConfiguration>()?.BaseAddress?.ToString() ?? "";
                     break;
                 default:
                     break;
@@ -592,44 +559,44 @@ public partial class RibbonMain
     {
         try
         {
-            var temperature = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultTemperature)}");
+            var temperatureAsString = GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultTemperature)}");
 
-            if (temperature == "Consistent")
+            if (temperatureAsString == "Consistent")
             {
-                return temperature;
+                return temperatureAsString;
             }
 
-            if (temperature == "Neutral")
+            if (temperatureAsString == "Neutral")
             {
-                return temperature;
+                return temperatureAsString;
             }
 
-            if (temperature == "Creative")
+            if (temperatureAsString == "Creative")
             {
-                return temperature;
+                return temperatureAsString;
             }
 
-            if (double.TryParse(temperature, out var tempVal))
+            if (double.TryParse(temperatureAsString.Replace(',', '.'), NumberStyles.Any, CultureInfo.GetCultureInfo("en-US"), out var temperature))
             {
-                if (tempVal == 0)
+                if (temperature == 0)
                 {
                     return "Consistent";
                 }
 
-                if (tempVal == 0.3)
+                if (temperature == 0.3)
                 {
                     return "Neutral";
                 }
 
-                if (tempVal == 0.7)
+                if (temperature == 0.7)
                 {
                     return "Creative";
                 }
 
-                return tempVal.ToString("0.0");
+                return temperature.ToString("0.0");
             }
 
-            return "Deterministic";
+            return "0.0";
         }
         catch (KeyNotFoundException)
         {
@@ -669,7 +636,7 @@ public partial class RibbonMain
         }
 
         // Validate that the input is a valid temperature (between 0 and 1)
-        if (double.TryParse(temperatureAsString.Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out var temperature))
+        if (double.TryParse(temperatureAsString.Replace(',', '.'), NumberStyles.Any, CultureInfo.GetCultureInfo("en-US"), out var temperature))
         {
             if (temperature < 0 || temperature > 1)
             {
@@ -725,7 +692,7 @@ public partial class RibbonMain
 
         }
 
-        SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableCache)}", enabled.ToString());
+        SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableCache)}", enabled);
         _ribbonUi?.InvalidateControl(control.Id);
     }
 
@@ -743,7 +710,7 @@ public partial class RibbonMain
 
         _ribbonUi.InvalidateControl(nameof(ModelGroupControlIds.ProviderMenu));
 
-        var ids = GetProviderConfigurations()
+        var ids = CellmAddIn.GetProviderConfigurations()
             .Where(providerConfiguration => providerConfiguration != null && providerConfiguration.IsEnabled)
             .Select(providerConfiguration => GetProviderMenuItemId(providerConfiguration.Id));
 
