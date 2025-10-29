@@ -4,19 +4,19 @@ description: 'How to use hosted models'
 icon: 'network-wired'
 ---
 
-Cellm supports hosted models from Anthropic, DeepSeek, OpenAI, Mistral, and any OpenAI-compatible cloud provider. These models are more powerful than anything you can run on your own computer.
+> **See also:** [Breaking Down Tasks for AI](/usage/breaking-down-tasks.mdx) for practical advice on model selection and structuring your tasks.
 
-On this page you will learn what to consider when choosing a hosted model.
+Cellm supports hosted models from Anthropic, AWS, Azure, DeepSeek, Google, OpenAI, Mistral, and any OpenAI-compatible cloud provider. These models are more powerful than anything you can run on your own computer.
 
-## Choosing a model
+## Model sizes
 We split hosted models into three tiers based on their size and capabilities, balancing speed, intelligence, and problem-solving skills:
 
-|              | Small | Large | Thinking |
-| ------------ | -------------- | -------------- | --------------- |
-| Speed        | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" />  | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" />             | <Icon icon="star" iconType="solid" /> | 
-| Intelligence  | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /> | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /> | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" />  | 
-| Problem-solving | <Icon icon="star" iconType="solid" /> | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /> | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /> |
-| Recommended model | Mistral Small 3 | Claude 3.5 Sonnet | DeepSeek R1 |
+|                   | Small Model                                                                                                           | Medium Model                                                                                                        | Large Model                                                                                                         |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Speed             | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" />       | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" />   | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" /> | 
+| Intelligence      | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" />   | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" />   | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" />     | 
+| World Knowledge   | <Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" /> | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" /> | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" />   |
+| Recommended model | Gemini 2.5 Flash Lite                                                                                                 | Claude 4 Sonnet                                                                                                     | Gemini 2.5 Pro                                                                                                      |
 
 ## Using a hosted model
 
@@ -32,7 +32,7 @@ To use hosted models you need an API key. In this example, we will show you how 
 
 4. Select e.g. `mistral/mistral-small-latest` and go nuts.
 
-The process for getting an API key is more or less the same for Anthropic, DeepSeek, and OpenAI except that they require a paid subscription.
+The process for getting an API key is more or less the same for the other hosted model providers.
 
 <Warning>
 Mistral explicitly states that they are allowed to train future AI models on the data you send them under the free tier. That is why it is free. At least they are honest about it.
@@ -41,8 +41,4 @@ Mistral explicitly states that they are allowed to train future AI models on the
 ### Add other OpenAI-compatible providers
 You can call models that are not preconfigured in Cellm as long as they are compatible with OpenAI's API. This means you can also use OpenRouter or LiteLLM.
 
-In Cellm's ribbon menu, type `openaicompatible/modelid` in the drop-down menu's text field. Point the address to the OpenAI-compatible endpoint and set your API key.
-
-You can also add models to the preset drop-down list via the `appsettings.*.json` files in the `src/Cellm` folder. Use `appsettings.Local.OpenAiCompatible.json` as a starting point, edit the values, and put it next to `Cellm-AddIn64-packed.xll` as `appsettings.Local.json`. 
-
-In general, you should leave `appsettings.json` alone and add your own configuration to `appsettings.Local.json` only. Any settings in `appsettings.Local.json` will override the default settings in `appsettings.json`.
+In Cellm's ribbon menu, choose the "OpenAI Compatible" provider and click on the provider icon to open the settings. Point the address to an OpenAI-compatible endpoint and set your API key.

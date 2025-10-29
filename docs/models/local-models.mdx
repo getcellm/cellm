@@ -8,26 +8,30 @@ Cellm supports local models that run on your computer via Llamafiles, Ollama, or
 
 On this page you will learn what to consider when choosing a local model and how to run it.
 
-## Choose a model
+## Model sizes
 We can split local models into three tiers based on their size and capabilities, balancing speed, intelligence, and world knowledge:
 
-|              | Small (0.5-3B) | Medium (4B-9B) | Large (10B-32B) |
-| ------------ | -------------- | -------------- | --------------- |
-| Speed        | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" />  | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" />             | <Icon icon="star" iconType="solid" /> | 
-| Intelligence  | <Icon icon="star" iconType="solid" /> | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /> | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" />  | 
-| World Knowledge | <Icon icon="star" iconType="regular" /> | <Icon icon="star" iconType="solid" /> | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /> |
-| Recommended model | Gemma 2 2B | Qwen 2.5 7B | Mistral Small 3.1 |
+|                   | Small Model                                                                                                           | Medium Model                                                                                                        | Large Model                                                                                                         |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Speed             | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" />       | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" />   | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" /> | 
+| Intelligence      | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" />   | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" />   | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" />     | 
+| World Knowledge   | <Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" /> | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" /> | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" />   |
+| Recommended model | Gemma 3 4B IT QAT | Gemma 3n E4B | Mistral Small 3.2 |
 
 <Tip>
 You need a GPU for any of the medium or large models to be useful in practice. If you don't have a GPU, you can use [Hosted Models](/models/hosted-models.mdx) if small ones are insufficient.
 </Tip>
 
 
-In general, smaller models are faster and less intelligent, while larger models are slower and more intelligent. When using local models, it's important to find the right balance for your task, because speed impacts your productivity and intelligence impacts your results. You should try out different models and choose the smallest one that gives you good results
+In general, smaller models are faster and less intelligent, while larger models are slower and more intelligent. When using local models, it's important to find the right balance for your task, because speed impact your productivity and intelligence impact your results. You should try out different models and choose the smallest one that gives you good results.
 
 Small models are sufficient for many common tasks such as categorizing text or extracting person names from news articles. Medium models are appropriate for more complex tasks such as document review, survey analysis, or tasks involving function calling. Large models are useful for creative writing, tasks requiring nuanced language understanding such as spam detection, or tasks requiring world knowledge. 
 
 Models larger than 32B require significant hardware investment to run locally, and you are better off using [Hosted Models](/models/hosted-models.mdx) if you need this kind of intelligence and don't have the hardware already.
+
+<Tip>
+  Large models are need to use the Internet Browser tool effectively.
+</Tip>
 
 ## Run models locally
 You need to run a program on your computer that servers models to Cellm. We call these programs "providers". Cellm supports Ollama, Llamafiles, and vLLM, as well as any OpenAI-compatible provider. If you don't know any of these names, just use Ollama.
@@ -67,7 +71,7 @@ Llamafile is project by Mozilla that combines llama.cpp with Cosmopolitan Libc, 
 Llamafiles are especially useful if you don't have the necessary permissions to install programs on your computer.
 </Tip>
 
-### Dockerized Ollama and vLLM
+### Dockerized Ollama
 
 If you prefer to run models via docker, both Ollama and vLLM are packaged up with docker compose files in the `docker/` folder. vLLM is designed to run many requests in parallel and particularly useful if you need to process a lot of data with Cellm.
 
@@ -95,6 +99,8 @@ If you want to speed up inference, you can use your GPU as well:
 ```cmd
 docker compose -f docker-compose.Ollama.yml -f docker-compose.Ollama.GPU.yml up --detach
 ```
+
+### Dockerized vLLM
 
 If you want to speed up running many requests in parallel, you can use vLLM instead of Ollama. You must supply the docker compose file with a Hugging Face API key either via an environment variable or editing the docker compose file directy. Look at the vLLM docker compose file for details. If you don't know what a Hugging Face API key is, just use Ollama. 
 

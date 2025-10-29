@@ -1,0 +1,34 @@
+---
+title: 'PROMPTMODEL'
+---
+
+```excel
+PROMPTMODEL(providerAndModel: string or cell, cells: range | instruction: string, [instruction: range or string | temperature: double], [temperature: double]): string
+```
+
+Allows you to call a model from a cell formula and specify the model as the first argument. This overides the default model.
+
+- **providerAndModel (Required)**: A string on the form "provider/model".
+  - Default: ollama/gemma2:2b
+- **cells (Required):** A cell or a range of cells.
+  - The model will use the cells as context and follow any instructions as long as they are present _somewhere_ in the cells. If you provide an instruction as second argument, the second argument instructions takes precedence.
+- **instructions (Optional):** A cell, a range of cells, or a string.
+  - The model will follow these instructions and ignore instructions in the cells of the first argument.
+  - Default: Empty. 
+- **temperature (Optional):** double. 
+    - A value between 0 and 1 that controls the balance between deterministic outputs and creative exploration. Lower values make the output more deterministic, higher values make it more random.
+  - Default: 0. The model will almost always give you the same result.
+- **Returns:** The AI model's response as plain text.
+
+Example usage:
+
+- `=PROMPTMODEL("openai/gpt-4o-mini", A1:D10, "Extract keywords")` will use GPT-4o mini to extract keywords from the cells.
+- `=PROMPTMODEL("openai/gpt-4o-mini", A1:D10, "Extract keywords", 0.7)` will use GPT-4o minito extract keywords from the cells and use a temperature of 0.7.
+- `=PROMPTMODEL("openai/gpt-4o-mini", A1:D10)` will use GPT-4o mini to process the range of cells and follow instructions as long as they present _somewhere_ in the cells.
+- `=PROMPTMODEL("openai/gpt-4o-mini", A1:D10, 0.7)` will use GPT-4o mini to process the selected range of cells, follow any instruction within the cells, and use a temperature of 0.7.
+
+Structured output variants:
+
+- `=PROMPTMODEL.TOROW()` will spill multiple output values (if any) into cells to the right.
+- `=PROMPTMODEL.TOCOLUMN()` will spill multiple output values (if any) into cells below.
+- `=PROMPTMODEL.TORANGE()` will spill multiple output values (if any) into a range.
