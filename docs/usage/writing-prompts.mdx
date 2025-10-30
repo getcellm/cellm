@@ -18,17 +18,17 @@ To get started, select a cell and write the formula `=PROMPT("Rate sentiment as 
 ## Use data from your spreadsheet
 Now that you know how to write a basic prompt, let's use data that's already in your spreadsheet. You can reference other cells in your `=PROMPT()` formula which lets you dynamically use other cells as context. To reference a single cell:
 
-```Excel
-=PROMPT(A1, "Rate the sentiment as positive, neutral, or negative")
-```
+````mdx Single cell reference
+=PROMPT("Rate the sentiment as positive, neutral, or negative", A1)
+````
 
-This formula applies your prompt to the text in cell A1. Cellm adds the data to your prompt and tells the model to treat it as context. Updates work just like any other Excel formula. When you change the data in column A, the results in column B update automatically.
+This formula applies your prompt to the text in cell A1. The model uses the cell's content as context when following your instructions. Updates work just like any other Excel formula. When you change the data in column A, the results in column B update automatically.
 
 You can also reference multiple cells at once (a cell "range"):
 
-```Excel
-=PROMPT(A1:A2, "Summarize the data").
-```
+````mdx Cell range reference
+=PROMPT("Summarize the data", A1:A2)
+````
 
 This formula makes the model look at both A1 and A2. You can reference any range of cells using standard Excel notation like `A1:C5` or `A:A` for an entire column.
 
@@ -36,7 +36,11 @@ This formula makes the model look at both A1 and A2. You can reference any range
 When your prompt results in a list of answers (like "Extract all person names from the text"), Cellm can output each answer in its own cell. The `=PROMPT.TOROW()`, `=PROMPT.TOCOLUMN()`, and `=PROMPT.TORANGE()` functions output model responses as rows, columns, or in a rectangular grid. The **Output Shape** selectors in the Cellm ribbon let's you quickly add one of these formulas to a selected cell or change an existing formula's output format.
 
 ### Format as rows or columns
-Use the `=PROMPT.TOROW()` or `=PROMPT.TOCOLUMN()` formulas to have Excel "spill" multiple values into other cells. For example, with prompt `=PROMPT(A2, "Extract all the features mentioned in this product review")`:
+Use the `=PROMPT.TOROW()` or `=PROMPT.TOCOLUMN()` formulas to have Excel "spill" multiple values into other cells. For example, with the prompt:
+
+````mdx Extract to row
+=PROMPT.TOROW("Extract all the features mentioned in this product review", A2)
+````
 
 - **=PROMPT.TOROW()**: Excel spills each feature into a new cell to the right (a row).
 - **=PROMPT.TOCOLUMN()**: Excel spills each feature into new cells below (a column).
@@ -57,7 +61,9 @@ To generate a table of synthetic data, you can use a prompt that describes the d
 
 For example:
 
-`=PROMPT.TORANGE("Give me 10 examples of synthetic data with email, name, and address.")`
+````mdx Generate table
+=PROMPT.TORANGE("Give me 10 examples of synthetic data with email, name, and address.")
+````
 
 <Frame caption="Format output as a range with `=PROMPT.TORANGE()`">
   <img src="https://assets.getcellm.com/docs/images/usage/writing-prompts/to-range.png" />
@@ -65,31 +71,43 @@ For example:
 
 #### Example: Specifying the output format
 
-You can be more specific in your prompt to ensure the data is returned in the exact format you need. For examepl, instruct the model to place the values in a row:
+You can be more specific in your prompt to ensure the data is returned in the exact format you need. For example, instruct the model to place the values in a row:
 
-```Excel
-=PROMPT.TORANGE("List the top 5 largest countries by area as a single row.")`
-```
+````mdx Output as row
+=PROMPT.TORANGE("List the top 5 largest countries by area as a single row.")
+````
 
 or a column:
 
-```Excel
+````mdx Output as column
 =PROMPT.TORANGE("List the first 5 months of the year in a single column.")
-```
+````
 
 ## Process many rows at once
 Once you're comfortable with cell references and output formats, you can scale up to process large amounts of data. You can apply the same prompt to many rows of data by dragging formulas across rows or columns.
 
-For example, you can import a CSV with a thousand news articles and put them in column A. In B1, write a formula like `=PROMPT.TOROW(A1, "Extract all person names mentioned in the text")`. Then drag the formula down to apply it to all your rows. Cellm will process each row and put the results in the corresponding cells in column B. This approach lets you automate tasks that would otherwise require copying and pasting data into a chat window over and over:
+For example, you can import a CSV with a thousand news articles and put them in column A. In B1, write a formula like:
+
+````mdx Batch processing
+=PROMPT.TOROW("Extract all person names mentioned in the text", A1)
+````
+
+Then drag the formula down to apply it to all your rows. Cellm will process each row and put the results in the corresponding cells in column B. This approach lets you automate tasks that would otherwise require copying and pasting data into a chat window over and over:
 
 <img src="https://assets.getcellm.com/docs/images/usage/writing-prompts/batch-processing.png" />
 
 `#GETTING_DATA` means the prompt is queued up or has already been has been sent to the model and the cell is awaiting response.
 
-## Use specific models for different tasks
+## Use specific models with PROMPTMODEL
 For advanced workflows, you might want to use different AI models for different types of analysis. You can use a specific model in any cell with the `=PROMPTMODEL()` function. This function takes a provider and model as its first argument but is otherwise identical to `=PROMPT()`.
 
-The first arguement consists of a provider and a model name seperated by a forward slash (`/`). For example, if you want to use OpenAI's cheapest model in a particular cell, you can write `=PROMPTMODEL("openai/gpt-4.1-nano", A1, "Rate sentiment as positive, neutral, or negative")`. This is useful when you want to use a strong model by default but offload simple tasks to cheaper models.
+The first argument consists of a provider and a model name separated by a forward slash (`/`). For example, if you want to use OpenAI's cheapest model in a particular cell, you can write:
+
+````mdx Specify model
+=PROMPTMODEL("openai/gpt-4o-mini", "Rate sentiment as positive, neutral, or negative", A1)
+````
+
+This is useful when you want to use a strong model by default but offload simple tasks to cheaper models.
 
 <Tip>See [Choosing Model](/models/choosing-model) to learn more about choosing the right model for the right task.</Tip>
 

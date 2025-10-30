@@ -23,127 +23,126 @@ Small models are sufficient for many common tasks such as categorizing text or e
 ## Task Complexity
 Your productivity with Cellm depends on your ability to find the sweet spot between task complexity and model size.
 
-If a task is too complex or broad for your choosen model, it may hallucinate results and you should choose a larger model or break down your task in a sequence of simpler ones. But if your task is broken down into excessively simple prompts, you're not using the models' capabilities effectively and you may end up running needlessly many prompts which hurt your productivity and costs more money.
+If a task is too complex or broad for your chosen model, it may hallucinate results and you should choose a larger model or break down your task in a sequence of simpler ones. But if your task is broken down into excessively simple prompts, you're not using the models' capabilities effectively and you may end up running needlessly many prompts which hurt your productivity and costs more money.
 
 Here are some practical examples:
 
 <Tabs>
-  <Tab title="Too complex" icon="face-surpise">
+  <Tab title="Too complex" icon="fire">
     Risk of unreliable results and output that is not suited for a single cell:
-    - `=PROMPT(A1, "Analyze these customer reviews, identify all product defects, and output a list of engineering improvements")`
 
-    
+    ````mdx Too complex
+    =PROMPT("Analyze these customer reviews, identify all product defects, and output a list of engineering improvements", A1)
+    ````
   </Tab>
-  <Tab title="Balanced" icon="face-kiss">
-    - `=PROMPT(A1, "Classify the sentiment of the text in this cell as Positive, Negative, or Neutral")`
-    - `=PROMPT(A1,"Categorize this product review as Electronics, Clothing, or Home")`
-    - `=PROMPT(A1,"Detect if the email in this cell is spam or not spam")`
-    - `=PROMPT(A1,"Extract the invoice date from the the PDF file")`
-    - `=PROMPT.TOROW(A1,"Extract all person names mentioned in the text in this cell")`
-  </Tab>
-  <Tab title="Too simple" icon="face-rolling-eyes">
-    Underutilizing model, why not classify sentiment or extract suggested improvements right away:
+  <Tab title="Balanced" icon="check">
+    ````mdx Sentiment classification
+    =PROMPT("Classify the sentiment of the text in this cell as Positive, Negative, or Neutral", A1)
+    ````
 
-    `=PROMPT(A1, "Summarize this customer review.")`
+    ````mdx Product categorization
+    =PROMPT("Categorize this product review as Electronics, Clothing, or Home", A1)
+    ````
+
+    ````mdx Spam detection
+    =PROMPT("Detect if the email in this cell is spam or not spam", A1)
+    ````
+
+    ````mdx Date extraction
+    =PROMPT("Extract the invoice date from the PDF file", A1)
+    ````
+
+    ````mdx Name extraction
+    =PROMPT.TOROW("Extract all person names mentioned in the text in this cell", A1)
+    ````
+  </Tab>
+  <Tab title="Too simple" icon="circle-xmark">
+    Tasks that could be combined with more specific instructions:
+
+    ````mdx Too simple
+    =PROMPT("Summarize this customer review.", A1)
+    ````
+
+    Consider adding classification or extraction in the same prompt.
   </Tab>
 </Tabs>
 
-Finding the right combination of task complexity model size requires experimentation. In general, start out with a small or medium model and move to a large model if you are not happy with results. If a large model still gives you bad results, move on to breaking down your tasks into simpler ones.
+Finding the right combination of task complexity and model size requires experimentation. In general, start out with a small or medium model and move to a large model if you are not happy with results. If a large model still gives you bad results, move on to breaking down your tasks into simpler ones.
 
-When faced with a complex task or a task with varius outputs, break it down into a sequence of smaller prompts. This makes it easier for the AI to help you, and for you to review the results at each step.
+## Breaking down tasks
+When faced with a complex task or a task with various outputs, break it down into a sequence of smaller prompts. This makes it easier for the AI to help you, and for you to review the results at each step.
 
 <Tip>
-  It is easier to change model than to break down tasks.
+  It is faster to switch to a more powerful model than to break down tasks.
 </Tip>
 
-## Example
+### Example
 Imagine you want to analyze customer feedback from column A. Instead of a single, complex prompt, you can create a sequence of tasks and delegate some of them to models of appropriate size:
 
 1. Translate: In column B, use the default model to translate into your own language.
-    ```Excel
-    =PROMPT(A2, "Translate to english")
-    ```
+    ````mdx Translate
+    =PROMPT("Translate to english", A2)
+    ````
 
-2. Classify Sentiment: In column C, use the default model to classify the feedback. 
-    ```Excel
-    =PROMPT(B2, "Classify this feedback as 'Positive', 'Negative', or 'Neutral'.")
-    ```
+2. Classify Sentiment: In column C, use the default model to classify the feedback.
+    ````mdx Classify sentiment
+    =PROMPT("Classify this feedback as 'Positive', 'Negative', or 'Neutral'.", B2)
+    ````
 
 3. Extract Suggestions: In column D, use a Large model to analyze the feedback and suggest improvements. You could also add relevant background information on your product directly to the prompt or to a cell that you reference.
-    ```Excel
-    =PROMPTMODEL("openai/o4-mini", B2, "Analyze user feedback and suggest improvements.")
-    ```
+    ````mdx Analyze feedback
+    =PROMPTMODEL("openai/gpt-4o-mini", "Analyze user feedback and suggest improvements.", B2)
+    ````
 
-4. Extract Product Names: In column E, extract relevant topics with a very small model, which is efficient for simple extraction tasks.
-    ```Excel
-    =PROMPTMODEL.TOROW("openai/gpt-4.1-nano", B2, "Extract relevant software engineering topics, such as UX, Bug, Documentation, or Improvement.")
-    ```
+4. Extract Topics: In column E, extract relevant topics with a small model, which is efficient for simple extraction tasks.
+    ````mdx Extract topics
+    =PROMPTMODEL.TOROW("openai/gpt-4o-mini", "Extract relevant software engineering topics, such as UX, Bug, Documentation, or Improvement.", B2)
+    ````
 
 This approach gives you reliable results and granular control of the output format.
 
-## Do's and Don'ts
+## What models can and cannot do
 
-Understanding its strengths and limitations of today's models will help you mitigate some of their shortcomings.
+Understanding model capabilities helps you avoid common pitfalls.
 
-AI is good at:
+**Use models to:**
+- Extract data from text (names, dates, product codes)
+- Classify and categorize data at scale
+- Transform data (translate, summarize, reformat)
+- Generate text variations
 
-* Structuring unstructured data: AI is exceptionally good at taking raw text and extracting specific, structured information. This is ideal for tasks like pulling out names, dates, or product codes from long text entries and placing them into new columns.
-* Classification and categorization: For tasks that require consistent judgment across thousands of rows, AI is a powerful tool. Once you have a clear prompt, you can apply it to an entire dataset to classify customer feedback, categorize products, or tag support tickets.
-* Augmenting and transforming data: AI can enrich your existing data. It can translate text, summarize lengthy descriptions into concise points, or reformat data.
-* Generating text in bulk: When you need to brainstorm or create variations of text, like marketing copy or product descriptions, AI can generate numerous options based on your initial prompt.
-
-AI is bad for:
-
-* Decision-making: AI models can make mistakes, especially with ambiguous or incomplete information. Always treat AI-generated output as a draft that needs to be reviewed, particularly when it's used for critical business decisions.
-* Real-time world knowledge: Without specific configurations like the Internet Browser or other MCP servers, the AI's knowledge is limited to the data you provide in your prompt. It cannot, for instance, look up the current stock price of a company unless that information is given to it.
-* Replacing Expert Judgment: AI is a tool to assist, not replace, your expertise. Use it to handle the repetitive aspects of your work, freeing you up to apply your critical thinking and domain knowledge to the results.
+**Don't rely on models for:**
+- Critical decisions without review. Models make mistakes with ambiguous data
+- Current information. Models only know what you tell them or what they can access through tools
+- Expert judgment. Use models for repetitive work, not in place of your domain knowledge
 
 <Tip>
-  With Internet Browser enabled, Cellm can fetch online data (e.g., scrape a website or retrieve live information) when the model asks for it. This typically requires a Large model.
+  Enable Internet Browser to let models fetch current data from the web. This requires a Large model.
 </Tip>
 
 ## Best practices
 
-Now that you understand task breakdown and model selection, here are some best practices for reliable results:
+**Be specific in your instructions**
+- Tell the model exactly what you want and in what format
+- Models only know what you tell them. Provide context or enable Internet Browser for external knowledge
 
-**1. Be Specific and Provide Context**
-The quality of your output is directly determined by the quality of your instructions. Vague prompts lead to vague or unpredictable results. Always tell the model exactly what you want and what format you expect.
+**Use separate columns for multi-step tasks**
+- Don't overload a single prompt with multiple tasks
+- Each column should handle one clear step
+- Example: Extract company name (column B) → Find industry (column C) → Summarize business (column D)
 
-*   **Vague:** `=PROMPT(A1, "Analyze sentiment")`
-*   **Specific:** `=PROMPT("Classify the customer feedback as 'Positive', 'Negative', or 'Neutral'")`
+**Match model size to task complexity**
+- Start with Small models for simple extraction and classification
+- Use Medium models when Small models give inconsistent results
+- Switch to Large models only when needed for complex reasoning
 
-Furthermore, a good rule of thumb is that AI only knows for sure what you tell it. Don't rely on a model's internal world knowledge. If you're asking for analysis related to a specific topic, provide some context about that product directly in the prompt or in a referenced cell or give it access to Internet Browser.
+**Iterate on your prompts**
+- Inconsistent results? Make your prompt more specific or add examples
+- Bad results? Try a larger model or break the task down further
 
-**2. Break Down Problems into Helper Columns**
-Resist the temptation to solve a multi-step problem in a single, complex prompt. Overloading a prompt with many tasks and output requests makes it unreliable and produce output that won't fit neatly into a single cell. Instead, use separate columns for each step of your workflow.
-
-*   **Overloaded Prompt:** `="Extract the company name from the email in A2, find its industry, and summarize its business model."`
-*   **Better Workflow:**
-    *   **Column B:** Extract the company name.
-        `=PROMPT(A2, "Extract the company name mentioned in this email.")`
-    *   **Column C:** Classify the industry.
-        `=PROMPT(B2, "What is the primary industry of this company? Use web browing tools to find this information.")`
-    *   **Column D:** Summarize the business model.
-        `=PROMPT(B2, "Summarize the business model of this company in one sentence. Use web browing tools to find this information.")`
-
-**3. Match the model to the task**
-Use the right-sized model to balancing performance and cost. Don't use a powerful, expensive model for a task that a smaller, faster one can handle perfectly well.
-
-*   **Start Small:** For straightforward tasks like extracting keywords, dates, or classifying text based on simple criteria, always start with a **Small** model.
-*   **Scale Up When Needed:** If you find that a Small or Medium model isn't providing the nuance or analytical depth required for a complex task (like creative writing or in-depth analysis), then it's time to try a **Large** model. Using a Large model for simple extraction is a waste of resources.
-
-**4. Iterate to Refine Your Results**
-Your first prompt is rarely your last. Getting the perfect output is a process of refinement. If the results aren't what you expect, adjust your approach.
-
-*   **If you get inconsistent results** Your prompt may be ambiguous. Try rephrasing it to be more specific or provide an example of the output you want (e.g., `"Extract the date in YYYY-MM-DD format."`).
-*   **If you get bad results?** The task might be too complex for the current model. Try breaking the problem down further or moving to a more powerful model.
-
-**5. Always Validate the AI's Output**
-Treat AI-generated results as a first draft that requires human review, not as an infallible final answer. Models can and will make mistakes.
-
-*   **Best Practice:** Before you drag-fill a formula down thousands of rows, spot-check the output on 5-10 different examples. This small investment of time can save you from making critical decisions based on flawed data. Always verify outputs before they are used in reports or final analyses.
-
-To sum up, effective use of Cellm hinges on three core principles: breaking down tasks into manageable pieces, choosing the right model for each task, and understanding the inherent capabilities and limitations of AI. By starting with small, well-defined tasks, you can test your approach and gradually build up to more complex and powerful workflows. Happy prompting!
+**Verify model output**
+- Test on 5-10 examples before processing thousands of rows
+- Review outputs before using them in reports or decisions
 
 
 

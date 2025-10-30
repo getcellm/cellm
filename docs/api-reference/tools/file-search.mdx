@@ -2,20 +2,58 @@
 title: 'File Search'
 ---
 
-Uses glob patterns to search for files on the your disk and returns matching file paths.
+Uses glob patterns to search for files on your disk and returns matching file paths.
 
-```csharp
-FileReader(rootPath: string, includePatterns: [string], [excludePatterns: [string]])
+## Parameters
+
+<ParamField body="rootPath" type="string" required>
+  The root directory to start the glob search from. Example: `C:\Users\username\Documents`
+</ParamField>
+
+<ParamField body="includePatterns" type="string[]" required>
+  Patterns to match files you want to find. Use absolute paths with wildcards. Common examples:
+  - `C:\Users\username\Documents\*.pdf` - All PDF files in Documents
+  - `C:\Users\username\Downloads\*.xlsx` - All Excel files in Downloads
+  - `C:\Projects\**\report*.docx` - Word files starting with "report" in Projects and all subfolders
+  - `C:\Data\2024-*.csv` - CSV files starting with "2024-" in Data folder
+</ParamField>
+
+<ParamField body="excludePatterns" type="string[]">
+  Patterns to exclude files from results. Use absolute paths with wildcards. Common examples:
+  - `C:\Users\username\Documents\*temp*` - Exclude files with "temp" in the name
+  - `C:\Users\username\Documents\*.bak` - Exclude backup files
+  - `C:\Projects\**\.git\**` - Exclude files in .git folders
+  - `C:\Users\username\Documents\*draft*` - Exclude files with "draft" in the name
+</ParamField>
+
+## Returns
+
+<ResponseField name="filePaths" type="string[]">
+  A list of file paths that match the include patterns and don't match the exclude patterns.
+</ResponseField>
+
+<Info>
+  This tool is automatically used by the AI model when needed. You enable it in Cellm's ribbon menu, then simply ask the model to perform tasks that require file operations (e.g., "Find all PDF files in my Documents folder").
+</Info>
+
+<RequestExample>
+
+```excel Find PDF files
+=PROMPT("Find all PDF files in C:\Users\username\Documents")
 ```
 
-- **rootPath (Required):** A string.
-  - The root directory to start the glob search from.
-- **includePatterns (Required):** List of strings.
-  - The list of glob patterns whose matches will be included in the result.
-- **excludePatterns (Optional):** List of strings. 
-  - A list of glob patterns whose matches will be excluded from the result.
-  - Default: Empty.
+```excel Find CSV files excluding temporary
+=PROMPT("Find all CSV files in C:\Users\username\Downloads, but exclude any files with 'temp' or 'draft' in the name")
+```
 
-<Warning>
-You cannot call this function yourself, but you can instruct the model to call it for you.
-</Warning>
+</RequestExample>
+
+<ResponseExample>
+
+```excel With cell reference
+=PROMPT("Find all PDF files in this folder", A1)
+```
+
+Where A1 contains: `C:\Users\username\Documents`
+
+</ResponseExample>

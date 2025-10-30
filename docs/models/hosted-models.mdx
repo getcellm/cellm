@@ -4,41 +4,185 @@ description: 'How to use hosted models'
 icon: 'network-wired'
 ---
 
-> **See also:** [Breaking Down Tasks for AI](/usage/breaking-down-tasks.mdx) for practical advice on model selection and structuring your tasks.
+> **See also:** [Breaking Down Tasks for AI](/usage/breaking-down-tasks) for practical advice on model selection and structuring your tasks.
 
 Cellm supports hosted models from Anthropic, AWS, Azure, DeepSeek, Google, OpenAI, Mistral, and any OpenAI-compatible cloud provider. These models are more powerful than anything you can run on your own computer.
+
+<Warning>
+  AI providers use data from free tiers and even some consumer plans to improve their models. Review each provider's data usage policies before sending sensitive information. For contractual data privacy guarantees, consider [local models](/models/local-models) or [Cellm's subscription plans](https://getcellm.com/pricing).
+</Warning>
 
 ## Model sizes
 We split hosted models into three tiers based on their size and capabilities, balancing speed, intelligence, and problem-solving skills:
 
 |                   | Small Model                                                                                                           | Medium Model                                                                                                        | Large Model                                                                                                         |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| Speed             | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" />       | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" />   | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" /> | 
-| Intelligence      | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" />   | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" />   | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" />     | 
-| World Knowledge   | <Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" /> | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" /> | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" />   |
-| Recommended model | Gemini 2.5 Flash Lite                                                                                                 | Claude 4 Sonnet                                                                                                     | Gemini 2.5 Pro                                                                                                      |
+| Speed             | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" />       | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" />   | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" /> |
+| Intelligence      | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" />   | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" />   | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" />     |
+| World Knowledge   | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" />   | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" /> | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" />   |
+| Recommended model | Gemini 2.5 Flash Lite                                                                                                 | Gemini 2.5 Flash                                                                                                    | Claude Sonnet 4.5                                                                                                      |
 
-## Using a hosted model
+## Provider setup
 
-To use hosted models you need an API key. In this example, we will show you how to use the Mistral API in Cellm. Mistral has a generous free tier that let's you use 1000,000,000 tokens per month at a maximum rate of 1 request per second and 500,000 tokens per minute.
+To use hosted models, you need an API key from your chosen provider. Below are setup instructions for the most popular providers.
 
-1. Create a Mistral account at [https://auth.mistral.ai/ui/](https://auth.mistral.ai/ui/).
+### Mistral (Recommended - Free Tier)
 
-2. Under the `Le Platforme` tab, go to `API Keys` > `Create new key`. Give your key a name and an expiration date and click on `Create new key`. 
+Mistral offers a generous free tier with access to powerful models.
 
-3. Copy the key. Optionally, you can store it in a password manager so you don't have to create a new one if it gets deleted from Cellm.
+<Steps>
+  <Step title="Create an account">
+    Go to [console.mistral.ai](https://console.mistral.ai) and sign up. Check your inbox and verify your email.
+  </Step>
+  <Step title="Select a plan">
+    Choose between "Experiment" (free tier) or "Scale" (pay-as-you-go). The free Experiment tier offers generous usage limits.
+  </Step>
+  <Step title="Activate billing">
+    Navigate to your Organization settings at [admin.mistral.ai](https://admin.mistral.ai) and add payment information. This activates your API keys even if you're using the free tier.
+  </Step>
+  <Step title="Create API key">
+    Under the "Workspace" tab, go to "API Keys" and click "Create new key". Give your key a name and set an expiration date, then click "Create".
+  </Step>
+  <Step title="Save your key">
+    Copy the key immediately and store it securely - you won't be able to see it again.
+  </Step>
+  <Step title="Configure in Cellm">
+    In Excel, open Cellm's ribbon menu, select the `mistral` provider, click the provider icon, and paste your API key. Try a model like:
 
-3. In Excel, go to Cellm's ribbon menu and paste the API key into the API Key text field in Cellm.
+    ````mdx Mistral example
+    =PROMPTMODEL("mistral/mistral-small-latest", "Summarize customer feedback", A1)
+    ````
 
-4. Select e.g. `mistral/mistral-small-latest` and go nuts.
+    And go nuts.
+  </Step>
+</Steps>
 
-The process for getting an API key is more or less the same for the other hosted model providers.
+<Tip>
+  Mistral's free tier is excellent for getting started - you get significant usage before incurring costs.
+</Tip>
 
-<Warning>
-Mistral explicitly states that they are allowed to train future AI models on the data you send them under the free tier. That is why it is free. At least they are honest about it.
-</Warning>
+### OpenAI
 
-### Add other OpenAI-compatible providers
-You can call models that are not preconfigured in Cellm as long as they are compatible with OpenAI's API. This means you can also use OpenRouter or LiteLLM.
+OpenAI provides access to GPT models, including GPT-4o and GPT-4o-mini.
 
-In Cellm's ribbon menu, choose the "OpenAI Compatible" provider and click on the provider icon to open the settings. Point the address to an OpenAI-compatible endpoint and set your API key.
+<Steps>
+  <Step title="Create an account">
+    Go to [platform.openai.com](https://platform.openai.com) and sign up or sign in.
+  </Step>
+  <Step title="Add payment method">
+    OpenAI requires a payment method to use the API. Click "Start building" and add your payment details to purchase API credits.
+  </Step>
+  <Step title="Create API key">
+    Click your profile icon in the top-right, select "View API keys", then click "Create new secret key". Copy the key immediately - you won't be able to see it again.
+  </Step>
+  <Step title="Configure in Cellm">
+    In Excel, open Cellm's ribbon menu, select the `openai` provider, click the provider icon, and paste your API key. Try a model like:
+
+    ````mdx OpenAI example
+    =PROMPTMODEL("openai/gpt-4o-mini", "Classify sentiment as positive, neutral, or negative", A1)
+    ````
+  </Step>
+</Steps>
+
+<Info>
+  OpenAI no longer provides free trial credits, so you'll need to add funds before making API calls.
+</Info>
+
+### Google Gemini
+
+Google Gemini offers powerful AI models with a generous free tier.
+
+<Steps>
+  <Step title="Access Google AI Studio">
+    Go to [ai.google.dev](https://ai.google.dev) and sign in with your Google account.
+  </Step>
+  <Step title="Get API key">
+    Click "Get API key" in the left sidebar, then click "Create API key". Select an existing Google Cloud project or create a new one.
+  </Step>
+  <Step title="Save your key">
+    Copy the generated API key and store it securely.
+  </Step>
+  <Step title="Configure in Cellm">
+    In Excel, open Cellm's ribbon menu, select the `gemini` provider, click the provider icon, and paste your API key. Try a model like:
+
+    ````mdx Gemini example
+    =PROMPTMODEL("gemini/gemini-2.5-flash", "Extract person names from text", A1)
+    ````
+  </Step>
+</Steps>
+
+<Tip>
+  Google Gemini offers 1,500 requests per day on the free tier, making it excellent for testing and development.
+</Tip>
+
+### Anthropic (Claude)
+
+Anthropic provides Claude models, known for their strong reasoning capabilities.
+
+<Steps>
+  <Step title="Create an account">
+    Go to [console.anthropic.com](https://console.anthropic.com) and sign up. Click "Start Building" to access the console.
+  </Step>
+  <Step title="Set up billing">
+    Add a payment method to purchase credits. Anthropic offers free credits for new accounts.
+  </Step>
+  <Step title="Create API key">
+    Navigate to "API Keys" in the left sidebar and click "Create Key". Give your key a name and click "Create".
+  </Step>
+  <Step title="Save immediately">
+    Copy the key immediately - it's only shown once. Store it in a password manager.
+  </Step>
+  <Step title="Configure in Cellm">
+    In Excel, open Cellm's ribbon menu, select the `anthropic` provider, click the provider icon, and paste your API key. Try a model like:
+
+    ````mdx Claude example
+    =PROMPTMODEL("anthropic/claude-sonnet-4.5", "Analyze customer feedback", A1)
+    ````
+  </Step>
+</Steps>
+
+### DeepSeek
+
+DeepSeek provides cost-effective AI models with OpenAI-compatible API.
+
+<Steps>
+  <Step title="Create an account">
+    Go to [platform.deepseek.com](https://platform.deepseek.com) and sign up.
+  </Step>
+  <Step title="Generate API key">
+    Navigate to the "API Keys" section and click "Create new API key". Optionally assign a name to your key.
+  </Step>
+  <Step title="Save your key">
+    Copy the key immediately and store it securely - it won't be displayed again.
+  </Step>
+  <Step title="Configure in Cellm">
+    In Excel, open Cellm's ribbon menu, select the `deepseek` provider (or `openaicompatible` with base address `https://api.deepseek.com`), click the provider icon, and paste your API key. Try a model like:
+
+    ````mdx DeepSeek example
+    =PROMPTMODEL("deepseek/deepseek-chat", "Summarize text", A1)
+    ````
+  </Step>
+</Steps>
+
+### Other OpenAI-compatible providers
+
+You can use any provider compatible with OpenAI's API format, including OpenRouter or LiteLLM.
+
+<Steps>
+  <Step title="Choose OpenAI Compatible provider">
+    In Cellm's ribbon menu, select the `OpenAI Compatible` provider.
+  </Step>
+  <Step title="Configure endpoint">
+    Click the provider icon to open settings. Enter the API endpoint URL and your API key.
+  </Step>
+  <Step title="Test the connection">
+    Enter a model name and try a test prompt to verify the configuration works.
+  </Step>
+</Steps>
+
+## Best practices
+
+- **Store API keys securely**: Use a password manager or environment variables
+- **Monitor usage**: Check your provider dashboard regularly to track costs
+- **Start small**: Begin with smaller, cheaper models and scale up as needed
+- **Test thoroughly**: Verify API setup with a few test prompts before processing large datasets
