@@ -30,10 +30,11 @@ To install Cellm:
     Go to the [Github Release page](https://github.com/getcellm/cellm/releases) and download the latest `Cellm-AddIn-Release-x64.msi`
   </Step>
   <Step title="Run the installer">
-    During installation, Cellm will download Node.js that it needs for MCP servers. Make sure you're connected to the internet during installation.
+    Run the installer and follow the prompts.
   </Step>
 </Steps>
 
+<AccordionGroup>
 <Accordion icon="message-bot" title="Install Ollama to use local models (optional)">
   <Info>
     If you want to use the more powerful hosted models right away, you can skip this step. The [Hosted Models](/models/hosted-models) section shows you how.
@@ -45,6 +46,30 @@ To install Cellm:
   2. Open the Windows Terminal, type `ollama pull gemma3:4b-it-qat` and hit Enter.
   3. Open Excel and type `=PROMPT("What model are you and who made you?")`. The model will respond that is is Gemma 3 and made by Google.
 </Accordion>
+
+<Accordion icon="plug" title="Enable MCP (optional)">
+  MCP lets AI models use external tools like web browsers, file systems, CRM systems, and databases. To use MCP servers and tools, you may need to install:
+
+  **Node.js** (to run Node.js-based MCP servers):
+  1. Go to [nodejs.org](https://nodejs.org)
+  2. Download the LTS version installer for Windows
+  3. Run the installer and follow the prompts
+  4. Verify installation by opening Windows Terminal and typing `node --version`
+
+  **uv** (to run Python-based MCP servers):
+  1. Open Windows Terminal
+  2. Run: `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`
+  3. Verify installation by typing `uv --version`
+
+  **Playwright dependencies** (for the built-in Internet Browser tool):
+  1. After installing Node.js, open Windows Terminal
+  2. Run: `npx playwright install --with-deps`
+
+  <Info>
+    Node.js and uv are runtimes that let you run MCP servers on your computer. Playwright is a specific built-in tool for browser automation. HTTP-based MCP servers run remotely and don't require any installations.
+  </Info>
+</Accordion>
+</AccordionGroup>
 
 ## Upgrade
 When a new version of Cellm is released, simply repeat the installation steps above with the latest installer.

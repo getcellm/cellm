@@ -26,7 +26,8 @@
             "group": "Usage",
             "pages": [
               "usage/writing-prompts",
-              "usage/calling-functions"
+              "usage/calling-functions",
+              "usage/using-mcp"
             ]
           },
           {
