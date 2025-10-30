@@ -8,10 +8,10 @@ icon: 'circle-info'
 
 Cellm is an Excel extension that lets you use Large Language Models (LLMs) in cell formulas. Cellm is useful when you want to use AI for repetitive tasks that would normally require copy-pasting data in and out of a chat window many times. 
 
-For example, you can write `=PROMPT(A1, "Extract all person names mentioned in the text.")` in a cell's formula and drag the cell to apply the prompt to many rows. Cellm's `=PROMPT()` function will output the AI response to a range of text, similar to how Excel's =SUM() function will output the sum of a range of numbers. 
+For example, you can write `=PROMPT("Extract all person names mentioned in the text", A1)` in a formula and drag the cell to apply the prompt to many rows. Cellm's `=PROMPT()` function will output the AI response to a range of text, similar to how Excel's =SUM() function outputs the sum of a range of numbers. 
 
 <Frame>
-  <img src="https://assets.getcellm.com/docs/images/usage/first-prompt.png" />
+  <img src="https://assets.getcellm.com/docs/images/usage/writing-prompts/first-prompt.png" />
 </Frame>
 
 ## Get Started
@@ -80,7 +80,7 @@ Cellm adds a few fundamental features to Excel that you can use to combine AI te
 
 
 ## How do I get started?
-You download Cellm from the Github Releases page and add it to Excel. Being an Excel add-in, its extremely easy to get started. If you know how to use Excel's `=SUM()` function, you will quickly get the hang of Cellm's `=PROMPT()` function.
+You [download the installer](https://github.com/getcellm/cellm/releases/download/v0.4.0/Cellm-AddIn-Release-x64.msi) and run it. Cellm will be available the next time you start Excel. As Cellm is just an Excel add-in, its extremely easy to get started. If you know how to use Excel's `=SUM()` function, you will quickly get the hang of Cellm's `=PROMPT()` function.
 
 <CardGroup cols={2}>
   <Card
