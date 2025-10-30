@@ -83,30 +83,28 @@ The ribbon has four main sections that control how Cellm works:
 ## Usage
 
 ### Sending a prompt to a model
-Sending prompts to a model is easy. Select a cell and type:
+Sending prompts to a model is easy. Select a cell and type in its formula:
 
 ````mdx Text instruction
 =PROMPT("Extract the main topic from: The quarterly sales report shows a 15% increase in revenue across all departments")
 ````
 
-The model will tell you that the main topic is sales. By default, Cellm is configured to use Ollama with the Gemma 3 4B model, which is a small model that runs on your CPU.
+The model will tell you that the main topic is sales. 
 
 ### Combine your prompt with data from your spreadsheet
-You can process entire datasets by referencing cells in your prompts, letting the AI work with your actual spreadsheet data. For example, try to copy a news article into cell A1 and type in the formula of cell B1:
+You augment your prompt with data from your spreadsheet by referencing cells in the prompt formula. . For example, try to copy a news article into cell A1 and type in the formula of cell B1:
 
 ````mdx Single cell context
 =PROMPT("Extract all person names mentioned in the text", A1)
 ````
 
-Then copy another news article into cell A1 and watch the formula recalculate itself and output the new person names. You can also use cell references to dynamically change your prompts based on other data in your spreadsheet. You can drag the cell to apply the prompt separately to many rows. Try copy a list of news articles into column A and type in cell B1:
+The model will output person names in the news article in A1. 
 
-````mdx Dynamic prompts
-=PROMPT("Extract all person names mentioned in the text", A1)
-````
+Try to copy another news article into cell A1 and hit enter. Watch how the formula recalculates. `=PROMPT()` formulas behave like any other built-in Excel function and re-run when its inputs change.
 
-Then drag the fill handle down to apply the formula to all rows. Cellm will automatically send each article to the model and output the results in corresponding cells in column B.
+You can also use cell references to dynamically change your prompts. For example, try to fill many news articles into column A and then drag the fill handle of B1 down across many rows. Cellm will automatically send each article to the model and output the results in corresponding cells in column B.
 
-You can also reference many cells using standard Excel notation:
+You can reference a group of cells using standard Excel notation (this is called a "range"):
 
 ````mdx Range context
 =PROMPT("Extract all person names in the cells", A1:F10)
@@ -119,7 +117,7 @@ You can use the `=PROMPT.TOCOLUMN()` function to spill the model response across
 =PROMPT.TOCOLUMN("Generate 10 relevant hashtags", A1)
 ````
 
-This will put multiple values across separate cells below. 
+This will put values in separate cells below. 
 
 <Frame caption="Format output as a row or a column with `=PROMPT.TOROW()` and `=PROMPT.TOCOLUMN()`">
   <img src="https://assets.getcellm.com/docs/images/usage/writing-prompts/to-row-column.png" />
@@ -139,7 +137,7 @@ Beyond basic text processing, you can use "Function Calling" to give models acce
 ```` 
 
 <Tip>
-  Gemma 3 4B does not support function calling. For function calling you must use another model, e.g. OpenAI's `gpt-4o-mini`.
+  Gemma 3 4B does not support function calling. For function calling you must use another model, e.g. OpenAI's `gpt-5-mini`.
 </Tip>
 
 ## Next steps
