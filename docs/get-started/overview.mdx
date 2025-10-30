@@ -10,6 +10,10 @@ Cellm is an Excel extension that lets you use Large Language Models (LLMs) in ce
 
 For example, you can write `=PROMPT(A1, "Extract all person names mentioned in the text.")` in a cell's formula and drag the cell to apply the prompt to many rows. Cellm's `=PROMPT()` function will output the AI response to a range of text, similar to how Excel's =SUM() function will output the sum of a range of numbers. 
 
+<Frame>
+  <img src="https://assets.getcellm.com/docs/images/usage/first-prompt.png" />
+</Frame>
+
 ## Get Started
 
 If you're new to Cellm, you can get started using the guides below.
@@ -35,15 +39,15 @@ Cellm has a small set of core features that seamlessly integrates with Excel wor
 
 <CardGroup cols={2}>
   <Card
-    title="Prompting"
+    title="Writing Prompts"
     icon="text"
-    href="/usage/prompting">
+    href="/usage/writing-prompts">
     Learn how to use Cellm to automate repetitive tasks in Excel.
   </Card>
   <Card
-    title="Function Calling"
+    title="Calling Functions"
     icon="function"
-    href="/usage/function-calling">
+    href="/usage/calling-functions">
     Learn how to use Excel as a low-code task orchestrator by enabling Cellm to access external tools and data.
   </Card>
   <Card
@@ -67,11 +71,12 @@ A friend of ours was writing a systematic review paper. She had to compare 7,500
 We think Cellm is really cool because it enables everyone to automate repetitive tasks with AI to a level that was previously available only to programmers.
 
 ## How does it work?
-Cellm adds a few fundamental features to Excel that are only made possible by the development of AI:
+Cellm adds a few fundamental features to Excel that you can use to combine AI text processing with normal Excel functions:
 
-
-- Calls AI models via the `=PROMPT()` function and returns short answers suitable for cells.
-- Supports models from Anthropic, Mistral, OpenAI, and others as well as local models via Llamafiles, Ollama, or vLLM.
+- Call AI models with the `=PROMPT()` function that outputs model responses directly in cells.
+- `=PROMPT()` behaves like a normal Excel function. Prompts can reference other cells, re-run when inputs change, and outputs can be filtered, plotted, and used in other Excel formulas.
+- Outputs with multiple values can spill into rows and colums, making it easy to build workflows that batch process your data.
+- Cellm supports models from Anthropic, AWS, Azure, Google, Mistral, OpenAI, and others as well as local models via Llamafiles, Ollama, or vLLM.
 
 
 ## How do I get started?

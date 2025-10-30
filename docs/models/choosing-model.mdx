@@ -1,0 +1,150 @@
+---
+title: 'Choosing Model'
+description: 'How to select the right model and break down tasks'
+icon: 'list-check'
+---
+
+Cellm supports hosted models that run in the cloud and local models that run on your computer. This page shows you how to choose the right model for your task and when to break down complex tasks into simpler ones. 
+
+## Model Sizes
+
+In general, smaller models are faster and less intelligent, while larger models are slower and more intelligent. It's important to find the right balance for your task, because speed impact your productivity and intelligence impact your results. You should try out different models and choose the smallest one that gives you good results.
+
+Cellm provides three preconfigured model sizes for most providers:
+
+|                   | Small Model                                                                                                           | Medium Model                                                                                                        | Large Model                                                                                                         |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Speed             | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" />       | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" />   | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" /> | 
+| Intelligence      | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" />   | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" />   | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" />     | 
+| World Knowledge   | <Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" /> | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" /> | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" />   |
+
+Small models are sufficient for many common tasks such as categorizing text or extracting person names from news articles. Medium models are appropriate for more complex tasks such as document review, survey analysis, or tasks involving function calling. Large models are needed for web browsing, tasks that require nuanced language understanding such as spam detection, or tasks that rely on the model's own world knowledge. 
+
+## Task Complexity
+Your productivity with Cellm depends on your ability to find the sweet spot between task complexity and model size.
+
+If a task is too complex or broad for your chosen model, it may hallucinate results and you should choose a larger model or break down your task in a sequence of simpler ones. But if your task is broken down into excessively simple prompts, you're not using the models' capabilities effectively and you may end up running needlessly many prompts which hurt your productivity and costs more money.
+
+Here are some practical examples:
+
+<Tabs>
+  <Tab title="Too complex" icon="fire">
+    Risk of unreliable results and output that is not suited for a single cell:
+
+    ````mdx Too complex
+    =PROMPT("Analyze these customer reviews, identify all product defects, and output a list of engineering improvements", A1)
+    ````
+  </Tab>
+  <Tab title="Balanced" icon="check">
+    ````mdx Sentiment classification
+    =PROMPT("Classify the sentiment of the text in this cell as Positive, Negative, or Neutral", A1)
+    ````
+
+    ````mdx Product categorization
+    =PROMPT("Categorize this product review as Electronics, Clothing, or Home", A1)
+    ````
+
+    ````mdx Spam detection
+    =PROMPT("Detect if the email in this cell is spam or not spam", A1)
+    ````
+
+    ````mdx Date extraction
+    =PROMPT("Extract the invoice date from the PDF file", A1)
+    ````
+
+    ````mdx Name extraction
+    =PROMPT.TOROW("Extract all person names mentioned in the text in this cell", A1)
+    ````
+  </Tab>
+  <Tab title="Too simple" icon="circle-xmark">
+    Tasks that could be combined with more specific instructions:
+
+    ````mdx Too simple
+    =PROMPT("Summarize this customer review.", A1)
+    ````
+
+    Consider adding classification or extraction in the same prompt.
+  </Tab>
+</Tabs>
+
+Finding the right combination of task complexity and model size requires experimentation. In general, start out with a small or medium model and move to a large model if you are not happy with results. If a large model still gives you bad results, move on to breaking down your tasks into simpler ones.
+
+## Breaking down tasks
+When faced with a complex task or a task with various outputs, break it down into a sequence of smaller prompts. This makes it easier for the AI to help you, and for you to review the results at each step.
+
+<Tip>
+  It is faster to switch to a more powerful model than to break down tasks.
+</Tip>
+
+### Example
+Imagine you want to analyze customer feedback from column A. Instead of a single, complex prompt, you can create a sequence of tasks and delegate some of them to models of appropriate size:
+
+1. Translate: In column B, use the default model to translate into your own language.
+    ````mdx Translate
+    =PROMPT("Translate to english", A2)
+    ````
+
+2. Classify Sentiment: In column C, use the default model to classify the feedback.
+    ````mdx Classify sentiment
+    =PROMPT("Classify this feedback as 'Positive', 'Negative', or 'Neutral'.", B2)
+    ````
+
+3. Extract Suggestions: In column D, use a Large model to analyze the feedback and suggest improvements. You could also add relevant background information on your product directly to the prompt or to a cell that you reference.
+    ````mdx Analyze feedback
+    =PROMPTMODEL("openai/gpt-4o-mini", "Analyze user feedback and suggest improvements.", B2)
+    ````
+
+4. Extract Topics: In column E, extract relevant topics with a small model, which is efficient for simple extraction tasks.
+    ````mdx Extract topics
+    =PROMPTMODEL.TOROW("openai/gpt-4o-mini", "Extract relevant software engineering topics, such as UX, Bug, Documentation, or Improvement.", B2)
+    ````
+
+This approach gives you reliable results and granular control of the output format.
+
+## What models can and cannot do
+
+Understanding model capabilities helps you avoid common pitfalls.
+
+**Use models to:**
+- Extract data from text (names, dates, product codes)
+- Classify and categorize data at scale
+- Transform data (translate, summarize, reformat)
+- Generate text variations
+
+**Don't rely on models for:**
+- Critical decisions without review. Models make mistakes with ambiguous data
+- Current information. Models only know what you tell them or what they can access through tools
+- Expert judgment. Use models for repetitive work, not in place of your domain knowledge
+
+<Tip>
+  Enable Internet Browser to let models fetch current data from the web. This requires a Large model.
+</Tip>
+
+## Best practices
+
+**Be specific in your instructions**
+- Tell the model exactly what you want and in what format
+- Models only know what you tell them. Provide context or enable Internet Browser for external knowledge
+
+**Use separate columns for multi-step tasks**
+- Don't overload a single prompt with multiple tasks
+- Each column should handle one clear step
+- Example: Extract company name (column B) → Find industry (column C) → Summarize business (column D)
+
+**Match model size to task complexity**
+- Start with Small models for simple extraction and classification
+- Use Medium models when Small models give inconsistent results
+- Switch to Large models only when needed for complex reasoning
+
+**Iterate on your prompts**
+- Inconsistent results? Make your prompt more specific or add examples
+- Bad results? Try a larger model or break the task down further
+
+**Verify model output**
+- Test on 5-10 examples before processing thousands of rows
+- Review outputs before using them in reports or decisions
+
+
+
+
+

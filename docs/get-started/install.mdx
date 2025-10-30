@@ -4,79 +4,91 @@ description: 'Add Cellm to Excel'
 icon: 'download'
 ---
 
+This guide will walk you through installing Cellm and getting it ready to use in Excel. The whole process takes about 10 minutes.
+
 ## Requirements
 
-Cellm requires Windows 10 or higher, Excel 2010 or higer, and the .NET 9.0 Runtime.
+Before installing Cellm, you'll need Windows 10 or higher, Excel 2010 or higher, and the .NET 9.0 Runtime on your computer.
 
 <AccordionGroup>
   <Accordion icon="file-excel" title="Install Excel">
-    - Open "Microsoft Store" on your computer and search for "Microsoft 365"
-    - Click "Install" and follow the install procedure. Requires a Microsoft 365 subscription.
+    1. Open "Microsoft Store" on your computer and search for "Microsoft 365"
+    2. Click "Install" and follow the install procedure. Requires a Microsoft 365 subscription.
   </Accordion>
   <Accordion icon="desktop" title="Install .NET 9.0 Runtime">
-    - Go to [https://dotnet.microsoft.com/en-us/download/dotnet/9.0](https://dotnet.microsoft.com/en-us/download/dotnet/9.0).
-    - Find the "Windows" row and "Installers" column in the ".NET Runtime" table and click on `x64` to download the installer.
-    - Run the installer.
+    1. Go to [https://dotnet.microsoft.com/en-us/download/dotnet/9.0](https://dotnet.microsoft.com/en-us/download/dotnet/9.0).
+    2. In the ".NET Runtime" table, find the "Windows" row and "Installers" column  and click on `x64` to download the installer.
+    3. Run the installer.
   </Accordion>
 </AccordionGroup>
 
 ## Install
-Cellm is an add-in to the Excel desktop app. Follow these steps from top to bottom to add Cellm to Excel and run a local AI model.
+To install Cellm:
+
+<Steps>
+  <Step title="Download the installer">
+    Go to the [Github Release page](https://github.com/getcellm/cellm/releases) and download the latest `Cellm-AddIn-Release-x64.msi`
+  </Step>
+  <Step title="Run the installer">
+    Run the installer and follow the prompts.
+  </Step>
+</Steps>
 
 <AccordionGroup>
-  <Accordion icon="download" title="Download Cellm">
-    1. Go to the [Github Release page](https://github.com/getcellm/cellm/releases).
-    2. Download `Cellm-AddIn64-packed.xll` and `appsettings.json` and put them in the _same_ folder.
-  </Accordion>
-  <Accordion icon="shield" title="Trust Location">
-    1. In Excel, go to File > Options > Trust Center > Trust Center Settings > Trusted Locations.
-    2. Click on `Add new location...`, then `Browse...`, and navigate to the folder with `Cellm-AddIn64-packed.xll` and `appsettings.json` in it. Click `OK`.
-  </Accordion>
-  <Accordion icon="rocket" title="Install Cellm">
-    1. In Excel, go to File > Options > Add-Ins.
-    2. In the `Manage` drop-down menu, select `Excel Add-ins` and click `Go...`.
-    3. Click `Browse...` and navigate to the trusted folder with `Cellm-AddIn64-packed.xll`. Select it and click `OK`
-  </Accordion>
-  <Accordion icon="message-bot" title="Install Ollama (optional)">
-    <Info>
-      If you want to use the more powerful hosted models right away, you can skip this step. The [Hosted Models](#models) section shows you how.
-    </Info>
+<Accordion icon="message-bot" title="Install Ollama to use local models (optional)">
+  <Info>
+    If you want to use the more powerful hosted models right away, you can skip this step. The [Hosted Models](/models/hosted-models) section shows you how.
+  </Info>
 
-    To get started, we recommend you try out the Gemma 2 2B model. 
+  To get started with local models, we recommend you try out the Gemma 3 4B model with quantized aware training. Gemma 3 4B is a wonderful little model that will run fine on your CPU, ensuring no data ever leaves your computer. And it's free.
 
-    1. Download and install [Ollama](https://ollama.com/). Ollama will start after the install and automatically run whenever you start up your computer.
-    2. In Excel, select a cell and type out the formulas `=PROMPT("Which model are you and who made you?")`. The model will tell you that is called "Gemma" and made by Google DeepMind.
+  1. Download and install [Ollama](https://ollama.com/). Ollama will start after the install and automatically run whenever you start up your computer.
+  2. Open the Windows Terminal, type `ollama pull gemma3:4b-it-qat` and hit Enter.
+  3. Open Excel and type `=PROMPT("What model are you and who made you?")`. The model will respond that is is Gemma 3 and made by Google.
+</Accordion>
 
-    Gemma 2 2B is a wonderful little model will run fine on your CPU, ensuring no data ever leaves your computer. And its free. Who knows, perhaps you will also discover the joy of running open source LLMs on your own machine!
+<Accordion icon="plug" title="Enable MCP (optional)">
+  MCP lets AI models use external tools like web browsers, file systems, CRM systems, and databases. To use MCP servers and tools, you may need to install:
 
-    <Tip>
-      Cellm will automatically instruct Ollama to download Gemma 2 2B the first time you call `=PROMPT()`. The first prompt will therefore take a while.
-    </Tip> 
-  </Accordion>
+  **Node.js** (to run Node.js-based MCP servers):
+  1. Go to [nodejs.org](https://nodejs.org)
+  2. Download the LTS version installer for Windows
+  3. Run the installer and follow the prompts
+  4. Verify installation by opening Windows Terminal and typing `node --version`
+
+  **uv** (to run Python-based MCP servers):
+  1. Open Windows Terminal
+  2. Run: `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`
+  3. Verify installation by typing `uv --version`
+
+  **Playwright dependencies** (for the built-in Internet Browser tool):
+  1. After installing Node.js, open Windows Terminal
+  2. Run: `npx playwright install --with-deps`
+
+  <Info>
+    Node.js and uv are runtimes that let you run MCP servers on your computer. Playwright is a specific built-in tool for browser automation. HTTP-based MCP servers run remotely and don't require any installations.
+  </Info>
+</Accordion>
 </AccordionGroup>
+
+## Upgrade
+When a new version of Cellm is released, simply repeat the installation steps above with the latest installer.
 
 ## Uninstall
+If you ever need to remove Cellm from your computer:
 
-<AccordionGroup>
-  <Accordion icon="xmark" title="Uninstall Cellm">
-    1. In Excel, go to File > Options > Add-Ins.
-    2. In the `Manage` drop-down menu, select `COM Add-ins` and click `Go...`.
-    3. Uncheck `Cellm-AddIn64-packed.xll` and click `OK`.
+<Steps>
+  <Step title="Open Add or Remove programs">
+    Search for "Add or remove programs" in the Windows start menu and open it.
+  </Step>
+  <Step title="Uninstall Cellm">
+    Select "Cellm" from the list and click "Uninstall".
+  </Step>
+</Steps>
 
-    Excel will not load Cellm next time you start it. 
-  </Accordion>
-  <Accordion icon="shield-halved" title="Untrust location">
-    In Excel, go to File > Options > Trust Center > Trust Center Settings > Trusted Locations and remove the folder with `Cellm-AddIn64-packed.xll` in it.
-  </Accordion>
-  <Accordion icon="trash" title="Remove from list of Add-Ins (optional)">
-    To also remove the unchecked `Cellm-AddIn64-packed.xll` entry from the Add-Ins list, follow these steps:
+## You're all set!
 
-    1. Delete `Cellm-AddIn64-packed.xll` from your disk. 
-    2. Restart Excel and go File > Options > Add-Ins. 
-    3. In the `Manage` drop-down menu, select `COM Add-ins` and click `Go...`. Excel will ask you if it should remove the `Cellm-AddIn64-packed.xll` entry from the list of add-ins.
-    4. Click `Yes`.
-  </Accordion>
-</AccordionGroup>
+Cellm is now installed and ready to use. Open Excel and look for the new **Cellm** tab in the ribbon menu. From there, you can start using AI in your spreadsheets.
 
 ## Next steps
 

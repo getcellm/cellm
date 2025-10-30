@@ -1,0 +1,176 @@
+---
+title: 'Using MCP'
+description: 'How to connect AI models to external data and tools'
+icon: 'plug'
+---
+
+MCP (Model Context Protocol) lets you plug in tools that extend what AI models can do. Want to search the web? There's an MCP server for that. Need to access your Salesforce data? There's one for that too. File system access, Slack integration, calendar management—people build MCP servers for all kinds of tasks.
+
+With MCP, you can ask the AI to perform tasks that require external resources, such as:
+- Search the web for current information
+- Access data from Salesforce, HubSpot, or other CRM systems
+- Read files from your local disk
+- Send messages through Slack or check your calendar
+- Query databases
+- Interact with web pages through browser automation
+
+<Info>
+  Standard I/O MCP servers require Node.js or uv installed on your computer to run. The built-in Internet Browser tool requires Playwright dependencies. HTTP-based servers don't need local installations. See [installation instructions](/get-started/install#enable-mcp-optional).
+</Info>
+
+## Built-in MCP servers
+
+Cellm comes with a built-in browser automation server called Playwright. This server lets AI models interact with websites—clicking buttons, filling forms, and extracting data. You can enable it in Cellm's ribbon menu under Tools → Enable Internet Browser.
+
+<Info>
+  To use the Internet Browser tool, you need to install Playwright's browser dependencies first. See the [installation instructions](/get-started/install#enable-mcp-optional).
+</Info>
+
+## Installation Requirements
+
+To use MCP servers and tools, you may need to install:
+
+- **Node.js** - Runtime to run Node.js-based MCP servers (most MCP servers like Salesforce, Slack, file system, etc.)
+- **uv** - Runtime to run Python-based MCP servers
+- **Playwright dependencies** - Browser binaries needed for the built-in Internet Browser tool
+
+HTTP-based MCP servers run on remote servers and don't require any local installations.
+
+For detailed installation instructions, see the [Enable MCP section](/get-started/install#enable-mcp-optional) on the install page.
+
+## Adding MCP servers
+
+You can add your own MCP servers to extend what AI models can do. MCP servers come in two types:
+
+### Standard I/O servers
+These are programs that run on your computer and communicate through standard input/output. Most MCP servers use this type.
+
+<Info>
+  Requires Node.js or uv installed on your computer to run the MCP server. [See installation requirements](#installation-requirements).
+</Info>
+
+<Steps>
+  <Step title="Open MCP configuration">
+    In Excel, go to Cellm's ribbon menu and click Tools → MCP Servers.
+  </Step>
+  <Step title="Add a new server">
+    Click "Add Server" and select "Standard I/O" as the transport type.
+  </Step>
+  <Step title="Configure the server">
+    - **Name**: Give your server a descriptive name (e.g., "File System")
+    - **Command**: The program to run (e.g., `node`, `python`, or path to executable)
+    - **Arguments**: Command-line arguments to pass to the program
+    - **Working Directory**: (Optional) The directory to run the command from
+    - **Environment Variables**: (Optional) Environment variables the server needs
+  </Step>
+  <Step title="Save and enable">
+    Click "Save" and enable the server in the MCP Servers list.
+  </Step>
+</Steps>
+
+### HTTP servers
+These are web services that communicate over HTTP. They're useful for connecting to cloud-based MCP servers or servers running on other machines.
+
+<Steps>
+  <Step title="Open MCP configuration">
+    In Excel, go to Cellm's ribbon menu and click Tools → MCP Servers.
+  </Step>
+  <Step title="Add a new server">
+    Click "Add Server" and select "Streamable HTTP" as the transport type.
+  </Step>
+  <Step title="Configure the server">
+    - **Name**: Give your server a descriptive name (e.g., "Weather API")
+    - **Endpoint**: The HTTP endpoint URL (e.g., `https://api.example.com/mcp`)
+    - **Transport Mode**: Usually "ServerSentEvents"
+    - **Connection Timeout**: How long to wait for connection (in seconds)
+    - **Additional Headers**: (Optional) HTTP headers for authentication
+  </Step>
+  <Step title="Save and enable">
+    Click "Save" and enable the server in the MCP Servers list.
+  </Step>
+</Steps>
+
+## Using MCP servers in prompts
+
+Once you've enabled an MCP server, you can simply ask the AI to use it in your prompts. The AI will automatically detect when it needs to use an external tool.
+
+<RequestExample>
+
+```excel Search the web
+=PROMPT("Search the web for recent news articles about renewable energy")
+```
+
+```excel Access CRM data
+=PROMPT("Get all deals from Salesforce that closed this month")
+```
+
+```excel Check calendar
+=PROMPT("Check my calendar for available meeting times tomorrow afternoon")
+```
+
+```excel Extract web data
+=PROMPT("Go to https://example.com and extract all product names and prices")
+```
+
+</RequestExample>
+
+<ResponseExample>
+
+```excel With cell reference
+=PROMPT("Search the web for information about this company", A1)
+```
+
+Where A1 contains: `Microsoft`
+
+</ResponseExample>
+
+<Info>
+  MCP servers are automatically used by the AI model when needed. You don't need to specify which server to use—the AI will choose the appropriate one based on your prompt.
+</Info>
+
+## Finding MCP servers
+
+The MCP ecosystem is growing rapidly. Popular MCP servers include:
+- **Salesforce MCP** - Access CRM data, leads, opportunities, and accounts
+- **Slack MCP** - Send messages, search conversations, manage channels
+- **Google Drive MCP** - Read and write documents, sheets, and files
+- **GitHub MCP** - Search repositories, read code, manage issues
+- **PostgreSQL/MySQL MCP** - Query databases directly
+- **Browser automation** (built into Cellm) - Interact with any website
+
+You can find more MCP servers at [mcp.so](https://mcp.so). For more information about MCP, visit [modelcontextprotocol.io](https://modelcontextprotocol.io).
+
+<Tip>
+  Many MCP servers are Node.js programs. If you see instructions that mention `npx` or `node`, you'll need Node.js installed on your computer. See the [installation instructions](/get-started/install#enable-mcp-optional) for setup details.
+</Tip>
+
+## Managing MCP servers
+
+To edit or remove an MCP server:
+
+1. Go to Cellm's ribbon menu → Tools → MCP Servers
+2. Select the server from the list
+3. Click "Edit" to change settings or "Remove" to delete it
+4. Changes take effect immediately
+
+## Best practices
+
+**Test with simple prompts first**
+- After adding an MCP server, test it with a simple prompt to verify it works
+- Check that the AI can successfully use the server's tools
+
+**Name servers descriptively**
+- Use clear names that describe what the server does
+- This helps you remember which servers you have enabled
+
+**Disable unused servers**
+- Keep only the servers you need enabled
+- This improves performance and reduces potential conflicts
+
+**Secure your credentials**
+- If an MCP server needs API keys or passwords, use environment variables
+- Don't put sensitive information directly in the configuration
+
+**Monitor resource usage**
+- MCP servers run as background processes
+- If you notice performance issues, check which servers are running

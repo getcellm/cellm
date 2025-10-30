@@ -4,14 +4,42 @@ title: 'File Reader'
 
 Reads a file and returns its content as plain text.
 
-```csharp
-FileReader(filePath: string)
+## Parameters
+
+<ParamField body="filePath" type="string" required>
+  An absolute path to a file on your disk.
+
+  ````mdx Example path
+  C:\Users\username\Documents\report.pdf
+  ````
+
+  Supports extensions: c, cpp, cs, csv, cxx, h, hxx, html, java, json, jsonl, md, pdf, php, py, rb, txt, and xml.
+</ParamField>
+
+## Returns
+
+<ResponseField name="content" type="string">
+  The content of the file as plain text.
+</ResponseField>
+
+<Info>
+  This tool is automatically used by the AI model when needed. You enable it in Cellm's ribbon menu, then simply ask the model to perform tasks that require reading files (e.g., "Summarize the content of report.pdf in my Documents folder").
+</Info>
+
+<RequestExample>
+
+```excel Read and summarize
+=PROMPT("Read and summarize C:\Users\username\Documents\report.pdf")
 ```
 
-- **filePath (Required):** A path to a file on your disk.
-  - Supports extensions c, cpp, cs, csv, cxx, h, hxx, html, java, json, jsonl, md, pdf, php, py, rb, txt, and xml.
-- **Returns:** The content of the file as plain text.
+</RequestExample>
 
-<Warning>
-You cannot call this function yourself, but you can instruct the model to call it for you.
-</Warning>
+<ResponseExample>
+
+```excel With cell reference
+=PROMPT("Read and summarize this file", A1)
+```
+
+Where A1 contains: `C:\Users\username\Documents\report.pdf`
+
+</ResponseExample>

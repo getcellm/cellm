@@ -1,10 +1,16 @@
 ---
-title: 'PROMPT'
+title: 'PROMPTMODEL'
 ---
 
-Allows you to call the default model from a cell formula.
+Allows you to call a model from a cell formula and specify the model as the first argument. This overrides the default model.
 
-## Inputs
+## Arguments
+
+<ParamField body="providerAndModel" type="string" required>
+  A string on the form "provider/model" (e.g., "openai/gpt-4o-mini").
+
+  The default model is determined by your configuration settings.
+</ParamField>
 
 <ParamField body="instructions" type="string" required>
   Your prompt - the instructions for the model to follow.
@@ -32,6 +38,8 @@ Allows you to call the default model from a cell formula.
   Lower values (closer to 0) produce consistent, deterministic responses. Higher values (closer to 1) produce more varied, creative responses.
 </ParamField>
 
+## Returns
+
 <ResponseField name="response" type="string">
   The model's response as plain text.
 </ResponseField>
@@ -39,19 +47,19 @@ Allows you to call the default model from a cell formula.
 <RequestExample>
 
 ```excel Text Instructions
-=PROMPT("Extract keywords")
+=PROMPTMODEL("openai/gpt-4o-mini", "Extract keywords")
 ```
 
 ```excel Cell Instructions
-=PROMPT(A1:D10)
+=PROMPTMODEL("openai/gpt-4o-mini", A1:D10)
 ```
 
 ```excel With Context
-=PROMPT("Extract keywords", A1:D10)
+=PROMPTMODEL("openai/gpt-4o-mini", "Extract keywords", A1:D10)
 ```
 
 ```excel With Temperature
-=PROMPT("Extract keywords", A1:D10, 0.7)
+=PROMPTMODEL("openai/gpt-4o-mini", "Extract keywords", A1:D10, 0.7)
 ```
 
 </RequestExample>
@@ -59,15 +67,15 @@ Allows you to call the default model from a cell formula.
 <ResponseExample>
 
 ```excel TOROW
-=PROMPT.TOROW("Extract keywords", A1:D10)
+=PROMPTMODEL.TOROW("openai/gpt-4o-mini", "Extract keywords", A1:D10)
 ```
 
 ```excel TOCOLUMN
-=PROMPT.TOCOLUMN("Extract keywords", A1:D10)
+=PROMPTMODEL.TOCOLUMN("openai/gpt-4o-mini", "Extract keywords", A1:D10)
 ```
 
 ```excel TORANGE
-=PROMPT.TORANGE("Extract keywords", A1:D10)
+=PROMPTMODEL.TORANGE("openai/gpt-4o-mini", "Extract keywords", A1:D10)
 ```
 
 </ResponseExample>

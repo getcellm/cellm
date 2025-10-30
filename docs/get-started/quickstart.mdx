@@ -4,38 +4,158 @@ description: 'Get up and running with Cellm in minutes'
 icon: 'rocket'
 ---
 
-## Quick Install
-You can quickly try out Cellm in a single Excel session:
+## Install
+To get started, you can quickly install Cellm and a local model:
 
-1. Go to the [Github Release page](https://github.com/getcellm/cellm/releases) and download `Cellm-AddIn64-packed.xll` and `appsettings.json`. Put them in the _same_ folder.
+<Steps>
+  <Step title="Download Cellm">
+    Go to the [Github Release page](https://github.com/getcellm/cellm/releases) and download the latest `Cellm-AddIn-Release-x64.msi`
+  </Step>
+  <Step title="Install Cellm">
+    Run the installer to install Cellm on your computer.
+  </Step>
+  <Step title="Install Ollama">
+    Download and install [Ollama](https://ollama.com/) to run local AI models.
+  </Step>
+  <Step title="Download Gemma 3 model">
+    Open the Windows Terminal and type `ollama pull gemma3:4b-it-qat` to download the Gemma 3 4B model.
+  </Step>
+</Steps>
 
-2. Double-click on `Cellm-AddIn64-packed.xll` and click on "Enable this add-in for this session only" when Excel opens. 
+<Info>
+  Cellm requires Windows 10 or higher, [Excel 2010 or higher](https://www.microsoft.com/en-us/microsoft-365/excel) (must be desktop app), and the [.NET 9.0 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/9.0). See the [Install](install.mdx) page for details.
+</Info>
 
-3. Download and install [Ollama](https://ollama.com/). The first time Cellm will automatically instruct Ollama to download Gemma 2 2B the first time you call `=PROMPT()`.
+## Cellm Ribbon
+After installation, open Excel and look for the new **Cellm** tab in the ribbon menu. Use this tab to configure Cellm:
 
-See the [Install](install.mdx) page for instructions on how install Cellm as proper Cellm extension.
+<Frame caption="Cellm Ribbon menu">
+  <img src="https://assets.getcellm.com/docs/images/get-started/cellm-ribbon.png" />
+</Frame>
 
-<Tip>
-  Cellm requires Windows 10 or higher, [Excel 2010 or higher ](https://www.microsoft.com/en-us/microsoft-365/excel) (desktop app), and [.NET 9.0 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/9.0).
-</Tip>
+The ribbon has four main sections that control how Cellm works:
+
+<AccordionGroup>
+  <Accordion icon="user" title="Account">
+    **Manage your Cellm account**
+
+    - **Login/Logout**: Log in to your Cellm account to use the Cellm provider, which handles model costs through your subscription
+    - **Create Account**: Sign up for a Cellm account to access all features
+    - **Manage Account**: Access your account settings
+  </Accordion>
+
+  <Accordion icon="message" title="Prompt">
+    **Insert PROMPT formulas with different output shapes**
+
+    Click these buttons to insert a `=PROMPT()` formula in the active cell and open the function wizard:
+
+    - **Cell**: Output to a single cell (default)
+    - **Row**: Spill multiple values across cells to the right with `=PROMPT.TOROW()`
+    - **Column**: Spill multiple values down with `=PROMPT.TOCOLUMN()`
+    - **Range**: Let the model decide the output shape with `=PROMPT.TORANGE()`
+
+    If the active cell already contains a PROMPT formula, clicking these buttons changes the output shape while keeping your arguments.
+  </Accordion>
+
+  <Accordion icon="brain" title="Model">
+    **Configure which AI model to use and how**
+
+    - **Provider**: Select your model provider (OpenAI, Anthropic, Ollama, etc.). Click the provider icon to configure API keys and base URLs
+    - **Model**: Choose from preset models or type a custom model name
+    - **Temperature**: Control randomness (Consistent/0.0, Neutral/0.3, Creative/0.7, or any value 0.0-1.0)
+    - **Usage**: View input/output tokens and prompt counts for this session
+    - **Speed**: See average Tokens Per Second (TPS) and Requests Per Second (RPS)
+    - **Memory**: Toggle response caching. When on, identical prompts return cached results instantly, saving costs
+  </Accordion>
+
+  <Accordion icon="wrench" title="Tools">
+    **Enable tools that extend model capabilities**
+
+    - **Functions**: Built-in tools the model can use:
+      - **Internet Browser**: Let models browse the web
+      - **File Search**: Let models search for files on your computer
+      - **File Reader**: Let models read PDF, Markdown, and text files
+
+    - **MCP**: Add, configure, or remove Model Context Protocol servers for advanced integrations
+  </Accordion>
+</AccordionGroup>
 
 ## Usage
 
 ### Sending a prompt to a model
-Select a cell and type e.g. `=PROMPT("What model are you and who made you?")`. The default model will tell you that is called "Gemma" and made by Google DeepMind.
+Sending prompts to a model is easy. Select a cell and type:
 
-### Processing text in cells
-You can use cell references to dynamically change your prompts based on other data in your spreadsheet. For example, try to copy a news article into cell A1 and type in the formula of cell B1 `=PROMPT(A1, "Extract all person names mentioned in the text")`. 
+````mdx Text instruction
+=PROMPT("Extract the main topic from: The quarterly sales report shows a 15% increase in revenue across all departments")
+````
 
-### Function Calling
-You can use the built-in tools to analyse files on your disk. Fill out a folder path in cell A1 and type in cell A2 `=PROMPT(A1, "Which pdf files do I have in my downloads folder?")`. Gemma 2 2B does not support tool calling, so for this task you must use another model, e.g. OpenAI's `gpt-4o-mini`.
+The model will tell you that the main topic is sales. By default, Cellm is configured to use Ollama with the Gemma 3 4B model, which is a small model that runs on your CPU.
+
+### Combine your prompt with data from your spreadsheet
+You can process entire datasets by referencing cells in your prompts, letting the AI work with your actual spreadsheet data. For example, try to copy a news article into cell A1 and type in the formula of cell B1:
+
+````mdx Single cell context
+=PROMPT("Extract all person names mentioned in the text", A1)
+````
+
+Then copy another news article into cell A1 and watch the formula recalculate itself and output the new person names. You can also use cell references to dynamically change your prompts based on other data in your spreadsheet. You can drag the cell to apply the prompt separately to many rows. Try copy a list of news articles into column A and type in cell B1:
+
+````mdx Dynamic prompts
+=PROMPT("Extract all person names mentioned in the text", A1)
+````
+
+Then drag the fill handle down to apply the formula to all rows. Cellm will automatically send each article to the model and output the results in corresponding cells in column B.
+
+You can also reference many cells using standard Excel notation:
+
+````mdx Range context
+=PROMPT("Extract all person names in the cells", A1:F10)
+````
+
+### Spilling model response across multiple cells
+You can use the `=PROMPT.TOCOLUMN()` function to spill the model response across multiple cells. For example, if you have text in cell A1, you can type in cell B1:
+
+````mdx Spill to column
+=PROMPT.TOCOLUMN("Generate 10 relevant hashtags", A1)
+````
+
+This will put multiple values across separate cells below. 
+
+<Frame caption="Format output as a row or a column with `=PROMPT.TOROW()` and `=PROMPT.TOCOLUMN()`">
+  <img src="https://assets.getcellm.com/docs/images/usage/writing-prompts/to-row-column.png" />
+</Frame>
+
+You can also use `=PROMPT.TOROW()` to spill the response across cells to the right or `=PROMPT.TORANGE()` to let the model choose whether to spill multiple values (if any) across rows and/or columns or not.
+
+<Warning>
+  If you wish to combine multi-value output with function calling, you must use OpenAI as no other provider supports combining structured output with function calling.
+</Warning>
+
+### Function calling
+Beyond basic text processing, you can use "Function Calling" to give models access to external tools and data and even take action in other systems. For example, expand the "Functions" menu in the Cellm ribbon tab, and click on "File Search" to enable the model to search for files on your computer. Then type:
+
+````mdx With function calling
+=PROMPT("Which pdf files do I have in C:\Users\username\Downloads?")
+```` 
+
+<Tip>
+  Gemma 3 4B does not support function calling. For function calling you must use another model, e.g. OpenAI's `gpt-4o-mini`.
+</Tip>
+
+## Next steps
 
 <CardGroup cols={2}>
   <Card
     title="Prompting"
     icon="pen-to-square"
     href="/usage/prompting">
-    Use AI in Excel to automate repetitive tasks. 
+    Learn more about prompting techniques and building automated workflows. 
+  </Card>
+  <Card
+    title="Breaking Down Tasks for AI"
+    icon="lightbulb"
+    href="/usage/breaking-down-tasks">
+    Learn how to split a complex task into multiple smaller ones and select the right model for your tasks' complexity.
   </Card>
   <Card
     title="Function Calling"
@@ -44,18 +164,3 @@ You can use the built-in tools to analyse files on your disk. Fill out a folder 
     Use Excel as a low-code task orchestrator by enabling Cellm to access external tools and data.
   </Card>
 </CardGroup>
-
-# Configuration
-Use the Cellm tab in Excel's ribbon menu to configure which AI model to use.
-
-<Frame caption="Cellm Ribbon">
-  <img src="https://iili.io/2yWOtna.png" />
-</Frame>
-
-- **Model**: Select which AI model to use (e.g., "openai/gpt-4o-mini"). The dropdown gives a couple of preset options. You can also type the model name directly in the drop-down text field to select another model.
-- **Address**: The API endpoint for your chosen provider (e.g., "https://api.openai.com/v1")
-- **API Key**: Your authentication key for the selected provider
-
-The other options in the Cellm tab are:
-- **Cache**: Enable/disable local caching of model responses to a fixed input. Useful when Excel triggers recalculation of many cells.
-- **Functions**: Enable/disable function calling.
