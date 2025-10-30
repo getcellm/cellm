@@ -2,32 +2,72 @@
 title: 'PROMPT'
 ---
 
-```excel
-PROMPT(cells: range | instruction: string, [instruction: range or string | temperature: double], [temperature: double]): string
+Allows you to call the default model from a cell formula.
+
+## Inputs
+
+<ParamField body="instructions" type="string" required>
+  Your prompt - the instructions for the model to follow.
+
+  Can be a string, a cell reference, or a range of cells.
+</ParamField>
+
+<ParamField body="cellsOrTemperature" type="string | number">
+  Either context cells or a temperature value:
+
+  - **If providing cells:** A cell reference or range (e.g., A1:D10). The model will use these cells as context when following your instructions.
+  - **If providing a temperature:** A number (0.0-1.0) or preset string to control randomness when no context cells are needed.
+</ParamField>
+
+<ParamField body="temperature" type="string | number" default="0.0">
+  Controls randomness in the model's output.
+
+  Accepts either:
+  - A number between 0.0 and 1.0
+  - A preset string:
+    - `"Consistent"` (0.0) - Deterministic output, same result each time
+    - `"Neutral"` (0.3) - Balanced between consistency and variety
+    - `"Creative"` (0.7) - More varied and creative outputs
+
+  Lower values (closer to 0) produce consistent, deterministic responses. Higher values (closer to 1) produce more varied, creative responses.
+</ParamField>
+
+<ResponseField name="response" type="string">
+  The model's response as plain text.
+</ResponseField>
+
+<RequestExample>
+
+```excel Text Instructions
+=PROMPT("Extract keywords")
 ```
 
-Allows you to call a model from a cell formula.
+```excel Cell Instructions
+=PROMPT(A1:D10)
+```
 
-- **cells (Required):** A cell or a range of cells.
-  - The model will use the cells as context and follow any instructions as long as they are present _somewhere_ in the cells. If you provide an instruction as second argument, the second argument instructions takes precedence.
-- **instructions (Optional):** A cell, a range of cells, or a string.
-  - The model will follow these instructions and ignore instructions in the cells of the first argument.
-  - Default: Empty. 
-- **temperature (Optional):** double. 
-    - A value between 0 and 1 that controls the balance between deterministic outputs and creative exploration. Lower values make the output more deterministic, higher values make it more random.
-  - Default: 0. The model will almost always give you the same result.
-- **Returns:** string.
-  - The AI model's response.
+```excel With Context
+=PROMPT("Extract keywords", A1:D10)
+```
 
-Example usage:
+```excel With Temperature
+=PROMPT("Extract keywords", A1:D10, 0.7)
+```
 
-- `=PROMPT(A1:D10, "Extract keywords")` will use the selected range of cells as context and follow the instruction to extract keywords.
-- `=PROMPT(A1:D10, "Extract keywords", 0.7)` will use the selected range of cells as context, follow the instruction to extract keywords, and use a temperature of 0.7.
-- `=PROMPT(A1:D10)` will use the range of cells as context and follow instructions as long as they present _somewhere_ in the cells.
-- `=PROMPT(A1:D10, 0.7)` will use the selected range of cells as context, follow any instruction within the cells, and use a temperature of 0.7.
+</RequestExample>
 
-Structured output variants:
+<ResponseExample>
 
-- `=PROMPT.TOROW()` will spill multiple output values (if any) into cells to the right.
-- `=PROMPT.TOCOLUMN()` will spill multiple output values (if any) into cells below.
-- `=PROMPT.TORANGE()` will spill multiple output values (if any) into a range.
+```excel TOROW
+=PROMPT.TOROW("Extract keywords", A1:D10)
+```
+
+```excel TOCOLUMN
+=PROMPT.TOCOLUMN("Extract keywords", A1:D10)
+```
+
+```excel TORANGE
+=PROMPT.TORANGE("Extract keywords", A1:D10)
+```
+
+</ResponseExample>
