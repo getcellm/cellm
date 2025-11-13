@@ -13,7 +13,7 @@ internal class OpenAiCompatibleConfiguration : IProviderConfiguration
 
     public string Icon { get => $"AddIn/UserInterface/Resources/{nameof(Provider.OpenAi)}.png"; }
 
-    public Uri BaseAddress { get; set; } = new Uri("https://api.openai.com/v1/");
+    public Uri BaseAddress { get; init; } = new Uri("https://api.openai.com/v1/");
 
     public string DefaultModel { get; init; } = string.Empty;
 
