@@ -21,6 +21,7 @@ using Cellm.Models.Providers.Mistral;
 using Cellm.Models.Providers.Ollama;
 using Cellm.Models.Providers.OpenAi;
 using Cellm.Models.Providers.OpenAiCompatible;
+using Cellm.Models.Providers.OpenRouter;
 using Cellm.Models.Resilience;
 using Cellm.Users;
 using Microsoft.Extensions.AI;
@@ -420,6 +421,37 @@ internal static class ServiceCollectionExtensions
                 return openAiClient
                     .GetChatClient(openAiCompatibleConfiguration.CurrentValue.DefaultModel)
                     .AsIChatClient();
+            }, ServiceLifetime.Transient)
+            .UseFunctionInvocation();
+
+        return services;
+    }
+
+    public static IServiceCollection AddOpenRouterChatClient(this IServiceCollection services)
+    {
+        services
+            .AddKeyedChatClient(Provider.OpenRouter, serviceProvider =>
+            {
+                var account = serviceProvider.GetRequiredService<Account>();
+                account.ThrowIfNotEntitled(Entitlement.EnableOpenRouterProvider);
+
+                var openRouterConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<OpenRouterConfiguration>>();
+                var resilientHttpClient = serviceProvider.GetResilientHttpClient(Provider.OpenRouter);
+
+                if (string.IsNullOrWhiteSpace(openRouterConfiguration.CurrentValue.ApiKey))
+                {
+                    throw new CellmException($"Empty {nameof(OpenRouterConfiguration.ApiKey)} for {Provider.OpenRouter}. Please set your API key.");
+                }
+
+                var openAiClient = new OpenAIClient(
+                    new ApiKeyCredential(openRouterConfiguration.CurrentValue.ApiKey),
+                    new OpenAIClientOptions
+                    {
+                        Transport = new HttpClientPipelineTransport(resilientHttpClient),
+                        Endpoint = openRouterConfiguration.CurrentValue.BaseAddress
+                    });
+
+                return openAiClient.GetChatClient(openRouterConfiguration.CurrentValue.DefaultModel).AsIChatClient();
             }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 

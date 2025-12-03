@@ -11,5 +11,6 @@ public enum Provider
     Mistral,
     Ollama,
     OpenAi,
-    OpenAiCompatible
+    OpenAiCompatible,
+    OpenRouter
 }
