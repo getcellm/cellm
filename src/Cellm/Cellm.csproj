@@ -90,5 +90,6 @@
     <EmbeddedResource Include="AddIn\UserInterface\Resources\Mistral.png" />
     <EmbeddedResource Include="AddIn\UserInterface\Resources\Ollama.png" />
     <EmbeddedResource Include="AddIn\UserInterface\Resources\OpenAi.png" />
+    <EmbeddedResource Include="AddIn\UserInterface\Resources\Vertex.png" />
   </ItemGroup>
 </Project>

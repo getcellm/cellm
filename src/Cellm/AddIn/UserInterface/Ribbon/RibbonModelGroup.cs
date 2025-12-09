@@ -12,6 +12,7 @@ using Cellm.Models.Providers.Mistral;
 using Cellm.Models.Providers.Ollama;
 using Cellm.Models.Providers.OpenAi;
 using Cellm.Models.Providers.OpenAiCompatible;
+using Cellm.Models.Providers.Vertex;
 using Cellm.Users;
 using ExcelDna.Integration.CustomUI;
 using Microsoft.Extensions.AI;
@@ -494,6 +495,9 @@ public partial class RibbonMain
                 case Provider.OpenAiCompatible:
                     currentBaseAddress = GetProviderConfiguration<OpenAiCompatibleConfiguration>()?.BaseAddress?.ToString() ?? "";
                     break;
+                case Provider.Vertex:
+                    currentBaseAddress = GetProviderConfiguration<VertexConfiguration>()?.BaseAddress?.ToString() ?? "";
+                    break;
                 default:
                     break;
             }
@@ -547,7 +551,7 @@ public partial class RibbonMain
     {
         return provider switch
         {
-            Provider.Azure or Provider.Aws or Provider.OpenAiCompatible => true,
+            Provider.Azure or Provider.Aws or Provider.OpenAiCompatible or Provider.Vertex => true,
             _ => false
         };
     }
