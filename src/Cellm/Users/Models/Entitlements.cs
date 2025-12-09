@@ -19,6 +19,7 @@ internal class Entitlements()
         Entitlement.EnableDeepSeekProvider,
         Entitlement.EnableGeminiProvider,
         Entitlement.EnableMistralProvider,
+        Entitlement.EnableModelContextProtocol,
         Entitlement.EnableOllamaProvider,
         Entitlement.EnableOpenAiProvider,
         Entitlement.EnableOpenAiCompatibleProvider,
