@@ -453,6 +453,8 @@ internal static class ServiceCollectionExtensions
                     });
 
                 return openAiClient.GetChatClient(vertexConfiguration.CurrentValue.DefaultModel).AsIChatClient();
+            });
+    }
 
     public static IServiceCollection AddOpenRouterChatClient(this IServiceCollection services)
     {
