@@ -1,11 +1,13 @@
 using System.Text.Json;
 using ExcelDna.Integration;
 using ExcelDna.Integration.CustomUI;
+using Excel = Microsoft.Office.Interop.Excel;
 
 namespace Cellm.AddIn.UserInterface.Ribbon;
 
 public partial class RibbonMain
 {
+    private static Excel.Application Application => (Excel.Application)ExcelDnaUtil.Application;
     private enum PromptGroupControlIds
     {
         PromptGroupHorizontalContainer,
@@ -102,7 +104,7 @@ public partial class RibbonMain
 
     private CellmFormula? GetCellmFunction()
     {
-        var formula = (string)ExcelDnaUtil.Application.ActiveCell.Formula;
+        var formula = (string)Application.ActiveCell.Formula;
 
         var startIndex = formula.IndexOf('=');
         var endIndex = formula.IndexOf('.');
@@ -138,7 +140,7 @@ public partial class RibbonMain
             return null;
         }
 
-        var formula = (string)ExcelDnaUtil.Application.ActiveCell.Formula;
+        var formula = (string)Application.ActiveCell.Formula;
 
         var startIndex = formula.IndexOf('.');
         var endIndex = formula.IndexOf('(');
@@ -149,7 +151,7 @@ public partial class RibbonMain
             return CellmOutputShape.ToCell;
         }
 
-        var cellmOutputShapeAsString = formula.Substring(startIndex + 1, endIndex - startIndex + 1);
+        var cellmOutputShapeAsString = formula.Substring(startIndex + 1, endIndex - startIndex - 1);
 
         if (Enum.TryParse<CellmOutputShape>(cellmOutputShapeAsString, ignoreCase: true, out var cellmOutputShape))
         {
@@ -183,7 +185,7 @@ public partial class RibbonMain
 
     private void UpdateCell(CellmOutputShape targetOutputShape)
     {
-        if (ExcelDnaUtil.Application.ActiveSheet == null)
+        if (Application.ActiveSheet == null)
         {
             // No sheet open
             return;
@@ -193,7 +195,7 @@ public partial class RibbonMain
         var currentOutputShape = GetCellmOutputShape();
         var targetOutputShapeAsString = targetOutputShape == CellmOutputShape.ToCell ? string.Empty : $".{targetOutputShape.ToString().ToUpper()}";
 
-        var selectedCells = ExcelDnaUtil.Application.Selection;
+        var selectedCells = Application.Selection;
 
         if (selectedCells.Cells.Count > 1)
         {
@@ -204,13 +206,13 @@ public partial class RibbonMain
             var rangeAsString = $"{GetColumnName(columnStart)}{GetRowName(rowStart)}:{GetColumnName(columnStart + columnEnd)}{GetRowName(rowStart + rowEnd)}";
             var formula = $"={nameof(CellmFunctions.Prompt).ToUpper()}({rangeAsString})";
 
-            var targetCell = ExcelDnaUtil.Application.ActiveSheet.Range[GetColumnName(columnStart + columnEnd) + GetRowName(rowStart + rowEnd + 1)];
+            var targetCell = Application.ActiveSheet.Range[GetColumnName(columnStart + columnEnd) + GetRowName(rowStart + rowEnd + 1)];
             targetCell.NumberFormat = "@";  // Do not recalculate the formula immediately
 
             try
             {
-                // Use array-aware Formula2 if it exists. This prevents array-aware Excel versions from prepending "@" to formula
-                targetCell.Formula2 = formula;
+                // Formula2 only exists in Excel 2019+, use dynamic to avoid compile error
+                ((dynamic)targetCell).Formula2 = formula;
             }
             catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException)
             {
@@ -223,12 +225,12 @@ public partial class RibbonMain
             // Select target cell before opening function wizard
             targetCell.Select();
 
-            ExcelDnaUtil.Application.Dialogs[Microsoft.Office.Interop.Excel.XlBuiltInDialog.xlDialogFunctionWizard].Show();
+            Application.Dialogs[Microsoft.Office.Interop.Excel.XlBuiltInDialog.xlDialogFunctionWizard].Show();
 
             return;
         }
 
-        if (ExcelDnaUtil.Application.ActiveCell is null)
+        if (Application.ActiveCell is null)
         {
             // No cell selected
             return;
@@ -239,10 +241,10 @@ public partial class RibbonMain
             // The cell does not contain a Cellm formula, insert a new one
             ExcelAsyncUtil.QueueAsMacro(() =>
             {
-                ExcelDnaUtil.Application.ActiveCell.NumberFormat = "@";  // Do not recalculate the formula immediately
+                Application.ActiveCell.NumberFormat = "@";  // Do not recalculate the formula immediately
                 SetFormula($"={nameof(CellmFunctions.Prompt).ToUpper()}{targetOutputShapeAsString}()");
-                ExcelDnaUtil.Application.ActiveCell.NumberFormat = "General";  // Calculate the formula when function wizard is closed
-                ExcelDnaUtil.Application.Dialogs[Microsoft.Office.Interop.Excel.XlBuiltInDialog.xlDialogFunctionWizard].Show();
+                Application.ActiveCell.NumberFormat = "General";  // Calculate the formula when function wizard is closed
+                Application.Dialogs[Microsoft.Office.Interop.Excel.XlBuiltInDialog.xlDialogFunctionWizard].Show();
 
             });
 
@@ -251,13 +253,17 @@ public partial class RibbonMain
 
         if (currentOutputShape == targetOutputShape)
         {
-            // Just recalculate
-            ExcelDnaUtil.Application.ActiveCell.Calculate();
+            // Re-set the formula to trigger recalculation
+            var formula = (string)Application.ActiveCell.Formula;
+            ExcelAsyncUtil.QueueAsMacro(() =>
+            {
+                SetFormula(formula);
+            });
             return;
         }
 
         // Change the output shape and recalculate
-        var currentFormula = (string)ExcelDnaUtil.Application.ActiveCell.Formula;
+        var currentFormula = (string)Application.ActiveCell.Formula;
         var currentFunctionAsString = currentFunction.ToString() ?? throw new NullReferenceException(nameof(currentFunction));
         var arguments = currentFormula[currentFormula.IndexOf('(')..];
 
@@ -269,17 +275,16 @@ public partial class RibbonMain
 
     void SetFormula(string formula)
     {
-        var dynamicApp = (dynamic)ExcelDnaUtil.Application;
-
+        var cell = Application.ActiveCell;
         try
         {
-            // Use array-aware Formula2 if it exists. This prevents array-aware Excel versions from prepending "@" to formula
-            dynamicApp.ActiveCell.Formula2 = formula;
+            // Formula2 only exists in Excel 2019+, use dynamic to avoid compile error
+            ((dynamic)cell).Formula2 = formula;
         }
         catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException)
         {
             // Fallback to normal Formula property for older versions of Excel
-            ExcelDnaUtil.Application.ActiveCell.Formula = formula;
+            cell.Formula = formula;
         }
     }
 
