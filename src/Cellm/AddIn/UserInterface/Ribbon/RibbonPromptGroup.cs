@@ -8,6 +8,7 @@ namespace Cellm.AddIn.UserInterface.Ribbon;
 public partial class RibbonMain
 {
     private static Excel.Application Application => (Excel.Application)ExcelDnaUtil.Application;
+
     private enum PromptGroupControlIds
     {
         PromptGroupHorizontalContainer,
@@ -23,7 +24,7 @@ public partial class RibbonMain
         return $"""
         <group id="{nameof(PromptGroup)}" label="Prompt">
             <box id="{nameof(PromptGroupControlIds.PromptGroupHorizontalContainer)}" boxStyle="horizontal">
-                <button id="{nameof(PromptGroupControlIds.PromptToCell)}" 
+                <button id="{nameof(PromptGroupControlIds.PromptToCell)}"
                         size="large"
                         label="Cell"
                         imageMso="TableSelectCell"
@@ -40,7 +41,7 @@ public partial class RibbonMain
                 <button id="{nameof(PromptGroupControlIds.PromptToColumn)}"
                         size="large"
                         label="Column"
-                        imageMso="TableColumnSelect" 
+                        imageMso="TableColumnSelect"
                         onAction="{nameof(OnPromptToColumnClicked)}"
                         getEnabled="{nameof(GetStructuredOutputEnabled)}"
                         screentip="Output response in a column"
@@ -102,65 +103,74 @@ public partial class RibbonMain
         ToRange,
     }
 
-    private CellmFormula? GetCellmFunction()
+    private record ParsedCellmFormula(
+        CellmFormula Function,
+        CellmOutputShape Shape,
+        string Arguments);
+
+    private static ParsedCellmFormula? TryParseFormula(string formula)
     {
-        var formula = (string)Application.ActiveCell.Formula;
+        // Parse the function name (e.g., "PROMPT" or "PROMPTMODEL")
+        var equalsIndex = formula.IndexOf('=');
+        var dotIndex = formula.IndexOf('.');
+        var parenIndex = formula.IndexOf('(');
 
-        var startIndex = formula.IndexOf('=');
-        var endIndex = formula.IndexOf('.');
-
-        if (endIndex < 0)
+        if (equalsIndex < 0 || parenIndex < 0)
         {
-            endIndex = formula.IndexOf('(');
-        }
-
-        if (startIndex < 0 || endIndex < 0 || startIndex >= endIndex)
-        {
-            // This is fine, it means the user asked us to insert formula in a cell that does not already contain a formula
             return null;
         }
 
-        var cellmFormulaAsString = formula.Substring(startIndex + 1, endIndex - startIndex - 1);
-
-        if (Enum.TryParse<CellmFormula>(cellmFormulaAsString, ignoreCase: true, out var cellmFormula))
+        // Function name ends at dot (if present before paren) or at paren
+        int functionEndIndex;
+        if (dotIndex >= 0 && dotIndex < parenIndex)
         {
-            // The cell already contains a Cellm formula
-            return cellmFormula;
+            functionEndIndex = dotIndex;
+        }
+        else
+        {
+            functionEndIndex = parenIndex;
         }
 
-        // The cell does not contain a Cellm formula
-        return null;
+        if (equalsIndex >= functionEndIndex)
+        {
+            return null;
+        }
+
+        var functionName = formula.Substring(equalsIndex + 1, functionEndIndex - equalsIndex - 1);
+
+        if (!Enum.TryParse<CellmFormula>(functionName, ignoreCase: true, out var function))
+        {
+            return null;
+        }
+
+        // Parse the output shape (e.g., "TOROW", "TOCOLUMN", "TORANGE")
+        var shape = CellmOutputShape.ToCell;
+
+        if (dotIndex >= 0 && dotIndex < parenIndex)
+        {
+            var shapeName = formula.Substring(dotIndex + 1, parenIndex - dotIndex - 1);
+
+            if (Enum.TryParse<CellmOutputShape>(shapeName, ignoreCase: true, out var parsedShape))
+            {
+                shape = parsedShape;
+            }
+        }
+
+        // Extract arguments including parentheses
+        var arguments = formula[parenIndex..];
+
+        return new ParsedCellmFormula(function, shape, arguments);
     }
 
-    private CellmOutputShape? GetCellmOutputShape()
+    private static string BuildFormula(CellmFormula function, CellmOutputShape shape, string arguments)
     {
-        if (GetCellmFunction() is null)
+        var shapeSuffix = shape switch
         {
-            // The cell does not contain a Cellm formula
-            return null;
-        }
+            CellmOutputShape.ToCell => string.Empty,
+            _ => $".{shape.ToString().ToUpper()}"
+        };
 
-        var formula = (string)Application.ActiveCell.Formula;
-
-        var startIndex = formula.IndexOf('.');
-        var endIndex = formula.IndexOf('(');
-
-        if (startIndex < 0 || endIndex < 0 || startIndex >= endIndex)
-        {
-            // This is fine, it means the formula uses the default output shape
-            return CellmOutputShape.ToCell;
-        }
-
-        var cellmOutputShapeAsString = formula.Substring(startIndex + 1, endIndex - startIndex - 1);
-
-        if (Enum.TryParse<CellmOutputShape>(cellmOutputShapeAsString, ignoreCase: true, out var cellmOutputShape))
-        {
-            // The cell already contains a Cellm formula
-            return cellmOutputShape;
-        }
-
-        // We could not parse the output shape from the formula
-        return null;
+        return $"={function.ToString().ToUpper()}{shapeSuffix}{arguments}";
     }
 
     public void OnPromptToCellClicked(IRibbonControl control)
@@ -183,99 +193,111 @@ public partial class RibbonMain
         UpdateCell(CellmOutputShape.ToRange);
     }
 
-    private void UpdateCell(CellmOutputShape targetOutputShape)
+    private void UpdateCell(CellmOutputShape targetShape)
     {
-        if (Application.ActiveSheet == null)
+        if (Application.ActiveSheet is null)
         {
-            // No sheet open
             return;
         }
 
-        var currentFunction = GetCellmFunction();
-        var currentOutputShape = GetCellmOutputShape();
-        var targetOutputShapeAsString = targetOutputShape == CellmOutputShape.ToCell ? string.Empty : $".{targetOutputShape.ToString().ToUpper()}";
+        if (HandleMultiCellSelection(targetShape))
+        {
+            return;
+        }
 
+        if (Application.ActiveCell is not Excel.Range activeCell)
+        {
+            return;
+        }
+
+        var formula = (string)activeCell.Formula;
+        var parsed = TryParseFormula(formula);
+
+        switch (parsed)
+        {
+            case null:
+                InsertNewFormula(activeCell, targetShape);
+                break;
+
+            case { Shape: var s } when s == targetShape:
+                TriggerRecalculation(activeCell, formula);
+                break;
+
+            case var p:
+                ChangeFormulaShape(activeCell, p, targetShape);
+                break;
+        }
+    }
+
+    private bool HandleMultiCellSelection(CellmOutputShape targetShape)
+    {
         var selectedCells = Application.Selection;
 
-        if (selectedCells.Cells.Count > 1)
+        if (selectedCells.Cells.Count <= 1)
         {
-            var rowStart = selectedCells.Row;
-            var rowEnd = selectedCells.Rows.Count - 1;
-            var columnStart = selectedCells.Column;
-            var columnEnd = selectedCells.Columns.Count - 1;
-            var rangeAsString = $"{GetColumnName(columnStart)}{GetRowName(rowStart)}:{GetColumnName(columnStart + columnEnd)}{GetRowName(rowStart + rowEnd)}";
-            var formula = $"={nameof(CellmFunctions.Prompt).ToUpper()}({rangeAsString})";
-
-            var targetCell = Application.ActiveSheet.Range[GetColumnName(columnStart + columnEnd) + GetRowName(rowStart + rowEnd + 1)];
-            targetCell.NumberFormat = "@";  // Do not recalculate the formula immediately
-
-            try
-            {
-                // Formula2 only exists in Excel 2019+, use dynamic to avoid compile error
-                ((dynamic)targetCell).Formula2 = formula;
-            }
-            catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException)
-            {
-                // Fallback to normal Formula property for older versions of Excel
-                targetCell.Formula = formula;
-            }
-
-            targetCell.NumberFormat = "General";  // Calculate the formula when function wizard is closed
-
-            // Select target cell before opening function wizard
-            targetCell.Select();
-
-            Application.Dialogs[Microsoft.Office.Interop.Excel.XlBuiltInDialog.xlDialogFunctionWizard].Show();
-
-            return;
+            return false;
         }
 
-        if (Application.ActiveCell is null)
-        {
-            // No cell selected
-            return;
-        }
+        var rowStart = selectedCells.Row;
+        var rowCount = selectedCells.Rows.Count;
+        var columnStart = selectedCells.Column;
+        var columnCount = selectedCells.Columns.Count;
 
-        if (currentFunction is null)
-        {
-            // The cell does not contain a Cellm formula, insert a new one
-            ExcelAsyncUtil.QueueAsMacro(() =>
-            {
-                Application.ActiveCell.NumberFormat = "@";  // Do not recalculate the formula immediately
-                SetFormula($"={nameof(CellmFunctions.Prompt).ToUpper()}{targetOutputShapeAsString}()");
-                Application.ActiveCell.NumberFormat = "General";  // Calculate the formula when function wizard is closed
-                Application.Dialogs[Microsoft.Office.Interop.Excel.XlBuiltInDialog.xlDialogFunctionWizard].Show();
+        var rangeStart = $"{GetColumnName(columnStart)}{rowStart}";
+        var rangeEnd = $"{GetColumnName(columnStart + columnCount - 1)}{rowStart + rowCount - 1}";
+        var formula = BuildFormula(CellmFormula.Prompt, targetShape, $"({rangeStart}:{rangeEnd})");
 
-            });
+        var targetCell = Application.ActiveSheet.Range[
+            $"{GetColumnName(columnStart + columnCount - 1)}{rowStart + rowCount}"
+        ];
 
-            return;
-        }
+        // Prevent immediate recalculation while function wizard is open
+        targetCell.NumberFormat = "@";
+        SetFormula(targetCell, formula);
+        targetCell.NumberFormat = "General";
 
-        if (currentOutputShape == targetOutputShape)
-        {
-            // Re-set the formula to trigger recalculation
-            var formula = (string)Application.ActiveCell.Formula;
-            ExcelAsyncUtil.QueueAsMacro(() =>
-            {
-                SetFormula(formula);
-            });
-            return;
-        }
+        // Select target cell before opening function wizard
+        targetCell.Select();
+        Application.Dialogs[Excel.XlBuiltInDialog.xlDialogFunctionWizard].Show();
 
-        // Change the output shape and recalculate
-        var currentFormula = (string)Application.ActiveCell.Formula;
-        var currentFunctionAsString = currentFunction.ToString() ?? throw new NullReferenceException(nameof(currentFunction));
-        var arguments = currentFormula[currentFormula.IndexOf('(')..];
+        return true;
+    }
+
+    private void InsertNewFormula(Excel.Range cell, CellmOutputShape targetShape)
+    {
+        var formula = BuildFormula(CellmFormula.Prompt, targetShape, "()");
 
         ExcelAsyncUtil.QueueAsMacro(() =>
         {
-            SetFormula($"={currentFunctionAsString.ToUpper()}{targetOutputShapeAsString}{arguments}");
+            // Prevent immediate recalculation while function wizard is open
+            cell.NumberFormat = "@";
+            SetFormula(cell, formula);
+            cell.NumberFormat = "General";
+            Application.Dialogs[Excel.XlBuiltInDialog.xlDialogFunctionWizard].Show();
         });
     }
 
-    void SetFormula(string formula)
+    private void TriggerRecalculation(Excel.Range cell, string formula)
     {
-        var cell = Application.ActiveCell;
+        // Re-setting the formula triggers Excel-DNA async function re-evaluation
+        // (Range.Calculate() does not work for async functions)
+        ExcelAsyncUtil.QueueAsMacro(() =>
+        {
+            SetFormula(cell, formula);
+        });
+    }
+
+    private void ChangeFormulaShape(Excel.Range cell, ParsedCellmFormula current, CellmOutputShape targetShape)
+    {
+        var newFormula = BuildFormula(current.Function, targetShape, current.Arguments);
+
+        ExcelAsyncUtil.QueueAsMacro(() =>
+        {
+            SetFormula(cell, newFormula);
+        });
+    }
+    private static void SetFormula(Excel.Range cell, string formula)
+    {
         try
         {
             // Formula2 only exists in Excel 2019+, use dynamic to avoid compile error
