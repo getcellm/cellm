@@ -110,6 +110,12 @@ You can reference a group of cells using standard Excel notation (this is called
 =PROMPT("Extract all person names in the cells", A1:F10)
 ````
 
+You can also reference multiple separate cell ranges:
+
+````mdx Multiple ranges
+=PROMPT("Compare the data in these two tables", A1:C10, E1:G10)
+````
+
 ### Spilling model response across multiple cells
 You can use the `=PROMPT.TOCOLUMN()` function to spill the model response across multiple cells. For example, if you have text in cell A1, you can type in cell B1:
 

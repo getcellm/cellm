@@ -58,7 +58,7 @@ You can also use local models, e.g., via [Ollama](https://ollama.com/). Download
 
 Select a cell and type `=PROMPT("What model are you and who made you?")`. For Gemma 3 4B, it will tell you that it's called "Gemma" and made by Google DeepMind.
 
-You can also use cell references. For example, copy a news article into cell A1 and type in cell B1: `=PROMPT("Extract all person names mentioned in the text", A1)`. You can reference many cells using standard Excel notation, e.g. `=PROMPT("Extract all person names in the cells", A1:F10)`
+You can also use cell references. For example, copy a news article into cell A1 and type in cell B1: `=PROMPT("Extract all person names mentioned in the text", A1)`. You can reference many cells using standard Excel notation, e.g. `=PROMPT("Extract all person names in the cells", A1:F10)` or reference multiple separate ranges, e.g. `=PROMPT("Compare these datasets", A1:B10, D1:E10)`
 
 For more advanced usage, including function calling and configuration, see our [documentation](https://docs.getcellm.com).
 
@@ -99,7 +99,7 @@ We think Cellm is really cool because it enables everyone to automate tasks with
 To help us improve Cellm, we collect limited, anonymous telemetry data:
 
 - **Crash reports:** To help us fix bugs.
-- **Prompts:** To help us understand usage patterns. For example, if you use `=PROMPT(A1:B2, "Extract person names")`, we capture the text "Extract person names" and prompt options. The prompt options are things like the model you use and the temperature setting. We do not capture the data in cells A1:B2. 
+- **Prompts:** To help us understand usage patterns. For example, if you use `=PROMPT("Extract person names", A1:B2)`, we capture the text "Extract person names" and prompt options. The prompt options are things like the model you use and the temperature setting. We do not capture the data in cells A1:B2. 
 
 We do not collect any data from your spreadsheet and we have no way of associating your prompts with you. You can see for yourself at [src/Cellm/Models/Behaviors/SentryBehavior.cs](src/Cellm/Models/Behaviors/SentryBehavior.cs).
 
