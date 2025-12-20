@@ -13,8 +13,7 @@ public class ArgumentParser(IConfiguration configuration)
     private object? _provider;
     private object? _model;
     private object? _instructions;
-    private object? _cellsOrTemperature;
-    private object? _temperature;
+    private object[]? _ranges;
     private StructuredOutputShape _outputShape = StructuredOutputShape.None;
 
     public static readonly string CellsBeginTag = "<cells>";
@@ -43,16 +42,9 @@ public class ArgumentParser(IConfiguration configuration)
         return this;
     }
 
-    public ArgumentParser AddCellsOrTemperature(object cellsOrTemperature)
+    public ArgumentParser AddCells(object[] ranges)
     {
-        _cellsOrTemperature = cellsOrTemperature;
-
-        return this;
-    }
-
-    public ArgumentParser AddTemperature(object temperature)
-    {
-        _temperature = temperature;
+        _ranges = ranges;
 
         return this;
     }
@@ -82,34 +74,32 @@ public class ArgumentParser(IConfiguration configuration)
         var defaultTemperature = configuration[$"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultTemperature)}"]
             ?? throw new ArgumentException(nameof(CellmAddInConfiguration.DefaultTemperature));
 
-        var arguments = (_instructions, _cellsOrTemperature, _temperature) switch
+        var temperature = ParseTemperature(defaultTemperature);
+
+        var arguments = (_instructions, _ranges) switch
         {
             // =PROMPT("Hello world")
-            (string instructions, ExcelMissing, ExcelMissing) => new Arguments(provider, model, string.Empty, instructions, ParseTemperature(defaultTemperature), _outputShape),
-            // =PROMPT("Hello world", 0.7)
-            (string instructions, double temperature, ExcelMissing) => new Arguments(provider, model, string.Empty, instructions, ParseTemperature(temperature), _outputShape),
-            // =PROMPT("Hello world", A1:B2)
-            (string instructions, ExcelReference cells, ExcelMissing) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), instructions, ParseTemperature(defaultTemperature), _outputShape),
-            // =PROMPT("Hello world", A1:B2, 0.7)
-            (string instructions, ExcelReference cells, double temperature) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), instructions, ParseTemperature(temperature), _outputShape),
+            (string instructions, []) => new Arguments(provider, model, [], instructions, temperature, _outputShape),
+            // =PROMPT("Hello world", A1, B2, ...)
+            (string instructions, object[] ranges) => new Arguments(provider, model, ParseRanges(ranges), instructions, temperature, _outputShape),
             // =PROMPT(A1:B2)
-            (ExcelReference instructions, ExcelMissing, ExcelMissing) => new Arguments(provider, model, string.Empty, new Cells(instructions.RowFirst, instructions.ColumnFirst, instructions.GetValue()), ParseTemperature(defaultTemperature), _outputShape),
-            // =PROMPT(A1:B2, 0.7)
-            (ExcelReference instructions, double temperature, ExcelMissing) => new Arguments(provider, model, string.Empty, new Cells(instructions.RowFirst, instructions.ColumnFirst, instructions.GetValue()), ParseTemperature(temperature), _outputShape),
-            // =PROMPT(A1:B2, C1:D2)
-            (ExcelReference instructions, ExcelReference cells, ExcelMissing) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), new Cells(instructions.RowFirst, instructions.ColumnFirst, instructions.GetValue()), ParseTemperature(defaultTemperature), _outputShape),
-            // =PROMPT(A1:B2, C1:D2, 0.7)
-            (ExcelReference instructions, ExcelReference cells, double temperature) => new Arguments(provider, model, new Cells(cells.RowFirst, cells.ColumnFirst, cells.GetValue()), new Cells(instructions.RowFirst, instructions.ColumnFirst, instructions.GetValue()), ParseTemperature(temperature), _outputShape),
+            (ExcelReference instructions, []) => new Arguments(provider, model, [], new Range(instructions.RowFirst, instructions.ColumnFirst, instructions.GetValue()), temperature, _outputShape),
+            // =PROMPT(A1:B2, C1, D2, ...)
+            (ExcelReference instructions, object[] ranges) => new Arguments(provider, model, ParseRanges(ranges), new Range(instructions.RowFirst, instructions.ColumnFirst, instructions.GetValue()), temperature, _outputShape),
             // Anything else
-            _ => throw new ArgumentException($"Invalid arguments ({_instructions?.GetType().Name}, {_cellsOrTemperature?.GetType().Name}, {_temperature?.GetType().Name})")
+            _ => throw new ArgumentException($"Invalid arguments ({_instructions?.GetType().Name}, {_ranges?.GetType().Name})")
         };
 
-        if (arguments.Cells is Cells contextCells && contextCells.Values is ExcelError contextCellsError)
+        // Validate cells for errors
+        foreach (var range in arguments.Ranges)
         {
-            throw new ExcelErrorException(contextCellsError);
+            if (range.Values is ExcelError rangeError)
+            {
+                throw new ExcelErrorException(rangeError);
+            }
         }
 
-        if (arguments.Instructions is Cells instructionCells && instructionCells.Values is ExcelError instructionsCellsError)
+        if (arguments.Instructions is Range instructionCells && instructionCells.Values is ExcelError instructionsCellsError)
         {
             throw new ExcelErrorException(instructionsCellsError);
         }
@@ -117,16 +107,39 @@ public class ArgumentParser(IConfiguration configuration)
         return arguments;
     }
 
-    internal static string AddCells(string cells)
+    private static List<Range> ParseRanges(object[] ranges)
+    {
+        var result = new List<Range>();
+
+        foreach (var range in ranges)
+        {
+            switch (range)
+            {
+                case ExcelReference excelReference:
+                    result.Add(new Range(excelReference.RowFirst, excelReference.ColumnFirst, excelReference.GetValue()));
+                    break;
+                case ExcelMissing:
+                    break;
+                case ExcelError error:
+                    throw new ExcelErrorException(error);
+                default:
+                    throw new ArgumentException($"Expected cell reference, got {range?.GetType().Name}");
+            }
+        }
+
+        return result;
+    }
+
+    internal static string FormatRanges(string ranges)
     {
         return new StringBuilder()
             .AppendLine(CellsBeginTag)
-            .AppendLine(cells)
+            .AppendLine(ranges)
             .AppendLine(CellsEndTag)
             .ToString();
     }
 
-    internal static string AddInstructions(string instructions)
+    internal static string FormatInstructions(string instructions)
     {
         return new StringBuilder()
             .AppendLine(InstructionsBeginTag)
@@ -136,9 +149,9 @@ public class ArgumentParser(IConfiguration configuration)
     }
 
     // Render range as Markdown table because models have seen loads of those
-    internal static string ParseCells(Cells cells)
+    internal static string RenderRange(Range range)
     {
-        var values = cells.Values switch
+        var values = range.Values switch
         {
             ExcelError excelError => throw new ExcelErrorException(excelError),
             object[,] manyCells => manyCells,
@@ -161,14 +174,14 @@ public class ArgumentParser(IConfiguration configuration)
         // Add header row
         for (var c = 1; c < numberOfRenderedColumns; c++)
         {
-            table[0, c] = GetColumnName(cells.ColumnFirst + c - 1);
+            table[0, c] = GetColumnName(range.ColumnFirst + c - 1);
             maxColumnWidth[c] = table[0, c].Length;
         }
 
         // Add enumeration column
         for (var r = 0; r < numberOfRows; r++)
         {
-            table[r + 1, 0] = GetRowName(cells.RowFirst + r);
+            table[r + 1, 0] = GetRowName(range.RowFirst + r);
         }
 
         // Parse cells and track empty rows, empty columns, and max column width along the way
@@ -263,12 +276,22 @@ public class ArgumentParser(IConfiguration configuration)
         if (rowsWithValues.Count == 0)
         {
             return $"The user has provided the cell range " +
-                   $"{GetColumnName(cells.ColumnFirst)}{GetRowName(cells.RowFirst)}:" +
-                   $"{GetColumnName(cells.ColumnFirst + values.GetLength(1) - 1)}{GetRowName(cells.RowFirst + values.GetLength(0) - 1)}, " +
+                   $"{GetColumnName(range.ColumnFirst)}{GetRowName(range.RowFirst)}:" +
+                   $"{GetColumnName(range.ColumnFirst + values.GetLength(1) - 1)}{GetRowName(range.RowFirst + values.GetLength(0) - 1)}, " +
                    $"but all cells are empty.";
         }
 
         return tableBuilder.ToString();
+    }
+
+    internal static string RenderRanges(IReadOnlyList<Range> ranges)
+    {
+        if (ranges.Count == 0)
+        {
+            return $"The user provided no additional context.";
+        }
+
+        return string.Join(Environment.NewLine, ranges.Select(RenderRange));
     }
 
     private static double ParseTemperature(string temperatureAsString)
