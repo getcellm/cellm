@@ -23,7 +23,14 @@ Allows you to call the default model from a cell formula.
 </ResponseField>
 
 <Note>
-  Temperature is configured via the ribbon UI. Use the Temperature dropdown in the Model section to control randomness (Consistent/0.0, Neutral/0.3, Creative/0.7, or any value 0.0-1.0).
+  Temperature is configured via the ribbon UI. Use the Temperature dropdown in the Model section. This can be either:
+  - A number between 0.0 and 1.0
+  - A preset string:
+    - `"Consistent"` (0.0) - Deterministic output, same result each time
+    - `"Neutral"` (0.3) - Balanced between consistency and variety
+    - `"Creative"` (0.7) - More varied and creative outputs
+
+  Lower values (closer to 0) produce consistent, deterministic responses. Higher values (closer to 1) produce more varied, creative responses.
 </Note>
 
 <RequestExample>
