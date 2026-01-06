@@ -1,8 +1,8 @@
-﻿using Xunit;
+using Xunit;
 
-namespace Cellm.Tests;
+namespace Cellm.Tests.Unit;
 
-public class UnitTests
+public class SanityTests
 {
     [Fact]
     public void TestSanity()

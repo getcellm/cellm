@@ -352,6 +352,9 @@ internal static class ServiceCollectionExtensions
 
                 var ollamaConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<OllamaConfiguration>>();
 
+                // Use Uri constructor - OllamaSharp manages its own HttpClient internally
+                // The resilient HTTP client registration still provides the Polly pipeline
+                // but OllamaSharp works better with its own HttpClient management
                 return new OllamaApiClient(
                     ollamaConfiguration.CurrentValue.BaseAddress,
                     ollamaConfiguration.CurrentValue.DefaultModel);

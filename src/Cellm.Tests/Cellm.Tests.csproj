@@ -13,7 +13,19 @@
 
   <ItemGroup>
     <PackageReference Include="ExcelDna.Testing" Version="1.9.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.9" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.0" />
+    <PackageReference Include="NSubstitute" Version="5.3.0" />
     <PackageReference Include="xunit" Version="2.9.3" />
+    <!-- Keep xunit.runner.visualstudio in sync with ExcelDna.Testing dependency (requires >= 2.4.3) -->
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Cellm\Cellm.csproj" />
   </ItemGroup>
 
 </Project>
