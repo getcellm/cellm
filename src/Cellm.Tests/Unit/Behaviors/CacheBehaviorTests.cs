@@ -64,7 +64,7 @@ public class CacheBehaviorTests
     #region Cache Disabled Tests
 
     [Fact]
-    public async Task Handle_WhenCacheDisabled_CallsNextDirectly()
+    public async Task Handle_WhenCacheDisabled_CallsNextDirectlyAsync()
     {
         // Arrange
         _configMonitor.CurrentValue.Returns(new CellmAddInConfiguration { EnableCache = false });
@@ -74,16 +74,16 @@ public class CacheBehaviorTests
         var nextCallCount = 0;
 
         // Act
-        var result1 = await behavior.Handle(request, async ct =>
+        var result1 = await behavior.Handle(request, cancellationToken =>
         {
             nextCallCount++;
-            return expectedResponse;
+            return Task.FromResult(expectedResponse);
         }, CancellationToken.None);
 
-        var result2 = await behavior.Handle(request, async ct =>
+        var result2 = await behavior.Handle(request, cancellationToken =>
         {
             nextCallCount++;
-            return expectedResponse;
+            return Task.FromResult(expectedResponse);
         }, CancellationToken.None);
 
         // Assert
@@ -97,7 +97,7 @@ public class CacheBehaviorTests
     #region Cache Enabled Tests
 
     [Fact]
-    public async Task Handle_WhenCacheEnabled_ReturnsCachedResponse()
+    public async Task Handle_WhenCacheEnabled_ReturnsCachedResponseAsync()
     {
         // Arrange
         _configMonitor.CurrentValue.Returns(new CellmAddInConfiguration
@@ -111,16 +111,16 @@ public class CacheBehaviorTests
         var nextCallCount = 0;
 
         // Act
-        var result1 = await behavior.Handle(request, async ct =>
+        var result1 = await behavior.Handle(request, cancellationToken =>
         {
             nextCallCount++;
-            return expectedResponse;
+            return Task.FromResult(expectedResponse);
         }, CancellationToken.None);
 
-        var result2 = await behavior.Handle(request, async ct =>
+        var result2 = await behavior.Handle(request, cancellationToken =>
         {
             nextCallCount++;
-            return expectedResponse;
+            return Task.FromResult(expectedResponse);
         }, CancellationToken.None);
 
         // Assert
@@ -131,7 +131,7 @@ public class CacheBehaviorTests
     }
 
     [Fact]
-    public async Task Handle_DifferentPrompts_CacheMiss()
+    public async Task Handle_DifferentPrompts_CacheMissAsync()
     {
         // Arrange
         _configMonitor.CurrentValue.Returns(new CellmAddInConfiguration
@@ -145,16 +145,16 @@ public class CacheBehaviorTests
         var nextCallCount = 0;
 
         // Act
-        await behavior.Handle(request1, async ct =>
+        await behavior.Handle(request1, cancellationToken =>
         {
             nextCallCount++;
-            return CreateResponse($"Response {nextCallCount}");
+            return Task.FromResult(CreateResponse($"Response {nextCallCount}"));
         }, CancellationToken.None);
 
-        await behavior.Handle(request2, async ct =>
+        await behavior.Handle(request2, cancellationToken =>
         {
             nextCallCount++;
-            return CreateResponse($"Response {nextCallCount}");
+            return Task.FromResult(CreateResponse($"Response {nextCallCount}"));
         }, CancellationToken.None);
 
         // Assert
@@ -166,7 +166,7 @@ public class CacheBehaviorTests
     #region Cache Key with Tools Tests
 
     [Fact]
-    public async Task Handle_SamePromptDifferentTools_CacheMiss()
+    public async Task Handle_SamePromptDifferentTools_CacheMissAsync()
     {
         // Arrange
         _configMonitor.CurrentValue.Returns(new CellmAddInConfiguration
@@ -195,16 +195,16 @@ public class CacheBehaviorTests
         var nextCallCount = 0;
 
         // Act
-        await behavior.Handle(request1, async ct =>
+        await behavior.Handle(request1, cancellationToken =>
         {
             nextCallCount++;
-            return CreateResponse($"Response {nextCallCount}");
+            return Task.FromResult(CreateResponse($"Response {nextCallCount}"));
         }, CancellationToken.None);
 
-        await behavior.Handle(request2, async ct =>
+        await behavior.Handle(request2, cancellationToken =>
         {
             nextCallCount++;
-            return CreateResponse($"Response {nextCallCount}");
+            return Task.FromResult(CreateResponse($"Response {nextCallCount}"));
         }, CancellationToken.None);
 
         // Assert
