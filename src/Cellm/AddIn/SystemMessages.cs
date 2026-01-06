@@ -53,7 +53,7 @@ internal static class SystemMessages
         <output schema>
           A 1D array JSON schema is imposed on your output.
 
-          - You MUST output a valid JSON object that is a **single array of values**.
+          - You MUST output valid JSON that is a **single array of values**.
           - The content of each element should match the user's request (data-like or narrative).
           - Each value MUST be its own separate string element. NEVER output comma seperated lists in one element.
           - Each value will populate a cell. The array will spill into adjecent cells.
@@ -68,7 +68,7 @@ internal static class SystemMessages
         <output schema>
           A 2D array JSON schema is imposed on your output.
 
-          - You MUST output a valid JSON object that is an **array of arrays of values**.
+          - You MUST output valid JSON that is an **array of arrays of values**.
           - Each inner array represents a row (row-major).
           - The content of each element should match the user's request (data-like or narrative).
           - Each value MUST be its own separate string element. NEVER output comma seperated lists in one element.

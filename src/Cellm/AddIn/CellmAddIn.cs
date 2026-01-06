@@ -63,13 +63,29 @@ public class CellmAddIn : IExcelAddIn
             throw new CellmException($"Unable to configure app, invalid value for ExcelDnaUtil.XllPathInfo='{ConfigurationPath}'");
         }
 
-        // Configurations
+        // Configurations - load order: base -> environment-specific -> local overrides
+        var environmentName = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production";
+
         IConfiguration configuration = new ConfigurationBuilder()
             .SetBasePath(ConfigurationPath)
             .AddJsonFile("appsettings.json", reloadOnChange: true, optional: false)
+            .AddJsonFile($"appsettings.{environmentName}.json", reloadOnChange: true, optional: true)
             .AddJsonFile("appsettings.Local.json", reloadOnChange: true, optional: true)
             .Build();
 
+        return ConfigureServices(services, configuration, ConfigurationPath);
+    }
+
+    /// <summary>
+    /// Configures services with the provided configuration. This overload is used for testing
+    /// to allow providing a test configuration without file system dependencies.
+    /// </summary>
+    /// <param name="services">The service collection to configure.</param>
+    /// <param name="configuration">The configuration to use.</param>
+    /// <param name="logPath">Optional base path for file logging. If null, file logging is disabled.</param>
+    /// <returns>The configured service collection.</returns>
+    internal static ServiceCollection ConfigureServices(ServiceCollection services, IConfiguration configuration, string? logPath = null)
+    {
         services
             .Configure<AccountConfiguration>(configuration.GetRequiredSection(nameof(AccountConfiguration)))
             .Configure<AnthropicConfiguration>(configuration.GetRequiredSection(nameof(AnthropicConfiguration)))
@@ -103,15 +119,15 @@ public class CellmAddIn : IExcelAddIn
                   .AddConsole()
                   .AddDebug();
 
-              if (cellmAddInConfiguration.EnableFileLogging)
+              if (cellmAddInConfiguration.EnableFileLogging && logPath is not null)
               {
-                  var logPath = Path.Combine(ConfigurationPath, "logs", "cellm-.log");
+                  var logFilePath = Path.Combine(logPath, "logs", "cellm-.log");
                   var serilogLogger = new LoggerConfiguration()
                       .MinimumLevel.Debug()
                       .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
                       .MinimumLevel.Override("System", Serilog.Events.LogEventLevel.Warning)
                       .WriteTo.File(
-                          path: logPath,
+                          path: logFilePath,
                           rollingInterval: RollingInterval.Day,
                           fileSizeLimitBytes: cellmAddInConfiguration.LogFileSizeLimitMegabyte * 1024 * 1024,
                           retainedFileCountLimit: cellmAddInConfiguration.LogFileRetainedCount,
@@ -168,6 +184,7 @@ public class CellmAddIn : IExcelAddIn
             .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.DeepSeek)
             .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.Gemini)
             .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.Mistral)
+            .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.Ollama)
             .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.OpenAiCompatible)
             .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.OpenRouter);
 

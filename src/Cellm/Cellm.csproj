@@ -30,7 +30,6 @@
     <None Remove="AddIn\UserInterface\Resources\openai.png" />
     <None Remove="AddIn\UserInterface\Resources\OpenRouter.svg" />
     <None Remove="appsettings.json" />
-    <None Remove="appsettings.Local.json" />
   </ItemGroup>
 
   <ItemGroup>
@@ -68,6 +67,9 @@
     <PackageReference Include="Svg" Version="3.4.7" />
     <PackageReference Include="System.Net.Http.Json" Version="9.0.9" />
     <Content Include="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="appsettings.Testing.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="appsettings.Local.json" Condition="Exists('appsettings.Local.json')">

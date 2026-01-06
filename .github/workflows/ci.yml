@@ -29,7 +29,7 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: Test
-      run: dotnet test --filter ClassName=Cellm.Tests.UnitTests	--no-build --verbosity normal
+      run: dotnet test --filter "FullyQualifiedName~Cellm.Tests.Unit" --no-build --verbosity normal
   Lint:
     runs-on: windows-latest
     steps:
