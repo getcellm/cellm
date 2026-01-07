@@ -77,6 +77,8 @@ public class MistralSdkBugReproductionTests
             foreach (var choice in response!.Choices!)
             {
                 // This is the exact bug: no null check before accessing Message.ToolCalls
+                // We deliberately access the null reference to reproduce the bug
+#pragma warning disable CS8602 // Dereference of a possibly null reference - intentional to reproduce bug
                 if (choice.Message.ToolCalls is not null)  // CRASH HERE!
                 {
                     contents.Add(new TextContent(choice.Message.Content));
@@ -85,6 +87,7 @@ public class MistralSdkBugReproductionTests
                 {
                     contents.Add(new TextContent(choice.Message.Content));
                 }
+#pragma warning restore CS8602
             }
         });
 

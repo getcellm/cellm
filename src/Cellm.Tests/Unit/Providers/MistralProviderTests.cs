@@ -130,7 +130,7 @@ public class MistralProviderTests
     /// This tests what happens when GetResponseAsync returns a message with null text.
     /// </summary>
     [Fact]
-    public async Task MockedChatClient_ReturnsNullTextResponse_HandledGracefully()
+    public async Task MockedChatClient_ReturnsNullTextResponse_HandledGracefullyAsync()
     {
         // Arrange
         var mockChatClient = Substitute.For<IChatClient>();
