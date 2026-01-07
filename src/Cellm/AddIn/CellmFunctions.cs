@@ -277,7 +277,7 @@ public static class CellmFunctions
 
         try
         {
-            logger.LogInformation("Sending {caller} to {provider}/{model} ... (elapsed time: {elapsedTime}ms)", callerCoordinates, arguments.Provider, arguments.Model, wallClock.ElapsedMilliseconds);
+            logger.LogInformation("Sending {caller} to {provider}/{model} ...", callerCoordinates, arguments.Provider, arguments.Model);
 
             // Check for cancellation before doing any work
             cancellationToken.ThrowIfCancellationRequested();
