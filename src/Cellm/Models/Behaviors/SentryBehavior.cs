@@ -12,7 +12,7 @@ internal class SentryBehavior<TRequest, TResponse>(
     Account account,
     ILogger<SentryBehavior<TRequest, TResponse>> logger)
     : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : IGetPrompt
+    where TRequest : IGetPrompt, IGetProvider
 {
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
@@ -26,7 +26,7 @@ internal class SentryBehavior<TRequest, TResponse>(
 
         logger.LogDebug("Telemetry enabled");
 
-        var transaction = SentrySdk.StartTransaction($"{nameof(Cellm)}.{nameof(Models)}.{nameof(Client)}", typeof(TRequest).Name);
+        var transaction = SentrySdk.StartTransaction(typeof(TRequest).Name, request.Provider.ToString());
 
         transaction.Contexts["Prompt"] = new
         {
