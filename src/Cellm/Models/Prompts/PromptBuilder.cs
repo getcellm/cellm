@@ -58,7 +58,7 @@ internal class PromptBuilder
 
     internal PromptBuilder AddAssistantMessage(string content)
     {
-        _messages.Add(new ChatMessage(ChatRole.User, content));
+        _messages.Add(new ChatMessage(ChatRole.Assistant, content));
         return this;
     }
 
