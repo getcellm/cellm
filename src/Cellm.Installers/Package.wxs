@@ -1,6 +1,6 @@
 ﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
   <Package
-    Id="TokenFactoryApSCellm" Name="Cellm" Manufacturer="Token Factory ApS" Version="0.4.1" Scope="perUser" InstallerVersion="500" Language="1033">
+    Id="TokenFactoryApSCellm" Name="Cellm" Manufacturer="Token Factory ApS" Version="0.5.0" Scope="perUser" InstallerVersion="500" Language="1033">
     <MajorUpgrade DowngradeErrorMessage="!(loc.DowngradeError)" />
     <Media  Id="1"  Cabinet="Cellm.cab"  EmbedCab="yes" />
     <Feature Id="Main">
