@@ -234,10 +234,11 @@ public static class CellmFunctions
             // Do work on background thread, releasing Excel's main thread to keep UI responsive
             var response = ExcelAsyncUtil.RunTaskWithCancellation(
                 nameof(Run),
-                // Add callerCoordinates to make task arguments unique, otherwise all concurrent calls
-                // with identical arguments will reuse the response from the first call that finishes.
                 // ExcelDNA calls this function twice. Once when invoked and once when result is ready
-                // at which point the list of arguments is used as key to pair result with first call
+                // at which point the list of arguments is used as key to pair result with first call.
+                // We therefore add callerCoordinates to make task arguments unique, otherwise all calls
+                // concurrent with identical arguments will reuse the response from the first call that
+                // finishes.
                 new object[] { providerAndModel, instructions, ranges, callerCoordinates },
                 cancellationToken => GetResponseAsync(arguments, wallClock, callerCoordinates, cancellationToken));
 
@@ -265,7 +266,7 @@ public static class CellmFunctions
     }
 
     /// <summary>
-    /// Builds a prompt, sends it to the model, and returns the response.
+    /// Builds a prompt, sends it to a model, and returns the response.
     /// </summary>
     internal static async Task<object> GetResponseAsync(Arguments arguments, Stopwatch wallClock, string callerCoordinates, CancellationToken cancellationToken)
     {
@@ -277,7 +278,7 @@ public static class CellmFunctions
 
         try
         {
-            logger.LogInformation("Sending {caller} to {provider}/{model} ...", callerCoordinates, arguments.Provider, arguments.Model);
+            logger.LogInformation("Sending {callerCoordinates} to {provider}/{model} ...", callerCoordinates, arguments.Provider, arguments.Model);
 
             // Check for cancellation before doing any work
             cancellationToken.ThrowIfCancellationRequested();
