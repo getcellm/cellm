@@ -4,15 +4,15 @@ using Microsoft.Extensions.Options;
 
 namespace Cellm.Models.Providers.Behaviors;
 
-internal class GeminiTemperatureBehavior(IOptionsMonitor<CellmAddInConfiguration> cellmAddinConfiguration) : IProviderBehavior
+internal class GoogleTemperatureBehavior(IOptionsMonitor<CellmAddInConfiguration> cellmAddinConfiguration) : IProviderBehavior
 {
     private const float DefaultMinTemp = 0.0f;
     private const float DefaultMaxTemp = 1.0f;
-    private const float GeminiMaxTemperature = 2.0f;
+    private const float GoogleMaxTemperature = 2.0f;
 
     public bool IsEnabled(Provider provider)
     {
-        return provider == Provider.Gemini;
+        return provider == Provider.Gemini || provider == Provider.Vertex;
     }
 
     public void Before(Provider provider, Prompt prompt)
@@ -20,8 +20,8 @@ internal class GeminiTemperatureBehavior(IOptionsMonitor<CellmAddInConfiguration
         var temperature = prompt.Options.Temperature ?? (float)cellmAddinConfiguration.CurrentValue.DefaultTemperature;
 
         // Scale temperature from [0;1] to [0;2]
-        temperature = (temperature / DefaultMaxTemp) * GeminiMaxTemperature;
-        prompt.Options.Temperature = Math.Clamp(temperature, DefaultMinTemp, GeminiMaxTemperature);
+        temperature = (temperature / DefaultMaxTemp) * GoogleMaxTemperature;
+        prompt.Options.Temperature = Math.Clamp(temperature, DefaultMinTemp, GoogleMaxTemperature);
     }
 
     public void After(Provider Provider, Prompt prompt)
@@ -31,7 +31,7 @@ internal class GeminiTemperatureBehavior(IOptionsMonitor<CellmAddInConfiguration
             var temperature = prompt.Options.Temperature.Value;
 
             // Scale temperature back from [0;2] to [0;1]
-            temperature = (temperature / GeminiMaxTemperature) * DefaultMaxTemp;
+            temperature = (temperature / GoogleMaxTemperature) * DefaultMaxTemp;
             prompt.Options.Temperature = Math.Clamp(temperature, DefaultMinTemp, DefaultMaxTemp);
         }
     }

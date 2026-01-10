@@ -16,6 +16,7 @@ using Cellm.Models.Providers.Ollama;
 using Cellm.Models.Providers.OpenAi;
 using Cellm.Models.Providers.OpenAiCompatible;
 using Cellm.Models.Providers.OpenRouter;
+using Cellm.Models.Providers.Vertex;
 using Cellm.Models.Resilience;
 using Cellm.Tools;
 using Cellm.Tools.FileReader;
@@ -100,6 +101,7 @@ public class CellmAddIn : IExcelAddIn
             .Configure<OllamaConfiguration>(configuration.GetRequiredSection(nameof(OllamaConfiguration)))
             .Configure<OpenAiConfiguration>(configuration.GetRequiredSection(nameof(OpenAiConfiguration)))
             .Configure<OpenAiCompatibleConfiguration>(configuration.GetRequiredSection(nameof(OpenAiCompatibleConfiguration)))
+            .Configure<VertexConfiguration>(configuration.GetRequiredSection(nameof(VertexConfiguration)))
             .Configure<OpenRouterConfiguration>(configuration.GetRequiredSection(nameof(OpenRouterConfiguration)))
             .Configure<ResilienceConfiguration>(configuration.GetRequiredSection(nameof(ResilienceConfiguration)))
             .Configure<SentryConfiguration>(configuration.GetRequiredSection(nameof(SentryConfiguration)));
@@ -165,7 +167,7 @@ public class CellmAddIn : IExcelAddIn
                 cfg.AddBehavior<UsageBehavior<ProviderRequest, ProviderResponse>>(ServiceLifetime.Singleton);
             })
             .AddSingleton<IProviderBehavior, AdditionalPropertiesBehavior>()
-            .AddSingleton<IProviderBehavior, GeminiTemperatureBehavior>()
+            .AddSingleton<IProviderBehavior, GoogleTemperatureBehavior>()
             .AddSingleton<IProviderBehavior, OpenAiTemperatureBehavior>()
             .AddSingleton<IProviderBehavior, MistralThinkingBehavior>();
 
@@ -186,6 +188,7 @@ public class CellmAddIn : IExcelAddIn
             .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.Mistral)
             .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.Ollama)
             .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.OpenAiCompatible)
+            .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.Vertex)
             .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.OpenRouter);
 
 #pragma warning disable EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates.
@@ -206,6 +209,7 @@ public class CellmAddIn : IExcelAddIn
             .AddOllamaChatClient()
             .AddOpenAiChatClient()
             .AddOpenAiCompatibleChatClient()
+            .AddVertexChatClient()
             .AddOpenRouterChatClient();
 
         // Add tools
@@ -254,6 +258,7 @@ public class CellmAddIn : IExcelAddIn
             Services.GetRequiredService<IOptionsMonitor<OllamaConfiguration>>().CurrentValue,
             Services.GetRequiredService<IOptionsMonitor<OpenAiConfiguration>>().CurrentValue,
             Services.GetRequiredService<IOptionsMonitor<OpenAiCompatibleConfiguration>>().CurrentValue,
+            Services.GetRequiredService<IOptionsMonitor<VertexConfiguration>>().CurrentValue,
             Services.GetRequiredService<IOptionsMonitor<OpenRouterConfiguration>>().CurrentValue
         ];
     }

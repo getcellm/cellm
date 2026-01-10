@@ -12,5 +12,6 @@ public enum Provider
     Ollama,
     OpenAi,
     OpenAiCompatible,
-    OpenRouter
+    OpenRouter,
+    Vertex
 }

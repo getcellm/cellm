@@ -15,6 +15,7 @@ public enum Entitlement
     EnableOpenAiCompatibleProviderLocalModels,
     EnableOpenAiCompatibleProviderHostedModels,
     EnableOpenRouterProvider,
+    EnableVertexProvider,
     EnableModelContextProtocol,
     DisableTelemetry
 }
