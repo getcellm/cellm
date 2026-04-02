@@ -43,7 +43,7 @@ public class ClientTests
     }
 
     [Fact]
-    public async Task GetResponseAsync_SuccessfulRequest_ReturnsPrompt()
+    public async Task GetResponseAsync_SuccessfulRequest_ReturnsPromptAsync()
     {
         // Arrange
         var request = CreateTestPrompt();
@@ -63,7 +63,7 @@ public class ClientTests
     }
 
     [Fact]
-    public async Task GetResponseAsync_RateLimitExceeded_ThrowsCellmException()
+    public async Task GetResponseAsync_RateLimitExceeded_ThrowsCellmExceptionAsync()
     {
         // Arrange
         var request = CreateTestPrompt("gpt-4");
@@ -81,7 +81,7 @@ public class ClientTests
     }
 
     [Fact]
-    public async Task GetResponseAsync_Timeout_ThrowsCellmException()
+    public async Task GetResponseAsync_Timeout_ThrowsCellmExceptionAsync()
     {
         // Arrange
         var request = CreateTestPrompt("claude-3");
@@ -99,7 +99,7 @@ public class ClientTests
     }
 
     [Fact]
-    public async Task GetResponseAsync_RateLimitMessage_IncludesProviderAndModel()
+    public async Task GetResponseAsync_RateLimitMessage_IncludesProviderAndModelAsync()
     {
         // Arrange
         var modelId = "llama3.2";
@@ -118,7 +118,7 @@ public class ClientTests
     }
 
     [Fact]
-    public async Task GetResponseAsync_TimeoutMessage_IncludesProviderAndModel()
+    public async Task GetResponseAsync_TimeoutMessage_IncludesProviderAndModelAsync()
     {
         // Arrange
         var modelId = "gemini-pro";
@@ -137,7 +137,7 @@ public class ClientTests
     }
 
     [Fact]
-    public async Task GetResponseAsync_OtherException_PropagatesUnchanged()
+    public async Task GetResponseAsync_OtherException_PropagatesUnchangedAsync()
     {
         // Arrange
         var request = CreateTestPrompt();
