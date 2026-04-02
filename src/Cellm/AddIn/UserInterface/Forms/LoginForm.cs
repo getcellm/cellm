@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using Cellm.Users;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 
@@ -8,11 +9,14 @@ namespace Cellm.AddIn.UserInterface.Forms;
 
 public partial class LoginForm : Form
 {
+    private readonly ILogger<LoginForm> _logger;
+
     public string Email => TextBoxEmail.Text;
     public string Password => TextBoxPassword.Text;
 
     public LoginForm()
     {
+        _logger = CellmAddIn.Services.GetRequiredService<ILogger<LoginForm>>();
         InitializeComponent();
     }
 
@@ -51,8 +55,7 @@ public partial class LoginForm : Form
         }
         catch (Exception ex)
         {
-            // Log the error or show a message to the user
-            Debug.WriteLine($"Error opening password reset link: {ex.Message}");
+            _logger.LogError(ex, "Error opening password reset link {Url}", passwordResetUrl);
             MessageBox.Show($"Could not open the password reset link.\nPlease visit:\n{passwordResetUrl}\n\nError: {ex.Message}",
                             "Error",
                             MessageBoxButtons.OK,
@@ -77,8 +80,7 @@ public partial class LoginForm : Form
         }
         catch (Exception ex)
         {
-            // Log the error or show a message to the user
-            Debug.WriteLine($"Error opening create account link: {ex.Message}");
+            _logger.LogError(ex, "Error opening create account link {Url}", signUpUrl);
             MessageBox.Show($"Could not open the create account link.\nPlease visit:\n{signUpUrl}\n\nError: {ex.Message}",
                             "Error",
                             MessageBoxButtons.OK,

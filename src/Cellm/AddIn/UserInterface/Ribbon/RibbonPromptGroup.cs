@@ -1,6 +1,7 @@
 using System.Text.Json;
 using ExcelDna.Integration;
 using ExcelDna.Integration.CustomUI;
+using Microsoft.Extensions.Logging;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace Cellm.AddIn.UserInterface.Ribbon;
@@ -296,16 +297,17 @@ public partial class RibbonMain
             SetFormula(cell, newFormula);
         });
     }
-    private static void SetFormula(Excel.Range cell, string formula)
+    private void SetFormula(Excel.Range cell, string formula)
     {
         try
         {
             // Formula2 only exists in Excel 2019+, use dynamic to avoid compile error
             ((dynamic)cell).Formula2 = formula;
         }
-        catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException)
+        catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException ex)
         {
             // Fallback to normal Formula property for older versions of Excel
+            _logger.LogDebug(ex, "Formula2 not available, using legacy Formula property (Excel version < 2019)");
             cell.Formula = formula;
         }
     }
