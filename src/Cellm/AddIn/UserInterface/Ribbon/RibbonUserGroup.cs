@@ -96,8 +96,10 @@ public partial class RibbonMain
                         InvalidateEntitledControls();
                     });
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    _logger.LogError(ex, "Login failed for user {Username}", username);
+
                     // Save username but clear token
                     SetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.Email)}", username);
                     SetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.ApiKey)}", string.Empty);
@@ -170,8 +172,9 @@ public partial class RibbonMain
                 var email = GetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.Email)}");
                 return $"Account: {email}\nStatus: Logged In";
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogDebug(ex, "Failed to read account email from configuration");
                 return "Account: Unknown\nStatus: Logged In";
             }
         }
@@ -217,8 +220,9 @@ public partial class RibbonMain
                 var username = GetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.Email)}");
                 return username.Length > 6 ? string.Concat(username.AsSpan(0, 6), "…") : username;
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogDebug(ex, "Failed to read username from configuration for button label");
                 return "Account";
             }
         }
@@ -237,8 +241,9 @@ public partial class RibbonMain
                 var email = GetValue($"{nameof(AccountConfiguration)}:{nameof(AccountConfiguration.Email)}");
                 return email;
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogDebug(ex, "Failed to read email from configuration for login button label");
                 return "Logged in";
             }
         }
@@ -281,7 +286,7 @@ public partial class RibbonMain
         }
         catch (Exception ex)
         {
-            _logger.LogError("Error opening URL {url}: {message}", url, ex.Message);
+            _logger.LogError(ex, "Error opening URL {Url}", url);
 
             MessageBox.Show($"Could not open the link: {url}\n\nError: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }

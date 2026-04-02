@@ -37,9 +37,10 @@ public partial class RibbonMain : ExcelRibbon
                 SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}", nameof(Provider.Ollama));
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             // Default to Ollama if missing
+            _logger.LogDebug(ex, "Default provider not configured, defaulting to Ollama");
             SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.DefaultProvider)}", nameof(Provider.Ollama));
         }
     }
@@ -50,9 +51,10 @@ public partial class RibbonMain : ExcelRibbon
         {
             GetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableCache)}");
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             // Default to false if missing
+            _logger.LogDebug(ex, "Cache setting not configured, defaulting to disabled");
             SetValue($"{nameof(CellmAddInConfiguration)}:{nameof(CellmAddInConfiguration.EnableCache)}", false);
         }
     }
