@@ -15,11 +15,11 @@ internal class PermissionDeniedException : CellmException
         return entitlement switch
         {
             Entitlement.EnableAnthropicProvider => $"Sign in and subscribe to use Anthropic models.",
-            Entitlement.EnableAwsProvider => $"Sign in and subscribe to use models hosted by Azure.",
+            Entitlement.EnableAwsProvider => $"Sign in and subscribe to use models hosted by AWS.",
             Entitlement.EnableAzureProvider => $"Sign in and subscribe to use models hosted by Azure.",
             Entitlement.EnableCellmProvider => $"Sign in and subscribe to use models hosted by Cellm.",
             Entitlement.EnableDeepSeekProvider => $"Sign in and subscribe to use models hosted by DeepSeek.",
-            Entitlement.EnableGeminiProvider => $"Sign in and subscribe to use models hosted by Azure.",
+            Entitlement.EnableGeminiProvider => $"Sign in and subscribe to use models hosted by Google.",
             Entitlement.EnableMistralProvider => $"Sign in and subscribe to use models hosted by Mistral.",
             Entitlement.EnableOllamaProvider => $"Sign in and subscribe to use models served by Ollama.",
             Entitlement.EnableOpenAiProvider => $"Sign in and subscribe to use models hosted by OpenAi.",
