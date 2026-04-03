@@ -239,27 +239,35 @@ public partial class RibbonMain
             return false;
         }
 
-        var rowStart = selectedCells.Row;
-        var rowCount = selectedCells.Rows.Count;
-        var columnStart = selectedCells.Column;
-        var columnCount = selectedCells.Columns.Count;
+        try
+        {
+            var rowStart = selectedCells.Row;
+            var rowCount = selectedCells.Rows.Count;
+            var columnStart = selectedCells.Column;
+            var columnCount = selectedCells.Columns.Count;
 
-        var rangeStart = $"{GetColumnName(columnStart)}{rowStart}";
-        var rangeEnd = $"{GetColumnName(columnStart + columnCount - 1)}{rowStart + rowCount - 1}";
-        var formula = BuildFormula(CellmFormula.Prompt, targetShape, $"({rangeStart}:{rangeEnd})");
+            var rangeStart = $"{GetColumnName(columnStart)}{rowStart}";
+            var rangeEnd = $"{GetColumnName(columnStart + columnCount - 1)}{rowStart + rowCount - 1}";
+            var formula = BuildFormula(CellmFormula.Prompt, targetShape, $"({rangeStart}:{rangeEnd})");
 
-        var targetCell = Application.ActiveSheet.Range[
-            $"{GetColumnName(columnStart + columnCount - 1)}{rowStart + rowCount}"
-        ];
+            var targetCell = Application.ActiveSheet.Range[
+                $"{GetColumnName(columnStart + columnCount - 1)}{rowStart + rowCount}"
+            ];
 
-        // Prevent immediate recalculation while function wizard is open
-        targetCell.NumberFormat = "@";
-        SetFormula(targetCell, formula);
-        targetCell.NumberFormat = "General";
+            // Prevent immediate recalculation while function wizard is open
+            targetCell.NumberFormat = "@";
+            SetFormula(targetCell, formula);
+            targetCell.NumberFormat = "General";
 
-        // Select target cell before opening function wizard
-        targetCell.Select();
-        Application.Dialogs[Excel.XlBuiltInDialog.xlDialogFunctionWizard].Show();
+            // Select target cell before opening function wizard
+            targetCell.Select();
+            Application.Dialogs[Excel.XlBuiltInDialog.xlDialogFunctionWizard].Show();
+        }
+        catch (System.Runtime.InteropServices.COMException ex)
+        {
+            _logger.LogWarning(ex, "Excel COM error while inserting formula for multi-cell selection (HRESULT: {HResult})", ex.HResult);
+            MessageBox.Show($"Excel could not complete this operation.\n\nError: {ex.Message}", "Cellm", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
 
         return true;
     }
@@ -270,11 +278,19 @@ public partial class RibbonMain
 
         ExcelAsyncUtil.QueueAsMacro(() =>
         {
-            // Prevent immediate recalculation while function wizard is open
-            cell.NumberFormat = "@";
-            SetFormula(cell, formula);
-            cell.NumberFormat = "General";
-            Application.Dialogs[Excel.XlBuiltInDialog.xlDialogFunctionWizard].Show();
+            try
+            {
+                // Prevent immediate recalculation while function wizard is open
+                cell.NumberFormat = "@";
+                SetFormula(cell, formula);
+                cell.NumberFormat = "General";
+                Application.Dialogs[Excel.XlBuiltInDialog.xlDialogFunctionWizard].Show();
+            }
+            catch (System.Runtime.InteropServices.COMException ex)
+            {
+                _logger.LogWarning(ex, "Excel COM error while inserting new formula (HRESULT: {HResult}, Formula: {Formula})", ex.HResult, formula);
+                MessageBox.Show($"Excel could not complete this operation.\n\nError: {ex.Message}", "Cellm", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         });
     }
 
@@ -284,7 +300,15 @@ public partial class RibbonMain
         // (Range.Calculate() does not work for async functions)
         ExcelAsyncUtil.QueueAsMacro(() =>
         {
-            SetFormula(cell, formula);
+            try
+            {
+                SetFormula(cell, formula);
+            }
+            catch (System.Runtime.InteropServices.COMException ex)
+            {
+                _logger.LogWarning(ex, "Excel COM error while triggering recalculation (HRESULT: {HResult}, Formula: {Formula})", ex.HResult, formula);
+                MessageBox.Show($"Excel could not complete this operation.\n\nError: {ex.Message}", "Cellm", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         });
     }
 
@@ -294,7 +318,15 @@ public partial class RibbonMain
 
         ExcelAsyncUtil.QueueAsMacro(() =>
         {
-            SetFormula(cell, newFormula);
+            try
+            {
+                SetFormula(cell, newFormula);
+            }
+            catch (System.Runtime.InteropServices.COMException ex)
+            {
+                _logger.LogWarning(ex, "Excel COM error while changing formula shape (HRESULT: {HResult}, Formula: {Formula})", ex.HResult, newFormula);
+                MessageBox.Show($"Excel could not complete this operation.\n\nError: {ex.Message}", "Cellm", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         });
     }
     private void SetFormula(Excel.Range cell, string formula)
