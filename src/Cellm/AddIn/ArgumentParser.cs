@@ -122,6 +122,9 @@ public class ArgumentParser(IConfiguration configuration)
                     break;
                 case ExcelError error:
                     throw new ExcelErrorException(error);
+                case string or double or bool:
+                    result.Add(new Range(0, 0, range));
+                    break;
                 default:
                     throw new ArgumentException($"Expected cell reference, got {range?.GetType().Name}");
             }
