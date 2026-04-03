@@ -86,6 +86,8 @@ public class ArgumentParser(IConfiguration configuration)
             (ExcelReference instructions, []) => new Arguments(provider, model, [], new Range(instructions.RowFirst, instructions.ColumnFirst, instructions.GetValue()), temperature, _outputShape),
             // =PROMPT(A1:B2, C1, D2, ...)
             (ExcelReference instructions, object[] ranges) => new Arguments(provider, model, ParseRanges(ranges), new Range(instructions.RowFirst, instructions.ColumnFirst, instructions.GetValue()), temperature, _outputShape),
+            // Short-circuit if instructions contain an Excel error
+            (ExcelError error, _) => throw new ExcelErrorException(error),
             // Anything else
             _ => throw new ArgumentException($"Invalid arguments ({_instructions?.GetType().Name}, {_ranges?.GetType().Name})")
         };
