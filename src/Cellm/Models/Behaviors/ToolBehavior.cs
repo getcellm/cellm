@@ -23,7 +23,6 @@ internal class ToolBehavior<TRequest, TResponse>(
   : IPipelineBehavior<TRequest, TResponse>
   where TRequest : IGetPrompt
 {
-    // TODO: Cannot use HybridCache because McpClientTool instances can be serialized
     private readonly ConcurrentDictionary<string, IList<McpClientTool>> _cache = new();
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
@@ -96,7 +95,7 @@ internal class ToolBehavior<TRequest, TResponse>(
         try
         {
             var clientTransport = new StdioClientTransport(stdioClientTransportOptions);
-            var mcpClient = await McpClientFactory.CreateAsync(clientTransport, loggerFactory: loggerFactory, cancellationToken: cancellationToken).ConfigureAwait(false);
+            var mcpClient = await McpClient.CreateAsync(clientTransport, loggerFactory: loggerFactory, cancellationToken: cancellationToken).ConfigureAwait(false);
             var mcpClientTools = await mcpClient.ListToolsAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
             _cache[stdioClientTransportOptions.Name ?? throw new NullReferenceException(nameof(stdioClientTransportOptions))] = mcpClientTools;
@@ -110,7 +109,7 @@ internal class ToolBehavior<TRequest, TResponse>(
         }
     }
 
-    private async Task<IList<McpClientTool>> GetOrFetchServerToolsAsync(SseClientTransportOptions sseClientTransportOptions, CancellationToken cancellationToken)
+    private async Task<IList<McpClientTool>> GetOrFetchServerToolsAsync(HttpClientTransportOptions sseClientTransportOptions, CancellationToken cancellationToken)
     {
         if (_cache.ContainsKey(sseClientTransportOptions.Name ?? throw new NullReferenceException(nameof(sseClientTransportOptions))) && _cache[sseClientTransportOptions.Name] is IList<McpClientTool> cachedMcpClientTools)
         {
@@ -120,8 +119,8 @@ internal class ToolBehavior<TRequest, TResponse>(
 
         try
         {
-            var clientTransport = new SseClientTransport(sseClientTransportOptions);
-            var mcpClient = await McpClientFactory.CreateAsync(clientTransport, loggerFactory: loggerFactory, cancellationToken: cancellationToken).ConfigureAwait(false);
+            var clientTransport = new HttpClientTransport(sseClientTransportOptions);
+            var mcpClient = await McpClient.CreateAsync(clientTransport, loggerFactory: loggerFactory, cancellationToken: cancellationToken).ConfigureAwait(false);
             var mcpClientTools = await mcpClient.ListToolsAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
             _cache[sseClientTransportOptions.Name ?? throw new NullReferenceException(nameof(sseClientTransportOptions))] = mcpClientTools;

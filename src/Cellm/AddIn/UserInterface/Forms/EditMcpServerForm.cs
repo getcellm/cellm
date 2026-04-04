@@ -368,7 +368,7 @@ public partial class EditMcpServerForm : Form
 
     private void SaveSseServer(string serverName)
     {
-        var newServer = new SseClientTransportOptions
+        var newServer = new HttpClientTransportOptions
         {
             Name = serverName,
             Endpoint = new Uri(endpointTextBox.Text.Trim()),

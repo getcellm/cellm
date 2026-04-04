@@ -12,7 +12,7 @@ public interface IMcpConfigurationService
     /// <summary>
     /// Gets all servers (base + user) for display purposes
     /// </summary>
-    IEnumerable<SseClientTransportOptions> GetAllSseServers();
+    IEnumerable<HttpClientTransportOptions> GetAllSseServers();
 
     /// <summary>
     /// Gets only user-defined servers from appsettings.Local.json
@@ -22,7 +22,7 @@ public interface IMcpConfigurationService
     /// <summary>
     /// Gets only user-defined servers from appsettings.Local.json
     /// </summary>
-    IEnumerable<SseClientTransportOptions> GetUserSseServers();
+    IEnumerable<HttpClientTransportOptions> GetUserSseServers();
 
     /// <summary>
     /// Gets all server names (base + user) for validation
@@ -37,7 +37,7 @@ public interface IMcpConfigurationService
     /// <summary>
     /// Gets a specific server for editing
     /// </summary>
-    SseClientTransportOptions? GetSseServer(string name);
+    HttpClientTransportOptions? GetSseServer(string name);
 
     /// <summary>
     /// Checks if a server name exists
@@ -52,7 +52,7 @@ public interface IMcpConfigurationService
     /// <summary>
     /// Saves a user server to appsettings.Local.json
     /// </summary>
-    void SaveUserServer(SseClientTransportOptions server);
+    void SaveUserServer(HttpClientTransportOptions server);
 
     /// <summary>
     /// Removes a user server from appsettings.Local.json

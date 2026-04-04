@@ -89,7 +89,7 @@ internal static class ServiceCollectionExtensions
                 // Delegate timeout to resilience pipeline
                 resilientHttpClient.Timeout = Timeout.InfiniteTimeSpan;
             })
-            .AddAsKeyed();
+            .AddAsKeyed(ServiceLifetime.Transient);
 
         // Only add the logging handler if body logging is enabled
         if (cellmAddInConfiguration.EnableHttpBodyLogging)
@@ -351,10 +351,10 @@ internal static class ServiceCollectionExtensions
                 account.ThrowIfNotEntitled(Entitlement.EnableOllamaProvider);
 
                 var ollamaConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<OllamaConfiguration>>();
+                var resilientHttpClient = serviceProvider.GetResilientHttpClient(Provider.Ollama);
+                resilientHttpClient.BaseAddress = ollamaConfiguration.CurrentValue.BaseAddress;
 
-                return new OllamaApiClient(
-                    ollamaConfiguration.CurrentValue.BaseAddress,
-                    ollamaConfiguration.CurrentValue.DefaultModel);
+                return new OllamaApiClient(resilientHttpClient, ollamaConfiguration.CurrentValue.DefaultModel);
             }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 
