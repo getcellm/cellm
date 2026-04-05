@@ -3,7 +3,7 @@ using System.ClientModel.Primitives;
 using System.Threading.RateLimiting;
 using Amazon;
 using Amazon.BedrockRuntime;
-using Anthropic.SDK;
+using Anthropic;
 using Azure;
 using Azure.AI.Inference;
 using Cellm.AddIn;
@@ -145,9 +145,10 @@ internal static class ServiceCollectionExtensions
             .AddKeyedChatClient(Provider.Anthropic, serviceProvider =>
             {
                 var account = serviceProvider.GetRequiredService<Account>();
-                account.ThrowIfNotEntitled(Entitlement.EnableAzureProvider);
+                account.ThrowIfNotEntitled(Entitlement.EnableAnthropicProvider);
 
                 var anthropicConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<AnthropicConfiguration>>();
+                var resilienceConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<ResilienceConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetResilientHttpClient(Provider.Anthropic);
 
                 if (string.IsNullOrWhiteSpace(anthropicConfiguration.CurrentValue.ApiKey))
@@ -155,10 +156,16 @@ internal static class ServiceCollectionExtensions
                     throw new CellmException($"Empty {nameof(AnthropicConfiguration.ApiKey)} for {Provider.Anthropic}. Please set your API key.");
                 }
 
-                return new AnthropicClient(anthropicConfiguration.CurrentValue.ApiKey, resilientHttpClient)
-                    .Messages
-                    .AsBuilder()
-                    .Build();
+                var anthropicClient = new AnthropicClient()
+                {
+                    ApiKey = anthropicConfiguration.CurrentValue.ApiKey,
+                    HttpClient = resilientHttpClient,
+                    MaxRetries = 0, // Retries handled by resilience pipeline
+                    Timeout = TimeSpan.FromSeconds(
+                        resilienceConfiguration.CurrentValue.RetryConfiguration.HttpTimeoutInSeconds)
+                };
+
+                return anthropicClient.AsIChatClient(anthropicConfiguration.CurrentValue.DefaultModel);
             }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 

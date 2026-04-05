@@ -2,14 +2,15 @@
   "version": 1,
   "dependencies": {
     "net9.0-windows7.0": {
-      "Anthropic.SDK": {
+      "Anthropic": {
         "type": "Direct",
-        "requested": "[5.10.0, )",
-        "resolved": "5.10.0",
-        "contentHash": "UQyZsDMcFy5pBNfEQXwNS5916dogqKSO76J4aynmdtR2q0QB3Ey/vB3vwll9/neAmH7IpKH7KpbzQ+SaYncxyQ==",
+        "requested": "[12.11.0, )",
+        "resolved": "12.11.0",
+        "contentHash": "cwWxqnxZrFIyh9q/7gq37KvaUcdll4gBpmfLFI+G1nS2/4JbRGP7OgC9zMal9y/ALmwwNAycAHsDvE8c1xHLNg==",
         "dependencies": {
-          "Microsoft.Bcl.AsyncInterfaces": "10.0.3",
-          "Microsoft.Extensions.AI.Abstractions": "10.3.0"
+          "Microsoft.Extensions.AI.Abstractions": "10.4.0",
+          "System.Net.ServerSentEvents": "10.0.1",
+          "System.Text.Json": "10.0.4"
         }
       },
       "AWSSDK.Extensions.Bedrock.MEAI": {
@@ -438,8 +439,8 @@
       },
       "Microsoft.Bcl.AsyncInterfaces": {
         "type": "Transitive",
-        "resolved": "10.0.3",
-        "contentHash": "TV62UsrJZPX6gbt3c4WrtXh7bmaDIcMqf9uft1cc4L6gJXOU07hDGEh+bFQh/L2Az0R1WVOkiT66lFqS6G2NmA=="
+        "resolved": "8.0.0",
+        "contentHash": "3WA9q9yVqJp222P3x1wYIGDAkpjAku0TMUaaQV22g6L67AI0LdOIrVS7Ht2vJfLHGSPVuqN94vIr15qn+HEkHw=="
       },
       "Microsoft.Diagnostics.NETCore.Client": {
         "type": "Transitive",

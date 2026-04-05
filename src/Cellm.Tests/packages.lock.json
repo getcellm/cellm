@@ -70,13 +70,14 @@
         "resolved": "3.1.5",
         "contentHash": "tKi7dSTwP4m5m9eXPM2Ime4Kn7xNf4x4zT9sdLO/G4hZVnQCRiMTWoSZqI/pYTVeI27oPPqHBKYI/DjJ9GsYgA=="
       },
-      "Anthropic.SDK": {
+      "Anthropic": {
         "type": "Transitive",
-        "resolved": "5.10.0",
-        "contentHash": "UQyZsDMcFy5pBNfEQXwNS5916dogqKSO76J4aynmdtR2q0QB3Ey/vB3vwll9/neAmH7IpKH7KpbzQ+SaYncxyQ==",
+        "resolved": "12.11.0",
+        "contentHash": "cwWxqnxZrFIyh9q/7gq37KvaUcdll4gBpmfLFI+G1nS2/4JbRGP7OgC9zMal9y/ALmwwNAycAHsDvE8c1xHLNg==",
         "dependencies": {
-          "Microsoft.Bcl.AsyncInterfaces": "10.0.3",
-          "Microsoft.Extensions.AI.Abstractions": "10.3.0"
+          "Microsoft.Extensions.AI.Abstractions": "10.4.0",
+          "System.Net.ServerSentEvents": "10.0.1",
+          "System.Text.Json": "10.0.4"
         }
       },
       "AWSSDK.BedrockRuntime": {
@@ -224,8 +225,8 @@
       },
       "Microsoft.Bcl.AsyncInterfaces": {
         "type": "Transitive",
-        "resolved": "10.0.3",
-        "contentHash": "TV62UsrJZPX6gbt3c4WrtXh7bmaDIcMqf9uft1cc4L6gJXOU07hDGEh+bFQh/L2Az0R1WVOkiT66lFqS6G2NmA=="
+        "resolved": "8.0.0",
+        "contentHash": "3WA9q9yVqJp222P3x1wYIGDAkpjAku0TMUaaQV22g6L67AI0LdOIrVS7Ht2vJfLHGSPVuqN94vIr15qn+HEkHw=="
       },
       "Microsoft.CodeCoverage": {
         "type": "Transitive",
@@ -1654,7 +1655,7 @@
         "type": "Project",
         "dependencies": {
           "AWSSDK.Extensions.Bedrock.MEAI": "[4.0.6.6, )",
-          "Anthropic.SDK": "[5.10.0, )",
+          "Anthropic": "[12.11.0, )",
           "ExcelDna.Addin": "[1.9.0, )",
           "ExcelDna.Interop": "[15.0.1, )",
           "Google.GenAI": "[1.6.1, )",
