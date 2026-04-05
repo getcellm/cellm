@@ -35,7 +35,7 @@ public class CellmAddIn : IExcelAddIn
 {
     internal static string ConfigurationPath => ExcelDnaUtil.XllPathInfo?.Directory?.FullName ?? throw new NullReferenceException("Could not get Cellm path");
 
-    private static readonly Lazy<ServiceProvider> _serviceProvider = new(() => ConfigureServices(new ServiceCollection()).BuildServiceProvider());
+    private static Lazy<ServiceProvider> _serviceProvider = new(() => ConfigureServices(new ServiceCollection()).BuildServiceProvider());
 
     public static ServiceProvider Services => _serviceProvider.Value;
 
@@ -148,6 +148,7 @@ public class CellmAddIn : IExcelAddIn
                   sentryLoggingOptions.ProfilesSampleRate = sentryConfiguration.ProfilesSampleRate;
                   sentryLoggingOptions.Environment = sentryConfiguration.Environment;
                   sentryLoggingOptions.AutoSessionTracking = true;
+                  sentryLoggingOptions.EnableLogs = true;
                   sentryLoggingOptions.AddIntegration(new ProfilingIntegration());
               });
           });

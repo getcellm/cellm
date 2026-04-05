@@ -6,5 +6,5 @@ internal class ModelContextProtocolConfiguration
 {
     public List<StdioClientTransportOptions> StdioServers { get; init; } = [];
 
-    public List<SseClientTransportOptions> SseServers { get; init; } = [];
+    public List<HttpClientTransportOptions> SseServers { get; init; } = [];
 }

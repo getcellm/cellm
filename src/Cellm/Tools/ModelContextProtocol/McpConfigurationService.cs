@@ -54,9 +54,9 @@ public class McpConfigurationService : IMcpConfigurationService
         return allServers;
     }
 
-    public IEnumerable<SseClientTransportOptions> GetAllSseServers()
+    public IEnumerable<HttpClientTransportOptions> GetAllSseServers()
     {
-        var allServers = new List<SseClientTransportOptions>();
+        var allServers = new List<HttpClientTransportOptions>();
 
         try
         {
@@ -68,7 +68,7 @@ public class McpConfigurationService : IMcpConfigurationService
                 {
                     if (serverNode != null)
                     {
-                        var server = JsonSerializer.Deserialize<SseClientTransportOptions>(serverNode.ToString(), _jsonSerializerOptions);
+                        var server = JsonSerializer.Deserialize<HttpClientTransportOptions>(serverNode.ToString(), _jsonSerializerOptions);
                         if (server != null && !string.IsNullOrWhiteSpace(server.Name))
                         {
                             allServers.Add(server);
@@ -116,9 +116,9 @@ public class McpConfigurationService : IMcpConfigurationService
         return userServers;
     }
 
-    public IEnumerable<SseClientTransportOptions> GetUserSseServers()
+    public IEnumerable<HttpClientTransportOptions> GetUserSseServers()
     {
-        var userServers = new List<SseClientTransportOptions>();
+        var userServers = new List<HttpClientTransportOptions>();
 
         try
         {
@@ -130,7 +130,7 @@ public class McpConfigurationService : IMcpConfigurationService
                 {
                     if (serverNode != null)
                     {
-                        var server = JsonSerializer.Deserialize<SseClientTransportOptions>(serverNode.ToString(), _jsonSerializerOptions);
+                        var server = JsonSerializer.Deserialize<HttpClientTransportOptions>(serverNode.ToString(), _jsonSerializerOptions);
                         if (server != null && !string.IsNullOrWhiteSpace(server.Name))
                         {
                             userServers.Add(server);
@@ -167,7 +167,7 @@ public class McpConfigurationService : IMcpConfigurationService
         return GetAllStdioServers().FirstOrDefault(s => s.Name == name);
     }
 
-    public SseClientTransportOptions? GetSseServer(string name)
+    public HttpClientTransportOptions? GetSseServer(string name)
     {
         return GetAllSseServers().FirstOrDefault(s => s.Name == name);
     }
@@ -201,7 +201,7 @@ public class McpConfigurationService : IMcpConfigurationService
         }
     }
 
-    public void SaveUserServer(SseClientTransportOptions server)
+    public void SaveUserServer(HttpClientTransportOptions server)
     {
         try
         {
@@ -302,7 +302,7 @@ public class McpConfigurationService : IMcpConfigurationService
         RibbonMain.SetValue($"{nameof(ModelContextProtocolConfiguration)}:{nameof(ModelContextProtocolConfiguration.StdioServers)}", jsonNode!);
     }
 
-    private void SaveUserSseServers(List<SseClientTransportOptions> servers)
+    private void SaveUserSseServers(List<HttpClientTransportOptions> servers)
     {
         var json = JsonSerializer.Serialize(servers, _jsonSerializerOptions);
         var jsonNode = JsonNode.Parse(json);
