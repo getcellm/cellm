@@ -1,4 +1,4 @@
- using Cellm.Models.Prompts;
+using Cellm.Models.Prompts;
 using Cellm.Models.Providers;
 using Cellm.Tests.Integration.Helpers;
 using Xunit;
@@ -44,7 +44,7 @@ public class ProviderTests : IClassFixture<ProviderTestFixture>, IDisposable
 
     [Theory]
     [MemberData(nameof(Providers))]
-    public async Task BasicPrompt_ReturnsResponse(Provider provider)
+    public async Task BasicPrompt_ReturnsResponseAsync(Provider provider)
     {
         SkipIfUnavailable(provider);
 
@@ -64,7 +64,7 @@ public class ProviderTests : IClassFixture<ProviderTestFixture>, IDisposable
 
     [Theory]
     [MemberData(nameof(Providers))]
-    public async Task ToolUse_FileReader_ReturnsFileContent(Provider provider)
+    public async Task ToolUse_FileReader_ReturnsFileContentAsync(Provider provider)
     {
         SkipIfUnavailable(provider);
 
@@ -98,7 +98,7 @@ public class ProviderTests : IClassFixture<ProviderTestFixture>, IDisposable
 
     [Theory]
     [MemberData(nameof(Providers))]
-    public async Task ToolUse_FileSearch_FindsFile(Provider provider)
+    public async Task ToolUse_FileSearch_FindsFileAsync(Provider provider)
     {
         SkipIfUnavailable(provider);
 
@@ -131,7 +131,7 @@ public class ProviderTests : IClassFixture<ProviderTestFixture>, IDisposable
 
     [Theory]
     [MemberData(nameof(Providers))]
-    public async Task McpToolUse_Playwright_NavigatesPage(Provider provider)
+    public async Task McpToolUse_Playwright_NavigatesPageAsync(Provider provider)
     {
         SkipIfUnavailable(provider);
 

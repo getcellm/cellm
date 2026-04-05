@@ -1,8 +1,9 @@
 using System.IO;
 using System.Reflection;
 using Cellm.AddIn;
+using Cellm.AddIn.UserInterface.Ribbon;
 using Cellm.Models;
-using Path = System.IO.Path;
+using Cellm.Models.Behaviors;
 using Cellm.Models.Providers;
 using Cellm.Models.Providers.Anthropic;
 using Cellm.Models.Providers.DeepSeek;
@@ -12,8 +13,6 @@ using Cellm.Models.Providers.Ollama;
 using Cellm.Models.Providers.OpenAi;
 using Cellm.Models.Providers.OpenAiCompatible;
 using Cellm.Models.Providers.OpenRouter;
-using Cellm.AddIn.UserInterface.Ribbon;
-using Cellm.Models.Behaviors;
 using Cellm.Tools.ModelContextProtocol;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -52,9 +51,9 @@ public class ProviderTestFixture : IDisposable
 
         // Replace McpConfigurationService with test version that doesn't depend on Excel/RibbonMain
         var mcpDescriptor = services.FirstOrDefault(d => d.ServiceType == typeof(IMcpConfigurationService));
-        if (mcpDescriptor != null) 
-        { 
-            services.Remove(mcpDescriptor); 
+        if (mcpDescriptor != null)
+        {
+            services.Remove(mcpDescriptor);
         }
 
         services.AddSingleton<IMcpConfigurationService, TestMcpConfigurationService>();
