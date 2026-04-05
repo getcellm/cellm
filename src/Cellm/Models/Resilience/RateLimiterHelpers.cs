@@ -1,5 +1,4 @@
 ﻿using System.ClientModel;
-using Anthropic.SDK;
 using Cellm.Models.Prompts;
 using Polly;
 using Polly.Timeout;
@@ -28,7 +27,6 @@ internal static class RateLimiterHelpers
     private static bool IsRetryableException(Exception exception) => exception switch
     {
         ClientResultException clientResultException => retryableStatusCodes.Contains(clientResultException.Status),
-        RateLimitsExceeded => true,
         _ => false
     };
 }
