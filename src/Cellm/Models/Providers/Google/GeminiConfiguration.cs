@@ -13,7 +13,7 @@ internal class GeminiConfiguration : IProviderConfiguration
 
     public string Icon { get => $"AddIn/UserInterface/Resources/{nameof(Provider.Gemini)}.png"; }
 
-    public Uri BaseAddress => new("https://generativelanguage.googleapis.com/v1beta/openai/");
+    public Uri BaseAddress => new("https://generativelanguage.googleapis.com/v1beta/");
 
     public string DefaultModel { get; init; } = string.Empty;
 

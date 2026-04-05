@@ -37,6 +37,7 @@
     <PackageReference Include="AWSSDK.Extensions.Bedrock.MEAI" Version="4.0.6.6" />
     <PackageReference Include="ExcelDna.Addin" Version="1.9.0" />
     <PackageReference Include="ExcelDna.Interop" Version="15.0.1" />
+    <PackageReference Include="Google.GenAI" Version="1.6.1" />
     <PackageReference Include="MediatR" Version="14.1.0" />
     <PackageReference Include="Microsoft.Extensions.AI" Version="10.4.1" />
     <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.4.1" />

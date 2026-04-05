@@ -183,7 +183,6 @@ public class CellmAddIn : IExcelAddIn
             .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.Anthropic)
             .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.Cellm)
             .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.DeepSeek)
-            .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.Gemini)
             .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.Mistral)
             .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.Ollama)
             .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.OpenAiCompatible)
