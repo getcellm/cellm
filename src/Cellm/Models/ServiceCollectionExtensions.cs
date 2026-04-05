@@ -295,22 +295,24 @@ internal static class ServiceCollectionExtensions
                 account.ThrowIfNotEntitled(Entitlement.EnableGeminiProvider);
 
                 var geminiConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<GeminiConfiguration>>();
-                var resilientHttpClient = serviceProvider.GetResilientHttpClient(Provider.Gemini);
+                var resilienceConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<ResilienceConfiguration>>();
 
                 if (string.IsNullOrWhiteSpace(geminiConfiguration.CurrentValue.ApiKey))
                 {
                     throw new CellmException($"Empty {nameof(GeminiConfiguration.ApiKey)} for {Provider.Gemini}. Please set your API key.");
                 }
 
-                var openAiClient = new OpenAIClient(
-                    new ApiKeyCredential(geminiConfiguration.CurrentValue.ApiKey),
-                    new OpenAIClientOptions
+                // Google.GenAI does not support custom HttpClient injection,
+                // so HTTP-level retry/timeout from the resilience pipeline is unavailable.
+                var geminiClient = new Google.GenAI.Client(
+                    apiKey: geminiConfiguration.CurrentValue.ApiKey,
+                    httpOptions: new Google.GenAI.Types.HttpOptions
                     {
-                        Transport = new HttpClientPipelineTransport(resilientHttpClient),
-                        Endpoint = geminiConfiguration.CurrentValue.BaseAddress
+                        Timeout = (int)TimeSpan.FromSeconds(
+                            resilienceConfiguration.CurrentValue.RetryConfiguration.HttpTimeoutInSeconds).TotalMilliseconds
                     });
 
-                return openAiClient.GetChatClient(geminiConfiguration.CurrentValue.DefaultModel).AsIChatClient();
+                return geminiClient.AsIChatClient(geminiConfiguration.CurrentValue.DefaultModel);
             }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 
