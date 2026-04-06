@@ -167,8 +167,7 @@ public class CellmAddIn : IExcelAddIn
             })
             .AddSingleton<IProviderBehavior, AdditionalPropertiesBehavior>()
             .AddSingleton<IProviderBehavior, GeminiTemperatureBehavior>()
-            .AddSingleton<IProviderBehavior, OpenAiTemperatureBehavior>()
-            .AddSingleton<IProviderBehavior, MistralThinkingBehavior>();
+            .AddSingleton<IProviderBehavior, OpenAiTemperatureBehavior>();
 
         // Internals
         var resilienceConfiguration = configuration.GetRequiredSection(nameof(ResilienceConfiguration)).Get<ResilienceConfiguration>()

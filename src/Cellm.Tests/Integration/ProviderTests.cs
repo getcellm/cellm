@@ -34,6 +34,12 @@ public class ProviderTests : IClassFixture<ProviderTestFixture>, IDisposable
         [Provider.OpenRouter],
     ];
 
+    public static IEnumerable<object[]> ThinkingProviders =>
+    [
+        [Provider.DeepSeek, "deepseek-reasoner"],
+        [Provider.Mistral, "magistral-small-2509"],
+    ];
+
     private void SkipIfUnavailable(Provider provider)
     {
         if (!_fixture.IsProviderAvailable(provider))
@@ -147,5 +153,24 @@ public class ProviderTests : IClassFixture<ProviderTestFixture>, IDisposable
         var text = response.Messages.Last().Text ?? string.Empty;
         _output.WriteLine($"{provider}/{model}: {text}");
         Assert.Contains("Example Domain", text, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Theory]
+    [MemberData(nameof(ThinkingProviders))]
+    public async Task ThinkingModel_ReturnsResponseAsync(Provider provider, string model)
+    {
+        SkipIfUnavailable(provider);
+
+        var prompt = new PromptBuilder()
+            .SetModel(model)
+            .SetTemperature(0)
+            .AddUserMessage("What is 2+2? Reply with just the number.")
+            .Build();
+
+        var response = await _fixture.Client.GetResponseAsync(prompt, provider, CancellationToken.None);
+
+        var text = response.Messages.Last().Text ?? string.Empty;
+        _output.WriteLine($"{provider}/{model}: {text}");
+        Assert.Contains("4", text);
     }
 }
