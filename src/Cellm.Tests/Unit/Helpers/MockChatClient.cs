@@ -8,8 +8,9 @@ namespace Cellm.Tests.Unit.Helpers;
 public class MockChatClient : IChatClient
 {
     public string DefaultResponse { get; set; } = "Test response";
-    public int CallCount { get; private set; }
+    public int CallCount { get; set; }
     public List<IList<ChatMessage>> ReceivedMessages { get; } = [];
+    public List<ChatOptions?> ReceivedOptions { get; } = [];
 
     public ChatClientMetadata Metadata => new("MockChatClient", null, "mock-model");
 
@@ -20,6 +21,7 @@ public class MockChatClient : IChatClient
     {
         CallCount++;
         ReceivedMessages.Add(chatMessages.ToList());
+        ReceivedOptions.Add(options);
 
         var responseMessage = new ChatMessage(ChatRole.Assistant, DefaultResponse);
         var response = new ChatResponse(responseMessage)
