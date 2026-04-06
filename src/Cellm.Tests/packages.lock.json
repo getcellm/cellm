@@ -66,9 +66,9 @@
       },
       "xunit.runner.visualstudio": {
         "type": "Direct",
-        "requested": "[3.1.5, )",
-        "resolved": "3.1.5",
-        "contentHash": "tKi7dSTwP4m5m9eXPM2Ime4Kn7xNf4x4zT9sdLO/G4hZVnQCRiMTWoSZqI/pYTVeI27oPPqHBKYI/DjJ9GsYgA=="
+        "requested": "[2.8.2, )",
+        "resolved": "2.8.2",
+        "contentHash": "vm1tbfXhFmjFMUmS4M0J0ASXz3/U5XvXBa6DOQUL3fEz4Vt6YPhv+ESCarx6M6D+9kJkJYZKCNvJMas1+nVfmQ=="
       },
       "Anthropic": {
         "type": "Transitive",
@@ -745,15 +745,6 @@
         "type": "Transitive",
         "resolved": "2.5.2",
         "contentHash": "vm4xrNt+i6OVRQ8vhfCcmDIUg3qvjyCTkSTNVTDFohsG6CXEpMaVFkidECL6yRYpHDnz4TqXhDoEQAcnHCu/tw=="
-      },
-      "Mistral.SDK": {
-        "type": "Transitive",
-        "resolved": "2.3.1",
-        "contentHash": "RhIaAxfHeeJcCQydGwJ06Jc82C6BeZvOAhULYBC6abUcCqFqAx7cgjQF9sX+mwHo2kL5VHcyxoHYxx07Q8MdiA==",
-        "dependencies": {
-          "Microsoft.Bcl.AsyncInterfaces": "8.0.0",
-          "Microsoft.Extensions.AI.Abstractions": "9.9.1"
-        }
       },
       "ModelContextProtocol": {
         "type": "Transitive",
@@ -1678,7 +1669,6 @@
           "Microsoft.Extensions.Logging.Debug": "[10.0.5, )",
           "Microsoft.Extensions.Options": "[10.0.5, )",
           "Microsoft.Extensions.Options.ConfigurationExtensions": "[10.0.5, )",
-          "Mistral.SDK": "[2.3.1, )",
           "ModelContextProtocol": "[1.2.0, )",
           "OllamaSharp": "[5.4.25, )",
           "PdfPig": "[0.1.14, )",

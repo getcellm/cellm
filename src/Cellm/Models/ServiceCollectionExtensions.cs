@@ -28,7 +28,6 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Mistral.SDK;
 using OllamaSharp;
 using OpenAI;
 using Polly;
@@ -98,6 +97,12 @@ internal static class ServiceCollectionExtensions
                 new HttpBodyLoggingHandler(
                     serviceProvider.GetRequiredService<ILogger<HttpBodyLoggingHandler>>(),
                     cellmAddInConfiguration.HttpBodyLogMaxLengthBytes));
+        }
+
+        // Strip thinking content parts from Magistral responses before the OpenAI SDK deserializes them
+        if (provider is Provider.Mistral or Provider.Cellm)
+        {
+            httpClientBuilder.AddHttpMessageHandler(() => new StripThinkingContentHandler());
         }
 
         httpClientBuilder
@@ -249,13 +254,15 @@ internal static class ServiceCollectionExtensions
                 var cellmConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<CellmConfiguration>>();
                 var resilientHttpClient = serviceProvider.GetResilientHttpClient(Provider.Cellm);
 
-                var apiAuthentication = new Mistral.SDK.APIAuthentication(accountConfiguration.CurrentValue.ApiKey);
-                var cellmClient = new MistralClient(apiAuthentication, resilientHttpClient)
-                {
-                    ApiUrlFormat = $"{cellmConfiguration.CurrentValue.BaseAddress.ToString().TrimEnd('/')}/{{1}}"
-                };
+                var openAiClient = new OpenAIClient(
+                    new ApiKeyCredential(accountConfiguration.CurrentValue.ApiKey),
+                    new OpenAIClientOptions
+                    {
+                        Transport = new HttpClientPipelineTransport(resilientHttpClient),
+                        Endpoint = cellmConfiguration.CurrentValue.BaseAddress
+                    });
 
-                return cellmClient.Completions;
+                return openAiClient.GetChatClient(cellmConfiguration.CurrentValue.DefaultModel).AsIChatClient();
             }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 
@@ -342,9 +349,15 @@ internal static class ServiceCollectionExtensions
                     throw new CellmException($"Empty {nameof(MistralConfiguration.ApiKey)} for {Provider.Mistral}. Please set your API key.");
                 }
 
-                var apiAuthentication = new Mistral.SDK.APIAuthentication(mistralConfiguration.CurrentValue.ApiKey);
-                var mistralClient = new MistralClient(apiAuthentication, resilientHttpClient);
-                return mistralClient.Completions;
+                var openAiClient = new OpenAIClient(
+                    new ApiKeyCredential(mistralConfiguration.CurrentValue.ApiKey),
+                    new OpenAIClientOptions
+                    {
+                        Transport = new HttpClientPipelineTransport(resilientHttpClient),
+                        Endpoint = mistralConfiguration.CurrentValue.BaseAddress
+                    });
+
+                return openAiClient.GetChatClient(mistralConfiguration.CurrentValue.DefaultModel).AsIChatClient();
             }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 
