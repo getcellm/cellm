@@ -35,8 +35,7 @@ public class IgnoreInaccessibleDirectoryInfoWrapperTests
     public void EnumerateFileSystemInfos_SkipsInaccessibleDirectories()
     {
         // C:\ProgramData contains junction points (Application Data, Desktop, etc.)
-        // that throw UnauthorizedAccessException when enumerated with the stock
-        // DirectoryInfoWrapper. This is the same class of error as CLIENT-K6.
+        // that throw when enumerated with the stock DirectoryInfoWrapper.
         var programData = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
 
         // Stock wrapper throws on problematic junction points:
