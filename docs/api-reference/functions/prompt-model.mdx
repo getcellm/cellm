@@ -7,7 +7,7 @@ Allows you to call a model from a cell formula and specify the model as the firs
 ## Arguments
 
 <ParamField body="providerAndModel" type="string" required>
-  A string on the form "provider/model" (e.g., "openai/gpt-4o-mini").
+  A string on the form "provider/model" (e.g., "openai/gpt-5.4-mini").
 
   The default model is determined by your configuration settings.
 </ParamField>
@@ -44,23 +44,23 @@ Allows you to call a model from a cell formula and specify the model as the firs
 <RequestExample>
 
 ```excel Text Instructions
-=PROMPTMODEL("openai/gpt-4o-mini", "Extract keywords")
+=PROMPTMODEL("openai/gpt-5.4-mini", "Extract keywords")
 ```
 
 ```excel Cell Instructions
-=PROMPTMODEL("openai/gpt-4o-mini", A1:D10)
+=PROMPTMODEL("openai/gpt-5.4-mini", A1:D10)
 ```
 
 ```excel With Context
-=PROMPTMODEL("openai/gpt-4o-mini", "Extract keywords", A1:D10)
+=PROMPTMODEL("openai/gpt-5.4-mini", "Extract keywords", A1:D10)
 ```
 
 ```excel Multiple Cell Ranges
-=PROMPTMODEL("openai/gpt-4o-mini", "Compare these datasets", A1:B10, D1:E10)
+=PROMPTMODEL("openai/gpt-5.4-mini", "Compare these datasets", A1:B10, D1:E10)
 ```
 
 ```excel Mixed Cell References
-=PROMPTMODEL("openai/gpt-4o-mini", "Analyze all data", A1, B2:C5, D6)
+=PROMPTMODEL("openai/gpt-5.4-mini", "Analyze all data", A1, B2:C5, D6)
 ```
 
 </RequestExample>
@@ -68,15 +68,15 @@ Allows you to call a model from a cell formula and specify the model as the firs
 <ResponseExample>
 
 ```excel TOROW
-=PROMPTMODEL.TOROW("openai/gpt-4o-mini", "Extract keywords", A1:D10)
+=PROMPTMODEL.TOROW("openai/gpt-5.4-mini", "Extract keywords", A1:D10)
 ```
 
 ```excel TOCOLUMN
-=PROMPTMODEL.TOCOLUMN("openai/gpt-4o-mini", "Extract keywords", A1:D10)
+=PROMPTMODEL.TOCOLUMN("openai/gpt-5.4-mini", "Extract keywords", A1:D10)
 ```
 
 ```excel TORANGE
-=PROMPTMODEL.TORANGE("openai/gpt-4o-mini", "Extract keywords", A1:D10)
+=PROMPTMODEL.TORANGE("openai/gpt-5.4-mini", "Extract keywords", A1:D10)
 ```
 
 </ResponseExample>

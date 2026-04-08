@@ -20,7 +20,7 @@ We split hosted models into three tiers based on their size and capabilities, ba
 | Speed             | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" />       | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" />   | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" /> |
 | Intelligence      | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" />   | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" />   | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" />     |
 | World Knowledge   | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" />   | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" /> | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" />   |
-| Recommended model | Gemini 2.5 Flash Lite                                                                                                 | Gemini 2.5 Flash                                                                                                    | Claude Sonnet 4.5                                                                                                      |
+| Recommended model | Gemini 3.1 Flash Lite                                                                                                 | Gemini 3 Flash                                                                                                      | Claude Opus 4.6                                                                                                        |
 
 ## Provider setup
 
@@ -63,7 +63,7 @@ Mistral offers a generous free tier with access to powerful models.
 
 ### OpenAI
 
-OpenAI provides access to GPT models, including GPT-4o and GPT-4o-mini.
+OpenAI provides access to GPT models, including GPT-5.4 and GPT-5.4-mini.
 
 <Steps>
   <Step title="Create an account">
@@ -79,7 +79,7 @@ OpenAI provides access to GPT models, including GPT-4o and GPT-4o-mini.
     In Excel, open Cellm's ribbon menu, select the `openai` provider, click the provider icon, and paste your API key. Try a model like:
 
     ````mdx OpenAI example
-    =PROMPTMODEL("openai/gpt-4o-mini", "Classify sentiment as positive, neutral, or negative", A1)
+    =PROMPTMODEL("openai/gpt-5.4-mini", "Classify sentiment as positive, neutral, or negative", A1)
     ````
   </Step>
 </Steps>
@@ -106,7 +106,7 @@ Google Gemini offers powerful AI models with a generous free tier.
     In Excel, open Cellm's ribbon menu, select the `gemini` provider, click the provider icon, and paste your API key. Try a model like:
 
     ````mdx Gemini example
-    =PROMPTMODEL("gemini/gemini-2.5-flash", "Extract person names from text", A1)
+    =PROMPTMODEL("gemini/gemini-3-flash-preview", "Extract person names from text", A1)
     ````
   </Step>
 </Steps>
@@ -136,7 +136,7 @@ Anthropic provides Claude models, known for their strong reasoning capabilities.
     In Excel, open Cellm's ribbon menu, select the `anthropic` provider, click the provider icon, and paste your API key. Try a model like:
 
     ````mdx Claude example
-    =PROMPTMODEL("anthropic/claude-sonnet-4.5", "Analyze customer feedback", A1)
+    =PROMPTMODEL("anthropic/claude-sonnet-4-6", "Analyze customer feedback", A1)
     ````
   </Step>
 </Steps>
