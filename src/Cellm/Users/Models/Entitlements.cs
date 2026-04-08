@@ -22,6 +22,7 @@ internal class Entitlements()
         Entitlement.EnableOllamaProvider,
         Entitlement.EnableOpenAiProvider,
         Entitlement.EnableOpenAiCompatibleProvider,
+        Entitlement.EnableOpenAiCompatibleProviderHostedModels,
         Entitlement.EnableOpenAiCompatibleProviderLocalModels,
         Entitlement.EnableOpenRouterProvider
     ];
