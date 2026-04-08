@@ -47,7 +47,7 @@ Just remember that the models do make mistakes at times. They might misunderstan
 
 3. Open Excel, choose a provider from the drop-down menu in the Cellm tab, and plug in your API key.
 
-You can also use local models, e.g., via [Ollama](https://ollama.com/). Download and install [Ollama](https://ollama.com/), open Windows Terminal (open start menu, type `Windows Terminal`, and click `OK`), type `ollama pull gemma3:4b`, and wait for the download to finish. Open Excel, choose the Ollama provider from the drop-down menu in the Cellm tab, and you are good to go.
+You can also use local models, e.g., via [Ollama](https://ollama.com/). Download and install [Ollama](https://ollama.com/) and open Excel. Choose the Ollama provider from the drop-down menu in the Cellm tab and select a model. Cellm will prompt you to download it automatically. Alternatively, open Windows Terminal (open start menu, type `Windows Terminal`, and click `OK`), type `ollama pull gemma4:e4b`, and wait for the download to finish.
 
 ## Pricing
 - **Free tier:** Use local models or your own API keys 
@@ -56,7 +56,7 @@ You can also use local models, e.g., via [Ollama](https://ollama.com/). Download
 
 ## Basic usage
 
-Select a cell and type `=PROMPT("What model are you and who made you?")`. For Gemma 3 4B, it will tell you that it's called "Gemma" and made by Google DeepMind.
+Select a cell and type `=PROMPT("What model are you and who made you?")`. For Gemma 4 E4B, it will tell you that it's called "Gemma 4" and made by Google DeepMind.
 
 You can also use cell references. For example, copy a news article into cell A1 and type in cell B1: `=PROMPT("Extract all person names mentioned in the text", A1)`. You can reference many cells using standard Excel notation, e.g. `=PROMPT("Extract all person names in the cells", A1:F10)` or reference multiple separate ranges, e.g. `=PROMPT("Compare these datasets", A1:B10, D1:E10)`
 

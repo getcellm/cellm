@@ -16,7 +16,7 @@ We can split local models into three tiers based on their size and capabilities,
 | Speed             | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" />       | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" />   | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" /> | 
 | Intelligence      | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" />   | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" />   | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" />     | 
 | World Knowledge   | <Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" /> | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" /><Icon icon="star" iconType="regular" /> | <Icon icon="star" iconType="solid" /><Icon icon="star" iconType="solid" /><Icon icon="star" iconType="regular" />   |
-| Recommended model | Gemma 3 4B IT QAT                                                                                                     | Mistral Small 3.2                                                                                                   | qwen3-30b-a3b-instruct-2507                                                                                         |
+| Recommended model | Gemma 4 E4B                                                                                                            | Gemma 4 26B                                                                                                         | Gemma 4 31B                                                                                                          |
 
 <Tip>
 You need a GPU for any of the medium or large models to be useful in practice. If you don't have a GPU, you can use [Hosted Models](/models/hosted-models) if small ones are insufficient.
@@ -38,29 +38,29 @@ You need to run a program on your computer that serves models to Cellm. We call 
 
 ### Ollama
 
-To get started with Ollama, we recommend you try out the Gemma 3 4B IT QAT model, which is Cellm's default local model.
+To get started with Ollama, we recommend you try out the Gemma 4 E4B model, which is Cellm's default local model.
 
 <Steps>
   <Step title="Install Ollama">
     Download and install [Ollama](https://ollama.com/). Ollama will start after the install and automatically run whenever you start up your computer.
   </Step>
   <Step title="Download the model">
-    Open Windows Terminal (open start menu, type `Windows Terminal`, and click `OK`), then run:
+    When you select an Ollama model in Cellm, it will prompt you to download it automatically. Alternatively, open Windows Terminal (open start menu, type `Windows Terminal`, and click `OK`), then run:
 
-    ````bash Download Gemma 3 4B QAT
-    ollama pull gemma3:4b-it-qat
+    ````bash Download Gemma 4 E4B
+    ollama pull gemma4:e4b
     ````
 
     Wait for the download to finish.
   </Step>
   <Step title="Test in Excel">
-    In Excel, select `ollama/gemma3:4b-it-qat` from the model dropdown menu, and type:
+    In Excel, select `ollama/gemma4:e4b` from the model dropdown menu, and type:
 
     ````mdx Test prompt
     =PROMPT("Which model are you and who made you?")
     ````
 
-    The model will tell you that it is called "Gemma" and made by Google DeepMind.
+    The model will tell you that it is called "Gemma 4" and made by Google DeepMind.
   </Step>
 </Steps>
 
@@ -133,7 +133,7 @@ If you prefer to run models via docker, both Ollama and vLLM are packaged up wit
     ````
   </Step>
   <Step title="Configure Cellm">
-    Start Excel and select the `openaicompatible` provider from the model drop-down on Cellm's ribbon menu. Enter the model name you want to use, e.g., `gemma3:4b-it-qat`.
+    Start Excel and select the `openaicompatible` provider from the model drop-down on Cellm's ribbon menu. Enter the model name you want to use, e.g., `gemma4:e4b`.
 
     Set the Base Address to `http://localhost:11434`.
   </Step>

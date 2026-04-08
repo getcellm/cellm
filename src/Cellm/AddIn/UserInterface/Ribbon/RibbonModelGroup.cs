@@ -21,6 +21,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using OllamaSharp;
 
 namespace Cellm.AddIn.UserInterface.Ribbon;
 
@@ -291,6 +292,47 @@ public partial class RibbonMain
         catch (Exception ex)
         {
             _logger.LogError("ERROR updating DefaultModel setting '{configKey}' to '{text}': {ex.Message}", configKey, text, ex.Message);
+        }
+
+        if (provider == Provider.Ollama)
+        {
+            CheckAndPullOllamaModel(text);
+        }
+    }
+
+    private void CheckAndPullOllamaModel(string modelName)
+    {
+        try
+        {
+            var ollamaConfiguration = CellmAddIn.Services.GetRequiredService<IOptionsMonitor<OllamaConfiguration>>();
+            var httpClient = new HttpClient { BaseAddress = ollamaConfiguration.CurrentValue.BaseAddress };
+            var client = new OllamaApiClient(httpClient, modelName);
+
+            var models = Task.Run(() => client.ListLocalModelsAsync()).GetAwaiter().GetResult();
+            var modelExists = models.Any(m => m.Name == modelName || m.Name == $"{modelName}:latest");
+
+            if (modelExists)
+            {
+                return;
+            }
+
+            var result = MessageBox.Show(
+                $"{modelName} was not found on your machine. Do you want to download it?",
+                "Cellm",
+                MessageBoxButtons.OKCancel,
+                MessageBoxIcon.Question);
+
+            if (result != DialogResult.OK)
+            {
+                return;
+            }
+
+            using var pullForm = new OllamaModelPullForm(client, modelName);
+            pullForm.ShowDialog();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Error checking Ollama model '{modelName}': {message}", modelName, ex.Message);
         }
     }
 

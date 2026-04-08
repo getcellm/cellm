@@ -91,12 +91,12 @@ Imagine you want to analyze customer feedback from column A. Instead of a single
 
 3. Extract Suggestions: In column D, use a Large model to analyze the feedback and suggest improvements. You could also add relevant background information on your product directly to the prompt or to a cell that you reference.
     ````mdx Analyze feedback
-    =PROMPTMODEL("openai/gpt-4o-mini", "Analyze user feedback and suggest improvements.", B2)
+    =PROMPTMODEL("openai/gpt-5.4-mini", "Analyze user feedback and suggest improvements.", B2)
     ````
 
 4. Extract Topics: In column E, extract relevant topics with a small model, which is efficient for simple extraction tasks.
     ````mdx Extract topics
-    =PROMPTMODEL.TOROW("openai/gpt-4o-mini", "Extract relevant software engineering topics, such as UX, Bug, Documentation, or Improvement.", B2)
+    =PROMPTMODEL.TOROW("openai/gpt-5.4-mini", "Extract relevant software engineering topics, such as UX, Bug, Documentation, or Improvement.", B2)
     ````
 
 This approach gives you reliable results and granular control of the output format.
