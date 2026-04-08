@@ -36,6 +36,21 @@ internal class SentryBehavior<TRequest, TResponse>(
             request.Prompt.Options,
         };
 
+        SentrySdk.ConfigureScope(scope =>
+        {
+            scope.SetTag("provider", request.Provider.ToString());
+            scope.SetTag("model", request.Prompt.Options.ModelId ?? "unknown");
+            scope.SetTag("tools_enabled", (request.Prompt.Options.Tools?.Any() ?? false).ToString());
+            scope.SetTag("output_shape", request.Prompt.OutputShape.ToString());
+            scope.Contexts["Prompt"] = new
+            {
+                Instructions = GetInstructions(request.Prompt.Messages),
+                Tools = providerConfiguration.CurrentValue.EnableTools,
+                Servers = providerConfiguration.CurrentValue.EnableModelContextProtocolServers,
+                request.Prompt.Options,
+            };
+        });
+
         try
         {
             return await next().ConfigureAwait(false);
