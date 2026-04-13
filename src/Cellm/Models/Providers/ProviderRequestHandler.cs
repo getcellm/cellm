@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.ClientModel;
+using System.Net.Http;
+using System.Text;
 using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.Models.Prompts;
@@ -12,28 +14,47 @@ internal class ProviderRequestHandler(IChatClientFactory chatClientFactory) : IR
     public async Task<ProviderResponse> Handle(ProviderRequest request, CancellationToken cancellationToken)
     {
         var chatClient = chatClientFactory.GetClient(request.Provider);
+        ChatResponse chatResponse;
 
-        var chatResponse = request.Prompt.OutputShape switch
+        // Third-party provider SDK exceptions bubble up as unhandled exceptions, giving users
+        // no useful feedback. We capture them to Sentry for visibility and rethrow as CellmException
+        // so the user sees the API's error message in their Excel cell.
+        try
         {
-            StructuredOutputShape.None =>
-                await chatClient.GetResponseAsync(
-                    request.Prompt.Messages,
-                    request.Prompt.Options,
-                    cancellationToken).ConfigureAwait(false),
-            StructuredOutputShape.Row or StructuredOutputShape.Column =>
-                await chatClient.GetResponseAsync<string[]>(
-                    AppendOutputShapeInstructions(request.Prompt.Messages, SystemMessages.RowOrColumn),
-                    request.Prompt.Options,
-                    UseJsonSchemaResponseFormat(request.Provider, request.Prompt),
-                    cancellationToken).ConfigureAwait(false),
-            StructuredOutputShape.Range =>
-                await chatClient.GetResponseAsync<string[][]>(
-                    AppendOutputShapeInstructions(request.Prompt.Messages, SystemMessages.Range),
-                    request.Prompt.Options,
-                    UseJsonSchemaResponseFormat(request.Provider, request.Prompt),
-                    cancellationToken).ConfigureAwait(false),
-            _ => throw new CellmException($"Internal error: Unknown output shape ({request.Prompt.OutputShape})")
-        };
+            chatResponse = request.Prompt.OutputShape switch
+            {
+                StructuredOutputShape.None =>
+                    await chatClient.GetResponseAsync(
+                        request.Prompt.Messages,
+                        request.Prompt.Options,
+                        cancellationToken).ConfigureAwait(false),
+                StructuredOutputShape.Row or StructuredOutputShape.Column =>
+                    await chatClient.GetResponseAsync<string[]>(
+                        AppendOutputShapeInstructions(request.Prompt.Messages, SystemMessages.RowOrColumn),
+                        request.Prompt.Options,
+                        UseJsonSchemaResponseFormat(request.Provider, request.Prompt),
+                        cancellationToken).ConfigureAwait(false),
+                StructuredOutputShape.Range =>
+                    await chatClient.GetResponseAsync<string[][]>(
+                        AppendOutputShapeInstructions(request.Prompt.Messages, SystemMessages.Range),
+                        request.Prompt.Options,
+                        UseJsonSchemaResponseFormat(request.Provider, request.Prompt),
+                        cancellationToken).ConfigureAwait(false),
+                _ => throw new CellmException($"Internal error: Unknown output shape ({request.Prompt.OutputShape})")
+            };
+        }
+        // OpenAI, OpenAI-compatible, Azure, DeepSeek, Mistral, OpenRouter, Cellm
+        catch (ClientResultException ex)
+        {
+            SentrySdk.CaptureException(ex);
+            throw new CellmException(ex.Message, ex);
+        }
+        // Ollama, Anthropic, AWS, Gemini, and general HTTP failures
+        catch (HttpRequestException ex)
+        {
+            SentrySdk.CaptureException(ex);
+            throw new CellmException(ex.Message, ex);
+        }
 
         var prompt = new PromptBuilder(request.Prompt)
             .AddMessages(chatResponse.Messages)
