@@ -1,4 +1,8 @@
+using System.Runtime.Serialization;
 using Cellm.AddIn;
+using Cellm.AddIn.Exceptions;
+using ExcelDna.Integration;
+using Microsoft.Extensions.Configuration;
 using Xunit;
 using CellmRange = Cellm.AddIn.Range;
 
@@ -6,6 +10,84 @@ namespace Cellm.Tests.Unit.AddIn;
 
 public class ArgumentParserTests
 {
+    private static ArgumentParser CreateParser()
+    {
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["CellmAddInConfiguration:DefaultProvider"] = "OpenAi",
+                ["CellmAddInConfiguration:DefaultTemperature"] = "0",
+                ["OpenAiConfiguration:DefaultModel"] = "gpt-4.1",
+            })
+            .Build();
+
+        return new ArgumentParser(config);
+    }
+
+    // ExcelReference constructor calls into Excel, so we create an uninitialized instance for unit tests
+    private static ExcelReference CreateExcelReference() =>
+        (ExcelReference)FormatterServices.GetUninitializedObject(typeof(ExcelReference));
+
+    #region Parse Old Syntax Tests
+
+    [Fact]
+    public void Parse_OldArgumentOrder_CellsThenString_ThrowsCellmException()
+    {
+        var parser = CreateParser();
+
+        var ex = Assert.Throws<CellmException>(() =>
+            parser
+                .AddInstructions(CreateExcelReference())
+                .AddCells(new object[] { "Extract keywords", ExcelMissing.Value })
+                .Parse());
+
+        Assert.Contains("argument order changed", ex.Message);
+    }
+
+    [Fact]
+    public void Parse_OldArgumentOrder_CellsThenStringThenTemperature_ThrowsCellmException()
+    {
+        var parser = CreateParser();
+
+        var ex = Assert.Throws<CellmException>(() =>
+            parser
+                .AddInstructions(CreateExcelReference())
+                .AddCells(new object[] { "Extract keywords", 0.7 })
+                .Parse());
+
+        Assert.Contains("argument order changed", ex.Message);
+    }
+
+    [Fact]
+    public void Parse_OldArgumentOrder_CellsThenTemperature_ThrowsCellmException()
+    {
+        var parser = CreateParser();
+
+        var ex = Assert.Throws<CellmException>(() =>
+            parser
+                .AddInstructions(CreateExcelReference())
+                .AddCells(new object[] { 0.7, ExcelMissing.Value })
+                .Parse());
+
+        Assert.Contains("argument order changed", ex.Message);
+    }
+
+    [Fact]
+    public void Parse_OldTemperatureArgument_StringThenTemperature_ThrowsCellmException()
+    {
+        var parser = CreateParser();
+
+        var ex = Assert.Throws<CellmException>(() =>
+            parser
+                .AddInstructions("Extract keywords")
+                .AddCells(new object[] { 0.7, ExcelMissing.Value })
+                .Parse());
+
+        Assert.Contains("temperature argument was removed", ex.Message);
+    }
+
+    #endregion
+
     #region GetColumnName Tests
 
     [Theory]
