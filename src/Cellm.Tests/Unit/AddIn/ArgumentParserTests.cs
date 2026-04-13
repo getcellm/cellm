@@ -1,4 +1,4 @@
-using System.Runtime.Serialization;
+using System.Runtime.CompilerServices;
 using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using ExcelDna.Integration;
@@ -26,7 +26,7 @@ public class ArgumentParserTests
 
     // ExcelReference constructor calls into Excel, so we create an uninitialized instance for unit tests
     private static ExcelReference CreateExcelReference() =>
-        (ExcelReference)FormatterServices.GetUninitializedObject(typeof(ExcelReference));
+        (ExcelReference)RuntimeHelpers.GetUninitializedObject(typeof(ExcelReference));
 
     #region Parse Old Syntax Tests
 
