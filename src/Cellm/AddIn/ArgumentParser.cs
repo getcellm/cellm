@@ -80,10 +80,16 @@ public class ArgumentParser(IConfiguration configuration)
         {
             // =PROMPT("Hello world")
             (string instructions, []) => new Arguments(provider, model, [], instructions, temperature, _outputShape),
+            // Old temperature argument: =PROMPT("instruction", 0.7), =PROMPT("instruction", A1:B2, 0.7), etc.
+            (string, object[] ranges) when ranges.Any(r => r is double) =>
+                throw new CellmException("The temperature argument was removed in v0.5. Please use PROMPT(\"instruction\", A1:B2) and configure temperature via the ribbon UI."),
             // =PROMPT("Hello world", A1, B2, ...)
             (string instructions, object[] ranges) => new Arguments(provider, model, ParseRanges(ranges), instructions, temperature, _outputShape),
             // =PROMPT(A1:B2)
             (ExcelReference instructions, []) => new Arguments(provider, model, [], new Range(instructions.RowFirst, instructions.ColumnFirst, instructions.GetValue()), temperature, _outputShape),
+            // Old argument order: =PROMPT(A1:B2, "instruction"), =PROMPT(A1:B2, "instruction", 0.7), =PROMPT(A1:B2, 0.7), etc.
+            (ExcelReference, object[] ranges) when ranges.Any(r => r is string or double) =>
+                throw new CellmException("The argument order changed in v0.5. Please use PROMPT(\"instruction\", A1:B2) instead of PROMPT(A1:B2, \"instruction\"). Temperature is now configured via the ribbon UI."),
             // =PROMPT(A1:B2, C1, D2, ...)
             (ExcelReference instructions, object[] ranges) => new Arguments(provider, model, ParseRanges(ranges), new Range(instructions.RowFirst, instructions.ColumnFirst, instructions.GetValue()), temperature, _outputShape),
             // Short-circuit if instructions contain an Excel error
