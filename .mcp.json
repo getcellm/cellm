@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "sentry": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@sentry/mcp-server@latest"]
+    }
+  }
+}
