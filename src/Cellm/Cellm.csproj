@@ -39,8 +39,8 @@
     <PackageReference Include="ExcelDna.Interop" Version="15.0.1" />
     <PackageReference Include="Google.GenAI" Version="1.6.1" />
     <PackageReference Include="MediatR" Version="14.1.0" />
-    <PackageReference Include="Microsoft.Extensions.AI" Version="10.4.1" />
-    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.4.1" />
+    <PackageReference Include="Microsoft.Extensions.AI" Version="10.5.0" />
+    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.5.0" />
     <PackageReference Include="Microsoft.Extensions.AI.AzureAIInference" Version="9.5.0-preview.1.25265.7" />
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.4.1" />
     <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="10.4.0" />
