@@ -4,9 +4,9 @@
     "net9.0-windows7.0": {
       "Anthropic": {
         "type": "Direct",
-        "requested": "[12.11.0, )",
-        "resolved": "12.11.0",
-        "contentHash": "cwWxqnxZrFIyh9q/7gq37KvaUcdll4gBpmfLFI+G1nS2/4JbRGP7OgC9zMal9y/ALmwwNAycAHsDvE8c1xHLNg==",
+        "requested": "[12.17.0, )",
+        "resolved": "12.17.0",
+        "contentHash": "eL0TsSR9idxVHjKrSVNImYvnH+SjnVoMA6GtsavEu8ulj4j+ztLbY/HMAIbpf1y95A4JR5fSXcS4syHIzZ4ACA==",
         "dependencies": {
           "Microsoft.Extensions.AI.Abstractions": "10.4.0",
           "System.Net.ServerSentEvents": "10.0.1",
@@ -429,8 +429,8 @@
       },
       "Microsoft.Bcl.AsyncInterfaces": {
         "type": "Transitive",
-        "resolved": "8.0.0",
-        "contentHash": "3WA9q9yVqJp222P3x1wYIGDAkpjAku0TMUaaQV22g6L67AI0LdOIrVS7Ht2vJfLHGSPVuqN94vIr15qn+HEkHw=="
+        "resolved": "6.0.0",
+        "contentHash": "UcSjPsst+DfAdJGVDsu346FX0ci0ah+lw3WRtn18NUwEqRt70HaOQ7lI72vy3+1LxtqI3T5GWwV39rQSrCzAeg=="
       },
       "Microsoft.Diagnostics.NETCore.Client": {
         "type": "Transitive",
