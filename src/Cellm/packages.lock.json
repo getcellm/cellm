@@ -15,12 +15,12 @@
       },
       "AWSSDK.Extensions.Bedrock.MEAI": {
         "type": "Direct",
-        "requested": "[4.0.6.6, )",
-        "resolved": "4.0.6.6",
-        "contentHash": "bOqVxtcYV/pz4e/sOClK1Zud377o/2jo3J2Sy9V1XgKXoQHCmDyFHPvX/IJqH6Ic4P8znDaTLXg7j3NzQm6NFQ==",
+        "requested": "[4.0.6.11, )",
+        "resolved": "4.0.6.11",
+        "contentHash": "F9ZyjdvGxhfDBPRi1ReNE/MNvJvTDdUcUUhdZjGyD8fj8ykfL4mXHgSdxfDynvak/yYT2KzehISoF9imcw3AkA==",
         "dependencies": {
-          "AWSSDK.BedrockRuntime": "4.0.16.8",
-          "AWSSDK.Core": "4.0.3.26",
+          "AWSSDK.BedrockRuntime": "4.0.17.5",
+          "AWSSDK.Core": "4.0.4",
           "Microsoft.Extensions.AI.Abstractions": "9.9.1"
         }
       },
@@ -351,16 +351,16 @@
       },
       "AWSSDK.BedrockRuntime": {
         "type": "Transitive",
-        "resolved": "4.0.16.8",
-        "contentHash": "tYfAZxm/lqiZOoIEMCg+zf5OuudKfAUTUvw1NH3b4Ki5B4bM4rEX9N/CmZpSfL6aSv3QVBabhRmrgLaJcxa86w==",
+        "resolved": "4.0.17.5",
+        "contentHash": "bxY3z9HXZQ9GxOuUCFeTpGnUiUF1mYpCYNodNxLENshhIb8ms2zm1uaGM8H6SPngThy9/tSXCflD0/eN0ixY4w==",
         "dependencies": {
-          "AWSSDK.Core": "[4.0.3.26, 5.0.0)"
+          "AWSSDK.Core": "[4.0.4, 5.0.0)"
         }
       },
       "AWSSDK.Core": {
         "type": "Transitive",
-        "resolved": "4.0.3.26",
-        "contentHash": "2iVc7MZCbq2KY8vkxs+C+xbJavG9X3JvnVkQxVlxkKyCWeQuQGJCI+w+p6RXrKYMpP2AaGLIPFBR0hLDRw59bQ=="
+        "resolved": "4.0.4",
+        "contentHash": "RjBk1WDrOCpsSRGn6j2lYhgiyYnXEhMctwJevNnIPIIGpgj49ifbU6FmG1Dk+1M/VSuqeTQ1WVsssziTty7b2w=="
       },
       "Azure.AI.Inference": {
         "type": "Transitive",
@@ -429,8 +429,8 @@
       },
       "Microsoft.Bcl.AsyncInterfaces": {
         "type": "Transitive",
-        "resolved": "8.0.0",
-        "contentHash": "3WA9q9yVqJp222P3x1wYIGDAkpjAku0TMUaaQV22g6L67AI0LdOIrVS7Ht2vJfLHGSPVuqN94vIr15qn+HEkHw=="
+        "resolved": "6.0.0",
+        "contentHash": "UcSjPsst+DfAdJGVDsu346FX0ci0ah+lw3WRtn18NUwEqRt70HaOQ7lI72vy3+1LxtqI3T5GWwV39rQSrCzAeg=="
       },
       "Microsoft.Diagnostics.NETCore.Client": {
         "type": "Transitive",

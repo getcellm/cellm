@@ -34,7 +34,7 @@
 
   <ItemGroup>
     <PackageReference Include="Anthropic" Version="12.11.0" />
-    <PackageReference Include="AWSSDK.Extensions.Bedrock.MEAI" Version="4.0.6.6" />
+    <PackageReference Include="AWSSDK.Extensions.Bedrock.MEAI" Version="4.0.6.11" />
     <PackageReference Include="ExcelDna.Addin" Version="1.9.0" />
     <PackageReference Include="ExcelDna.Interop" Version="15.0.1" />
     <PackageReference Include="Google.GenAI" Version="1.6.1" />
