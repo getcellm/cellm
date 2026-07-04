@@ -13,6 +13,7 @@ using Cellm.Models.Providers.Ollama;
 using Cellm.Models.Providers.OpenAi;
 using Cellm.Models.Providers.OpenAiCompatible;
 using Cellm.Models.Providers.OpenRouter;
+using Cellm.Models.Providers.Requesty;
 using Cellm.Tools.ModelContextProtocol;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -85,6 +86,7 @@ public class ProviderTestFixture : IDisposable
             Provider.OpenAi => HasApiKey<OpenAiConfiguration>(),
             Provider.OpenAiCompatible => HasApiKey<OpenAiCompatibleConfiguration>(),
             Provider.OpenRouter => HasApiKey<OpenRouterConfiguration>(),
+            Provider.Requesty => HasApiKey<RequestyConfiguration>(),
             _ => false
         };
     }
@@ -101,6 +103,7 @@ public class ProviderTestFixture : IDisposable
             Provider.OpenAi => GetConfig<OpenAiConfiguration>().DefaultModel,
             Provider.OpenAiCompatible => GetConfig<OpenAiCompatibleConfiguration>().DefaultModel,
             Provider.OpenRouter => GetConfig<OpenRouterConfiguration>().DefaultModel,
+            Provider.Requesty => GetConfig<RequestyConfiguration>().DefaultModel,
             _ => throw new ArgumentException($"Unknown provider: {provider}")
         };
     }

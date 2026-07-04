@@ -29,6 +29,7 @@ public class PipelineTests : IClassFixture<PipelineTestFixture>
         [Provider.DeepSeek, "deepseek-chat"],
         [Provider.Ollama, "llama3.2"],
         [Provider.OpenRouter, "openai/gpt-4.1-mini"],
+        [Provider.Requesty, "openai/gpt-4o-mini"],
     ];
 
     [Theory]

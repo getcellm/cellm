@@ -29,6 +29,7 @@
     <None Remove="AddIn\UserInterface\Resources\ollama.png" />
     <None Remove="AddIn\UserInterface\Resources\openai.png" />
     <None Remove="AddIn\UserInterface\Resources\OpenRouter.svg" />
+    <None Remove="AddIn\UserInterface\Resources\Requesty.svg" />
     <None Remove="appsettings.json" />
   </ItemGroup>
 
@@ -94,5 +95,6 @@
     <EmbeddedResource Include="AddIn\UserInterface\Resources\Ollama.png" />
     <EmbeddedResource Include="AddIn\UserInterface\Resources\OpenAi.png" />
     <EmbeddedResource Include="AddIn\UserInterface\Resources\OpenRouter.svg" />
+    <EmbeddedResource Include="AddIn\UserInterface\Resources\Requesty.svg" />
   </ItemGroup>
 </Project>
