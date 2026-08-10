@@ -4,13 +4,13 @@
     "net9.0-windows7.0": {
       "Anthropic": {
         "type": "Direct",
-        "requested": "[12.11.0, )",
-        "resolved": "12.11.0",
-        "contentHash": "cwWxqnxZrFIyh9q/7gq37KvaUcdll4gBpmfLFI+G1nS2/4JbRGP7OgC9zMal9y/ALmwwNAycAHsDvE8c1xHLNg==",
+        "requested": "[12.40.0, )",
+        "resolved": "12.40.0",
+        "contentHash": "5V9JZxH4E8vuGjpP9BkfkrsRXLSs2sTacHqpcAquKiDW0Kt+f5oFUi3TFgrecossVa47WW6WnHl9DdsZ5i/1Jw==",
         "dependencies": {
-          "Microsoft.Extensions.AI.Abstractions": "10.4.0",
+          "Microsoft.Extensions.AI.Abstractions": "10.5.1",
           "System.Net.ServerSentEvents": "10.0.1",
-          "System.Text.Json": "10.0.4"
+          "System.Text.Json": "10.0.6"
         }
       },
       "AWSSDK.Extensions.Bedrock.MEAI": {
@@ -80,11 +80,11 @@
       },
       "Microsoft.Extensions.AI.Abstractions": {
         "type": "Direct",
-        "requested": "[10.4.1, )",
-        "resolved": "10.4.1",
-        "contentHash": "ZxhU/wg9BOc3ohibhLl18toPLWm96ysQoE+3OhCgrZ0TUPZd7bsUmGteeatz08yweyuPIEhtyUzEZTF+3bMWEQ==",
+        "requested": "[10.8.3, )",
+        "resolved": "10.8.3",
+        "contentHash": "K0B05oApxmviWalNHPMBBcRC7erKiDATz3ENNR/jqTR9JwIwLRefgDhj2jCRwL1aca99pXUe0qyQC73/xIuZig==",
         "dependencies": {
-          "System.Text.Json": "10.0.4"
+          "System.Text.Json": "10.0.10"
         }
       },
       "Microsoft.Extensions.AI.AzureAIInference": {
