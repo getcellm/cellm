@@ -180,6 +180,7 @@ public class CellmAddIn : IExcelAddIn
             .AddSingleton<Client>()
             .AddRateLimiter(resilienceConfiguration)
             .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.Anthropic)
+            .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.Azure)
             .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.Cellm)
             .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.DeepSeek)
             .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.Mistral)
