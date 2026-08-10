@@ -15,13 +15,13 @@
       },
       "AWSSDK.Extensions.Bedrock.MEAI": {
         "type": "Direct",
-        "requested": "[4.0.6.6, )",
-        "resolved": "4.0.6.6",
-        "contentHash": "bOqVxtcYV/pz4e/sOClK1Zud377o/2jo3J2Sy9V1XgKXoQHCmDyFHPvX/IJqH6Ic4P8znDaTLXg7j3NzQm6NFQ==",
+        "requested": "[4.0.101.7, )",
+        "resolved": "4.0.101.7",
+        "contentHash": "l3g+moUn/XEs0qaVgbZELH6w0ua10m4a+fH32CpDI8oNpBxOyTzt1LeAIUmH9z0KiEbzSu5W1eQIEVN/D40gsg==",
         "dependencies": {
-          "AWSSDK.BedrockRuntime": "4.0.16.8",
-          "AWSSDK.Core": "4.0.3.26",
-          "Microsoft.Extensions.AI.Abstractions": "9.9.1"
+          "AWSSDK.BedrockRuntime": "4.0.100.7",
+          "AWSSDK.Core": "4.0.100.9",
+          "Microsoft.Extensions.AI.Abstractions": "10.5.1"
         }
       },
       "ExcelDna.AddIn": {
@@ -80,11 +80,11 @@
       },
       "Microsoft.Extensions.AI.Abstractions": {
         "type": "Direct",
-        "requested": "[10.4.1, )",
-        "resolved": "10.4.1",
-        "contentHash": "ZxhU/wg9BOc3ohibhLl18toPLWm96ysQoE+3OhCgrZ0TUPZd7bsUmGteeatz08yweyuPIEhtyUzEZTF+3bMWEQ==",
+        "requested": "[10.8.3, )",
+        "resolved": "10.8.3",
+        "contentHash": "K0B05oApxmviWalNHPMBBcRC7erKiDATz3ENNR/jqTR9JwIwLRefgDhj2jCRwL1aca99pXUe0qyQC73/xIuZig==",
         "dependencies": {
-          "System.Text.Json": "10.0.4"
+          "System.Text.Json": "10.0.10"
         }
       },
       "Microsoft.Extensions.AI.AzureAIInference": {
@@ -351,16 +351,16 @@
       },
       "AWSSDK.BedrockRuntime": {
         "type": "Transitive",
-        "resolved": "4.0.16.8",
-        "contentHash": "tYfAZxm/lqiZOoIEMCg+zf5OuudKfAUTUvw1NH3b4Ki5B4bM4rEX9N/CmZpSfL6aSv3QVBabhRmrgLaJcxa86w==",
+        "resolved": "4.0.100.7",
+        "contentHash": "/HODJ+Zr4UXLCRgUD5A5u9x1K/s41oM10syuOKdUYdoNnyPRd2XicYHDBCfjZR3fqY2+kqCaS98HTRt5YVoWtQ==",
         "dependencies": {
-          "AWSSDK.Core": "[4.0.3.26, 5.0.0)"
+          "AWSSDK.Core": "[4.0.100.9, 5.0.0)"
         }
       },
       "AWSSDK.Core": {
         "type": "Transitive",
-        "resolved": "4.0.3.26",
-        "contentHash": "2iVc7MZCbq2KY8vkxs+C+xbJavG9X3JvnVkQxVlxkKyCWeQuQGJCI+w+p6RXrKYMpP2AaGLIPFBR0hLDRw59bQ=="
+        "resolved": "4.0.100.9",
+        "contentHash": "OPYy41jZjXwxxcYRotaq24HDrwUnVtBB/mvg1IwB9D1ICXAtHqMa1sp2hpmlVJCZwjlcrPcTCJIejInvV1vp5g=="
       },
       "Azure.AI.Inference": {
         "type": "Transitive",
