@@ -1,0 +1,7 @@
+<Project>
+  <Target Name="RemoveUnusedOllamaSharpSourceGenerator" BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <Analyzer Remove="@(Analyzer)" Condition="'%(Analyzer.Filename)%(Analyzer.Extension)' == 'OllamaSharp.SourceGenerators.dll'" />
+    </ItemGroup>
+  </Target>
+</Project>
