@@ -4,8 +4,6 @@ using System.Threading.RateLimiting;
 using Amazon;
 using Amazon.BedrockRuntime;
 using Anthropic;
-using Azure;
-using Azure.AI.Inference;
 using Cellm.AddIn;
 using Cellm.AddIn.Exceptions;
 using Cellm.AddIn.Logging;
@@ -220,16 +218,22 @@ internal static class ServiceCollectionExtensions
                 account.ThrowIfNotEntitled(Entitlement.EnableAzureProvider);
 
                 var azureConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<AzureConfiguration>>();
+                var resilientHttpClient = serviceProvider.GetResilientHttpClient(Provider.Azure);
 
                 if (string.IsNullOrWhiteSpace(azureConfiguration.CurrentValue.ApiKey))
                 {
                     throw new CellmException($"Empty {nameof(AzureConfiguration.ApiKey)} for {Provider.Azure}. Please set your API key.");
                 }
 
-                return new ChatCompletionsClient(
-                    azureConfiguration.CurrentValue.BaseAddress,
-                    new AzureKeyCredential(azureConfiguration.CurrentValue.ApiKey))
-                    .AsIChatClient(azureConfiguration.CurrentValue.DefaultModel);
+                var openAiClient = new OpenAIClient(
+                    new ApiKeyCredential(azureConfiguration.CurrentValue.ApiKey),
+                    new OpenAIClientOptions
+                    {
+                        Transport = new HttpClientPipelineTransport(resilientHttpClient),
+                        Endpoint = azureConfiguration.CurrentValue.BaseAddress
+                    });
+
+                return openAiClient.GetChatClient(azureConfiguration.CurrentValue.DefaultModel).AsIChatClient();
             }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 
