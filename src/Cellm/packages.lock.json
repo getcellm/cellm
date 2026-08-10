@@ -35,9 +35,9 @@
       },
       "ExcelDna.Interop": {
         "type": "Direct",
-        "requested": "[15.0.1, )",
-        "resolved": "15.0.1",
-        "contentHash": "CIKPXlw+6C6v2Em8DVFgkTsrMZoz978CtSG722+dwHi3Tt7JTxQ2BmmBH4yJuzcA9EaOC5AMEmioLkLsvhESQw=="
+        "requested": "[16.0.0, )",
+        "resolved": "16.0.0",
+        "contentHash": "xJoz0zmnEfJd5hKkC0rzmtpQeyjC0mMEQQdpICrGnIB/zYN8e270S5yLxdtbPpTYeEGk7RUQNfjA4FjG9xlRNA=="
       },
       "Google.GenAI": {
         "type": "Direct",
