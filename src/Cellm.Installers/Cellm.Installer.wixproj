@@ -1,4 +1,4 @@
-﻿<Project Sdk="WixToolset.Sdk/6.0.0">
+﻿<Project Sdk="WixToolset.Sdk/6.0.2">
   <PropertyGroup>
     <OutputName>Cellm-AddIn-$(Configuration)-$(Platform)</OutputName>
     <SignOutput>false</SignOutput>
