@@ -72,35 +72,35 @@
       },
       "Anthropic": {
         "type": "Transitive",
-        "resolved": "12.11.0",
-        "contentHash": "cwWxqnxZrFIyh9q/7gq37KvaUcdll4gBpmfLFI+G1nS2/4JbRGP7OgC9zMal9y/ALmwwNAycAHsDvE8c1xHLNg==",
+        "resolved": "12.40.0",
+        "contentHash": "5V9JZxH4E8vuGjpP9BkfkrsRXLSs2sTacHqpcAquKiDW0Kt+f5oFUi3TFgrecossVa47WW6WnHl9DdsZ5i/1Jw==",
         "dependencies": {
-          "Microsoft.Extensions.AI.Abstractions": "10.4.0",
+          "Microsoft.Extensions.AI.Abstractions": "10.5.1",
           "System.Net.ServerSentEvents": "10.0.1",
-          "System.Text.Json": "10.0.4"
+          "System.Text.Json": "10.0.6"
         }
       },
       "AWSSDK.BedrockRuntime": {
         "type": "Transitive",
-        "resolved": "4.0.16.8",
-        "contentHash": "tYfAZxm/lqiZOoIEMCg+zf5OuudKfAUTUvw1NH3b4Ki5B4bM4rEX9N/CmZpSfL6aSv3QVBabhRmrgLaJcxa86w==",
+        "resolved": "4.0.100.7",
+        "contentHash": "/HODJ+Zr4UXLCRgUD5A5u9x1K/s41oM10syuOKdUYdoNnyPRd2XicYHDBCfjZR3fqY2+kqCaS98HTRt5YVoWtQ==",
         "dependencies": {
-          "AWSSDK.Core": "[4.0.3.26, 5.0.0)"
+          "AWSSDK.Core": "[4.0.100.9, 5.0.0)"
         }
       },
       "AWSSDK.Core": {
         "type": "Transitive",
-        "resolved": "4.0.3.26",
-        "contentHash": "2iVc7MZCbq2KY8vkxs+C+xbJavG9X3JvnVkQxVlxkKyCWeQuQGJCI+w+p6RXrKYMpP2AaGLIPFBR0hLDRw59bQ=="
+        "resolved": "4.0.100.9",
+        "contentHash": "OPYy41jZjXwxxcYRotaq24HDrwUnVtBB/mvg1IwB9D1ICXAtHqMa1sp2hpmlVJCZwjlcrPcTCJIejInvV1vp5g=="
       },
       "AWSSDK.Extensions.Bedrock.MEAI": {
         "type": "Transitive",
-        "resolved": "4.0.6.6",
-        "contentHash": "bOqVxtcYV/pz4e/sOClK1Zud377o/2jo3J2Sy9V1XgKXoQHCmDyFHPvX/IJqH6Ic4P8znDaTLXg7j3NzQm6NFQ==",
+        "resolved": "4.0.101.7",
+        "contentHash": "l3g+moUn/XEs0qaVgbZELH6w0ua10m4a+fH32CpDI8oNpBxOyTzt1LeAIUmH9z0KiEbzSu5W1eQIEVN/D40gsg==",
         "dependencies": {
-          "AWSSDK.BedrockRuntime": "4.0.16.8",
-          "AWSSDK.Core": "4.0.3.26",
-          "Microsoft.Extensions.AI.Abstractions": "9.9.1"
+          "AWSSDK.BedrockRuntime": "4.0.100.7",
+          "AWSSDK.Core": "4.0.100.9",
+          "Microsoft.Extensions.AI.Abstractions": "10.5.1"
         }
       },
       "Azure.AI.Inference": {
@@ -186,12 +186,13 @@
       },
       "Google.GenAI": {
         "type": "Transitive",
-        "resolved": "1.6.1",
-        "contentHash": "ydKqbLdf1JF6hh49OM1cOOz9/CeAF1ZQ9dcA4KZaJKpACb9oxucGWAIciWvNC/Cci0rnMA8qn4o/3pw5Yy/EOg==",
+        "resolved": "1.17.0",
+        "contentHash": "DU7eoRe5zAXVKNTPYXyC6pyhHdyQlcExawv/iGD/lSU3h8BfVNKcFxlST7Ca8bkykdQNKDtDn/BJfF/mJsu3qA==",
         "dependencies": {
           "Google.Apis.Auth": "1.69.0",
-          "Microsoft.Extensions.AI.Abstractions": "10.4.0",
-          "MimeTypes": "2.5.2"
+          "Microsoft.Extensions.AI.Abstractions": "10.6.0",
+          "MimeTypes": "2.5.2",
+          "System.Text.Json": "10.0.8"
         }
       },
       "MediatR": {
@@ -786,10 +787,11 @@
       },
       "OllamaSharp": {
         "type": "Transitive",
-        "resolved": "5.4.25",
-        "contentHash": "EqkPM1gbkE+RbHgKUMzp4lYjpFymWUIgJntx3u4uDXAfAIFUXJ0MGklNFCi/PdCaxNAPRpcf205yx+g6jLLhZg==",
+        "resolved": "5.4.30",
+        "contentHash": "r/dtO3cm/D+OCB1A3dPcA//YnC9Cak3SSSK1dxfvG9RbEKjMezf3l04Ag1j8tiDul/oGn9nb8+fIwlrg0KOkww==",
         "dependencies": {
-          "Microsoft.Extensions.AI.Abstractions": "10.4.1"
+          "Microsoft.Extensions.AI": "10.8.0",
+          "Microsoft.Extensions.AI.Abstractions": "10.8.0"
         }
       },
       "OpenAI": {
@@ -1647,11 +1649,11 @@
       "cellm": {
         "type": "Project",
         "dependencies": {
-          "AWSSDK.Extensions.Bedrock.MEAI": "[4.0.6.6, )",
-          "Anthropic": "[12.11.0, )",
+          "AWSSDK.Extensions.Bedrock.MEAI": "[4.0.101.7, )",
+          "Anthropic": "[12.40.0, )",
           "ExcelDna.Addin": "[1.9.0, )",
           "ExcelDna.Interop": "[15.0.1, )",
-          "Google.GenAI": "[1.6.1, )",
+          "Google.GenAI": "[1.17.0, )",
           "MediatR": "[14.1.0, )",
           "Microsoft.Extensions.AI": "[10.8.3, )",
           "Microsoft.Extensions.AI.Abstractions": "[10.8.3, )",
@@ -1672,7 +1674,7 @@
           "Microsoft.Extensions.Options": "[10.0.10, )",
           "Microsoft.Extensions.Options.ConfigurationExtensions": "[10.0.10, )",
           "ModelContextProtocol": "[1.2.0, )",
-          "OllamaSharp": "[5.4.25, )",
+          "OllamaSharp": "[5.4.30, )",
           "PdfPig": "[0.1.14, )",
           "Sentry.Extensions.Logging": "[6.3.0, )",
           "Sentry.Profiling": "[6.3.0, )",
