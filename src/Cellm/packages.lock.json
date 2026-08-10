@@ -15,13 +15,13 @@
       },
       "AWSSDK.Extensions.Bedrock.MEAI": {
         "type": "Direct",
-        "requested": "[4.0.6.6, )",
-        "resolved": "4.0.6.6",
-        "contentHash": "bOqVxtcYV/pz4e/sOClK1Zud377o/2jo3J2Sy9V1XgKXoQHCmDyFHPvX/IJqH6Ic4P8znDaTLXg7j3NzQm6NFQ==",
+        "requested": "[4.0.101.7, )",
+        "resolved": "4.0.101.7",
+        "contentHash": "l3g+moUn/XEs0qaVgbZELH6w0ua10m4a+fH32CpDI8oNpBxOyTzt1LeAIUmH9z0KiEbzSu5W1eQIEVN/D40gsg==",
         "dependencies": {
-          "AWSSDK.BedrockRuntime": "4.0.16.8",
-          "AWSSDK.Core": "4.0.3.26",
-          "Microsoft.Extensions.AI.Abstractions": "9.9.1"
+          "AWSSDK.BedrockRuntime": "4.0.100.7",
+          "AWSSDK.Core": "4.0.100.9",
+          "Microsoft.Extensions.AI.Abstractions": "10.5.1"
         }
       },
       "ExcelDna.AddIn": {
@@ -80,11 +80,11 @@
       },
       "Microsoft.Extensions.AI.Abstractions": {
         "type": "Direct",
-        "requested": "[10.4.1, )",
-        "resolved": "10.4.1",
-        "contentHash": "ZxhU/wg9BOc3ohibhLl18toPLWm96ysQoE+3OhCgrZ0TUPZd7bsUmGteeatz08yweyuPIEhtyUzEZTF+3bMWEQ==",
+        "requested": "[10.5.1, )",
+        "resolved": "10.5.1",
+        "contentHash": "nB0l3IlsVbNeUxsE7nZNb9GY8rP1OSeqpj0pseORPejt474HNKEauTWTLdSJPkSvPlRMxowZNMo6nyp7APAiSg==",
         "dependencies": {
-          "System.Text.Json": "10.0.4"
+          "System.Text.Json": "10.0.6"
         }
       },
       "Microsoft.Extensions.AI.AzureAIInference": {
@@ -351,16 +351,16 @@
       },
       "AWSSDK.BedrockRuntime": {
         "type": "Transitive",
-        "resolved": "4.0.16.8",
-        "contentHash": "tYfAZxm/lqiZOoIEMCg+zf5OuudKfAUTUvw1NH3b4Ki5B4bM4rEX9N/CmZpSfL6aSv3QVBabhRmrgLaJcxa86w==",
+        "resolved": "4.0.100.7",
+        "contentHash": "/HODJ+Zr4UXLCRgUD5A5u9x1K/s41oM10syuOKdUYdoNnyPRd2XicYHDBCfjZR3fqY2+kqCaS98HTRt5YVoWtQ==",
         "dependencies": {
-          "AWSSDK.Core": "[4.0.3.26, 5.0.0)"
+          "AWSSDK.Core": "[4.0.100.9, 5.0.0)"
         }
       },
       "AWSSDK.Core": {
         "type": "Transitive",
-        "resolved": "4.0.3.26",
-        "contentHash": "2iVc7MZCbq2KY8vkxs+C+xbJavG9X3JvnVkQxVlxkKyCWeQuQGJCI+w+p6RXrKYMpP2AaGLIPFBR0hLDRw59bQ=="
+        "resolved": "4.0.100.9",
+        "contentHash": "OPYy41jZjXwxxcYRotaq24HDrwUnVtBB/mvg1IwB9D1ICXAtHqMa1sp2hpmlVJCZwjlcrPcTCJIejInvV1vp5g=="
       },
       "Azure.AI.Inference": {
         "type": "Transitive",
@@ -429,8 +429,8 @@
       },
       "Microsoft.Bcl.AsyncInterfaces": {
         "type": "Transitive",
-        "resolved": "8.0.0",
-        "contentHash": "3WA9q9yVqJp222P3x1wYIGDAkpjAku0TMUaaQV22g6L67AI0LdOIrVS7Ht2vJfLHGSPVuqN94vIr15qn+HEkHw=="
+        "resolved": "6.0.0",
+        "contentHash": "UcSjPsst+DfAdJGVDsu346FX0ci0ah+lw3WRtn18NUwEqRt70HaOQ7lI72vy3+1LxtqI3T5GWwV39rQSrCzAeg=="
       },
       "Microsoft.Diagnostics.NETCore.Client": {
         "type": "Transitive",
@@ -787,8 +787,8 @@
       },
       "System.IO.Pipelines": {
         "type": "Transitive",
-        "resolved": "10.0.5",
-        "contentHash": "8/ZHN/j2y1t+7McdCf1wXku2/c7wtrGLz3WQabIoPuLAn3bHDWT6YOJYreJq8sCMPSo6c8iVYXUdLlFGX5PEqw=="
+        "resolved": "10.0.6",
+        "contentHash": "98dV8iAMdOzlB7iZ8OOJ3Wj/LNMV+x2c0DCM4EyFEz/kEVmB1+49HwnocY703amF2BguoZZXk4t3lPSfbcHOgA=="
       },
       "System.Management": {
         "type": "Transitive",
@@ -823,16 +823,16 @@
       },
       "System.Text.Encodings.Web": {
         "type": "Transitive",
-        "resolved": "10.0.5",
-        "contentHash": "opvD/nKTzGKA7GVntZ9L823kN6IxgHQfuxY+VI9gv8VE1Y7CSKoi/QS1EYDQiA63MqtZsD7X6zkISd2ZQJohTQ=="
+        "resolved": "10.0.6",
+        "contentHash": "o7zWD39jHesxpHyMSWAf+CjM+NaEIV49IJ8tasAsnaVkRcLP33+5aobgxeKLJRLQQfeciO7BbW5vXCUMzPoU6w=="
       },
       "System.Text.Json": {
         "type": "Transitive",
-        "resolved": "10.0.5",
-        "contentHash": "vW2zhkWziyfhoSXNf42mTWyilw+vfwBGOsODDsHSFtOIY6LCgfRVUyaAilLEL4Kc1fzhaxcep5pS0VWYPSDW0w==",
+        "resolved": "10.0.6",
+        "contentHash": "eU/JSsGWpQPE+rkBJjFjsmtaPsu1kCLqFYeW3NS715+z/dP2/BsCl6R7BFGcjhg+rm5WHblllC3p7QS+sS3HtA==",
         "dependencies": {
-          "System.IO.Pipelines": "10.0.5",
-          "System.Text.Encodings.Web": "10.0.5"
+          "System.IO.Pipelines": "10.0.6",
+          "System.Text.Encodings.Web": "10.0.6"
         }
       },
       "System.Threading.Channels": {
