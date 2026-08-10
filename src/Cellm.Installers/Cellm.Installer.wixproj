@@ -2,6 +2,7 @@
   <PropertyGroup>
     <OutputName>Cellm-AddIn-$(Configuration)-$(Platform)</OutputName>
     <SignOutput>false</SignOutput>
+    <SuppressIces>ICE91</SuppressIces>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="WixToolset.Netfx.wixext" Version="6.0.2" />
