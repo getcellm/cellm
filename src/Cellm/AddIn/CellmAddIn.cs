@@ -16,6 +16,7 @@ using Cellm.Models.Providers.Ollama;
 using Cellm.Models.Providers.OpenAi;
 using Cellm.Models.Providers.OpenAiCompatible;
 using Cellm.Models.Providers.OpenRouter;
+using Cellm.Models.Providers.Requesty;
 using Cellm.Models.Resilience;
 using Cellm.Tools;
 using Cellm.Tools.FileReader;
@@ -101,6 +102,7 @@ public class CellmAddIn : IExcelAddIn
             .Configure<OpenAiConfiguration>(configuration.GetRequiredSection(nameof(OpenAiConfiguration)))
             .Configure<OpenAiCompatibleConfiguration>(configuration.GetRequiredSection(nameof(OpenAiCompatibleConfiguration)))
             .Configure<OpenRouterConfiguration>(configuration.GetRequiredSection(nameof(OpenRouterConfiguration)))
+            .Configure<RequestyConfiguration>(configuration.GetRequiredSection(nameof(RequestyConfiguration)))
             .Configure<ResilienceConfiguration>(configuration.GetRequiredSection(nameof(ResilienceConfiguration)))
             .Configure<SentryConfiguration>(configuration.GetRequiredSection(nameof(SentryConfiguration)));
 
@@ -185,7 +187,8 @@ public class CellmAddIn : IExcelAddIn
             .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.Mistral)
             .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.Ollama)
             .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.OpenAiCompatible)
-            .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.OpenRouter);
+            .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.OpenRouter)
+            .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.Requesty);
 
 #pragma warning disable EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates.
         services
@@ -205,7 +208,8 @@ public class CellmAddIn : IExcelAddIn
             .AddOllamaChatClient()
             .AddOpenAiChatClient()
             .AddOpenAiCompatibleChatClient()
-            .AddOpenRouterChatClient();
+            .AddOpenRouterChatClient()
+            .AddRequestyChatClient();
 
         // Add tools
         services
@@ -253,7 +257,8 @@ public class CellmAddIn : IExcelAddIn
             Services.GetRequiredService<IOptionsMonitor<OllamaConfiguration>>().CurrentValue,
             Services.GetRequiredService<IOptionsMonitor<OpenAiConfiguration>>().CurrentValue,
             Services.GetRequiredService<IOptionsMonitor<OpenAiCompatibleConfiguration>>().CurrentValue,
-            Services.GetRequiredService<IOptionsMonitor<OpenRouterConfiguration>>().CurrentValue
+            Services.GetRequiredService<IOptionsMonitor<OpenRouterConfiguration>>().CurrentValue,
+            Services.GetRequiredService<IOptionsMonitor<RequestyConfiguration>>().CurrentValue
         ];
     }
 

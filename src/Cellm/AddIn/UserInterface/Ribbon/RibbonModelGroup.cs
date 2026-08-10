@@ -13,6 +13,7 @@ using Cellm.Models.Providers.Ollama;
 using Cellm.Models.Providers.OpenAi;
 using Cellm.Models.Providers.OpenAiCompatible;
 using Cellm.Models.Providers.OpenRouter;
+using Cellm.Models.Providers.Requesty;
 using Cellm.Users;
 using ExcelDna.Integration.CustomUI;
 using Microsoft.Extensions.AI;
@@ -539,6 +540,9 @@ public partial class RibbonMain
                     break;
                 case Provider.OpenRouter:
                     currentBaseAddress = GetProviderConfiguration<OpenRouterConfiguration>()?.BaseAddress?.ToString() ?? "";
+                    break;
+                case Provider.Requesty:
+                    currentBaseAddress = GetProviderConfiguration<RequestyConfiguration>()?.BaseAddress?.ToString() ?? "";
                     break;
                 default:
                     break;

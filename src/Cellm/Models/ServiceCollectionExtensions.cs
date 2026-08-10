@@ -22,6 +22,7 @@ using Cellm.Models.Providers.Ollama;
 using Cellm.Models.Providers.OpenAi;
 using Cellm.Models.Providers.OpenAiCompatible;
 using Cellm.Models.Providers.OpenRouter;
+using Cellm.Models.Providers.Requesty;
 using Cellm.Models.Resilience;
 using Cellm.Users;
 using Microsoft.Extensions.AI;
@@ -474,6 +475,37 @@ internal static class ServiceCollectionExtensions
                     });
 
                 return openAiClient.GetChatClient(openRouterConfiguration.CurrentValue.DefaultModel).AsIChatClient();
+            }, ServiceLifetime.Transient)
+            .UseFunctionInvocation();
+
+        return services;
+    }
+
+    public static IServiceCollection AddRequestyChatClient(this IServiceCollection services)
+    {
+        services
+            .AddKeyedChatClient(Provider.Requesty, serviceProvider =>
+            {
+                var account = serviceProvider.GetRequiredService<Account>();
+                account.ThrowIfNotEntitled(Entitlement.EnableRequestyProvider);
+
+                var requestyConfiguration = serviceProvider.GetRequiredService<IOptionsMonitor<RequestyConfiguration>>();
+                var resilientHttpClient = serviceProvider.GetResilientHttpClient(Provider.Requesty);
+
+                if (string.IsNullOrWhiteSpace(requestyConfiguration.CurrentValue.ApiKey))
+                {
+                    throw new CellmException($"Empty {nameof(RequestyConfiguration.ApiKey)} for {Provider.Requesty}. Please set your API key.");
+                }
+
+                var openAiClient = new OpenAIClient(
+                    new ApiKeyCredential(requestyConfiguration.CurrentValue.ApiKey),
+                    new OpenAIClientOptions
+                    {
+                        Transport = new HttpClientPipelineTransport(resilientHttpClient),
+                        Endpoint = requestyConfiguration.CurrentValue.BaseAddress
+                    });
+
+                return openAiClient.GetChatClient(requestyConfiguration.CurrentValue.DefaultModel).AsIChatClient();
             }, ServiceLifetime.Transient)
             .UseFunctionInvocation();
 
