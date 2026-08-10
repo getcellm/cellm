@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Cellm.AddIn.Configuration;
+using Cellm.AddIn.Control;
 using Cellm.AddIn.Exceptions;
 using Cellm.Models;
 using Cellm.Models.Behaviors;
@@ -48,6 +49,8 @@ public class CellmAddIn : IExcelAddIn
             SentrySdk.CaptureException(e);
             return e.Message;
         });
+
+        Services.GetRequiredService<ControlServer>().Start();
     }
 
     public void AutoClose()
@@ -178,6 +181,8 @@ public class CellmAddIn : IExcelAddIn
             .AddTransient<ArgumentParser>()
             .AddSingleton<Account>()
             .AddSingleton<Client>()
+            .AddSingleton<PromptRequestHandler>()
+            .AddSingleton<ControlServer>()
             .AddRateLimiter(resilienceConfiguration)
             .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.Anthropic)
             .AddResilientHttpClient(resilienceConfiguration, cellmAddInConfiguration, Provider.Azure)
