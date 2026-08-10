@@ -38,7 +38,7 @@
     <PackageReference Include="ExcelDna.Addin" Version="1.9.0" />
     <PackageReference Include="ExcelDna.Interop" Version="15.0.1" />
     <PackageReference Include="Google.GenAI" Version="1.17.0" />
-    <PackageReference Include="MediatR" Version="14.1.0" />
+    <PackageReference Include="MediatR" Version="14.2.0" />
     <PackageReference Include="Microsoft.Extensions.AI" Version="10.8.3" />
     <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.8.3" />
     <PackageReference Include="Microsoft.Extensions.AI.AzureAIInference" Version="9.5.0-preview.1.25265.7" />
@@ -59,12 +59,12 @@
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.10" />
     <PackageReference Include="ModelContextProtocol" Version="1.2.0" />
     <PackageReference Include="OllamaSharp" Version="5.4.30" />
-    <PackageReference Include="PdfPig" Version="0.1.14" />
+    <PackageReference Include="PdfPig" Version="0.1.15" />
     <PackageReference Include="Sentry.Extensions.Logging" Version="6.3.0" />
     <PackageReference Include="Sentry.Profiling" Version="6.3.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="10.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-    <PackageReference Include="Svg" Version="3.4.7" />
+    <PackageReference Include="Svg" Version="3.4.8" />
     <PackageReference Include="System.Net.Http.Json" Version="10.0.10" />
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
