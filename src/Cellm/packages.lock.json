@@ -15,12 +15,12 @@
       },
       "AWSSDK.Extensions.Bedrock.MEAI": {
         "type": "Direct",
-        "requested": "[4.0.101.7, )",
-        "resolved": "4.0.101.7",
-        "contentHash": "l3g+moUn/XEs0qaVgbZELH6w0ua10m4a+fH32CpDI8oNpBxOyTzt1LeAIUmH9z0KiEbzSu5W1eQIEVN/D40gsg==",
+        "requested": "[4.0.101.8, )",
+        "resolved": "4.0.101.8",
+        "contentHash": "5pj7Et+XJU12XJHDfrh0t87h9hm4fUMnp+Q0NNYpV7YYiUe+H/Pb8j/UAgyuAjkYi7Tl5XuIHQmBrzo8gmuTcw==",
         "dependencies": {
-          "AWSSDK.BedrockRuntime": "4.0.100.7",
-          "AWSSDK.Core": "4.0.100.9",
+          "AWSSDK.BedrockRuntime": "4.0.101.1",
+          "AWSSDK.Core": "4.0.101",
           "Microsoft.Extensions.AI.Abstractions": "10.5.1"
         }
       },
@@ -341,16 +341,16 @@
       },
       "AWSSDK.BedrockRuntime": {
         "type": "Transitive",
-        "resolved": "4.0.100.7",
-        "contentHash": "/HODJ+Zr4UXLCRgUD5A5u9x1K/s41oM10syuOKdUYdoNnyPRd2XicYHDBCfjZR3fqY2+kqCaS98HTRt5YVoWtQ==",
+        "resolved": "4.0.101.1",
+        "contentHash": "4rZxsM0r6ytFa3iho83osE01yGuLB0gouTrMkUd8+PawFzZ5SBIR45TL5z7EFi3HLFX914boPipQEw8rMJBmtA==",
         "dependencies": {
-          "AWSSDK.Core": "[4.0.100.9, 5.0.0)"
+          "AWSSDK.Core": "[4.0.101, 5.0.0)"
         }
       },
       "AWSSDK.Core": {
         "type": "Transitive",
-        "resolved": "4.0.100.9",
-        "contentHash": "OPYy41jZjXwxxcYRotaq24HDrwUnVtBB/mvg1IwB9D1ICXAtHqMa1sp2hpmlVJCZwjlcrPcTCJIejInvV1vp5g=="
+        "resolved": "4.0.101",
+        "contentHash": "7Q0z0fLpy+w6h4G5z/qZ6PYGzZ0DgYjYkVdGMnhtjkgQaKX+Sjm0YxfFxFILRewxC4o6wwnrbvwaSj41LgRRfg=="
       },
       "ExcelDna.Integration": {
         "type": "Transitive",
