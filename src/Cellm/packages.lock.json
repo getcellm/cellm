@@ -4,9 +4,9 @@
     "net9.0-windows7.0": {
       "Anthropic": {
         "type": "Direct",
-        "requested": "[12.40.0, )",
-        "resolved": "12.40.0",
-        "contentHash": "5V9JZxH4E8vuGjpP9BkfkrsRXLSs2sTacHqpcAquKiDW0Kt+f5oFUi3TFgrecossVa47WW6WnHl9DdsZ5i/1Jw==",
+        "requested": "[12.46.0, )",
+        "resolved": "12.46.0",
+        "contentHash": "hrkgGKtNgw+p0WUgpOtwd2ayQcOpj/9/W4vnJ6bFvzfj+DHXF47O/i37/59J4DexpUPtJVePZVa5Tzbx1odBvg==",
         "dependencies": {
           "Microsoft.Extensions.AI.Abstractions": "10.5.1",
           "System.Net.ServerSentEvents": "10.0.1",
