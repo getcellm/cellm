@@ -33,7 +33,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Anthropic" Version="12.40.0" />
+    <PackageReference Include="Anthropic" Version="12.46.0" />
     <PackageReference Include="AWSSDK.Extensions.Bedrock.MEAI" Version="4.0.101.8" />
     <PackageReference Include="ExcelDna.Addin" Version="1.9.0" />
     <PackageReference Include="ExcelDna.Interop" Version="15.0.1" />
