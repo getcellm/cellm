@@ -24,7 +24,8 @@ internal class Entitlements()
         Entitlement.EnableOpenAiCompatibleProvider,
         Entitlement.EnableOpenAiCompatibleProviderHostedModels,
         Entitlement.EnableOpenAiCompatibleProviderLocalModels,
-        Entitlement.EnableOpenRouterProvider
+        Entitlement.EnableOpenRouterProvider,
+        Entitlement.EnableRequestyProvider
     ];
 
     public IEnumerable<Entitlement> AsEnumerable()
