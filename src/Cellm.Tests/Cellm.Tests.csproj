@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Cellm\Cellm.csproj" />
+    <ProjectReference Include="..\Cellm.Mcp\Cellm.Mcp.csproj" />
   </ItemGroup>
 
 </Project>
